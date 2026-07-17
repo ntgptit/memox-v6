@@ -48,6 +48,36 @@ breaks the system.** Token names are additive-only.
 5. **Content/voice:** sentence case, calm encouraging tone, numbers lead, Material
    Symbols icons (no emoji) — see the CONTENT FUNDAMENTALS section in `readme.md`.
 
+## Design checklist / audit — REQUIRED for app design or kit redesign
+
+When **designing app screens/flows** or **redesigning the kit** (tokens, components,
+patterns, themes), the checklist source is:
+
+```
+docs/design/mobile-design-kit-audit-v5/
+```
+
+48 KIT groups (`KIT-01`…`KIT-48`, 288 items) covering tokens, typography, spacing,
+components, patterns, accessibility, responsive/adaptive, motion, dark-mode/high-contrast
+QA, governance, and release readiness. Each item has **Cách kiểm** (how to verify) and
+**Evidence mong đợi** (expected evidence); severities are gated **P0–P3** (P0 blocks
+release, P1 blocks kit sign-off).
+
+Use it like this:
+
+1. Read `audit-rules.md` (marking, severity, per-group conditions) and
+   `verification-methods.md` first — token-cheap boilerplate lives there, not per item.
+2. Open only the `KIT-XX-*.md` groups relevant to the work (e.g. `KIT-25-form-patterns`,
+   `KIT-30-loading-empty-error-va-offline`, `KIT-42-accessibility-end-to-end`).
+3. Treat each item's criteria as acceptance criteria for the design; log gaps in
+   `issue-register.md` with severity + owner + target, and honor the P0/P1 gates before
+   calling design work done.
+4. `scripts/validate.py` self-checks the checklist docs (broken links, duplicate ids /
+   near-duplicate content) — run it when editing the audit itself.
+
+Docs are intentionally bilingual (Vietnamese checklist prose; `Cách kiểm` / `Evidence`
+may be English or Vietnamese). Don't "finish" a design without citing the relevant gates.
+
 ## Guardrails
 
 - No raw `#rrggbb` / literal color or spacing values above the token layer — the

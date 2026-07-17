@@ -20,6 +20,13 @@ type scales; pull exact values from `tokens/*.css`.
 
 Golden rule: changing a **value** is free; changing a **name or id** breaks the system.
 
+**Design / redesign checklist.** When designing app screens or redesigning the kit,
+the checklist source is `docs/design/mobile-design-kit-audit-v5/` — 48 KIT groups
+(288 items) with P0–P3 severity gates. Start from its `audit-rules.md` and
+`verification-methods.md`, open the relevant `KIT-XX-*.md` groups, treat their items as
+acceptance criteria, and log gaps in `issue-register.md`. The `memox-design` skill
+explains how to apply it. Don't call design work done while a P0/P1 item is open.
+
 ## Code standard — main guard
 
 All code is verified by **code-verification-guard** (git submodule at
