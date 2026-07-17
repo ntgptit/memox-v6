@@ -57,6 +57,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # Generate localizations (AppLocalizations) from the ARB files. The
+      # generated output is gitignored, so regenerate it before analyze/test.
+      - name: Generate localizations (gen-l10n)
+        run: flutter gen-l10n
+
       # Check formatting on tracked Dart files only (skips gitignored generated code).
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed $(git ls-files '*.dart')

@@ -16,9 +16,14 @@ git submodule update --init --recursive
 # 2. Install the guard's Python dependencies (needs Python 3.12+)
 python -m pip install -r tools/code-verification-guard/requirements.txt
 
-# 3. Activate the shared git hooks (enables the pre-commit guard)
+# 3. Activate the shared git hooks (pre-commit guard + auto l10n regen)
 git config core.hooksPath .githooks
 ```
+
+Activating `.githooks` also enables `post-merge` / `post-checkout` hooks that
+regenerate the localizations after a pull or branch switch. Locally, `generate: true`
+in `pubspec.yaml` already regenerates them on `flutter pub get`, `run`, `build`,
+and `test`; CI regenerates them explicitly with `flutter gen-l10n`.
 
 ## Running the guard manually
 

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#
+# Regenerate localizations after a merge/pull so ARB changes are always
+# reflected in the (gitignored) generated AppLocalizations.
+#
+. "$(dirname "$0")/gen-l10n.sh"
+regen_l10n
