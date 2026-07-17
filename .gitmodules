@@ -1,0 +1,3 @@
+[submodule "tools/code-verification-guard"]
+	path = tools/code-verification-guard
+	url = https://github.com/ntgptit/code-verification-guard-v2.git

@@ -1,0 +1,61 @@
+# Code Verification Guard
+
+`memox_v6` uses [code-verification-guard-v2](https://github.com/ntgptit/code-verification-guard-v2)
+as its **main code guard**. It scans the project against the `memox` ruleset
+(YAML rules for design-system, i18n, architecture, file layout, etc.) and blocks
+non-compliant code at three points: git pre-commit, CI, and the Claude Code agent.
+
+The guard is vendored as a **git submodule** at `tools/code-verification-guard`.
+
+## One-time setup (after cloning)
+
+```bash
+# 1. Fetch the guard submodule
+git submodule update --init --recursive
+
+# 2. Install the guard's Python dependencies (needs Python 3.12+)
+python -m pip install -r tools/code-verification-guard/requirements.txt
+
+# 3. Activate the shared git hooks (enables the pre-commit guard)
+git config core.hooksPath .githooks
+```
+
+## Running the guard manually
+
+```bash
+python tools/code-verification-guard/guard/run.py check --project . --ruleset memox --profile local
+```
+
+Exit code `0` = passed, `1` = violations found.
+
+## Where the guard runs
+
+| Surface           | Config                       | Profile | Behavior                                        |
+| ----------------- | ---------------------------- | ------- | ----------------------------------------------- |
+| Git pre-commit    | `.githooks/pre-commit`       | `local` | Blocks the commit on errors. Bypass: `--no-verify` |
+| CI (GitHub)       | `.github/workflows/ci.yml`   | `local` | Fails the `guard` job on errors                 |
+| Claude Code agent | `.claude/settings.json` (Stop hook) | `local` | Blocks turn completion on errors, feeds back violations |
+
+### Profiles
+
+- `local` — fails on **errors** only (warnings reported, not fatal). Current default.
+- `ci` — treats **warnings as errors** too (stricter).
+- `strict` — fails on errors **and** warnings.
+
+Tighten CI / hooks to `ci` or `strict` once the codebase is built out and the
+stale-path (`guard.config.missing_target_path`) warnings are resolved.
+
+## Updating the guard
+
+The guard is its own repository. Update the pinned version with:
+
+```bash
+cd tools/code-verification-guard
+git fetch && git checkout <commit-or-tag>
+cd ../..
+git add tools/code-verification-guard
+git commit -m "Bump code-verification-guard"
+```
+
+Do not edit files under `tools/code-verification-guard/**` from this repo — rule
+changes belong in the guard repository itself.
