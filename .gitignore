@@ -45,7 +45,7 @@ app.*.map.json
 /android/app/release
 
 # Generated code (build_runner: riverpod, freezed, json_serializable, etc.)
-# Regenerate locally with: dart run build_runner build --delete-conflicting-outputs
+# Regenerate locally with: dart run build_runner build
 *.g.dart
 *.freezed.dart
 *.gr.dart

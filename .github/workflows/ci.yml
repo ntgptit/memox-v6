@@ -42,7 +42,7 @@ jobs:
         run: |
           if flutter pub deps --style=compact | grep -q '\bbuild_runner\b'; then
             echo "build_runner found, running code generation..."
-            dart run build_runner build --delete-conflicting-outputs
+            dart run build_runner build
           else
             echo "build_runner not in dependencies, skipping code generation."
           fi
