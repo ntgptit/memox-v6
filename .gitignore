@@ -43,3 +43,19 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Generated code (build_runner: riverpod, freezed, json_serializable, etc.)
+# Regenerate locally with: dart run build_runner build --delete-conflicting-outputs
+*.g.dart
+*.freezed.dart
+*.gr.dart
+*.config.dart
+*.mocks.dart
+*.gen.dart
+*.pb.dart
+*.pbenum.dart
+*.pbjson.dart
+*.pbserver.dart
+
+# Generated localization (if using intl_utils / flutter gen-l10n to lib)
+# lib/generated/
