@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs for the same ref when a new commit is pushed.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Check formatting on hand-written source only (before generated files exist).
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      # Runs code generation only when build_runner is a dependency.
+      # Skips cleanly until you add build_runner (riverpod, freezed, etc.).
+      - name: Generate code (build_runner)
+        run: |
+          if flutter pub deps --style=compact | grep -q '\bbuild_runner\b'; then
+            echo "build_runner found, running code generation..."
+            dart run build_runner build --delete-conflicting-outputs
+          else
+            echo "build_runner not in dependencies, skipping code generation."
+          fi
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
