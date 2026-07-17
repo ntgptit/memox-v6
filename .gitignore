@@ -57,5 +57,5 @@ app.*.map.json
 *.pbjson.dart
 *.pbserver.dart
 
-# Generated localization (if using intl_utils / flutter gen-l10n to lib)
-# lib/generated/
+# Generated localization (flutter gen-l10n output; regenerated on `flutter pub get`)
+/lib/l10n/generated/
