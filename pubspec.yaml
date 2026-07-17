@@ -34,6 +34,10 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  # Aligned to the riverpod 3.2.1 line so codegen packages resolve together:
+  # riverpod_generator 4.0.3 (stable) pins riverpod_annotation 4.0.2 -> riverpod 3.2.1.
+  flutter_riverpod: ^3.2.1
+  riverpod_annotation: 4.0.2
 
 dev_dependencies:
   flutter_test:
@@ -46,6 +50,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   build_runner: ^2.15.1
+  riverpod_generator: ^4.0.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
