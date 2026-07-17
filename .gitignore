@@ -59,3 +59,6 @@ app.*.map.json
 
 # Generated localization (flutter gen-l10n output; regenerated on `flutter pub get`)
 /lib/l10n/generated/
+
+# Design-kit scratch uploads (pasted screenshots; canonical font lives in fonts/)
+docs/design/**/uploads/
