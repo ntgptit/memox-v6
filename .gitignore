@@ -68,3 +68,6 @@ docs/design/**/uploads/
 docs/design/**/shots/*.png
 docs/design/**/_sheets/*.png
 docs/design/**/evidence/*.png
+
+# design-sync helper output (regenerated diff/push batches)
+tools/design-sync/out/

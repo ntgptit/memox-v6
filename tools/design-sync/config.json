@@ -1,0 +1,9 @@
+{
+  "projectId": "2ffa54ae-10eb-49b1-b005-d253b54a5711",
+  "projectName": "MemoX Design System_v4",
+  "kitDir": "docs/design/MemoX Design System_v4",
+  "batchSize": 200,
+  "excludeDirs": ["uploads"],
+  "excludePathParts": ["/shots/", "/_sheets/", "/evidence/"],
+  "excludeBasenames": [".thumbnail", ".source-hash"]
+}
