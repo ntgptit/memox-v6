@@ -1,0 +1,20 @@
+/* ============================================================
+   MemoX — Element size scale  (Layer 1). Names frozen.
+   Dimensions for fixed-size visual elements (avatars, rings,
+   tiles, illustration / chart boxes, modal max-widths). Layout
+   that is fluid (%, flex, auto) stays unitless / string-valued.
+   ============================================================ */
+
+:root {
+  --memox-size-3xs: 4px;
+  --memox-size-2xs: 8px;
+  --memox-size-xs: 16px;
+  --memox-size-sm: 40px;
+  --memox-size-md: 56px;
+  --memox-size-lg: 74px;
+  --memox-size-xl: 96px;
+  --memox-size-2xl: 120px;
+  --memox-size-3xl: 220px;
+  --memox-size-4xl: 280px;
+  --memox-size-5xl: 320px;
+}

@@ -1,0 +1,379 @@
+<!-- @dsCard group="MemoX App" viewport="920x880" name="Screen gallery" subtitle="Mobile · 390×780 portrait · every state · light + dark" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MemoX — App UI Kit</title>
+<link rel="stylesheet" href="../../styles.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..40,400,0,0" />
+<style>
+  html, body { margin: 0; }
+  body {
+    background: #e9edf4;
+    font-family: var(--memox-font-sans);
+    color: #1c2540;
+    padding: 28px 24px 60px;
+  }
+  .mxg-head { max-width: 880px; margin: 0 auto 26px; }
+  .mxg-head h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; margin: 0; }
+  .mxg-head p { font-size: 14px; color: #59617e; margin: 6px 0 0; max-width: 560px; line-height: 1.5; }
+  .mxg-gallery { display: flex; flex-direction: column; gap: 28px; max-width: 880px; margin: 0 auto; }
+
+  .mxg-row { background: #ffffff; border-radius: 24px; padding: 22px; box-shadow: 0 10px 30px rgba(40, 55, 95, .08), 0 2px 4px rgba(40, 55, 95, .06); }
+  .mxg-row__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .mxg-row__title { font-size: 17px; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; }
+  .mxg-row__sub { font-size: 12.5px; color: #8089a3; margin-top: 2px; }
+
+  .mxg-stepper { display: inline-flex; align-items: center; gap: 6px; background: #f0f3f9; border-radius: 999px; padding: 5px; }
+  .mxg-stepper button { width: 34px; height: 34px; border: none; border-radius: 999px; background: #ffffff; color: #2a3357; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(40,55,95,.12); transition: transform .12s ease, background .15s ease; }
+  .mxg-stepper button:hover { background: #5569ff; color: #fff; }
+  .mxg-stepper button:active { transform: scale(.9); }
+  .mxg-stepper .mxg-label { min-width: 96px; text-align: center; font-size: 13px; font-weight: 700; letter-spacing: .02em; text-transform: capitalize; color: #2a3357; }
+
+  .mxg-frames { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
+  .mxg-frame-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; flex: 1 1 390px; max-width: 390px; min-width: 0; }
+  /* The device mock is a fixed 390x780 (the kit's design width). On narrow viewports the
+     scaler shrinks the whole frame to fit its container and reserves the SCALED footprint,
+     so the frame never bulges past the gallery card. Scale is set inline per measured width. */
+  .mxg-frame-scaler { position: relative; max-width: 100%; }
+  .mxg-frame {
+    position: absolute; top: 0; left: 0;
+    width: 390px; height: 780px;
+    border-radius: 44px;
+    overflow: hidden;
+    background: var(--memox-bg);
+    box-shadow: 0 0 0 9px #11152b, 0 0 0 11px #2a2f4a, 0 22px 48px rgba(20, 28, 56, .32);
+    transform-origin: top left;
+  }
+  .mxg-frame[data-theme="dark"] { box-shadow: 0 0 0 9px #05081a, 0 0 0 11px #232a47, 0 22px 48px rgba(0, 0, 0, .5); }
+  .mxg-frame > .app { width: 100%; height: 100%; }
+  .mxg-cap { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #8089a3; }
+  .mxg-cap[data-theme="dark"] { color: #7b84a3; }
+
+  /* skeleton shimmer — resolves per-theme via tokens */
+  @keyframes mxg-pulse { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
+  .mxg-skel { background: var(--memox-surface-sunken); animation: mxg-pulse var(--memox-duration-pulse) ease-in-out infinite; }
+  .material-symbols-rounded { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; user-select: none; }
+</style>
+</head>
+<body>
+<div class="mxg-head">
+  <h1>MemoX — App UI Kit</h1>
+  <p>Every screen assembled only from <strong>Mx*</strong> components, rendered through each of its states in light and dark. Step through states with the controls on each row.</p>
+</div>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<!-- Base Mx* primitives load from SOURCE (no compiled bundle) — the boot loader below
+     transpiles them in-browser and the NS shim registers each on the frozen namespace,
+     so the canonical gallery renders the current source with zero compiled-artifact drift. -->
+<script type="text/babel-src" src="../../components/core/MxButton.jsx"></script>
+<script type="text/babel-src" src="../../components/core/MxTextField.jsx"></script>
+<script type="text/babel-src" src="../../components/core/MxChip.jsx"></script>
+<script type="text/babel-src" src="../../components/core/MxBadge.jsx"></script>
+<script type="text/babel-src" src="../../components/core/MxSwitch.jsx"></script>
+<script type="text/babel-src" src="../../components/core/MxSegmentedControl.jsx"></script>
+<script type="text/babel-src" src="../../components/core/MxAvatar.jsx"></script>
+<script type="text/babel-src" src="../../components/core/MxLink.jsx"></script>
+<script type="text/babel-src" src="../../components/navigation/MxBottomNav.jsx"></script>
+<script type="text/babel-src" src="../../components/navigation/MxFab.jsx"></script>
+<script type="text/babel-src" src="../../components/navigation/MxIconButton.jsx"></script>
+<script type="text/babel-src" src="../../components/navigation/MxSearchDock.jsx"></script>
+<script type="text/babel-src" src="../../components/surfaces/MxScaffold.jsx"></script>
+<script type="text/babel-src" src="../../components/surfaces/MxCard.jsx"></script>
+<script type="text/babel-src" src="../../components/surfaces/MxIconTile.jsx"></script>
+<script type="text/babel-src" src="../../components/surfaces/MxSectionHeader.jsx"></script>
+<script type="text/babel-src" src="../../components/surfaces/MxContextualAppBar.jsx"></script>
+<script type="text/babel-src" src="../../components/surfaces/MxList.jsx"></script>
+<script type="text/babel-src" src="../../components/feedback/MxDialog.jsx"></script>
+<script type="text/babel-src" src="../../components/feedback/MxSheet.jsx"></script>
+<script type="text/babel-src" src="../../components/feedback/MxMenu.jsx"></script>
+<script type="text/babel-src" src="../../components/feedback/MxBanner.jsx"></script>
+<script type="text/babel-src" src="../../components/feedback/MxProgress.jsx"></script>
+<!-- Shared helpers load before any screen entry (screens read them at render). -->
+<script type="text/babel-src" src="kit-helpers.jsx"></script>
+<!-- i18n string catalog + Intl format helpers (fallback returns literals → parity-neutral). -->
+<script type="text/babel-src" src="i18n/strings.js"></script>
+<script type="text/babel-src" src="i18n/format.js"></script>
+<!-- Shared app composites (_shared/, used by 2+ screens) load after helpers, before features. -->
+<script type="text/babel-src" src="_shared/ConfirmDialog.jsx"></script>
+<script type="text/babel-src" src="_shared/StatusCardRow.jsx"></script>
+<script type="text/babel-src" src="_shared/ActionCallout.jsx"></script>
+<script type="text/babel-src" src="_shared/SelectSheet.jsx"></script>
+<script type="text/babel-src" src="_shared/ProfileCard.jsx"></script>
+<script type="text/babel-src" src="_shared/DeckCard.jsx"></script>
+<script type="text/babel-src" src="_shared/DeckActionsSheet.jsx"></script>
+<script type="text/babel-src" src="_shared/DeckPlaySheet.jsx"></script>
+<script type="text/babel-src" src="_shared/StudyPromptCard.jsx"></script>
+<script type="text/babel-src" src="_shared/DeckMoveSheet.jsx"></script>
+<script type="text/babel-src" src="_shared/DeckResetConfirmDialog.jsx"></script>
+<script type="text/babel-src" src="_shared/DeckDeleteConfirmDialog.jsx"></script>
+<script type="text/babel-src" src="_shared/DeckContentChoice.jsx"></script>
+<script type="text/babel-src" src="_shared/Breadcrumb.jsx"></script>
+<!-- Screen entries: one per feature folder (_features/<screen>/<ScreenName>.jsx). -->
+<script type="text/babel-src" src="_features/dashboard/components/GreetingHeader.jsx"></script>
+<script type="text/babel-src" src="_features/dashboard/components/TodaySummary.jsx"></script>
+<script type="text/babel-src" src="_features/dashboard/components/GoalCard.jsx"></script>
+<script type="text/babel-src" src="_features/dashboard/components/StreakCard.jsx"></script>
+<script type="text/babel-src" src="_features/dashboard/components/OnboardingHero.jsx"></script>
+<script type="text/babel-src" src="_features/dashboard/components/OnboardingStep.jsx"></script>
+<script type="text/babel-src" src="_features/dashboard/Dashboard.jsx"></script>
+<script type="text/babel-src" src="_features/create-deck-firstrun/CreateDeckFirstRun.jsx"></script>
+<script type="text/babel-src" src="_features/create-deck-dialog/CreateDeckDialog.jsx"></script>
+<script type="text/babel-src" src="_features/empty-deck/EmptyDeck.jsx"></script>
+<script type="text/babel-src" src="_features/add-card-target/AddCardTarget.jsx"></script>
+<script type="text/babel-src" src="_features/library/components/libFixtures.jsx"></script>
+<script type="text/babel-src" src="_features/library/components/DeckRowCard.jsx"></script>
+<script type="text/babel-src" src="_features/library/components/FilterRow.jsx"></script>
+<script type="text/babel-src" src="_features/library/components/LibraryCreateSheet.jsx"></script>
+<script type="text/babel-src" src="_features/library/Library.jsx"></script>
+<script type="text/babel-src" src="_features/subdeck-list/components/subdeckFixtures.jsx"></script>
+<script type="text/babel-src" src="_features/subdeck-list/components/CreateDeckSheet.jsx"></script>
+<script type="text/babel-src" src="_features/subdeck-list/SubdeckList.jsx"></script>
+<script type="text/babel-src" src="_features/flashcard-list/components/cardFixtures.jsx"></script>
+<script type="text/babel-src" src="_features/flashcard-list/components/AddCardSheet.jsx"></script>
+<script type="text/babel-src" src="_features/flashcard-list/FlashcardList.jsx"></script>
+<script type="text/babel-src" src="_features/deck-settings/DeckSettings.jsx"></script>
+<script type="text/babel-src" src="_features/flashcard-editor/components/Field.jsx"></script>
+<script type="text/babel-src" src="_features/flashcard-editor/components/DupBanner.jsx"></script>
+<script type="text/babel-src" src="_features/flashcard-editor/components/AudioRow.jsx"></script>
+<script type="text/babel-src" src="_features/flashcard-editor/FlashcardEditor.jsx"></script>
+<script type="text/babel-src" src="_features/mode-picker/components/ModeOption.jsx"></script>
+<script type="text/babel-src" src="_features/mode-picker/components/ScopeCard.jsx"></script>
+<script type="text/babel-src" src="_features/mode-picker/components/ScopeSheet.jsx"></script>
+<script type="text/babel-src" src="_features/mode-picker/ModePicker.jsx"></script>
+<script type="text/babel-src" src="_features/match-mode/components/Tile.jsx"></script>
+<script type="text/babel-src" src="_features/match-mode/MatchMode.jsx"></script>
+<script type="text/babel-src" src="_features/guess-mode/GuessMode.jsx"></script>
+<script type="text/babel-src" src="_features/recall-mode/components/MeaningPanel.jsx"></script>
+<script type="text/babel-src" src="_features/recall-mode/RecallMode.jsx"></script>
+<script type="text/babel-src" src="_features/fill-mode/components/CharCompare.jsx"></script>
+<script type="text/babel-src" src="_features/fill-mode/components/InputBox.jsx"></script>
+<script type="text/babel-src" src="_features/fill-mode/FillMode.jsx"></script>
+<script type="text/babel-src" src="_features/review-mode/components/MeaningCard.jsx"></script>
+<script type="text/babel-src" src="_features/review-mode/ReviewMode.jsx"></script>
+<script type="text/babel-src" src="_features/player/components/Dots.jsx"></script>
+<script type="text/babel-src" src="_features/player/components/PlayerCard.jsx"></script>
+<script type="text/babel-src" src="_features/player/Player.jsx"></script>
+<script type="text/babel-src" src="_features/study-result/components/ResultHero.jsx"></script>
+<script type="text/babel-src" src="_features/study-result/components/StreakGoalCard.jsx"></script>
+<script type="text/babel-src" src="_features/study-result/components/Cta.jsx"></script>
+<script type="text/babel-src" src="_features/study-result/components/FinalizingView.jsx"></script>
+<script type="text/babel-src" src="_features/study-result/StudyResult.jsx"></script>
+<script type="text/babel-src" src="_features/search/components/ResultRow.jsx"></script>
+<script type="text/babel-src" src="_features/search/components/Chips.jsx"></script>
+<script type="text/babel-src" src="_features/search/Search.jsx"></script>
+<script type="text/babel-src" src="_features/statistics/components/Bars.jsx"></script>
+<script type="text/babel-src" src="_features/statistics/components/Heatmap.jsx"></script>
+<script type="text/babel-src" src="_features/statistics/components/Donut.jsx"></script>
+<script type="text/babel-src" src="_features/statistics/Statistics.jsx"></script>
+<script type="text/babel-src" src="_features/reminder/components/TimeCol.jsx"></script>
+<script type="text/babel-src" src="_features/reminder/components/TimePickerSheet.jsx"></script>
+<script type="text/babel-src" src="_features/reminder/Reminder.jsx"></script>
+<script type="text/babel-src" src="_features/account-sync/components/SyncBlock.jsx"></script>
+<script type="text/babel-src" src="_features/account-sync/components/SignInCard.jsx"></script><script type="text/babel-src" src="_features/account-sync/AccountSync.jsx"></script>
+<script type="text/babel-src" src="_features/theme/components/PreviewCard.jsx"></script>
+<script type="text/babel-src" src="_features/theme/components/AccentPicker.jsx"></script>
+<script type="text/babel-src" src="_features/theme/Theme.jsx"></script>
+<script type="text/babel-src" src="_features/import/components/Table.jsx"></script>
+<script type="text/babel-src" src="_features/import/components/SourceCard.jsx"></script>
+<script type="text/babel-src" src="_features/import/Import.jsx"></script>
+<script type="text/babel-src" src="_features/export/components/ExportingCard.jsx"></script>
+<script type="text/babel-src" src="_features/export/components/FormatList.jsx"></script>
+<script type="text/babel-src" src="_features/export/Export.jsx"></script>
+<script type="text/babel-src" src="_features/languages/components/LangCard.jsx"></script>
+<script type="text/babel-src" src="_features/languages/components/RemoveLanguageDialog.jsx"></script>
+<script type="text/babel-src" src="_features/languages/Languages.jsx"></script>
+<script type="text/babel-src" src="_features/study-session/components/PromptCard.jsx"></script>
+<script type="text/babel-src" src="_features/study-session/components/StageReview.jsx"></script>
+<script type="text/babel-src" src="_features/study-session/components/StageMatch.jsx"></script>
+<script type="text/babel-src" src="_features/study-session/components/StageGuess.jsx"></script>
+<script type="text/babel-src" src="_features/study-session/components/StageRecall.jsx"></script>
+<script type="text/babel-src" src="_features/study-session/components/StageFill.jsx"></script>
+<script type="text/babel-src" src="_features/study-session/components/ExitDialog.jsx"></script>
+<script type="text/babel-src" src="_features/study-session/components/AnswerSaveErrorDialog.jsx"></script>
+<script type="text/babel-src" src="_features/study-session/components/ResumeErrorState.jsx"></script>
+<script type="text/babel-src" src="_features/study-session/StudySession.jsx"></script><script type="text/babel-src" src="_features/settings/components/ValuePickerSheet.jsx"></script>
+<script type="text/babel-src" src="_features/settings/Settings.jsx"></script>
+<script type="text/babel-src" src="_features/app-bar/AppBar.jsx"></script>
+<script type="text/babel-gallery">
+// AUTOGENERATED from tool/ui_kit_shots/registry.mjs — do not hand-edit; run `npm run gen:ui-kit`.
+const SCREENS = [
+  { id: 'dashboard', title: 'Today', Comp: () => window.Dashboard, states: ['loaded', 'not-studied', 'goal-met', 'streak-reset', 'caught-up', 'create-sheet', 'empty', 'empty-after-onboarding-skip', 'loading'] },
+  // ONE deck-list screen for every level. Root mode (bottom-nav tab) lists top-level decks; nested-* states (pushed, back + breadcrumb) list a deck’s child decks — same model, chrome differs by level. Absorbs the retired subdeck-list screen; nested-* states keep the frozen subdeck-list/* node ids.
+  { id: 'library', title: 'Library', Comp: () => window.Library, states: ['loaded', 'dense', 'empty', 'create-sheet', 'deck-created', 'first-deck-created', 'first-deck-created-dismissed', 'search-active', 'search-results', 'search-no-results', 'filter-applied', 'filter-sheet', 'selection', 'loading', 'offline', 'nested-loaded', 'nested-dense', 'nested-deep', 'nested-empty', 'nested-deck-created', 'nested-search', 'nested-no-results', 'nested-selection', 'nested-create-sheet', 'nested-subdeck-actions', 'nested-long-menu', 'nested-play', 'nested-loading', 'nested-offline', 'nested-error', 'nested-not-found'] },
+  // Browse, filter and manage flashcards in the current final deck (cards only).
+  { id: 'flashcard-list', title: 'Flashcard List', Comp: () => window.FlashcardList, states: ['loaded', 'dense', 'minimum-data', 'long-text', 'empty', 'search', 'no-results', 'filter-applied', 'selection', 'add-sheet', 'card-actions', 'delete-confirm', 'convert-dialog', 'convert-submitting', 'convert-failure', 'loading', 'offline', 'error', 'not-found'] },
+  // Manage deck metadata and lifecycle actions (no content list).
+  { id: 'deck-settings', title: 'Deck Settings', Comp: () => window.DeckSettings, states: ['action-sheet', 'leaf-actions', 'rename', 'move', 'reset-confirm', 'delete-confirm'] },
+  // First-run only (§4–7): landing → Step 1 learning setup → Step 2 first deck. Create makes an EMPTY deck (no card/nested/Default-view). Outcome states compose where the flow lands (Library+callout / Import / Dashboard-empty).
+  { id: 'create-deck-firstrun', title: 'Create Deck · First run', Comp: () => window.CreateDeckFirstRun, states: ['landing', 'step1', 'step1-validation', 'step2', 'step2-optional', 'duplicate', 'name-too-long', 'submitting', 'submit-failure', 'resume-draft', 'success', 'import-branch', 'not-now'] },
+  // Dialog (§8) for the 2nd deck onward. Root picks a language pair; nested inherits it (read-only) and shows "Inside <parent>". Creates an EMPTY deck; one primary CTA; no cards-vs-nested question.
+  { id: 'create-deck-dialog', title: 'Create Deck · Dialog', Comp: () => window.CreateDeckDialog, states: ['root-default', 'root-multi-pair', 'root-missing-pair', 'nested', 'optional-expanded', 'validation', 'duplicate-root', 'duplicate-sibling', 'name-too-long', 'submitting', 'submit-failure', 'long-name', 'keyboard-open', 'discard-confirm'] },
+  // Content-first (§11): the cards-vs-nested choice lives HERE, after creation. Add card (primary) / Create nested deck / Import cards. Also the state a leaf reaches after its last card, or a parent after its last child, is removed.
+  { id: 'empty-deck', title: 'Empty Deck', Comp: () => window.EmptyDeck, states: ['default', 'create-nested-dialog', 'import-target'] },
+  // Global Add-Card deck picker (§16). Only leaf + empty decks are selectable; parent decks are disabled with a helper pointing to their nested decks. no-target = nowhere valid yet → Create deck.
+  { id: 'add-card-target', title: 'Add Card · target', Comp: () => window.AddCardTarget, states: ['picker', 'no-target'] },
+  { id: 'flashcard-editor', title: 'Card Editor', Comp: () => window.FlashcardEditor, states: ['create', 'edit', 'validation', 'duplicate', 'additional-translation', 'audio-generating', 'keyboard-open', 'submitting', 'submit-error', 'submit-success'] },
+  { id: 'mode-picker', title: 'Mode Picker', Comp: () => window.ModePicker, states: ['default', 'scope-dropdown', 'not-enough'] },
+  { id: 'review-mode', title: 'Review', Comp: () => window.ReviewMode, states: ['browsing', 'editing', 'audio', 'loading', 'error', 'end'] },
+  { id: 'match-mode', title: 'Match', Comp: () => window.MatchMode, states: ['playing', 'selected', 'correct', 'wrong', 'almost', 'complete'] },
+  { id: 'guess-mode', title: 'Guess', Comp: () => window.GuessMode, states: ['waiting', 'correct', 'wrong', 'long-text', 'complete'] },
+  { id: 'recall-mode', title: 'Recall', Comp: () => window.RecallMode, states: ['before-reveal', 'revealed', 'forgot', 'remembered', 'complete'] },
+  { id: 'fill-mode', title: 'Fill', Comp: () => window.FillMode, states: ['waiting', 'typing', 'hint', 'correct', 'wrong', 'complete'] },
+  { id: 'player', title: 'Player', Comp: () => window.Player, states: ['playing', 'paused', 'speed', 'error', 'end'] },
+  { id: 'study-result', title: 'Study Result', Comp: () => window.StudyResult, states: ['standard', 'goal-met', 'goal-missed', 'many-wrong', 'finalizing', 'retry-finalize', 'finalize-error'] },
+  { id: 'search', title: 'Search', Comp: () => window.Search, states: ['empty-recent', 'results', 'filtered', 'no-results', 'loading'] },
+  { id: 'statistics', title: 'Stats', Comp: () => window.Statistics, states: ['loaded', 'scope-switch', 'insufficient', 'loading', 'error'] },
+  { id: 'reminder', title: 'Reminders', Comp: () => window.Reminder, states: ['on', 'off', 'time-picker', 'permission-denied', 'permission-denied-expansion'] },
+  { id: 'account-sync', title: 'Account & Sync', Comp: () => window.AccountSync, states: ['signed-out', 'signed-in', 'syncing', 'conflict', 'offline', 'sign-in-form', 'sign-in-keyboard', 'expansion'] },
+  { id: 'theme', title: 'Theme', Comp: () => window.Theme, states: ['light', 'dark', 'accent-size'] },
+  { id: 'import', title: 'Import', Comp: () => window.Import, states: ['source', 'parent-target', 'mapping', 'preview', 'dup-warning', 'importing', 'import-error', 'done'] },
+  { id: 'export', title: 'Export', Comp: () => window.Export, states: ['config', 'exporting', 'export-error', 'done'] },
+  { id: 'languages', title: 'Language Pairs', Comp: () => window.Languages, states: ['list', 'one', 'empty', 'add', 'remove', 'scripts'] },
+  { id: 'study-session', title: 'Study Session (5 stages)', Comp: () => window.StudySession, states: ['stage1-review', 'stage2-match', 'stage3-guess', 'stage4-recall', 'stage5-fill', 'relearn', 'due-review', 'exit', 'resume-error', 'answer-save-error'] },
+  { id: 'settings', title: 'Settings', Comp: () => window.Settings, states: ['loaded', 'study-hub', 'study-worddisplay', 'study-srs', 'study-mode', 'study-voice', 'value-picker'] },
+  { id: 'app-bar', title: 'App Bar (shared)', Comp: () => window.AppBar, states: ['root-top', 'root-scrolled', 'root-unread', 'nested', 'nested-overflow', 'search', 'selection', 'modal'] },
+];
+
+// A single screen failing (compile error, runtime throw, or not loaded — e.g.
+// opened over file:// where Babel can't fetch the .jsx) must NOT blank the whole
+// gallery. Each frame is isolated and degrades to a visible message instead.
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { err: null }; }
+  static getDerivedStateFromError(err) { return { err }; }
+  render() {
+    if (this.state.err) {
+      return <div style={{ padding: '16px', color: 'var(--memox-error)', fontSize: '13px', fontWeight: 600 }}>⚠ {String(this.state.err && this.state.err.message || this.state.err)}</div>;
+    }
+    return this.props.children;
+  }
+}
+
+const FRAME_W = 390, FRAME_H = 780;
+function Frame({ theme, Comp, state }) {
+  const wrapRef = React.useRef(null);
+  const [scale, setScale] = React.useState(1);
+  React.useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    setScale(Math.min(1, el.clientWidth / FRAME_W));
+    // Read the post-layout width from the observer entry (a synchronous clientWidth read
+    // can be stale mid-resize), so the frame rescales correctly on orientation changes.
+    const ro = new ResizeObserver(([entry]) => {
+      const w = entry.contentRect.width;
+      if (w) setScale(Math.min(1, w / FRAME_W));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <div className="mxg-frame-wrap" ref={wrapRef}>
+      <div className="mxg-frame-scaler" style={{ width: FRAME_W * scale, height: FRAME_H * scale }}>
+        <div className="mxg-frame" data-theme={theme} style={{ transform: `scale(${scale})` }}>
+          <ErrorBoundary>
+            {typeof Comp === 'function'
+              ? <Comp state={state} />
+              : <div style={{ padding: '16px', color: 'var(--memox-text-tertiary)', fontSize: '13px' }}>Screen not loaded — serve over http:// (e.g. <code>node tool/preview/kit-server.mjs</code>), not file://.</div>}
+          </ErrorBoundary>
+        </div>
+      </div>
+      <div className="mxg-cap" data-theme={theme}>{theme}</div>
+    </div>
+  );
+}
+
+function Row({ screen }) {
+  const [i, setI] = React.useState(0);
+  const states = screen.states;
+  const st = states[i];
+  const Comp = screen.Comp();
+  const go = (d) => setI((p) => (p + d + states.length) % states.length);
+  return (
+    <section className="mxg-row" data-screen-label={screen.id}>
+      <div className="mxg-row__head">
+        <div>
+          <div className="mxg-row__title">{screen.title}</div>
+          <div className="mxg-row__sub">{states.length} state{states.length > 1 ? 's' : ''} · light + dark</div>
+        </div>
+        <div className="mxg-stepper">
+          <button onClick={() => go(-1)} aria-label="Previous state"><span className="material-symbols-rounded">chevron_left</span></button>
+          <div className="mxg-label">{st.replace('-', ' ')}</div>
+          <button onClick={() => go(1)} aria-label="Next state"><span className="material-symbols-rounded">chevron_right</span></button>
+        </div>
+      </div>
+      <div className="mxg-frames">
+        <Frame theme="light" Comp={Comp} state={st} />
+        <Frame theme="dark" Comp={Comp} state={st} />
+      </div>
+    </section>
+  );
+}
+
+function Gallery() {
+  return <div className="mxg-gallery">{SCREENS.map((s) => <Row key={s.id} screen={s} />)}</div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Gallery />);
+</script>
+<script>
+/* Local preview fix: the kit's feature files end with a compiler-only
+   `export const X = ...` line and register their component on a window
+   registry via an IIFE. Loaded as a classic <script>, that top-level
+   `export` is a parse error, so the whole file aborts and the page falls
+   back to the (separately broken) bundled copies. Here we load each file
+   ourselves, strip the ESM line, transpile, and run in document order so
+   the real per-file components register and win. */
+(function () {
+  function strip(code) {
+    return code
+      // drop ESM imports (React/etc. are provided as globals)
+      .replace(/^[ \t]*import[ \t].*$/gm, '')
+      // strip ONLY the `export` keyword, keeping the declaration — so a top-level
+      // `export function MxButton(){}` stays a function declaration (→ global), while a
+      // trailing `export const X = window.X` degrades to a harmless local const.
+      .replace(/^([ \t]*)export[ \t]+/gm, '$1');
+  }
+  function run(code, label) {
+    var out = Babel.transform(code, { presets: ['react'], filename: label }).code;
+    var s = document.createElement('script');
+    s.textContent = out + '\n//# sourceURL=' + label;
+    document.head.appendChild(s);
+  }
+  async function boot() {
+    var srcs = Array.prototype.slice.call(
+      document.querySelectorAll('script[type="text/babel-src"]')
+    ).map(function (t) { return t.getAttribute('src'); });
+    // Fetch every file in parallel, then execute in document order.
+    var texts = await Promise.all(srcs.map(function (src) {
+      return fetch(src).then(function (r) { return r.text(); })
+        .catch(function (e) { console.error('kit fetch failed:', src, e); return ''; });
+    }));
+    // NS shim: the ESM base primitives (MxButton…) drop their `export` on strip and become
+    // Mx* globals; register each on the frozen namespace. This MUST run incrementally — after
+    // every file — because screen modules destructure the primitives off NS at load time
+    // (`const { MxScaffold, … } = NS`), so the base primitives (loaded first) have to be on NS
+    // before any later screen module runs. Runtime-authored primitives already self-register.
+    var NS = (window.MemoXDesignSystem_2ffa54 = window.MemoXDesignSystem_2ffa54 || {});
+    function registerMx() {
+      Object.keys(window).forEach(function (k) {
+        if (/^Mx[A-Z]/.test(k) && typeof window[k] === 'function' && !NS[k]) NS[k] = window[k];
+      });
+    }
+    for (var i = 0; i < srcs.length; i++) {
+      if (!texts[i]) continue;
+      try { run(strip(texts[i]), srcs[i]); }
+      catch (e) { console.error('kit run failed:', srcs[i], e); }
+      registerMx();
+    }
+    var g = document.querySelector('script[type="text/babel-gallery"]');
+    if (g) run(strip(g.textContent), 'gallery.jsx');
+  }
+  boot();
+})();
+</script>
+</body>
+</html>

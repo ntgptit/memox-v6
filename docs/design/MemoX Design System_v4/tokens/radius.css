@@ -1,0 +1,21 @@
+/* ============================================================
+   MemoX — Radius scale  (Layer 1). Names frozen.
+   ============================================================ */
+
+:root {
+  --memox-radius-xs: 6px;
+  --memox-radius-sm: 10px;
+  --memox-radius-md: 14px;
+  --memox-radius-lg: 18px;
+  --memox-radius-xl: 24px;
+  --memox-radius-2xl: 28px;
+
+  /* role aliases */
+  --memox-radius-card: 20px;
+  --memox-radius-tile: 16px;
+  --memox-radius-control: 12px;
+  --memox-radius-field: 14px;
+  --memox-radius-chip: 999px;
+  --memox-radius-pill: 999px;
+  --memox-radius-full: 9999px;
+}

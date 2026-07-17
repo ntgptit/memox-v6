@@ -1,0 +1,230 @@
+/* ============================================================
+   MemoX — Color tokens  (Layer 1)  ·  CANONICAL PALETTE: DEEP VIOLET
+     light  → deep-violet brand (#4b3a8c) on an off-white violet-tinted
+              canvas (#f6f5fc); bright violet (#7355d6) as the accent.
+     dark   → same deep-violet brand on a near-black violet canvas (#141220);
+              bright violet (#a88fff) as the accent.
+   This file is the SINGLE SOURCE OF TRUTH for every colour value; there is
+   no runtime theme override. Token NAMES are a frozen contract: --memox-<role>,
+   additive only. Switch theme by setting [data-theme="dark"] on any ancestor.
+   (Historical note: an earlier revision sampled the Tokyo admin palette; it was
+   migrated to deep violet and is legacy — do not reintroduce Tokyo values.)
+   ============================================================ */
+
+:root,
+[data-theme='light'] {
+  /* --- canvas & surfaces · violet-tinted neutrals so background + brand
+         read as one family --- */
+  --memox-bg: #f6f5fc;
+  --memox-surface: #ffffff;
+  --memox-surface-muted: #f1eff9;
+  --memox-surface-raised: #ffffff;
+  --memox-surface-sunken: #eae8f4;
+
+  /* --- text (violet-ink). tertiary meets normal-text AA (>=4.5:1) so it is safe for the
+         small 11-13px meta/overline labels that use it (contrast.mjs gates it as normal). --- */
+  --memox-text: #1b1a26;
+  --memox-text-secondary: #67647a;
+  --memox-text-tertiary: #6f6b81;
+
+  /* --- primary (brand · deep violet) --- */
+  --memox-primary: #4b3a8c;
+  --memox-primary-strong: #3b2d72;
+  --memox-on-primary: #ffffff;
+  --memox-primary-soft: #f1eff9;
+  --memox-on-primary-soft: #4b3a8c;
+
+  /* --- accent (bright violet highlight) --- */
+  --memox-accent: #7355d6;
+  --memox-on-accent: #ffffff;
+  --memox-accent-soft: #efeafb;
+
+  /* --- structural --- */
+  --memox-border: rgba(28, 24, 45, 0.11);
+  --memox-border-strong: rgba(28, 24, 45, 0.22);
+  --memox-divider: rgba(28, 24, 45, 0.08);
+
+  /* --- semantic: success --- */
+  --memox-success: #0f7d4b;
+  --memox-on-success: #ffffff;
+  --memox-success-soft: rgba(15, 125, 75, 0.12);
+  --memox-on-success-soft: #0d6e42;
+
+  /* --- semantic: warning --- */
+  --memox-warning: #c77b12;
+  --memox-on-warning: #2a1a00;
+  --memox-warning-soft: rgba(199, 123, 18, 0.12);
+  --memox-on-warning-soft: #9a5f0e;
+
+  /* --- semantic: error --- */
+  --memox-error: #d63a40;
+  --memox-on-error: #ffffff;
+  --memox-error-soft: rgba(219, 62, 68, 0.1);
+  --memox-on-error-soft: #c1272d;
+
+  /* --- semantic: info --- */
+  --memox-info: #4b3a8c;
+  --memox-on-info: #ffffff;
+  --memox-info-soft: rgba(75, 58, 140, 0.1);
+  --memox-on-info-soft: #4b3a8c;
+
+  /* --- component: snackbar / toast --- a floating status toast needs an OPAQUE ground, but the
+         `*-soft` tints are translucent rgba. These are FLAT, per-theme LITERALS (the opaque `bg`
+         is the soft tint pre-composited over the surface, computed once here at the token layer),
+         declared in FULL under both themes — NOT `var()` aliases, which freeze at the light value
+         when [data-theme='dark'] sits below :root and would break dark contrast. `text` = on-soft
+         (≥4.5 on bg), `accent` = the icon tone (≥3), `border` = a soft edge. --- */
+  --memox-snackbar-success-bg: #e2efe9;                    /* success-soft 12% over #ffffff */
+  --memox-snackbar-success-text: #0d6e42;                  /* = on-success-soft (light) */
+  --memox-snackbar-success-accent: #0f7d4b;                /* = success (light) */
+  --memox-snackbar-success-border: rgba(15, 125, 75, 0.35);
+  --memox-snackbar-error-bg: #fbecec;                      /* error-soft 10% over #ffffff */
+  --memox-snackbar-error-text: #c1272d;                    /* = on-error-soft (light) */
+  --memox-snackbar-error-accent: #d63a40;                  /* = error (light) */
+  --memox-snackbar-error-border: rgba(219, 62, 68, 0.35);
+  --memox-snackbar-info-bg: #f1eff9;                       /* = primary-soft (opaque, light) */
+  --memox-snackbar-info-text: #4b3a8c;                     /* = on-primary-soft (light) */
+  --memox-snackbar-info-accent: #4b3a8c;                   /* = primary (light) */
+  --memox-snackbar-info-border: rgba(75, 58, 140, 0.35);
+  --memox-snackbar-neutral-bg: #ffffff;                    /* = surface (light) */
+  --memox-snackbar-neutral-text: #1b1a26;                  /* = text (light) */
+  --memox-snackbar-neutral-accent: #67647a;                /* = text-secondary (light) */
+  --memox-snackbar-neutral-border: rgba(28, 24, 45, 0.08); /* = divider (light) */
+
+  /* --- interaction states --- */
+  --memox-state-hover: rgba(28, 24, 45, 0.05);
+  --memox-state-pressed: rgba(28, 24, 45, 0.07);
+  --memox-state-selected: rgba(75, 58, 140, 0.1);
+  --memox-state-disabled: #bebccb;
+  --memox-focus-ring: #4b3a8c;
+  --memox-overlay: rgba(28, 24, 45, 0.42);
+  --memox-scrim: rgba(28, 24, 45, 0.04);
+
+  /* --- data-visualization palette (Layer 1) · a dedicated categorical
+         namespace for CHART tones, kept SEPARATE from the feedback/semantic
+         roles so charts never borrow success/error/etc. semantics (KIT-05-05).
+         Declared in BOTH theme roots as theme-aware aliases so each viz slot
+         resolves to the same value the charts render today — parity-neutral.
+           viz-1 = weekly bars + study-calendar heatmap  (brand primary)
+           viz-2 = Leitner-box bars                      (brand accent)
+           viz-3 = accuracy donut ring                   (success green)
+           viz-4..6 = spare categorical slots for future series. --- */
+  --memox-viz-1: var(--memox-primary);
+  --memox-viz-2: var(--memox-accent);
+  --memox-viz-3: var(--memox-success);
+  --memox-viz-4: var(--memox-warning);
+  --memox-viz-5: var(--memox-info);
+  --memox-viz-6: var(--memox-error);
+}
+
+[data-theme='dark'] {
+  /* --- canvas & surfaces · near-black violet neutrals; elevation by lightness --- */
+  --memox-bg: #141220;
+  --memox-surface: #252338;
+  --memox-surface-muted: #1c1a2b;
+  --memox-surface-raised: #302d46;
+  --memox-surface-sunken: #141220;
+
+  /* --- text --- */
+  --memox-text: #f4f2fb;
+  --memox-text-secondary: #bdb9d2;
+  --memox-text-tertiary: #a5a1bd;
+
+  /* --- primary (brand) · deep-violet surface, white text; 'soft' = dark
+         tonal container with light text (standard dark mode). primary-strong
+         is the on-surface foreground (ghost buttons / links) → kept light. --- */
+  --memox-primary: #4b3a8c;
+  --memox-primary-strong: #b4aadd;
+  --memox-on-primary: #ffffff;
+  --memox-primary-soft: #302d46;
+  --memox-on-primary-soft: #cbc3ee;
+
+  /* --- accent (bright violet highlight) --- */
+  --memox-accent: #a88fff;
+  --memox-on-accent: #141220;
+  --memox-accent-soft: rgba(168, 143, 255, 0.16);
+
+  /* --- structural --- */
+  --memox-border: rgba(255, 255, 255, 0.13);
+  --memox-border-strong: rgba(255, 255, 255, 0.24);
+  --memox-divider: rgba(255, 255, 255, 0.1);
+
+  /* --- semantic: success --- */
+  --memox-success: #4fd08f;
+  --memox-on-success: #06320f;
+  --memox-success-soft: rgba(34, 181, 115, 0.16);
+  --memox-on-success-soft: #4fd08f;
+
+  /* --- semantic: warning --- */
+  --memox-warning: #ffc76f;
+  --memox-on-warning: #2a1a00;
+  --memox-warning-soft: rgba(255, 199, 111, 0.2);
+  --memox-on-warning-soft: #ffc76f;
+
+  /* --- semantic: error --- */
+  --memox-error: #ff8a8a;
+  --memox-on-error: #3b1622;
+  --memox-error-soft: rgba(240, 85, 90, 0.16);
+  --memox-on-error-soft: #ff8a8a;
+
+  /* --- semantic: info --- */
+  --memox-info: #8a79e0;
+  --memox-on-info: #141220;
+  --memox-info-soft: rgba(138, 121, 224, 0.18);
+  --memox-on-info-soft: #b4a7ec;
+
+  /* --- component: snackbar / toast — dark grounds (soft tint over the dark surface #252338);
+         FULL per-theme literals so dark text/accent are the light-on-dark values (contrast-correct),
+         never inherited light-theme foregrounds. --- */
+  --memox-snackbar-success-bg: #253a41;                    /* success-soft 16% over #252338 */
+  --memox-snackbar-success-text: #4fd08f;                  /* = on-success-soft (dark) → 6.11:1 on bg */
+  --memox-snackbar-success-accent: #4fd08f;                /* = success (dark) */
+  --memox-snackbar-success-border: rgba(79, 208, 143, 0.35);
+  --memox-snackbar-error-bg: #452b3d;                      /* error-soft 16% over #252338 */
+  --memox-snackbar-error-text: #ff8a8a;                    /* = on-error-soft (dark) → 5.55:1 on bg */
+  --memox-snackbar-error-accent: #ff8a8a;                  /* = error (dark) */
+  --memox-snackbar-error-border: rgba(255, 138, 138, 0.35);
+  --memox-snackbar-info-bg: #302d46;                       /* = primary-soft (dark) */
+  --memox-snackbar-info-text: #cbc3ee;                     /* = on-primary-soft (dark) */
+  --memox-snackbar-info-accent: #cbc3ee;                   /* light-on-dark violet */
+  --memox-snackbar-info-border: rgba(203, 195, 238, 0.35);
+  --memox-snackbar-neutral-bg: #252338;                    /* = surface (dark) */
+  --memox-snackbar-neutral-text: #f4f2fb;                  /* = text (dark) */
+  --memox-snackbar-neutral-accent: #bdb9d2;                /* = text-secondary (dark) */
+  --memox-snackbar-neutral-border: rgba(255, 255, 255, 0.1);
+
+  /* --- interaction states --- */
+  --memox-state-hover: rgba(255, 255, 255, 0.06);
+  --memox-state-pressed: rgba(255, 255, 255, 0.1);
+  --memox-state-selected: rgba(138, 121, 224, 0.22);
+  --memox-state-disabled: #5c5975;
+  --memox-focus-ring: #b4aadd;
+  --memox-overlay: rgba(8, 6, 16, 0.7);
+  --memox-scrim: rgba(255, 255, 255, 0.04);
+
+  /* --- data-visualization palette (dark) · same theme-aware aliases as light,
+         re-declared at the dark root so each slot substitutes the dark value of
+         its source token. Charts render identically to before (KIT-05-05). --- */
+  --memox-viz-1: var(--memox-primary);
+  --memox-viz-2: var(--memox-accent);
+  --memox-viz-3: var(--memox-success);
+  --memox-viz-4: var(--memox-warning);
+  --memox-viz-5: var(--memox-info);
+  --memox-viz-6: var(--memox-error);
+}
+
+/* --- accent palette · the selectable accent colours offered by the Theme
+       picker. Theme-independent (the user picks an absolute hue), additive.
+       These are user choices, NOT the brand palette (brand = deep violet above). --- */
+:root {
+  --memox-palette-indigo: #5569ff;
+  --memox-palette-violet: #7c5cff;
+  --memox-palette-green: #2bb673;
+  --memox-palette-coral: #ff6b6b;
+  --memox-palette-amber: #ff9f43;
+  --memox-palette-cyan: #22a3c3;
+}
+
+/* High-contrast profile (KIT-08-06 / KIT-39-05) lives in tokens/high-contrast.css —
+   additive [data-hc='true'] overrides kept out of this base file so the light/dark
+   snapshot here stays the single source the manifest parity tooling reads. */

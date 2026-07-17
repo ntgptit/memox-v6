@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452 128" role="img" aria-label="MemoX" preserveAspectRatio="xMidYMid meet">
+  <title>MemoX wordmark — dark usage (light-on-dark)</title>
+  <desc>MemoX typographic wordmark set in Plus Jakarta Sans Extrabold, near-white #f6f5fc, for use on the dark canvas (--memox-bg #141220).</desc>
+  <!--
+    Light-on-dark variant of the MemoX wordmark for the [data-theme="dark"] canvas.
+    Font: Plus Jakarta Sans weight 800. Colour #f6f5fc mirrors the light-theme canvas
+    tone so the mark reads as bright on the near-black violet background (#141220).
+    Outline the text against the Plus Jakarta Sans master before shipping as a static asset.
+  -->
+  <text x="6" y="96" font-family="'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" font-size="112" letter-spacing="-4" fill="#f6f5fc">MemoX</text>
+</svg>

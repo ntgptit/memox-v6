@@ -1,0 +1,13 @@
+/* ============================================================
+   MemoX — Icon size scale  (Layer 1). Names frozen.
+   Sizes for Material Symbols glyphs (set via font-size on the
+   .material-symbols-rounded span). Icon sizes that coincide with
+   the type scale (20, 24) reuse --memox-font-size-lg / -xl instead.
+   ============================================================ */
+
+:root {
+  --memox-icon-size-sm: 18px;
+  --memox-icon-size-md: 22px;
+  --memox-icon-size-lg: 28px;
+  --memox-icon-size-xl: 32px; /* icon-tile--lg glyph (K.1) */
+}

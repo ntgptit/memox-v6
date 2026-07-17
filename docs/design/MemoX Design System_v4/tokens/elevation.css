@@ -1,0 +1,27 @@
+/* ============================================================
+   MemoX — Elevation / shadow tokens  (Layer 1)  ·  DEEP VIOLET
+   Theme-dependent: soft violet-grey casts in light, crisp hairline +
+   deep ambient in dark. Values track the deep-violet brand; names frozen.
+   ============================================================ */
+
+:root,
+[data-theme='light'] {
+  --memox-shadow-sm: 0 2px 3px rgba(120, 112, 158, 0.18),
+    0 1px 1px rgba(120, 112, 158, 0.3);
+  --memox-shadow-card: 0 9px 16px rgba(120, 112, 158, 0.18),
+    0 2px 2px rgba(120, 112, 158, 0.28);
+  --memox-shadow-lg: 0 18px 40px rgba(75, 58, 140, 0.18),
+    0 4px 8px rgba(120, 112, 158, 0.24);
+  --memox-shadow-fab: 0 8px 18px rgba(75, 58, 140, 0.38);
+  --memox-shadow-nav: 0 -2px 14px rgba(120, 112, 158, 0.2);
+  --memox-ring-focus: 0 0 0 3px var(--memox-focus-ring);
+}
+
+[data-theme='dark'] {
+  --memox-shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.09);
+  --memox-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --memox-shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --memox-shadow-fab: 0 6px 16px rgba(0, 0, 0, 0.5);
+  --memox-shadow-nav: 0 -2px 16px rgba(0, 0, 0, 0.55), 0 -1px 0 rgba(255, 255, 255, 0.06);
+  --memox-ring-focus: 0 0 0 3px var(--memox-focus-ring);
+}

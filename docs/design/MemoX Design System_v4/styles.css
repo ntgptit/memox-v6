@@ -1,0 +1,20 @@
+/* ============================================================
+   MemoX Design System — global entry.
+   Consumers link THIS file. Imports only — no inline rules.
+   Layer 1 (tokens) → Layer 2 (components).
+   ============================================================ */
+
+@import url('tokens/colors.css');
+@import url('tokens/typography.css');
+@import url('tokens/spacing.css');
+@import url('tokens/component.css');
+@import url('tokens/opacity.css');
+@import url('tokens/radius.css');
+@import url('tokens/stroke.css');
+@import url('tokens/size.css');
+@import url('tokens/icon-size.css');
+@import url('tokens/elevation.css');
+@import url('tokens/motion.css');
+@import url('tokens/high-contrast.css');
+
+@import url('components.css');

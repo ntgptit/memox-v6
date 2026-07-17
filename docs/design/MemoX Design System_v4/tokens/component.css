@@ -1,0 +1,51 @@
+/* ============================================================
+   MemoX — Component dimension tokens  (Layer 1). Names frozen.
+   Fixed intrinsic sizes of individual controls (K.1, Đ-K-4 full
+   tokenization): every raw px that used to live in components.css.
+   Theme-independent. `--memox-comp-<component>-<prop>`.
+   ============================================================ */
+
+:root {
+  /* chip */
+  --memox-comp-chip-height: 34px;
+
+  /* switch (M3 spec 52x32; thumb grows 22->24 when on) */
+  --memox-comp-switch-width: 52px;
+  --memox-comp-switch-height: 32px;
+  --memox-comp-switch-thumb: 22px;
+  --memox-comp-switch-thumb-on: 24px;
+  --memox-comp-switch-thumb-inset: 4px;
+  --memox-comp-switch-thumb-inset-on: 2px;
+  --memox-comp-switch-thumb-travel: 20px;
+
+  /* badge */
+  --memox-comp-badge-height: 20px;
+  --memox-comp-badge-min-width: 20px;
+  --memox-comp-badge-pad-x: 6px;
+  --memox-comp-badge-gap: 4px;
+  --memox-comp-badge-dot: 10px;
+
+  /* avatar */
+  --memox-comp-avatar-sm: 32px;
+  --memox-comp-avatar-md: 44px;
+  --memox-comp-avatar-lg: 64px;
+
+  /* icon tile */
+  --memox-comp-icon-tile-md: 48px;
+  --memox-comp-icon-tile-lg: 60px;
+
+  /* icon button (small visual; hit area extends to 48 via ::after) */
+  --memox-comp-icon-btn-sm: 36px;
+
+  /* search dock */
+  --memox-comp-search-dock-height: 52px;
+
+  /* bottom-nav internals */
+  --memox-comp-nav-pill-width: 56px;
+  --memox-comp-nav-pill-height: 30px;
+  --memox-comp-nav-item-gap: 3px;
+  --memox-comp-nav-safe-pad: 4px;
+
+  /* segmented control (M3 segment visual) */
+  --memox-comp-segmented-seg-height: 40px;
+}

@@ -1,0 +1,63 @@
+/* ============================================================
+   MemoX — Typography tokens & webfont  (Layer 1)
+   Family: Plus Jakarta Sans (variable). Names are frozen contract.
+   ============================================================ */
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('../fonts/PlusJakartaSans[wght].ttf') format('truetype-variations');
+}
+
+:root {
+  --memox-font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --memox-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Per-script fallback stacks (KIT-09-04, KIT-37-02) — additive; name-frozen once shipped.
+     The primary family (Plus Jakarta Sans) fully covers Latin AND Vietnamese diacritics, so
+     --memox-font-vietnamese is the primary itself — declared explicitly so the coverage is
+     documented, not assumed. CJK (Korean/Japanese/Chinese) is NOT in the primary and must fall
+     through to a platform CJK family; --memox-font-cjk makes that fallback EXPLICIT so a glyph
+     is never left to an undefined default. Production (React Native) maps each to a per-field
+     fontFamily fallback array keyed off the field/deck language; the web prototype uses the CSS
+     stack directly. RTL shaping is layout (dir/logical props), not a font — see i18n-localization.md. */
+  --memox-font-vietnamese: var(--memox-font-sans);
+  --memox-font-cjk: 'Plus Jakarta Sans', 'Noto Sans CJK KR', 'Noto Sans KR',
+    'Noto Sans CJK JP', 'Noto Sans JP', 'Noto Sans CJK SC', 'Noto Sans SC',
+    'Malgun Gothic', 'Yu Gothic', 'Hiragino Sans', 'Microsoft YaHei',
+    'Apple SD Gothic Neo', 'PingFang SC', sans-serif;
+
+  /* font sizes */
+  --memox-font-size-xs: 12px;
+  --memox-font-size-sm: 13px;
+  --memox-font-size-base: 15px;
+  --memox-font-size-md: 17px;
+  --memox-font-size-lg: 20px;
+  --memox-font-size-xl: 24px;
+  --memox-font-size-2xl: 30px;
+  --memox-font-size-3xl: 38px;
+  --memox-font-size-4xl: 48px;
+
+  /* weights */
+  --memox-font-weight-regular: 400;
+  --memox-font-weight-medium: 500;
+  --memox-font-weight-semibold: 600;
+  --memox-font-weight-bold: 700;
+  --memox-font-weight-extrabold: 800;
+
+  /* line heights */
+  --memox-line-height-none: 1;
+  --memox-line-height-tight: 1.15;
+  --memox-line-height-snug: 1.32;
+  --memox-line-height-normal: 1.5;
+  --memox-line-height-relaxed: 1.7;
+
+  /* letter spacing */
+  --memox-letter-spacing-tight: -0.02em;
+  --memox-letter-spacing-normal: 0;
+  --memox-letter-spacing-wide: 0.04em;
+  --memox-letter-spacing-caps: 0.08em;
+}

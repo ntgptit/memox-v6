@@ -1,0 +1,20 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Structure & State" subtitle="Borders, dividers, interaction layers" -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+<style>
+  html,body{margin:0}
+  body{background:var(--memox-bg);font-family:var(--memox-font-sans);color:var(--memox-text);padding:22px}
+  .swatches{display:flex;flex-wrap:wrap;gap:14px}
+  .sw{width:150px}
+  .sw .chip{height:56px;border-radius:14px;box-shadow:inset 0 0 0 1px var(--memox-border)}
+  .sw .nm{font-size:12.5px;font-weight:700;margin-top:9px;letter-spacing:-.01em}
+  .sw .tk{font-size:11px;color:var(--memox-text-tertiary);font-family:var(--memox-font-mono);margin-top:2px}
+
+</style></head><body><div class="swatches">
+<div class="sw"><div class="chip" style="background:var(--memox-border);"></div><div class="nm">Border</div><div class="tk">--memox-border</div></div>
+<div class="sw"><div class="chip" style="background:var(--memox-border-strong);"></div><div class="nm">Border strong</div><div class="tk">--memox-border-strong</div></div>
+<div class="sw"><div class="chip" style="background:var(--memox-state-hover);"></div><div class="nm">Hover</div><div class="tk">--memox-state-hover</div></div>
+<div class="sw"><div class="chip" style="background:var(--memox-state-pressed);"></div><div class="nm">Pressed</div><div class="tk">--memox-state-pressed</div></div>
+<div class="sw"><div class="chip" style="background:var(--memox-state-selected);"></div><div class="nm">Selected</div><div class="tk">--memox-state-selected</div></div>
+</div></body></html>

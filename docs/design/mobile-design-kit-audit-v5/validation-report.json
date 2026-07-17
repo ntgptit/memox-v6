@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "kit_file_count": 48,
+  "checklist_item_count": 288,
+  "severity_counts": {
+    "P1": 194,
+    "P2": 45,
+    "P0": 36,
+    "P3": 13
+  },
+  "broken_links": [],
+  "duplicate_ids": [],
+  "exact_duplicate_content_groups": [],
+  "near_duplicate_content_pairs": [],
+  "invalid_slug_files": [],
+  "all_severity_levels_present": true,
+  "calibration_warnings": [],
+  "hybrid_language_warnings": []
+}

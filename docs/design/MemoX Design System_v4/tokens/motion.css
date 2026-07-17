@@ -1,0 +1,29 @@
+/* ============================================================
+   MemoX — Motion: duration + easing scale  (Layer 1). Names frozen.
+   Theme-independent: timings do not change between light and dark.
+   Durations scale with the size of the moving surface; easings follow
+   the standard / enter (decelerate) / exit (accelerate) split.
+   ============================================================ */
+
+:root {
+  /* durations — scale up with the size of the moving surface */
+  --memox-duration-instant: 80ms; /* @kind other */  /* micro: switch, ripple, press feedback */
+  --memox-duration-fast: 140ms; /* @kind other */    /* small: hover/press, chip, tab, segmented */
+  --memox-duration-base: 220ms; /* @kind other */    /* default: card, fade, sheet content */
+  --memox-duration-slow: 320ms; /* @kind other */    /* large / overlay: dialog, drawer, page */
+
+  /* reduced-motion primitive — a near-zero duration (not exactly 0 so that
+     transitionend/animationend still fire) for the components.css
+     prefers-reduced-motion reset to swap in. Additive; nothing references it
+     by default, so default motion is unchanged. (KIT-04-05 / KIT-38-06) */
+  --memox-duration-none: 0.01ms; /* @kind other */
+
+  /* loop / feedback timings — not on the transition scale above */
+  --memox-duration-flash: 300ms; /* @kind other */   /* feedback reveal: correct-match tile flash before it clears */
+  --memox-duration-pulse: 1300ms; /* @kind other */  /* ambient loop period: skeleton shimmer (opacity .5↔1, infinite) */
+
+  /* easings */
+  --memox-ease-standard: cubic-bezier(0.2, 0, 0, 1); /* @kind other */   /* most in-place transitions */
+  --memox-ease-decelerate: cubic-bezier(0, 0, 0, 1); /* @kind other */   /* enter: element settling in */
+  --memox-ease-accelerate: cubic-bezier(0.3, 0, 1, 1); /* @kind other */ /* exit: element leaving */
+}

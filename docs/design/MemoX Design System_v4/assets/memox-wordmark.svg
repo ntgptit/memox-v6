@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452 128" role="img" aria-label="MemoX" preserveAspectRatio="xMidYMid meet">
+  <title>MemoX wordmark — light usage</title>
+  <desc>MemoX typographic wordmark set in Plus Jakarta Sans Extrabold, deep-violet #4b3a8c, for use on light surfaces (#f6f5fc / #ffffff).</desc>
+  <!--
+    Typographic wordmark (MemoX's own type), pending a bespoke brand icon.
+    Font: Plus Jakarta Sans (self-hosted in the kit, fonts/PlusJakartaSans[wght].ttf),
+    weight 800 (token memox-font-weight-800). Colour is the deep-violet brand token
+    memox-primary (#4b3a8c). To ship as a fully static asset, outline the text
+    (convert to paths) with the Plus Jakarta Sans master before export.
+  -->
+  <text x="6" y="96" font-family="'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" font-size="112" letter-spacing="-4" fill="#4b3a8c">MemoX</text>
+</svg>

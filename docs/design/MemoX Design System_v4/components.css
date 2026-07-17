@@ -1,0 +1,1540 @@
+/* ============================================================
+   MemoX — Component styling (Layer 2)
+   One STABLE base class per Mx* component (frozen contract).
+   All visual values reference Layer-1 tokens — no raw values.
+   Variants are modifiers, never renamed classes.
+   ============================================================ */
+
+/* ---- base reset for design-system surfaces ---- */
+.app *,
+.app *::before,
+.app *::after {
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   MxScaffold  ·  .app
+   ============================================================ */
+.app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: var(--memox-bg);
+  color: var(--memox-text);
+  font-family: var(--memox-font-sans);
+  font-size: var(--memox-font-size-base);
+  line-height: var(--memox-line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+/* Status-bar / notch safe area — a flex spacer above every app bar so no screen's
+   chrome hugs the top edge or collides with system indicators. */
+.app::before {
+  content: '';
+  flex: 0 0 var(--memox-safe-area-top);
+  background: var(--memox-bg);
+}
+.app__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--memox-space-4) var(--memox-gutter)
+    calc(var(--memox-bottom-nav-height) + var(--memox-space-6));
+  display: flex;
+  flex-direction: column;
+  gap: var(--memox-space-6);
+}
+/* a scrolling column must not shrink its children (e.g. a horizontal
+   chip row with overflow-x:auto would otherwise collapse to a sliver) */
+.app__body > * {
+  flex-shrink: 0;
+}
+.app__body--with-fab {
+  /* Keep the LAST list item fully visible above the floating FAB when scrolled to
+     the end: FAB sits at bottom = nav-height + space-4, is fab-size tall, plus a
+     space-6 gap above it. (nav + space-4) + fab + space-6. */
+  padding-bottom: calc(var(--memox-bottom-nav-height) + var(--memox-space-4) + var(--memox-fab-size) + var(--memox-space-6));
+}
+.app__body--flush {
+  padding-inline: 0;
+}
+/* mobile: no visible scrollbars on any scroller inside the app shell */
+.app,
+.app * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.app::-webkit-scrollbar,
+.app *::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* ============================================================
+   MxContextualAppBar  ·  .cappbar   (shared context-aware top bar)
+   ============================================================ */
+.cappbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--memox-space-3);
+  min-height: var(--memox-appbar-height); /* 56 — single compact height */
+  padding: 0 var(--memox-gutter);          /* same horizontal grid as content */
+  color: var(--memox-text);
+  flex-shrink: 0;
+  /* ONE flat colour = the screen background, opaque so scrolling content can't show through.
+     No divider by default. The bar does NOT change colour or gain a surface/shadow on scroll —
+     the top edge (safe area), the bar and the body read as a single unbroken block. */
+  background: var(--memox-bg);
+  border-bottom: var(--memox-stroke-hairline) solid transparent;
+}
+/* root / nested / search — seamless at every scroll position: `top` and `scrolled` render
+   IDENTICALLY (same flat background, no divider). There is no elevate-on-scroll transition. */
+.cappbar--top,
+.cappbar--scrolled {
+  background: var(--memox-bg);
+  border-bottom-color: transparent;
+}
+/* selection & modal — deliberate mode bars, not scroll states: a surface + hairline separates
+   the transient mode chrome from the content below. These never toggle on scroll. */
+.cappbar--selection,
+.cappbar--modal {
+  background: var(--memox-surface);
+  border-bottom-color: var(--memox-divider);
+}
+.cappbar__lead,
+.cappbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--memox-space-2);
+  flex-shrink: 0;
+}
+.cappbar__main {
+  flex: 1;
+  min-width: 0;
+}
+.cappbar__context {
+  font-size: var(--memox-font-size-base);      /* 15, medium — below the screen heading */
+  font-weight: var(--memox-font-weight-medium);
+  color: var(--memox-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cappbar__title {
+  font-size: var(--memox-font-size-lg);         /* 20, semibold */
+  font-weight: var(--memox-font-weight-semibold);
+  letter-spacing: var(--memox-letter-spacing-tight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Modal form bar: the title is a fixed page label centered between the leading
+   (close) and trailing (Save) actions, so it never shifts across form/submit states. */
+.cappbar--modal .cappbar__title { text-align: center; }
+.cappbar__title,
+.cappbar__context {
+  animation: cappbar-label-in var(--memox-duration-base) var(--memox-ease-standard);
+}
+@keyframes cappbar-label-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+/* notification action + badge */
+.cappbar__notif {
+  position: relative;
+  display: inline-flex;
+}
+.cappbar__badge {
+  position: absolute;
+  top: 5px;              /* raw-ok: off-scale nudge to seat the badge over the bell glyph */
+  inset-inline-end: 5px; /* raw-ok: off-scale nudge to seat the badge over the bell glyph */
+  min-width: var(--memox-space-4);
+  height: var(--memox-space-4);
+  padding: 0 var(--memox-space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--memox-radius-pill);
+  background: var(--memox-error);
+  color: var(--memox-on-error);
+  font-size: 10px;       /* raw-ok: below the type scale — count digits on a 16px badge */
+  font-weight: var(--memox-font-weight-bold);
+  line-height: 1;
+  border: var(--memox-stroke-emphasis) solid var(--memox-surface); /* rings the badge off the bell */
+  pointer-events: none;
+}
+/* the notification bell lives only on the root bar, which is always the flat screen bg —
+   ring the badge with that same colour at every scroll position */
+.cappbar--root .cappbar__badge {
+  border-color: var(--memox-bg);
+}
+.cappbar__badge--dot {
+  min-width: var(--memox-comp-badge-dot);
+  height: var(--memox-comp-badge-dot);
+  padding: 0;
+  top: 7px;              /* raw-ok: off-scale nudge to seat the dot over the bell glyph */
+  inset-inline-end: 7px; /* raw-ok: off-scale nudge to seat the dot over the bell glyph */
+}
+/* search variant */
+.cappbar__search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--memox-space-2);
+  height: var(--memox-space-8);
+  padding: 0 var(--memox-space-3);
+  background: var(--memox-surface-sunken);
+  border-radius: var(--memox-radius-pill);
+}
+.cappbar__search-icon {
+  font-size: var(--memox-icon-size-md);
+  color: var(--memox-text-secondary);
+}
+.cappbar__search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--memox-font-size-base);
+  color: var(--memox-text);
+}
+.cappbar__search-input::placeholder {
+  /* text-secondary (not tertiary): the search field sits on surface-sunken, where tertiary
+     is only 4.24:1 — below AA. text-secondary clears 4.5:1 on that container. */
+  color: var(--memox-text-secondary);
+}
+/* keyboard focus: branded ring (only :focus-visible → no change to static/pointer shots) */
+.cappbar__search-input:focus-visible {
+  outline: none;
+  box-shadow: var(--memox-ring-focus);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cappbar { transition: none; }
+  .cappbar__title,
+  .cappbar__context { animation: none; }
+}
+
+/* ============================================================
+   MxCard  ·  .card
+   ============================================================ */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--memox-space-3);
+  padding: var(--memox-space-6);
+  background: var(--memox-surface);
+  border-radius: var(--memox-radius-card);
+  box-shadow: var(--memox-shadow-card);
+  color: var(--memox-text);
+}
+.card--flat {
+  box-shadow: none;
+  border: var(--memox-stroke-hairline) solid var(--memox-border);
+}
+.card--muted {
+  background: var(--memox-surface-muted);
+  box-shadow: none;
+}
+.card--primary {
+  background: var(--memox-primary);
+  color: var(--memox-on-primary);
+  box-shadow: var(--memox-shadow-fab);
+}
+.card--primary-soft {
+  background: var(--memox-primary-soft);
+  color: var(--memox-on-primary-soft);
+  box-shadow: none;
+}
+.card--interactive {
+  cursor: pointer;
+  transition: transform var(--memox-duration-fast) var(--memox-ease-standard), box-shadow var(--memox-duration-fast) var(--memox-ease-standard);
+}
+.card--interactive:hover {
+  box-shadow: var(--memox-shadow-lg);
+}
+.card--interactive:active {
+  transform: scale(0.985);
+}
+.card--pad-sm {
+  padding: var(--memox-space-4);
+}
+.card--pad-lg {
+  padding: var(--memox-space-6);
+}
+
+/* ============================================================
+   MxSectionHeader  ·  .section-head
+   ============================================================ */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--memox-space-3);
+  margin-bottom: calc(-1 * var(--memox-space-2));
+}
+/* Section grouping wrapper: a plain <div> holding a MxSectionHeader plus its
+   content (card / grid / control). The header's negative margin-bottom above is
+   tuned to be absorbed by the .app__body flex gap; inside a plain block wrapper
+   there is no gap to absorb it, so the content collapses onto the caption. Lay
+   the wrapper out as a column and neutralise the negative margin there. */
+.app__body > div:has(> .section-head) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--memox-space-3);
+}
+.app__body > div:has(> .section-head) > .section-head {
+  margin-bottom: 0;
+}
+.section-head__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--memox-space-05);
+  min-width: 0;
+}
+.section-head__title {
+  font-size: var(--memox-font-size-md);
+  font-weight: var(--memox-font-weight-bold);
+  letter-spacing: var(--memox-letter-spacing-tight);
+}
+.section-head__caption {
+  font-size: var(--memox-font-size-sm);
+  color: var(--memox-text-secondary);
+}
+.section-head__action {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--memox-font-size-base); /* 15 — reads as an interactive link, not metadata */
+  font-weight: var(--memox-font-weight-bold);
+  /* accent (bright violet) not primary-strong (a dark pressed colour) so the link keeps
+     contrast on dark surfaces. */
+  color: var(--memox-accent);
+  cursor: pointer;
+}
+
+/* ============================================================
+   MxButton  ·  .btn  (+ primary / secondary / outline / ghost)
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--memox-space-2);
+  min-height: var(--memox-touch-min);
+  padding: 0 var(--memox-space-6);
+  border: none;
+  border-radius: var(--memox-radius-control);
+  font-family: inherit;
+  font-size: var(--memox-font-size-base);
+  font-weight: var(--memox-font-weight-bold);
+  letter-spacing: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--memox-duration-fast) var(--memox-ease-standard), box-shadow var(--memox-duration-fast) var(--memox-ease-standard), transform var(--memox-duration-fast) var(--memox-ease-standard),
+    color var(--memox-duration-fast) var(--memox-ease-standard), opacity var(--memox-duration-fast) var(--memox-ease-standard);
+  user-select: none;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--memox-ring-focus);
+}
+.btn .material-symbols-rounded {
+  font-size: var(--memox-font-size-lg);
+}
+.btn--block {
+  width: 100%;
+}
+/* Dialog action row (KIT-09-05 / KIT-21-06 / KIT-42-05 — 200% text scaling): the two
+   confirm/cancel buttons sit side by side, but their labels are `white-space: nowrap`, so at
+   200% text on the narrowest 320px phone their combined min-width exceeds the dialog and used
+   to overflow it. Give them a content-based flex basis inside the wrapping `.mx-dialog-actions`
+   row: at ≤150% they still fit and stay side by side (basis grows to a 50/50 split — pixel-
+   identical to the previous `width:100%` + shrink), and only the 200%×320 extreme wraps them to
+   stacked full-width buttons. Parity-safe: the canonical 390px / 100% render is unchanged. */
+.mx-dialog-actions > .btn {
+  flex: 1 1 auto;
+  width: auto;
+}
+/* loading / submitting — inert while a spinner replaces the press affordance. The button
+   keeps its label so width/height are stable; the spinner rides on currentColor so it works
+   on every variant. Announced via aria-busy + the spinner's role="status" (set in JSX). */
+.btn--loading {
+  pointer-events: none;
+}
+.btn__spinner {
+  width: var(--memox-font-size-lg);
+  height: var(--memox-font-size-lg);
+  flex-shrink: 0;
+  border: var(--memox-stroke-emphasis) solid currentColor;
+  border-top-color: transparent;
+  border-radius: var(--memox-radius-full);
+  opacity: 0.9;
+  animation: mx-spin 0.8s linear infinite; /* raw-ok: animation duration, not a visual token */
+}
+.btn--sm {
+  min-height: var(--memox-size-sm);
+  padding: 0 var(--memox-space-4);
+  font-size: var(--memox-font-size-sm);
+}
+.btn--lg {
+  min-height: var(--memox-size-md);
+  padding: 0 var(--memox-space-7);
+  font-size: var(--memox-font-size-md);
+}
+/* primary — flat (no elevation glow). An inline button is not a floating layer; the
+   solid fill is affordance enough, and the coloured shadow read as an unwanted halo. */
+.btn.primary {
+  background: var(--memox-primary);
+  color: var(--memox-on-primary);
+}
+.btn.primary:hover {
+  background: var(--memox-primary-strong);
+}
+/* secondary (tonal) */
+.btn.secondary {
+  background: var(--memox-primary-soft);
+  color: var(--memox-on-primary-soft);
+}
+.btn.secondary:hover {
+  background: var(--memox-state-selected);
+}
+/* contrast — solid surface pill for use ON a colored/primary card (white in both themes) */
+.btn.contrast {
+  background: var(--memox-on-primary);
+  color: var(--memox-primary);
+}
+.btn.contrast:hover {
+  background: var(--memox-on-primary);
+  filter: brightness(0.94);
+}
+/* outline */
+.btn.outline {
+  background: transparent;
+  color: var(--memox-text);
+  box-shadow: inset 0 0 0 var(--memox-stroke-mid) var(--memox-border-strong);
+}
+.btn.outline:hover {
+  background: var(--memox-state-hover);
+}
+/* ghost (low-emphasis) — a hairline border gives it a visible button boundary in BOTH
+   themes and on any surface (transparent fill alone reads as plain text, near-invisible on
+   dark). Lighter border than `outline`, so it stays the lowest-emphasis real button. */
+.btn.ghost {
+  background: transparent;
+  /* accent (bright) not primary-strong (a dark pressed colour) so ghost labels keep
+     contrast on dark surfaces. */
+  color: var(--memox-accent);
+  box-shadow: inset 0 0 0 var(--memox-stroke-hairline) var(--memox-border);
+}
+.btn.ghost:hover {
+  background: var(--memox-state-hover);
+}
+
+/* ============================================================
+   MxLink  ·  .link  (text / navigation link button)
+   ============================================================ */
+.link {
+  display: inline-flex;
+  align-self: flex-start; /* never stretch to full width inside a flex column */
+  align-items: center;
+  gap: var(--memox-space-1);
+  min-height: var(--memox-touch-min); /* >=48 tap target; text stays visually compact */
+  padding: 0 var(--memox-space-1);
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--memox-font-size-base);
+  font-weight: var(--memox-font-weight-bold);
+  color: var(--memox-accent);
+  text-decoration: none;
+  border-radius: var(--memox-radius-control);
+  cursor: pointer;
+  transition: opacity var(--memox-duration-fast) var(--memox-ease-standard);
+}
+.link:hover span:not(.material-symbols-rounded) {
+  text-decoration: underline; /* underline the label only — not the trailing chevron/icons */
+}
+.link:active {
+  opacity: 0.7;
+}
+/* keyboard focus: branded ring (only :focus-visible → no change to static/pointer shots) */
+.link:focus-visible {
+  outline: none;
+  box-shadow: var(--memox-ring-focus);
+}
+/* disabled link — not activatable / out of the tab order (button gets the disabled attr; the <a>
+   form gets aria-disabled + tabIndex -1). No opacity here: when a link is disabled inside a locked
+   form the wrapper already dims it, and stacking a second opacity would over-fade it. Parity-neutral:
+   no existing fixture disables a link. */
+.link:disabled,
+.link[aria-disabled="true"] {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.link--sm {
+  font-size: var(--memox-font-size-sm);
+}
+.link .material-symbols-rounded {
+  font-size: var(--memox-font-size-md);
+}
+/* MxLink used as a Snackbar action: inherit the toast's on-tone TEXT colour (guaranteed ≥4.5 on the
+   tonal ground — the brand accent can dip just under 4.5 on a light tint) and keep a PERSISTENT
+   underline so it still reads as the action. Tap target + :focus-visible ring stay from .link. */
+.snackbar-action.link { color: inherit; }
+.snackbar-action.link span:not(.material-symbols-rounded) { text-decoration: underline; }
+/* destructive modifier (composes with above) */
+.btn.danger {
+  background: var(--memox-error);
+  color: var(--memox-on-error);
+  box-shadow: none;
+}
+.btn[disabled],
+.btn--disabled {
+  pointer-events: none;
+  opacity: var(--memox-opacity-disabled);
+  box-shadow: none;
+}
+
+/* ============================================================
+   MxIconButton  ·  .icon-btn
+   ============================================================ */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--memox-touch-min);
+  height: var(--memox-touch-min);
+  border: none;
+  border-radius: var(--memox-radius-full);
+  background: transparent;
+  color: var(--memox-text);
+  cursor: pointer;
+  transition: background var(--memox-duration-fast) var(--memox-ease-standard), color var(--memox-duration-fast) var(--memox-ease-standard), transform var(--memox-duration-fast) var(--memox-ease-standard);
+}
+.icon-btn:hover {
+  background: var(--memox-state-hover);
+}
+.icon-btn:active {
+  transform: scale(0.9);
+}
+.icon-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--memox-ring-focus);
+}
+.icon-btn .material-symbols-rounded {
+  font-size: var(--memox-font-size-xl);
+}
+.icon-btn--filled {
+  background: var(--memox-surface);
+  box-shadow: var(--memox-shadow-sm);
+}
+.icon-btn--primary {
+  background: var(--memox-primary-soft);
+  color: var(--memox-on-primary-soft);
+}
+.icon-btn--sm {
+  width: var(--memox-comp-icon-btn-sm);
+  height: var(--memox-comp-icon-btn-sm);
+}
+.icon-btn--sm .material-symbols-rounded {
+  font-size: var(--memox-font-size-lg);
+}
+
+/* ============================================================
+   MxIconTile  ·  .icon-tile  (rounded color tile w/ a glyph)
+   ============================================================ */
+.icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--memox-comp-icon-tile-md);
+  height: var(--memox-comp-icon-tile-md);
+  flex-shrink: 0;
+  border-radius: var(--memox-radius-tile);
+  background: var(--memox-primary-soft);
+  color: var(--memox-on-primary-soft);
+}
+.icon-tile .material-symbols-rounded {
+  font-size: var(--memox-icon-size-lg);
+}
+.icon-tile--lg {
+  width: var(--memox-comp-icon-tile-lg);
+  height: var(--memox-comp-icon-tile-lg);
+  border-radius: var(--memox-radius-lg);
+}
+.icon-tile--lg .material-symbols-rounded {
+  font-size: var(--memox-icon-size-xl);
+}
+.icon-tile--accent {
+  background: var(--memox-accent-soft);
+  /* accent (bright violet) — the glyph sits on the SOFT tint, so it needs the bright
+     accent, not on-accent (a near-black colour meant for a SOLID accent fill). */
+  color: var(--memox-accent);
+}
+.icon-tile--success {
+  background: var(--memox-success-soft);
+  color: var(--memox-on-success-soft);
+}
+.icon-tile--warning {
+  background: var(--memox-warning-soft);
+  color: var(--memox-on-warning-soft);
+}
+.icon-tile--error {
+  background: var(--memox-error-soft);
+  color: var(--memox-on-error-soft);
+}
+.icon-tile--solid {
+  background: var(--memox-primary);
+  color: var(--memox-on-primary);
+}
+
+/* ============================================================
+   MxFab  ·  .fab
+   ============================================================ */
+.fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--memox-space-2);
+  height: var(--memox-fab-size);
+  min-width: var(--memox-fab-size);
+  padding: 0 var(--memox-space-6);
+  border: none;
+  border-radius: var(--memox-radius-xl);
+  background: var(--memox-primary);
+  color: var(--memox-on-primary);
+  font-family: inherit;
+  font-size: var(--memox-font-size-base);
+  font-weight: var(--memox-font-weight-bold);
+  box-shadow: var(--memox-shadow-fab);
+  cursor: pointer;
+  transition: transform var(--memox-duration-fast) var(--memox-ease-standard), box-shadow var(--memox-duration-fast) var(--memox-ease-standard), background var(--memox-duration-fast) var(--memox-ease-standard);
+}
+.fab:hover {
+  background: var(--memox-primary-strong);
+}
+.fab:active {
+  transform: scale(0.94);
+}
+.fab:focus-visible {
+  outline: none;
+  box-shadow: var(--memox-shadow-fab), var(--memox-ring-focus);
+}
+.fab .material-symbols-rounded {
+  font-size: var(--memox-icon-size-lg);
+}
+.fab--round {
+  padding: 0;
+  width: var(--memox-fab-size);
+  border-radius: var(--memox-radius-full);
+}
+.fab--accent {
+  background: var(--memox-accent);
+  color: var(--memox-on-accent);
+}
+
+/* ============================================================
+   MxSearchDock  ·  .search-dock
+   ============================================================ */
+.search-dock {
+  display: flex;
+  align-items: center;
+  gap: var(--memox-space-3);
+  height: var(--memox-comp-search-dock-height);
+  padding: 0 var(--memox-space-4);
+  background: var(--memox-surface);
+  border-radius: var(--memox-radius-pill);
+  box-shadow: var(--memox-shadow-sm);
+  color: var(--memox-text-secondary);
+}
+.search-dock .material-symbols-rounded {
+  font-size: var(--memox-icon-size-md);
+  color: var(--memox-text-tertiary);
+}
+.search-dock__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--memox-font-size-base);
+  color: var(--memox-text);
+}
+.search-dock__input::placeholder {
+  color: var(--memox-text-tertiary);
+}
+/* keyboard focus: branded ring (only :focus-visible → no change to static/pointer shots) */
+.search-dock__input:focus-visible {
+  outline: none;
+  box-shadow: var(--memox-ring-focus);
+}
+.search-dock--focused {
+  box-shadow: var(--memox-shadow-sm), var(--memox-ring-focus);
+}
+.search-dock--flat {
+  background: var(--memox-surface-muted);
+  box-shadow: none;
+}
+
+/* ============================================================
+   MxBottomNav  ·  .bottom-nav
+   ============================================================ */
+.bottom-nav {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  height: var(--memox-bottom-nav-height);
+  /* safe-area token folds env(safe-area-inset-bottom) with the fixed nav pad; in the kit
+     frame it resolves to the same 4px, so rendered pixels are unchanged. */
+  padding: var(--memox-space-2) var(--memox-space-2)
+    calc(var(--memox-space-2) + var(--memox-safe-area-bottom));
+  background: var(--memox-surface);
+  box-shadow: var(--memox-shadow-nav);
+  z-index: 10;
+}
+.bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--memox-comp-nav-item-gap);
+  flex: 1;
+  min-width: 0; /* allow 5 items to shrink to fit narrow (320px) frames */
+  border: none;
+  background: transparent;
+  color: var(--memox-text-secondary); /* idle label needs AA at label size (M3-2) */
+  font-family: inherit;
+  font-size: var(--memox-font-size-xs); /* 12px floor (M3-2) */
+  font-weight: var(--memox-font-weight-semibold);
+  cursor: pointer;
+  transition: color var(--memox-duration-fast) var(--memox-ease-standard);
+}
+/* keyboard focus: branded ring (only :focus-visible → no change to static/pointer shots) */
+.bottom-nav__item:focus-visible {
+  outline: none;
+  box-shadow: var(--memox-ring-focus);
+}
+.bottom-nav__item .material-symbols-rounded {
+  font-size: var(--memox-icon-size-lg);
+}
+.bottom-nav__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: var(--memox-comp-nav-pill-width); /* shrinks with the item on narrow frames */
+  height: var(--memox-comp-nav-pill-height);
+  border-radius: var(--memox-radius-pill);
+  transition: background var(--memox-duration-fast) var(--memox-ease-standard);
+}
+/* Selected item must be BRIGHTER than inactive in both themes. The purple selection
+   cue is carried by the tonal pill + filled icon; the label uses primary text (bright)
+   so it never reads dimmer than the inactive text-secondary labels (the dark-mode bug). */
+.bottom-nav__item--active {
+  color: var(--memox-text);
+  font-weight: var(--memox-font-weight-bold);
+}
+.bottom-nav__item--active .bottom-nav__icon {
+  background: var(--memox-primary-soft);
+  /* on-primary-soft is the token PAIRED with the pill background — bright in dark;
+     primary-strong is a pressed (dark) colour that reads as invisible on the dark pill. */
+  color: var(--memox-on-primary-soft);
+}
+.bottom-nav__item--active .material-symbols-rounded {
+  font-variation-settings: 'FILL' 1; /* filled icon = clear selected signal beyond colour */
+}
+
+/* ============================================================
+   MxChip  ·  .chip
+   ============================================================ */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--memox-space-2);
+  height: var(--memox-comp-chip-height);
+  padding: 0 var(--memox-space-4);
+  border: none;
+  font-family: inherit;
+  border-radius: var(--memox-radius-chip);
+  background: var(--memox-surface);
+  box-shadow: inset 0 0 0 var(--memox-stroke-hairline) var(--memox-border);
+  color: var(--memox-text-secondary);
+  font-size: var(--memox-font-size-sm);
+  font-weight: var(--memox-font-weight-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--memox-duration-fast) var(--memox-ease-standard), color var(--memox-duration-fast) var(--memox-ease-standard), box-shadow var(--memox-duration-fast) var(--memox-ease-standard);
+}
+.chip .material-symbols-rounded {
+  font-size: var(--memox-icon-size-sm);
+}
+.chip:hover {
+  background: var(--memox-state-hover);
+}
+/* keyboard focus: branded ring (only :focus-visible → no change to static/pointer shots) */
+.chip:focus-visible {
+  outline: none;
+  box-shadow: var(--memox-ring-focus);
+}
+/* unavailable / disabled — inert and dimmed (no fixture sets it → parity-neutral) */
+.chip--disabled {
+  opacity: var(--memox-opacity-disabled);
+  pointer-events: none;
+}
+.chip--selected {
+  background: var(--memox-primary-soft);
+  color: var(--memox-on-primary-soft);
+  box-shadow: inset 0 0 0 var(--memox-stroke-hairline) transparent;
+}
+.chip--accent {
+  background: var(--memox-accent-soft);
+  /* accent (bright violet) on the SOFT tint — on-accent is white, meant only for a
+     SOLID accent fill, and fails contrast on the pale tint (cf. .icon-tile--accent). */
+  color: var(--memox-accent);
+  box-shadow: none;
+}
+.chip--ghost {
+  background: transparent;
+  box-shadow: inset 0 0 0 var(--memox-stroke-hairline) var(--memox-border);
+}
+
+/* ============================================================
+   MxBadge  ·  .badge
+   ============================================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--memox-comp-badge-gap);
+  min-width: var(--memox-comp-badge-min-width);
+  height: var(--memox-comp-badge-height);
+  padding: 0 var(--memox-comp-badge-pad-x);
+  border-radius: var(--memox-radius-pill);
+  background: var(--memox-primary);
+  color: var(--memox-on-primary);
+  font-size: var(--memox-font-size-xs); /* 12px floor (M3-2) */
+  font-weight: var(--memox-font-weight-bold);
+  line-height: 1;
+}
+.badge--dot {
+  min-width: var(--memox-comp-badge-dot);
+  width: var(--memox-comp-badge-dot);
+  height: var(--memox-comp-badge-dot);
+  padding: 0;
+}
+.badge--success {
+  background: var(--memox-success);
+  color: var(--memox-on-success);
+}
+.badge--warning {
+  background: var(--memox-warning);
+  color: var(--memox-on-warning);
+}
+.badge--error {
+  background: var(--memox-error);
+  color: var(--memox-on-error);
+}
+.badge--soft {
+  background: var(--memox-primary-soft);
+  color: var(--memox-on-primary-soft);
+}
+.badge--soft.badge--success {
+  background: var(--memox-success-soft);
+  color: var(--memox-on-success-soft);
+}
+.badge--soft.badge--warning {
+  background: var(--memox-warning-soft);
+  color: var(--memox-on-warning-soft);
+}
+.badge--soft.badge--error {
+  background: var(--memox-error-soft);
+  color: var(--memox-on-error-soft);
+}
+
+/* ============================================================
+   MxSwitch  ·  .switch
+   ============================================================ */
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: var(--memox-comp-switch-width);
+  height: var(--memox-comp-switch-height);
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--memox-radius-pill);
+  background: var(--memox-surface-sunken);
+  box-shadow: inset 0 0 0 var(--memox-stroke-mid) var(--memox-border);
+  cursor: pointer;
+  transition: background var(--memox-duration-fast) var(--memox-ease-standard), box-shadow var(--memox-duration-fast) var(--memox-ease-standard);
+}
+.switch__thumb {
+  position: absolute;
+  inset-inline-start: var(--memox-comp-switch-thumb-inset);
+  width: var(--memox-comp-switch-thumb);
+  height: var(--memox-comp-switch-thumb);
+  border-radius: var(--memox-radius-full);
+  background: var(--memox-text-tertiary);
+  transition: transform var(--memox-duration-fast) var(--memox-ease-standard), background var(--memox-duration-fast) var(--memox-ease-standard),
+    width var(--memox-duration-fast) var(--memox-ease-standard), height var(--memox-duration-fast) var(--memox-ease-standard);
+}
+.switch--on {
+  background: var(--memox-primary);
+  box-shadow: inset 0 0 0 var(--memox-stroke-mid) transparent;
+}
+.switch--on .switch__thumb {
+  width: var(--memox-comp-switch-thumb-on);
+  height: var(--memox-comp-switch-thumb-on);
+  inset-inline-start: var(--memox-comp-switch-thumb-inset-on);
+  transform: translateX(var(--memox-comp-switch-thumb-travel));
+  background: var(--memox-on-primary);
+}
+.switch--disabled {
+  opacity: var(--memox-opacity-disabled);
+  pointer-events: none;
+}
+/* keyboard focus: branded ring (only :focus-visible → no change to static/pointer shots) */
+.switch:focus-visible {
+  outline: none;
+  box-shadow: var(--memox-ring-focus);
+}
+
+/* ============================================================
+   MxSegmentedControl  ·  .segmented
+   ============================================================ */
+.segmented {
+  display: inline-flex;
+  align-items: stretch;
+  padding: var(--memox-space-1);
+  gap: var(--memox-space-1);
+  border-radius: var(--memox-radius-pill);
+  background: var(--memox-surface-muted);
+}
+.segmented__seg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--memox-space-2);
+  padding: 0 var(--memox-space-4);
+  min-height: var(--memox-comp-segmented-seg-height); /* M3 segmented visual spec (was 38, M3-1) */
+  border: none;
+  border-radius: var(--memox-radius-pill);
+  background: transparent;
+  color: var(--memox-text-secondary);
+  font-family: inherit;
+  font-size: var(--memox-font-size-sm);
+  font-weight: var(--memox-font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--memox-duration-fast) var(--memox-ease-standard), color var(--memox-duration-fast) var(--memox-ease-standard), box-shadow var(--memox-duration-fast) var(--memox-ease-standard);
+}
+.segmented__seg .material-symbols-rounded {
+  font-size: var(--memox-icon-size-sm);
+}
+/* keyboard focus: branded ring (only :focus-visible → no change to static/pointer shots) */
+.segmented__seg:focus-visible {
+  outline: none;
+  box-shadow: var(--memox-ring-focus);
+}
+/* unavailable / disabled option — inert and dimmed (no fixture sets it → parity-neutral) */
+.segmented__seg:disabled {
+  opacity: var(--memox-opacity-disabled);
+  pointer-events: none;
+  cursor: default;
+}
+.segmented__seg--active {
+  background: var(--memox-surface);
+  color: var(--memox-primary-strong);
+  box-shadow: var(--memox-shadow-sm);
+}
+.segmented--block {
+  display: flex;
+}
+.segmented--block .segmented__seg {
+  flex: 1;
+}
+
+/* ============================================================
+   MxAvatar  ·  .avatar
+   ============================================================ */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--memox-comp-avatar-md);
+  height: var(--memox-comp-avatar-md);
+  flex-shrink: 0;
+  border-radius: var(--memox-radius-full);
+  background: var(--memox-primary-soft);
+  color: var(--memox-on-primary-soft);
+  font-size: var(--memox-font-size-base);
+  font-weight: var(--memox-font-weight-bold);
+  overflow: hidden;
+  user-select: none;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.avatar--sm {
+  width: var(--memox-comp-avatar-sm);
+  height: var(--memox-comp-avatar-sm);
+  font-size: var(--memox-font-size-sm);
+}
+.avatar--lg {
+  width: var(--memox-comp-avatar-lg);
+  height: var(--memox-comp-avatar-lg);
+  font-size: var(--memox-font-size-lg);
+}
+.avatar--accent {
+  background: var(--memox-accent-soft);
+  /* accent glyph on the SOFT tint (not on-accent, which is white for a solid fill). */
+  color: var(--memox-accent);
+}
+.avatar--ring {
+  box-shadow: 0 0 0 var(--memox-stroke-emphasis) var(--memox-surface), 0 0 0 var(--memox-stroke-bold) var(--memox-primary);
+}
+
+/* ============================================================
+   MxTextField  ·  .field
+   Bare inline input — the visible box (if any) is the caller's container.
+   ============================================================ */
+.field {
+  width: 100%;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--memox-font-size-base);
+  color: var(--memox-text);
+  caret-color: var(--memox-primary);
+}
+.field::placeholder {
+  color: var(--memox-text-tertiary);
+}
+/* keyboard focus: branded ring (only :focus-visible → no change to static/pointer shots) */
+.field:focus-visible {
+  outline: none;
+  box-shadow: var(--memox-ring-focus);
+}
+.field--center {
+  text-align: center;
+}
+.field--multiline {
+  resize: none;
+  line-height: var(--memox-line-height-normal);
+}
+.field--error {
+  color: var(--memox-error);
+  caret-color: var(--memox-error);
+}
+.field--disabled {
+  color: var(--memox-text-tertiary);
+  cursor: not-allowed;
+}
+/* read-only — value is shown but not editable: distinct from disabled (still selectable/
+   focusable), muted to secondary with no caret. New modifier, no fixture sets it → parity-neutral. */
+.field--readonly {
+  color: var(--memox-text-secondary);
+  caret-color: transparent;
+  cursor: default;
+}
+/* Labelled field group — wraps .field with a label, helper and error message. */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--memox-space-2);
+}
+.field-group--disabled {
+  opacity: var(--memox-opacity-disabled, 0.5);
+}
+.field-group__label {
+  font-size: var(--memox-font-size-sm);
+  font-weight: var(--memox-font-weight-semibold);
+  color: var(--memox-text-secondary);
+}
+.field-group__req {
+  color: var(--memox-error);
+}
+.field-group__helper {
+  font-size: var(--memox-font-size-sm);
+  color: var(--memox-text-tertiary);
+}
+.field-group__error {
+  font-size: var(--memox-font-size-sm);
+  color: var(--memox-error);
+}
+
+/* ============================================================
+   M3-1 hit areas (audit G2) — interactive controls whose VISUAL is smaller
+   than the 48px M3 / 44px HIG minimum get an invisible ::after overlay that
+   extends the clickable region. Visual + layout stay untouched; the overlay
+   may overlap neighbouring gaps (M3 explicitly allows tap zones to exceed
+   the visible bounds). Flutter mirrors this by widening the interactive box
+   (visual unchanged). Inset per control = (48 - visual) / 2, capped at the
+   surrounding gap.
+   ============================================================ */
+.chip,
+.switch,
+.btn--sm,
+.icon-btn--sm,
+.segmented__seg,
+.section-head__action,
+.accent-swatch {
+  position: relative;
+}
+.chip::after,
+.switch::after,
+.btn--sm::after,
+.icon-btn--sm::after,
+.segmented__seg::after,
+.section-head__action::after,
+.accent-swatch::after {
+  content: '';
+  position: absolute;
+}
+.chip::after { inset: -7px 0; }             /* raw-ok: (48-34)/2 — derived hit inset */
+.switch::after { inset: -8px -4px; }        /* raw-ok: (48-32)/2 vertical — derived hit inset */
+.btn--sm::after { inset: -4px 0; }          /* raw-ok: (48-40)/2 — derived hit inset */
+.icon-btn--sm::after { inset: -6px; }       /* raw-ok: (48-36)/2 — derived hit inset */
+.segmented__seg::after { inset: -4px 0; }   /* raw-ok: (48-40)/2 — derived hit inset */
+.section-head__action::after { inset: -14px 0; } /* raw-ok: (48-20)/2 — derived hit inset */
+.accent-swatch::after { inset: -4px; }      /* raw-ok: (48-40)/2 — derived hit inset */
+
+/* ============================================================
+   Breadcrumb  ·  .breadcrumb  (shared nested-deck path widget)
+   Ancestor crumbs = muted tappable buttons; current = bold page label;
+   chevron separators; the row scrolls horizontally when the path is wide.
+   ============================================================ */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--memox-space-1);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.breadcrumb::-webkit-scrollbar { display: none; }
+.breadcrumb > * { flex-shrink: 0; }
+.breadcrumb__crumb {
+  position: relative;
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: var(--memox-font-size-sm);
+  font-weight: var(--memox-font-weight-medium);
+  color: var(--memox-text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.breadcrumb__crumb::after {                  /* >=48px tap target; visual stays compact */
+  content: '';
+  position: absolute;
+  inset: -14px 0;                            /* raw-ok: (48-20)/2 — derived hit inset */
+}
+.breadcrumb__crumb:hover { color: var(--memox-text); text-decoration: underline; }
+.breadcrumb__sep {
+  color: var(--memox-text-tertiary);
+  font-size: var(--memox-icon-size-sm);
+}
+.breadcrumb__current {
+  font-size: var(--memox-font-size-sm);
+  font-weight: var(--memox-font-weight-semibold);
+  color: var(--memox-text);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   Card "Show more / less" — the collapsible-meaning toggle (StatusCardRow). Compact accent
+   text; a ::after overlay gives it a >=48px tap target without inflating the card.
+   ============================================================ */
+.card-more {
+  position: relative;
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin-top: var(--memox-space-1);
+  font-family: inherit;
+  font-size: var(--memox-font-size-sm);
+  font-weight: var(--memox-font-weight-semibold);
+  color: var(--memox-accent);
+  cursor: pointer;
+}
+.card-more::after { content: ''; position: absolute; inset: -14px 0; } /* raw-ok: (48-20)/2 — derived hit inset */
+.card-more:hover { text-decoration: underline; }
+
+/* Disabled icon button (e.g. Play while audio is generating) */
+.icon-btn:disabled { opacity: var(--memox-opacity-muted); pointer-events: none; }
+
+/* ============================================================
+   Spinner — a semantic indeterminate loading indicator (audio generating, etc.).
+   A rotating ring, NOT a static sync glyph; a captured frame still reads as loading.
+   ============================================================ */
+.spinner {
+  width: var(--memox-icon-size-md);
+  height: var(--memox-icon-size-md);
+  border: var(--memox-stroke-emphasis) solid var(--memox-divider);
+  border-top-color: var(--memox-accent);
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: mx-spin 0.8s linear infinite; /* raw-ok: animation duration, not a visual token */
+}
+@keyframes mx-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+/* ============================================================
+   Reduced motion — global honor of prefers-reduced-motion across
+   EVERY design-system surface (KIT-38-06 / KIT-04-05 / KIT-21-06).
+   Neutralizes all transitions AND animations, including infinite
+   loops the per-component rules above miss (skeleton shimmer,
+   spinners). Uses a near-zero duration token (0.01ms) rather than
+   `none` so animation/transition end events still fire, and caps
+   iteration to 1 so looping animations settle immediately.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .app *,
+  .app *::before,
+  .app *::after {
+    animation-duration: var(--memox-duration-none) !important;
+    animation-delay: var(--memox-duration-none) !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: var(--memox-duration-none) !important;
+    transition-delay: var(--memox-duration-none) !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   RTL directional-icon mirror (KIT-13-05) — opt-in hook. Tag a
+   Material Symbol that ENCODES direction (chevron_right, arrow_back,
+   arrow_forward) with `mx-icon--directional`; it flips only under
+   [dir='rtl']. Additive and LTR-neutral: no effect unless the
+   document is RTL AND the class is present, so existing shots are
+   unchanged. Non-directional glyphs must NOT carry this class.
+   ============================================================ */
+[dir='rtl'] .material-symbols-rounded.mx-icon--directional {
+  transform: scaleX(-1);
+}
+
+/* ============================================================
+   FEEDBACK / OVERLAY family (KIT-15-05) — frozen Mx* components
+   promoted out of ad-hoc feature composites. One STABLE base class
+   each; all values reference Layer-1 tokens; variants are modifiers.
+   These classes are NOT used by any existing fixture, so adding them
+   changes no rendered pixel of any current state (parity-neutral).
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   MxDialog  ·  .dialog   (centered modal decision surface)
+   The overlay host centers the panel and paints the scrim; the panel
+   is the surface that carries title / body / actions.
+   ------------------------------------------------------------ */
+.dialog-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--memox-space-6);
+}
+.dialog__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--memox-overlay);
+}
+.dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--memox-space-4);
+  width: 100%;
+  max-width: var(--memox-size-5xl); /* caps the panel on wide screens */
+  padding: var(--memox-space-6);
+  background: var(--memox-surface-raised);
+  border-radius: var(--memox-radius-2xl);
+  box-shadow: var(--memox-shadow-lg);
+  color: var(--memox-text);
+}
+.dialog:focus {
+  outline: none; /* panel takes programmatic focus for the trap; no visible ring on the container */
+}
+.dialog__title {
+  font-size: var(--memox-font-size-md);
+  font-weight: var(--memox-font-weight-bold);
+  letter-spacing: var(--memox-letter-spacing-tight);
+  color: var(--memox-text);
+}
+.dialog__body {
+  font-size: var(--memox-font-size-base);
+  line-height: var(--memox-line-height-relaxed);
+  color: var(--memox-text-secondary);
+}
+.dialog__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--memox-space-2);
+  margin-top: var(--memox-space-2);
+}
+
+/* ------------------------------------------------------------
+   MxSheet  ·  .sheet   (bottom sheet with drag handle)
+   Host pins the sheet to the bottom edge and paints the scrim; the
+   sheet honours the bottom safe-area and caps height with an inner
+   scroll region.
+   ------------------------------------------------------------ */
+.sheet-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.sheet__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--memox-overlay);
+}
+.sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: 88%; /* leave the top of the screen visible behind the sheet */
+  padding: var(--memox-space-6);
+  padding-bottom: var(--memox-safe-area-bottom);
+  background: var(--memox-surface-raised);
+  border-top-left-radius: var(--memox-radius-2xl);
+  border-top-right-radius: var(--memox-radius-2xl);
+  box-shadow: var(--memox-shadow-lg);
+  color: var(--memox-text);
+}
+.sheet__handle {
+  flex-shrink: 0;
+  width: var(--memox-space-9); /* 48 — comfortable grab width */
+  height: var(--memox-space-1); /* 4 */
+  margin: 0 auto var(--memox-space-4);
+  border-radius: var(--memox-radius-full);
+  background: var(--memox-border-strong);
+}
+.sheet__title {
+  flex-shrink: 0;
+  margin-bottom: var(--memox-space-3);
+  font-size: var(--memox-font-size-md);
+  font-weight: var(--memox-font-weight-bold);
+  letter-spacing: var(--memox-letter-spacing-tight);
+}
+.sheet__body {
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--memox-space-3);
+}
+
+/* ------------------------------------------------------------
+   MxMenu  ·  .menu   (action menu / list of items)
+   Supersedes the ad-hoc MenuItem for the frozen layer, including the
+   item disabled state (closes KIT-29-03 for the frozen component).
+   ------------------------------------------------------------ */
+.menu {
+  display: flex;
+  flex-direction: column;
+  min-width: var(--memox-size-3xl); /* 220 */
+  max-height: var(--memox-size-4xl); /* 280 — overflow scrolls */
+  overflow-y: auto;
+  padding: var(--memox-space-2);
+  background: var(--memox-surface-raised);
+  border-radius: var(--memox-radius-lg);
+  box-shadow: var(--memox-shadow-lg);
+  color: var(--memox-text);
+}
+.menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--memox-space-3);
+  width: 100%;
+  min-height: var(--memox-touch-min);
+  padding: 0 var(--memox-space-3);
+  border: none;
+  border-radius: var(--memox-radius-control);
+  background: transparent;
+  color: var(--memox-text);
+  font-family: inherit;
+  font-size: var(--memox-font-size-base);
+  font-weight: var(--memox-font-weight-medium);
+  text-align: start;
+  cursor: pointer;
+  transition: background var(--memox-duration-fast) var(--memox-ease-standard);
+}
+.menu__item:hover {
+  background: var(--memox-state-hover);
+}
+.menu__item:active {
+  background: var(--memox-state-pressed);
+}
+.menu__item:focus-visible {
+  outline: none;
+  box-shadow: var(--memox-ring-focus);
+}
+.menu__item .material-symbols-rounded {
+  font-size: var(--memox-icon-size-md);
+  flex-shrink: 0;
+}
+.menu__item-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.menu__item--selected {
+  background: var(--memox-state-selected);
+  color: var(--memox-on-primary-soft);
+  font-weight: var(--memox-font-weight-bold);
+}
+.menu__item--destructive {
+  color: var(--memox-error);
+}
+.menu__item--destructive:hover {
+  background: var(--memox-error-soft);
+}
+.menu__item[disabled],
+.menu__item--disabled {
+  pointer-events: none;
+  opacity: var(--memox-opacity-disabled);
+}
+
+/* ------------------------------------------------------------
+   MxBanner  ·  .banner   (inline tone banner; info base)
+   ------------------------------------------------------------ */
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--memox-space-3);
+  padding: var(--memox-space-4);
+  border-radius: var(--memox-radius-card);
+  background: var(--memox-info-soft);
+  color: var(--memox-on-info-soft);
+}
+.banner__icon {
+  flex-shrink: 0;
+  font-size: var(--memox-icon-size-md);
+  color: inherit;
+}
+.banner__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--memox-space-05);
+}
+.banner__title {
+  font-size: var(--memox-font-size-base);
+  font-weight: var(--memox-font-weight-bold);
+}
+.banner__body {
+  font-size: var(--memox-font-size-sm);
+  line-height: var(--memox-line-height-normal);
+  color: inherit;
+}
+.banner__action {
+  flex-shrink: 0;
+  align-self: center;
+}
+.banner--success {
+  background: var(--memox-success-soft);
+  color: var(--memox-on-success-soft);
+}
+.banner--warning {
+  background: var(--memox-warning-soft);
+  color: var(--memox-on-warning-soft);
+}
+.banner--error {
+  background: var(--memox-error-soft);
+  color: var(--memox-on-error-soft);
+}
+
+/* ------------------------------------------------------------
+   MxProgress  ·  .progress   (determinate bar + indeterminate + spinner)
+   Honours prefers-reduced-motion: the looping animations settle.
+   ------------------------------------------------------------ */
+.progress {
+  display: block;
+  width: 100%;
+}
+.progress__track {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: var(--memox-space-1); /* 4 */
+  border-radius: var(--memox-radius-full);
+  background: var(--memox-surface-muted);
+}
+.progress__fill {
+  height: 100%;
+  border-radius: var(--memox-radius-full);
+  background: var(--memox-primary);
+  transition: width var(--memox-duration-base) var(--memox-ease-standard);
+}
+.progress--indeterminate .progress__fill {
+  width: 40%;
+  animation: mx-progress-slide var(--memox-duration-slow) var(--memox-ease-standard) infinite;
+}
+@keyframes mx-progress-slide {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(260%);
+  }
+}
+/* spinner form — inline circular indeterminate indicator */
+.progress--spinner {
+  display: inline-flex;
+  width: auto;
+}
+.progress__spinner {
+  width: var(--memox-icon-size-lg);
+  height: var(--memox-icon-size-lg);
+  border-radius: var(--memox-radius-full);
+  border: var(--memox-stroke-focus) solid var(--memox-surface-muted);
+  border-top-color: var(--memox-primary);
+  animation: mx-progress-spin var(--memox-duration-slow) linear infinite;
+}
+@keyframes mx-progress-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .progress--indeterminate .progress__fill,
+  .progress__spinner {
+    animation-duration: var(--memox-duration-none);
+  }
+}

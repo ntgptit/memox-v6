@@ -1,0 +1,32 @@
+/* ============================================================
+   MemoX — High-contrast profile  (Layer 1, additive · opt-in)
+   KIT-08-06 / KIT-39-05. A third contrast profile layered ADDITIVELY
+   on top of the light and dark bases in colors.css. It takes effect only
+   when an ancestor carries [data-hc='true']; no existing fixture sets that
+   attribute, so base light/dark rendering is unchanged (parity-neutral).
+   It raises the contrast of the lowest-ratio roles — hairline borders,
+   secondary/tertiary text, and the focus ring — without touching the
+   :root / [data-theme] base values. Kept in a SEPARATE file (not colors.css)
+   so the base light/dark token snapshot stays the single source the manifest
+   parity tooling reads; these overrides are runtime cascade only.
+   ============================================================ */
+
+/* light base + high contrast */
+[data-hc='true'] {
+  --memox-border: rgba(28, 24, 45, 0.38);
+  --memox-border-strong: rgba(28, 24, 45, 0.55);
+  --memox-divider: rgba(28, 24, 45, 0.28);
+  --memox-text-secondary: #34324a;
+  --memox-text-tertiary: #34324a;
+  --memox-focus-ring: #241a4d;
+}
+
+/* dark base + high contrast */
+[data-theme='dark'][data-hc='true'] {
+  --memox-border: rgba(255, 255, 255, 0.42);
+  --memox-border-strong: rgba(255, 255, 255, 0.62);
+  --memox-divider: rgba(255, 255, 255, 0.32);
+  --memox-text-secondary: #ece9f7;
+  --memox-text-tertiary: #ece9f7;
+  --memox-focus-ring: #e4deff;
+}

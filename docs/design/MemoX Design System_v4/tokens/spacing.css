@@ -1,0 +1,49 @@
+/* ============================================================
+   MemoX — Spacing scale  (Layer 1)  · 4px base. Names frozen.
+   ============================================================ */
+
+:root {
+  --memox-space-0: 0;
+  --memox-space-05: 2px;
+  --memox-space-1: 4px;
+  --memox-space-2: 8px;
+  --memox-space-3: 12px;
+  --memox-space-4: 16px;
+  --memox-space-5: 20px;
+  --memox-space-6: 24px;
+  --memox-space-7: 32px;
+  --memox-space-8: 40px;
+  --memox-space-9: 48px;
+  --memox-space-10: 64px;
+  --memox-space-11: 80px;
+  --memox-space-12: 96px;
+
+  /* layout rhythm */
+  --memox-gutter: 16px; /* screen edge padding (phone) — contract: screen horizontal padding = 16 */
+  /* Status-bar / notch inset above every app bar. Kit renders a fixed 24; on a real device
+     the env() inset wins when larger. Production RN maps this to the SafeAreaView top inset. */
+  --memox-safe-area-top: max(env(safe-area-inset-top, 0px), 24px);
+  /* Symmetric with safe-area-top: the inset reserved below bottom-nav / sheets.
+     Kit renders max(0px, 4px) = 4px = the current fixed --memox-comp-nav-safe-pad,
+     so pixels are unchanged; on a real device the env() inset wins when larger.
+     Production RN maps this to the SafeAreaView bottom inset. (KIT-34-02) */
+  --memox-safe-area-bottom: max(env(safe-area-inset-bottom, 0px), var(--memox-comp-nav-safe-pad));
+  --memox-appbar-height: 56px; /* single compact app-bar height (minimal M3) */
+  /* DEPRECATED (kept for compatibility until v5 — see governance/deprecation-policy.md): the
+     large/hero app bar was retired for the single compact MxContextualAppBar. New screens use
+     --memox-appbar-height. The name stays (token names are additive-only) until a usage=0 scan. */
+  --memox-appbar-lg-height: 112px;
+  --memox-bottom-nav-height: 80px; /* M3 navigation bar spec (Đ-M3-2) */
+  --memox-fab-size: 56px; /* M3 standard FAB */
+  --memox-touch-min: 48px;
+
+  /* --- layout group (additive aliases · KIT-04-06) -----------------------
+     The element-named sizes above (appbar-height / bottom-nav-height / fab-size)
+     are layout metrics that happen to sit in this primitive spacing file. These
+     `--memox-layout-*` aliases group them under a clear layout namespace so
+     their role reads unambiguously, WITHOUT renaming or removing the originals
+     (frozen contract). Same values → parity-neutral. Prefer either name. --- */
+  --memox-layout-appbar-height: var(--memox-appbar-height);
+  --memox-layout-bottom-nav-height: var(--memox-bottom-nav-height);
+  --memox-layout-fab-size: var(--memox-fab-size);
+}

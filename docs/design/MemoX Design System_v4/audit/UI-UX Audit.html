@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemoX — UI/UX Audit</title>
+<style>
+  @font-face { font-family:'Plus Jakarta Sans'; font-style:normal; font-weight:200 800; font-display:swap; src:url('../fonts/PlusJakartaSans[wght].ttf') format('truetype-variations'); }
+  :root{ --ink:#1d2240; --ink2:rgba(29,34,64,.68); --bg:#f3f4fb; --card:#fff; --line:#e4e4f2; --brand:#4f46e5; --brand-soft:#e6e6fb;
+         --maj:#c20f32; --maj-bg:#fce0e5; --min:#93570a; --min-bg:#fdecca; --nit:#3c4068; --nit-bg:#ecedf8; --ok:#1f7a33; --ok-bg:#e0f4e2; }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Plus Jakarta Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.55; }
+  .wrap{ max-width:1080px; margin:0 auto; padding:48px 32px 96px; }
+  h1{ font-size:34px; font-weight:800; letter-spacing:-.02em; margin:0 0 4px; }
+  .sub{ color:var(--ink2); margin:0 0 40px; }
+  h2{ font-size:22px; font-weight:800; letter-spacing:-.01em; margin:56px 0 16px; padding-top:24px; border-top:1px solid var(--line); }
+  h3{ font-size:16px; font-weight:700; margin:28px 0 8px; }
+  p{ margin:8px 0; }
+  .vn{ background:var(--card); border-radius:16px; padding:24px 28px; box-shadow:0 4px 14px rgba(120,124,178,.14); }
+  .vn h2{ border:none; margin:0 0 12px; padding:0; }
+  ul{ margin:8px 0; padding-left:22px; }
+  li{ margin:6px 0; }
+  .chip{ display:inline-block; font-size:11px; font-weight:700; letter-spacing:.04em; padding:2px 8px; border-radius:999px; vertical-align:1px; margin-right:6px; white-space:nowrap; }
+  .MAJ{ background:var(--maj-bg); color:var(--maj); } .MIN{ background:var(--min-bg); color:var(--min); }
+  .NIT{ background:var(--nit-bg); color:var(--nit); } .OK{ background:var(--ok-bg); color:var(--ok); }
+  .gid{ display:inline-block; font-size:11px; font-weight:700; background:var(--brand-soft); color:#382fb4; padding:2px 8px; border-radius:999px; margin-right:6px; }
+  code{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; background:var(--nit-bg); padding:1px 5px; border-radius:5px; }
+  table{ border-collapse:collapse; width:100%; margin:12px 0; background:var(--card); border-radius:12px; overflow:hidden; font-size:13.5px; }
+  th,td{ text-align:left; padding:8px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th{ font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink2); background:var(--nit-bg); }
+  tr:last-child td{ border-bottom:none; }
+  .screen{ background:var(--card); border-radius:16px; padding:24px 28px; margin:20px 0; box-shadow:0 4px 14px rgba(120,124,178,.12); }
+  .screen h3{ margin:0 0 2px; font-size:18px; }
+  .meta{ font-size:13px; color:var(--ink2); margin:0 0 12px; }
+  .row{ display:flex; gap:20px; align-items:flex-start; }
+  .row .txt{ flex:1; min-width:0; }
+  .thumbs{ display:flex; gap:10px; flex-shrink:0; }
+  .thumbs a{ display:block; }
+  .thumbs img{ width:132px; border-radius:10px; border:1px solid var(--line); display:block; }
+  .vnline{ font-size:13.5px; color:#382fb4; background:var(--brand-soft); border-radius:10px; padding:8px 12px; margin:0 0 12px; }
+  .toc{ columns:2; gap:32px; font-size:14px; }
+  .toc a{ color:var(--brand); text-decoration:none; font-weight:600; }
+  .num{ font-variant-numeric:tabular-nums; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>MemoX — UI/UX Audit</h1>
+<p class="sub">22 màn hình · 117 states · light + dark · đối chiếu Material 3 + Apple HIG + foundations của chính design system · 06/07/2026.<br>
+Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM specs (<code>ui_kits/memox-app/specs/</code>, bounding box px thật) và ảnh render (<code>shots/</code>). Vì DS được sync từ code, mọi fix cần thực hiện ở repo gốc rồi chạy lại <code>/design-sync</code>.</p>
+
+<div style="border:2px solid #d9822b;border-radius:12px;padding:16px 20px;margin:20px 0;background:#fff7ed;color:#3b2a12">
+  <strong>⚠ Status update (2026-07-13) — historical snapshot.</strong>
+  <p style="margin:8px 0 0">This report is a point-in-time audit of the kit as of <strong>06/07/2026 (22 screens · 117 states)</strong>. The kit has since grown to <strong>26 screens · 168 states</strong>, and render-health closure is now <strong>objective and continuous</strong>, not a one-off report:</p>
+  <ul style="margin:8px 0 0">
+    <li><strong>Single source of truth</strong> — <code>tool/ui_kit_shots/registry.mjs</code>; the gallery, per-screen specs, and shots index are generated from it (no drift).</li>
+    <li><strong>Committed visual baseline</strong> — 336 canonical PNGs (168 states × light/dark) under <code>../ui_kits/memox-app/shots/</code>.</li>
+    <li><strong>One gate</strong> — <code>npm run verify:ui-kit</code> renders the full matrix and fails on any overflow / clip / render-error, and checks drift + missing shots. Wired into CI (<code>.github/workflows/ui-kit.yml</code>).</li>
+  </ul>
+  <p style="margin:8px 0 0"><strong>Verified closed (2026-07-13, re-measured against current source):</strong> full-matrix render-health (0 overflow/clip/render-error across 168 states); progress-convention unification (one <code>ProgressHeader</code>); destructive-action colour (remove/delete use <code>danger</code>); app-bar consolidation; <strong>G2 touch targets</strong> — every flagged control (<code>chip</code>/<code>switch</code>/<code>btn--sm</code>/<code>icon-btn--sm</code>/<code>segmented__seg</code>/<code>section-head__action</code>/<code>accent-swatch</code>) now gets an <code>::after</code> hit-area overlay to 48px (components.css §"M3-1 hit areas"); <strong>G7 chart labels</strong> — Bars renders x-axis labels and every Stats chart has a caption.</p>
+  <p style="margin:8px 0 0"><strong>Verified closed (2026-07-13): G1 contrast + palette SSOT.</strong> The palette source-of-truth conflict is resolved — <strong>deep violet</strong> is now the canonical palette, ported into <code>tokens/colors.css</code> as the single colour source; <code>theme-override.css</code> has been <strong>deleted</strong> and is no longer loaded by <code>index.html</code>, so palette is no longer decided by CSS load order (0 shared-token conflicts). Contrast is now gated deterministically by <code>tool/ui_kit_shots/contrast.mjs</code> (wired into <code>npm run verify:ui-kit[:structural]</code> and CI): every required foreground/background pair passes WCAG AA in <strong>light and dark</strong> — normal text ≥ 4.5:1, large/UI ≥ 3.0:1 — and a missing or unparseable required token is a hard gate failure (never a warning). <code>text-tertiary</code> is gated as <strong>normal</strong> text (it labels small 11–13px meta) and was set to <code>#6f6b81</code> (light) — 4.73:1 on bg / 5.13:1 on surface, staying below <code>text-secondary</code> so the hierarchy holds; dark tertiary already clears 4.5. Solid <code>success</code>/<code>error</code> were darkened and amber <code>on-warning</code> switched to dark ink for AA; the dark on-surface foreground (<code>primary-strong</code>) was lightened to <code>#b4aadd</code>; and <code>.chip--accent</code>/<code>.avatar--accent</code> (and the accent-soft guideline swatch) now use <code>--memox-accent</code> (not the white <code>on-accent</code>) on the soft tint. The lowest gated normal-text ratio is ≥ 4.5. There are <strong>no current open contrast findings</strong>.</p>
+</div>
+
+<!-- ============ TÓM TẮT TIẾNG VIỆT ============ -->
+<div class="vn">
+<h2>Tóm tắt (tiếng Việt)</h2>
+<p><strong>Nhìn chung hệ thống rất tốt:</strong> phủ state đầy đủ (loading / empty / error cho hầu hết flow), copy chuẩn giọng "coach", feedback đúng/sai dùng cả màu + icon, dialog xoá có xác nhận đúng chuẩn. Các vấn đề tìm thấy tập trung vào <strong>4 nhóm hệ thống</strong> — sửa 1 lần ở token/component sẽ tự lành trên cả 22 màn hình:</p>
+<ul>
+  <li><span class="chip MAJ">MAJOR</span><strong>Contrast (WCAG):</strong> <code>text-tertiary</code> light chỉ đạt <span class="num">2.4:1</span> nhưng đang dùng cho label 11–13px ở 19/22 màn hình; token <code>on-accent</code>/<code>on-info</code> dark bị hỏng (<span class="num">1.34:1</span>); warning/success/error đặt trực tiếp trên nền trắng đều rớt AA. → Sửa ~6 giá trị token (mục G1).</li>
+  <li><span class="chip MAJ">MAJOR</span><strong>Touch target:</strong> 8 control dùng chung nhỏ hơn 44px (chip 34, switch 32, btn--sm 38, icon-btn--sm 36, segmented 38, "See all" 20px…), xuất hiện ở 36+ vị trí. Đặc biệt nút <strong>Save</strong> của Card Editor — hành động chính của màn hình — chỉ cao 38px. → Mở rộng vùng chạm bằng pseudo-element, giữ nguyên visual (mục G2).</li>
+  <li><span class="chip MAJ">MAJOR</span><strong>Nhất quán bố cục:</strong> 4 kiểu hiển thị tiến độ khác nhau (Review: bar + "7/20" ✓; Study session: chỉ chữ "16%"; Games: bar không số; Player: chấm tròn); 3 kiểu xếp cặp nút hành động cuối màn; nút "Leave" (huỷ phiên học) đang mang màu primary thay vì danger — ngược với dialog xoá thẻ. → Chuẩn hoá 3 convention (mục G3–G5).</li>
+  <li><span class="chip MIN">MINOR</span><strong>Chi tiết màn hình:</strong> FAB che nội dung cuối danh sách (padding đáy 96px &lt; mức cần ~148px); biểu đồ Stats không có nhãn trục/chú giải; chữ 11px ở nav + badge; dấu "✓" unicode trong badge thay vì icon. (G6–G8).</li>
+</ul>
+<p><strong>Thứ tự ưu tiên đề xuất:</strong> ① token contrast (G1) → ② hit-area component (G2) → ③ convention tiến độ + action bar + destructive (G3–G5) → ④ FAB clearance, chart labels, chi tiết từng màn.</p>
+</div>
+
+<h2 id="toc">Mục lục</h2>
+<div class="toc">
+  <p><a href="#global">A. Global findings (G1–G8)</a></p>
+  <p><a href="#s-dashboard">Dashboard</a> · <a href="#s-library">Library</a> · <a href="#s-deck-detail">Deck Detail</a> · <a href="#s-search">Search</a> · <a href="#s-editor">Card Editor</a></p>
+  <p><a href="#s-study-session">Study Session</a> · <a href="#s-review-mode">Review</a> · <a href="#s-study-result">Study Result</a> · <a href="#s-player">Player</a></p>
+  <p><a href="#s-mode-picker">Mode Picker</a> · <a href="#s-match-mode">Match</a> · <a href="#s-guess-mode">Guess</a> · <a href="#s-recall-mode">Recall</a> · <a href="#s-fill-mode">Fill</a></p>
+  <p><a href="#s-import">Import</a> · <a href="#s-export">Export</a> · <a href="#s-statistics">Stats</a> · <a href="#s-settings">Settings</a> · <a href="#s-account">Account &amp; Sync</a> · <a href="#s-reminder">Reminders</a> · <a href="#s-theme">Theme</a> · <a href="#s-drawer">Drawer</a></p>
+  <p><a href="#checklist">B. Handoff checklist</a></p>
+</div>
+
+<!-- ============ GLOBAL ============ -->
+<h2 id="global">A. Global findings — fix once, heal everywhere</h2>
+
+<h3><span class="gid">G1</span>Color contrast (measured, WCAG 2.x)</h3>
+<p>Computed from token values over their actual surfaces. AA normal text needs ≥ 4.5:1; large/bold ≥ 3:1; UI icons ≥ 3:1.</p>
+<table>
+<tr><th>Pair (theme)</th><th>Ratio</th><th>Where it bites</th><th>Suggested fix (values only — names frozen)</th></tr>
+<tr><td><code>text-tertiary</code> on surface/bg (light)</td><td class="num">2.40</td><td>Section labels (SUB-DECKS, RECENT, STUDYING…), sheet titles, placeholders, idle bottom-nav labels (11px), "Swipe to continue", meta lines — 19 screens</td><td>Raise alpha .40 → ≥ .55; for ALL-CAPS section labels switch usage to <code>text-secondary</code></td></tr>
+<tr><td><code>text-secondary</code> on surface (light)</td><td class="num">4.49</td><td>All body-secondary text — a hair under 4.5</td><td>Alpha .62 → .66</td></tr>
+<tr><td><code>text-tertiary</code> (dark)</td><td class="num">3.19</td><td>Same roles in dark</td><td>Alpha .55 → ≥ .70</td></tr>
+<tr><td><code>on-accent</code> on <code>accent</code> (dark)</td><td class="num">1.34</td><td><strong>Token bug:</strong> light cyan #8fdcfb on cyan #33c2ff — <code>fab--accent</code>, accent chips unusable in dark</td><td>Dark <code>on-accent</code> → dark navy (e.g. #062a3a), like light theme's #04303f</td></tr>
+<tr><td><code>on-info</code> on <code>info</code> (both)</td><td class="num">2.73 / 1.34</td><td>Solid info surfaces</td><td>Same treatment as on-accent</td></tr>
+<tr><td>white on <code>success</code> (light)</td><td class="num">3.02</td><td>Solid success badge — 11px bold needs 4.5</td><td>Darken success #2faa46 → ~#1e8f38, or use soft badge</td></tr>
+<tr><td>white on <code>error</code> (light)</td><td class="num">4.12</td><td>Danger buttons (15px bold), error badges</td><td>Darken error → ~#d91e44</td></tr>
+<tr><td><code>warning</code> as fg on white (light)</td><td class="num">2.33</td><td>Inline warning icons/text on cards</td><td>Never use raw <code>warning</code> as text; use <code>on-warning-soft</code> (5.0 ✓)</td></tr>
+<tr><td><code>primary-strong</code> on surface (dark)</td><td class="num">4.49</td><td>Ghost buttons / links on dark cards</td><td>Lighten dark <code>primary-strong</code> slightly (#7d74f0 → #8b83f4)</td></tr>
+</table>
+
+<h3><span class="gid">G2</span>Touch targets below 44px (HIG) / 48dp (M3)</h3>
+<p>Measured from rendered DOM. Visual size can stay — extend the <em>hit area</em> (transparent pseudo-element or padding + negative margin), which M3 explicitly allows.</p>
+<table>
+<tr><th>Control</th><th>Actual</th><th>Instances</th></tr>
+<tr><td><code>.chip</code> (filters, days, separators, gender)</td><td class="num">34px</td><td>deck-detail, search, reminder, import, export, flashcard-editor</td></tr>
+<tr><td><code>.switch</code></td><td class="num">52×32</td><td>reminder, settings, export, flashcard-editor (M3 spec size — needs 48px hit area)</td></tr>
+<tr><td><code>.btn--sm</code></td><td class="num">38px</td><td><strong>Editor Save</strong>, account Sync now, mode-picker Add words, review Cancel, player speed</td></tr>
+<tr><td><code>.icon-btn--sm</code></td><td class="num">36px</td><td>sort, search-clear, card edit (games/review), recent-fill, import column pickers</td></tr>
+<tr><td><code>.segmented__seg</code></td><td class="num">38px</td><td>statistics, export, theme, player speed</td></tr>
+<tr><td><code>.section-head__action</code> ("See all")</td><td class="num">41×20</td><td>dashboard — add <code>min-height:48px</code>; it's a bare text button</td></tr>
+<tr><td>App-bar avatar (tappable → profile)</td><td class="num">32px</td><td>dashboard</td></tr>
+<tr><td>Theme accent swatch</td><td class="num">40px</td><td>theme (borderline; extend to 48)</td></tr>
+</table>
+
+<h3><span class="gid">G3</span>Progress indication — 4 different patterns for the same concept</h3>
+<ul>
+  <li><span class="chip OK">GOOD</span><strong>Review</strong>: linear bar + "7/20" count — the best pattern; make it the standard.</li>
+  <li><span class="chip MAJ">MAJOR</span><strong>Study Session</strong>: text "16%" only (<code>study-session/progress</code> is a 230×20 text div) — no visual bar, no card count, and % is harder to reason about mid-session.</li>
+  <li><span class="chip MIN">MINOR</span><strong>Games</strong> (matching/mc/typing/recall): bar with no count.</li>
+  <li><span class="chip MIN">MINOR</span><strong>Player</strong>: 8 dots — breaks down beyond ~12 cards.</li>
+</ul>
+<p>Fix: one shared progress header = linear <code>ProgressBar</code> + "n / N" label, used by session, games and player alike.</p>
+
+<h3><span class="gid">G4</span>Bottom paired-action layouts — 3 competing conventions</h3>
+<ul>
+  <li>Study session: full-width primary <strong>Next</strong> ✓ (single action)</li>
+  <li>Due-review &amp; Fill: ghost left + primary right, unequal widths, right-aligned</li>
+  <li>Recall: <strong>Forgot</strong> (ghost) + <strong>Got it</strong> (outline) — <em>neither</em> is primary although this is the core grading interaction of the whole app</li>
+</ul>
+<p>Fix: define one action-bar convention (e.g. equal-width pair, 48px+, primary on the right; single action = full-width). Recall's grade buttons deserve the strongest visual weight in the flow.</p>
+
+<h3><span class="gid">G5</span>Destructive-action conventions are split</h3>
+<ul>
+  <li><span class="chip OK">GOOD</span>Delete card / delete deck dialogs: ghost Cancel + <strong>danger</strong> Delete — correct.</li>
+  <li><span class="chip MAJ">MAJOR</span>Study-session exit dialog: "Leave" (discards stage progress) is styled <strong>primary brand</strong> — the visual language says "recommended action". Should be danger (or at minimum outline, with "Stay" as the emphasized safe action).</li>
+  <li><span class="chip MIN">MINOR</span>Account "Sign out": full-width solid danger is the loudest element on an otherwise calm screen; HIG favors a quieter destructive row/outline + confirm dialog.</li>
+</ul>
+
+<h3><span class="gid">G6</span>FAB occludes end-of-list content</h3>
+<p><code>.app__body</code> bottom padding = nav 72 + 24 = <span class="num">96px</span>, but the FAB band (60px + margin) sits above the nav and overlaps the last row's trailing badge/progress on dashboard, library and deck-detail. Fix: bottom padding ≥ nav + FAB + 16 ≈ <span class="num">148px</span> on FAB screens.</p>
+
+<h3><span class="gid">G7</span>Type scale floor</h3>
+<p>11px is in use for badge text and bottom-nav labels (with <code>text-tertiary</code> idle color — double penalty with G1). M3 label-small floor is 11sp but with 4.5:1 contrast; recommend 12px minimum + fix idle color to <code>text-secondary</code>.</p>
+
+<h3><span class="gid">G8</span>Smaller systemic details</h3>
+<ul>
+  <li><span class="chip NIT">NIT</span><code>DeckRow</code> renders a unicode "✓" inside MxBadge when due=0 — the system's rule is icons, not unicode glyphs; use <code>check</code> Material symbol or a "Done" soft badge.</li>
+  <li><span class="chip NIT">NIT</span><code>Stat</code> uses <code>--memox-icon-size-md</code> (22px) as a <em>font size</em> — token category misuse; add/use a font-size token.</li>
+  <li><span class="chip NIT">NIT</span>Sheet grab-handle uses <code>divider</code> (8% alpha) — nearly invisible; use <code>border-strong</code>.</li>
+  <li><span class="chip MIN">MINOR</span>Focus rings exist (3px ✓) but chips/switch rely on default only — verify <code>:focus-visible</code> on every interactive primitive.</li>
+</ul>
+
+<!-- ============ PER SCREEN ============ -->
+<h2>Per-screen findings</h2>
+
+<div class="screen" id="s-dashboard">
+<h3>Dashboard — Today</h3>
+<p class="meta">5 states: loaded · empty · loading · goal-met · streak-reset</p>
+<p class="vnline">Hero tốt, số liệu nổi bật đúng chuẩn "numbers lead"; lỗi chính là FAB che hàng deck cuối, "See all" quá nhỏ và caption goal khó đọc.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MAJ">MAJOR</span>"Review" FAB overlaps the last deck row's badge + progress bar → <span class="gid">G6</span>.</li>
+  <li><span class="chip MAJ">MAJOR</span>"See all" section action is a 41×20px bare-text hit area → <span class="gid">G2</span>.</li>
+  <li><span class="chip MIN">MINOR</span>Appbar avatar (→ profile) is 32px tappable → <span class="gid">G2</span>.</li>
+  <li><span class="chip MIN">MINOR</span>Daily-goal caption "Met when minutes OR words reached" — 13px <code>text-tertiary</code> (2.4:1, <span class="gid">G1</span>) and reads like spec text; suggest "Counts minutes or words — whichever hits first", in <code>text-secondary</code>.</li>
+  <li><span class="chip MIN">MINOR</span>Empty state: below the TODAY card the lower two-thirds is blank; the "start your streak" callout floats at top. Consider an EmptyState block (icon + line + "Create a deck") in the void.</li>
+  <li><span class="chip NIT">NIT</span>Streak tile is <code>primary-soft</code> while mastered tile is <code>muted</code> — if intentional emphasis, document it; it reads as accidental.</li>
+  <li><span class="chip OK">GOOD</span>Loading skeleton mirrors real layout; goal-met and streak-reset states are covered with the right tones.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/dashboard--loaded--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/dashboard--loaded--light.png" alt="dashboard loaded"></a>
+  <a href="../ui_kits/memox-app/shots/dashboard--empty--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/dashboard--empty--light.png" alt="dashboard empty"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-library">
+<h3>Library</h3>
+<p class="meta">10 states incl. loaded · empty · loading · error · search-active · sheets/menus</p>
+<p class="vnline">Cấu trúc list tốt, state phủ đủ; điểm trừ: search chỉ là icon trần (không nhất quán với Deck Detail), FAB che hàng cuối.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MIN">MINOR</span>Search entry is a bare icon while Deck Detail uses a full search dock — two affordances for the same action one level apart. Suggest the dock (or M3 search bar) here too; it also fixes the small icon target.</li>
+  <li><span class="chip MAJ">MAJOR</span>"New" FAB overlaps the last deck row → <span class="gid">G6</span>; search-clear 36px → <span class="gid">G2</span>.</li>
+  <li><span class="chip MIN">MINOR</span>Play-sheet title (deck name) is 13px CAPS <code>text-tertiary</code> → <span class="gid">G1</span>; grab handle nearly invisible → <span class="gid">G8</span>.</li>
+  <li><span class="chip NIT">NIT</span>Language-pair pill sits between search and sort with no grouping cue; consider anchoring it to the app bar (it changes global scope, not list filtering).</li>
+  <li><span class="chip OK">GOOD</span>Empty state ("Create deck" + "Add words") and error state with Retry are exemplary; due badges use soft tones consistently.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/library--loaded--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/library--loaded--light.png" alt="library loaded"></a>
+  <a href="../ui_kits/memox-app/shots/library--play-sheet--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/library--play-sheet--light.png" alt="library play sheet"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-deck-detail">
+<h3>Deck Detail</h3>
+<p class="meta">13 states — the deepest coverage in the kit</p>
+<p class="vnline">Màn hình chuẩn mực nhất về state; lỗi chủ yếu là target nhỏ (sort/clear/chip) và label section chìm.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MAJ">MAJOR</span>Sort 36px, search-clear 36px, filter chips 34px → <span class="gid">G2</span>.</li>
+  <li><span class="chip MIN">MINOR</span>"SUB-DECKS" / "CARDS" section labels: 13px CAPS <code>text-tertiary</code> → <span class="gid">G1</span>.</li>
+  <li><span class="chip MIN">MINOR</span>"Add" FAB overlaps last card row → <span class="gid">G6</span>.</li>
+  <li><span class="chip NIT">NIT</span>Mastered sub-deck shows unicode "✓" badge → <span class="gid">G8</span>.</li>
+  <li><span class="chip OK">GOOD</span>Delete-confirm dialog (ghost Cancel + danger Delete) is the correct destructive pattern — promote it as the app-wide convention (see <span class="gid">G5</span>). Search, filters, menus, empty, error, loading all present.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/deck-detail--loaded--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/deck-detail--loaded--light.png" alt="deck detail loaded"></a>
+  <a href="../ui_kits/memox-app/shots/deck-detail--delete-confirm--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/deck-detail--delete-confirm--light.png" alt="delete confirm"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-search">
+<h3>Search</h3>
+<p class="meta">5 states: empty-recent · results · no-results · …</p>
+<p class="vnline">Pattern tốt (recent → results → no-results); chỉ cần nâng target icon và contrast dòng meta.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MAJ">MAJOR</span>Recent-fill (north_west) and clear buttons 36px → <span class="gid">G2</span>.</li>
+  <li><span class="chip MIN">MINOR</span>Result meta line (deck name) 13px <code>text-tertiary</code> → <span class="gid">G1</span>; "RECENT" label likewise.</li>
+  <li><span class="chip NIT">NIT</span>Hidden-card result at 55% opacity stacks on already-low-contrast meta — consider a "Hidden" soft badge instead of dimming the whole row.</li>
+  <li><span class="chip OK">GOOD</span>No-results copy quotes the query and suggests recovery — textbook error copy.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/search--results--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/search--results--light.png" alt="search results"></a>
+  <a href="../ui_kits/memox-app/shots/search--no-results--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/search--no-results--light.png" alt="no results"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-editor">
+<h3>Card Editor</h3>
+<p class="meta">6 states: create · edit · validation · multi-meaning · audio · duplicate</p>
+<p class="vnline">Form tốt, validation rõ; lỗi lớn nhất: nút Save — hành động chính — chỉ 38px và đặt kiểu app-bar nhỏ.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MAJ">MAJOR</span><strong>Save</strong> is a 38px <code>btn--sm</code> → <span class="gid">G2</span>. As the screen's primary commit action, consider a full-width bottom Save (keeps thumb reach) or at least a 48px bar button.</li>
+  <li><span class="chip MIN">MINOR</span>Gender chips 34px, Hide-card switch 32px → <span class="gid">G2</span>.</li>
+  <li><span class="chip MIN">MINOR</span>Error text uses raw <code>error</code> on canvas (4.12:1) → <span class="gid">G1</span>; required fields marked by red "*" only — add "(required)" to labels or rely on inline errors for screen readers.</li>
+  <li><span class="chip NIT">NIT</span>Secondary-meaning field (multi-meaning state) shows no remove affordance — verify one exists.</li>
+  <li><span class="chip OK">GOOD</span>Disabled Save in create state, red outline + message pattern, and audio row are all clear.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/flashcard-editor--create--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/flashcard-editor--create--light.png" alt="editor create"></a>
+  <a href="../ui_kits/memox-app/shots/flashcard-editor--validation--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/flashcard-editor--validation--light.png" alt="editor validation"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-study-session">
+<h3>Study Session (5 stages)</h3>
+<p class="meta">10 states incl. stage1–5 · due-review · relearn · exit · resume-error · answer-save-error</p>
+<p class="vnline">Flow lõi của app: thiếu progress bar trực quan (chỉ "16%"), dialog thoát dùng nhầm màu primary cho hành động phá huỷ.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MAJ">MAJOR</span>Progress is a bare "16%" text — no linear bar, no card count → <span class="gid">G3</span>. Adopt Review's bar + "n/N".</li>
+  <li><span class="chip MAJ">MAJOR</span>Exit dialog: "Leave" styled primary while it discards progress → <span class="gid">G5</span>.</li>
+  <li><span class="chip MIN">MINOR</span>Relearn/Next pair: unequal, right-aligned → <span class="gid">G4</span>.</li>
+  <li><span class="chip NIT">NIT</span>Stage 1 card centers content with large fixed blank zones; on smaller frames (SE-class, 667pt) verify the Next button stays above the fold.</li>
+  <li><span class="chip OK">GOOD</span>Due-review warning note, relearn "not counted" note, and both error states (resume, answer-save) are exactly the resilience states most apps forget.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/study-session--stage1-review-mode--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/study-session--stage1-review-mode--light.png" alt="stage 1"></a>
+  <a href="../ui_kits/memox-app/shots/study-session--exit--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/study-session--exit--light.png" alt="exit dialog"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-review-mode">
+<h3>Review</h3>
+<p class="meta">4 states: browsing · editing · audio · end</p>
+<p class="vnline">Màn hình có progress chuẩn nhất — nên lấy làm mẫu; chỉnh target nút edit/Cancel/Save và dòng "Swipe to continue".</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip OK">GOOD</span>Linear bar + "7/20" — the reference progress pattern (<span class="gid">G3</span>).</li>
+  <li><span class="chip MAJ">MAJOR</span>Edit pencil 36px; editing-state Cancel/Save 38px → <span class="gid">G2</span>.</li>
+  <li><span class="chip MIN">MINOR</span>"Swipe to continue" + chevrons: 13px tertiary → <span class="gid">G1</span>; chevrons look tappable but are tiny — either make them real 48px paging buttons or drop them.</li>
+  <li><span class="chip NIT">NIT</span>"MEANING" card overline is tertiary CAPS → <span class="gid">G1</span>.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/review-mode--browsing--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/review-mode--browsing--light.png" alt="review browsing"></a>
+  <a href="../ui_kits/memox-app/shots/review-mode--editing--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/review-mode--editing--light.png" alt="review editing"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-study-result">
+<h3>Study Result</h3>
+<p class="meta">7 states incl. standard · goal-met/missed · many-wrong · finalizing · finalize-error · retry</p>
+<p class="vnline">Bố cục kết quả rõ ràng, đúng "numbers lead"; gần như không có lỗi đáng kể.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip OK">GOOD</span>Stat tiles + streak card + single primary CTA — clean hierarchy; finalize-error with Retry / Not now is a great resilience state.</li>
+  <li><span class="chip NIT">NIT</span>Stat labels 12px <code>text-secondary</code> — fine after the G1 alpha bump; keep ≥12px.</li>
+  <li><span class="chip NIT">NIT</span><code>Stat</code> number font-size borrows an icon-size token → <span class="gid">G8</span>.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/study-result--standard--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/study-result--standard--light.png" alt="study result"></a>
+  <a href="../ui_kits/memox-app/shots/study-result--finalize-error--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/study-result--finalize-error--light.png" alt="finalize error"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-player">
+<h3>Player</h3>
+<p class="meta">4 states: playing · paused · speed · end</p>
+<p class="vnline">Transport rõ; thay dãy chấm tiến độ bằng bar + số để nhất quán và scale được.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MIN">MINOR</span>Dot progress (8 dots) → <span class="gid">G3</span>; breaks beyond ~12 cards.</li>
+  <li><span class="chip MIN">MINOR</span>Speed button 74×38 → <span class="gid">G2</span>; verify prev/next transport buttons are ≥48px.</li>
+  <li><span class="chip OK">GOOD</span>End state (All played → Replay / Close) is clear and calm.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/player--playing--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/player--playing--light.png" alt="player"></a>
+  <a href="../ui_kits/memox-app/shots/player--end--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/player--end--light.png" alt="player end"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-mode-picker">
+<h3>Mode Picker</h3>
+<p class="meta">3 states: default · not-enough · scope-dropdown</p>
+<p class="vnline">Danh sách game rõ ràng; state "not enough" xử lý tốt, chỉ cần nâng nút Add words và bỏ chevron ở hàng disabled.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MIN">MINOR</span>"Add words" button in warning callout is 38px → <span class="gid">G2</span>.</li>
+  <li><span class="chip NIT">NIT</span>Disabled game rows keep their chevron affordance — drop chevrons when non-navigable.</li>
+  <li><span class="chip NIT">NIT</span>Footer "5 words per round · change in Settings" 13px tertiary → <span class="gid">G1</span>; consider making "Settings" a link.</li>
+  <li><span class="chip OK">GOOD</span>Not-enough state explains the threshold and offers the fix inline.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/mode-picker--default--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/mode-picker--default--light.png" alt="game picker"></a>
+  <a href="../ui_kits/memox-app/shots/mode-picker--not-enough--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/mode-picker--not-enough--light.png" alt="not enough"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-match-mode">
+<h3>Match</h3>
+<p class="meta">6 states: playing · selected · correct · wrong · almost · complete</p>
+<p class="vnline">Grid ghép cặp gọn; thiếu số đếm tiến độ và một dòng hướng dẫn ngắn.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MIN">MINOR</span>Progress bar has no count/label → <span class="gid">G3</span> ("3/5 pairs").</li>
+  <li><span class="chip NIT">NIT</span>No instruction line for first-time players ("Tap a term, then its match") — one 13px secondary line under the bar suffices.</li>
+  <li><span class="chip NIT">NIT</span>Verify wrong-pair feedback pairs color with a non-color cue (icon/shake) like MC does — the wrong state should not be border-color-only.</li>
+  <li><span class="chip OK">GOOD</span>Round-complete state is warm and offers Next round immediately.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/match-mode--playing--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/match-mode--playing--light.png" alt="matching"></a>
+  <a href="../ui_kits/memox-app/shots/match-mode--complete--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/match-mode--complete--light.png" alt="matching complete"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-guess-mode">
+<h3>Guess</h3>
+<p class="meta">4 states: waiting · correct · wrong · complete</p>
+<p class="vnline">Feedback đúng/sai mẫu mực (màu + icon); chỉ cần nâng nút edit và thêm số đếm.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip OK">GOOD</span>Correct/wrong options combine color, border <em>and</em> icon — accessible feedback done right; options are comfortably tall.</li>
+  <li><span class="chip MIN">MINOR</span>Card edit icon-button 36px → <span class="gid">G2</span>; progress bar uncounted → <span class="gid">G3</span>.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/guess-mode--wrong--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/guess-mode--wrong--light.png" alt="mc wrong"></a>
+  <a href="../ui_kits/memox-app/shots/guess-mode--correct--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/guess-mode--correct--light.png" alt="mc correct"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-recall-mode">
+<h3>Recall</h3>
+<p class="meta">5 states: before-reveal · revealed · remembered · forgot · complete</p>
+<p class="vnline">Đây là tương tác chấm điểm cốt lõi nhưng cặp nút Forgot / Got it lại yếu nhất về thị giác — cần nâng cấp thành cặp nút lớn, cân bằng.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MAJ">MAJOR</span>Grade actions "Forgot" (ghost) / "Got it" (outline): neither is primary, widths unequal, right-aligned → <span class="gid">G4</span>. Recommend equal-width 48px+ pair — e.g. outline-danger Forgot / filled-success Got it — full-width row.</li>
+  <li><span class="chip MIN">MINOR</span>Edit icon 36px → <span class="gid">G2</span>; uncounted progress → <span class="gid">G3</span>.</li>
+  <li><span class="chip OK">GOOD</span>Reveal flow (question card → answer card) reads clearly.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/recall-mode--revealed--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/recall-mode--revealed--light.png" alt="recall revealed"></a>
+  <a href="../ui_kits/memox-app/shots/recall-mode--complete--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/recall-mode--complete--light.png" alt="recall complete"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-fill-mode">
+<h3>Fill</h3>
+<p class="meta">6 states: waiting · typing · hint · correct · wrong · complete</p>
+<p class="vnline">Flow gõ đáp án ổn, có hint; chuẩn hoá lại hàng nút Help/Check theo convention chung.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MIN">MINOR</span>Help (ghost) + Check (primary): unequal, right-aligned pair → <span class="gid">G4</span>; with the keyboard up, Check should hug the keyboard full-width.</li>
+  <li><span class="chip NIT">NIT</span>"MEANING" overline tertiary CAPS → <span class="gid">G1</span>.</li>
+  <li><span class="chip OK">GOOD</span>Hint state exists; correct/wrong feedback covered.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/fill-mode--typing--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/fill-mode--typing--light.png" alt="typing"></a>
+  <a href="../ui_kits/memox-app/shots/fill-mode--hint--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/fill-mode--hint--light.png" alt="typing hint"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-import">
+<h3>Import</h3>
+<p class="meta">5 states: source · mapping · preview · dup-warning · done</p>
+<p class="vnline">Wizard 3 bước rõ ràng, có cảnh báo trùng; vài target nhỏ và copy cảnh báo nên đổi từ câu hỏi sang khẳng định.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MIN">MINOR</span>Separator chips 34px; column-mapping expand buttons 36px → <span class="gid">G2</span>.</li>
+  <li><span class="chip NIT">NIT</span>Dup-warning note asks "import anyway?" but carries no action — the answer lives in the main CTA below. Reword declaratively: "8 cards already exist — they'll be skipped/overwritten."</li>
+  <li><span class="chip NIT">NIT</span>Paste-area placeholder tertiary on dashed field → <span class="gid">G1</span>.</li>
+  <li><span class="chip OK">GOOD</span>Preview table + "Import 124 cards" (count in the CTA) is excellent commit-clarity.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/import--mapping--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/import--mapping--light.png" alt="import mapping"></a>
+  <a href="../ui_kits/memox-app/shots/import--dup-warning--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/import--dup-warning--light.png" alt="dup warning"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-export">
+<h3>Export</h3>
+<p class="meta">3 states: config · exporting · done</p>
+<p class="vnline">Cấu hình gọn trong một màn; nâng target segmented/chip/switch là đủ.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MIN">MINOR</span>Segmented segs 38px, separator chips 34px, switch 32px → <span class="gid">G2</span>.</li>
+  <li><span class="chip NIT">NIT</span>Format radio marks are small — confirm the whole row is the tap target (it appears to be).</li>
+  <li><span class="chip OK">GOOD</span>Full-width Export CTA; scope/format/separator grouping with section labels is scannable.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/export--config--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/export--config--light.png" alt="export config"></a>
+  <a href="../ui_kits/memox-app/shots/export--done--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/export--done--light.png" alt="export done"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-statistics">
+<h3>Stats</h3>
+<p class="meta">4 states: loaded · loading · insufficient · scope-switch</p>
+<p class="vnline">Biểu đồ đẹp nhưng "câm": heatmap không có nhãn thứ/chú giải đậm–nhạt, bar chart không có nhãn ngày/giá trị.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MAJ">MAJOR</span>Study-calendar heatmap: no weekday labels and no less→more legend — intensity is uninterpretable; add M3-style axis + legend.</li>
+  <li><span class="chip MAJ">MAJOR</span>Time-per-week bars: no day labels or values — add x-axis labels and value-on-tap (or max value marker).</li>
+  <li><span class="chip MIN">MINOR</span>Segmented segs 38px → <span class="gid">G2</span>.</li>
+  <li><span class="chip NIT">NIT</span>Streak tiles reuse the dashboard's mixed tones (primary-soft vs muted) — same intentionality question.</li>
+  <li><span class="chip OK">GOOD</span>Insufficient-data state explains what will appear and how to get it.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/statistics--loaded--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/statistics--loaded--light.png" alt="stats"></a>
+  <a href="../ui_kits/memox-app/shots/statistics--insufficient--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/statistics--insufficient--light.png" alt="stats insufficient"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-settings">
+<h3>Settings</h3>
+<p class="meta">3 states: loaded · group-expanded · about</p>
+<p class="vnline">Chuẩn list-settings, phân nhóm tốt; chỉnh contrast label nhóm và switch target.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MIN">MINOR</span>"STUDYING" (and sibling) group labels: 13px CAPS tertiary → <span class="gid">G1</span>; switches in expanded groups 32px → <span class="gid">G2</span>.</li>
+  <li><span class="chip NIT">NIT</span>Game-settings row shows a bare trailing "5" next to the chevron — cryptic; the subtitle already says "5 words/round", drop the trailing value.</li>
+  <li><span class="chip OK">GOOD</span>Row anatomy (icon tile · title · current-value subtitle · chevron) is consistent and scannable throughout.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/settings--loaded--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/settings--loaded--light.png" alt="settings"></a>
+  <a href="../ui_kits/memox-app/shots/settings--loaded--dark.png" target="_blank"><img src="../ui_kits/memox-app/shots/settings--loaded--dark.png" alt="settings dark"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-account">
+<h3>Account &amp; Sync</h3>
+<p class="meta">5 states: signed-out · signed-in · syncing · conflict · offline</p>
+<p class="vnline">State máy đồng bộ phủ tốt; nút Sign out đỏ đặc full-width quá "gào" so với phần còn lại, khoảng trống dưới lớn.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MIN">MINOR</span>Full-width solid-danger "Sign out" → <span class="gid">G5</span>; white-on-error is 4.12:1 → <span class="gid">G1</span>. An outline-danger row + confirm dialog is calmer and safer.</li>
+  <li><span class="chip MIN">MINOR</span>"Sync now" 38px → <span class="gid">G2</span>.</li>
+  <li><span class="chip NIT">NIT</span>The "conflict" state actually shows the <em>resolution</em> ("Merged · last-write-wins") — consider a pre-resolution state if users can choose.</li>
+  <li><span class="chip NIT">NIT</span>Lower half of the screen is empty — sync history or storage info could ground it (ask product first).</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/account-sync--signed-in--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/account-sync--signed-in--light.png" alt="account signed in"></a>
+  <a href="../ui_kits/memox-app/shots/account-sync--conflict--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/account-sync--conflict--light.png" alt="account conflict"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-reminder">
+<h3>Reminders</h3>
+<p class="meta">3 states: on · off · time-picker</p>
+<p class="vnline">Số giờ 13:00 làm hero — đúng tinh thần; nâng chip ngày + switch, kiểm tra độ phân biệt chip chọn/không chọn.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MIN">MINOR</span>Day chips 34px, master switch 32px → <span class="gid">G2</span>.</li>
+  <li><span class="chip MIN">MINOR</span>Selected vs unselected day chips are hard to tell apart at a glance (soft tint vs white + hairline) — add the emphasis border or a check to selected chips.</li>
+  <li><span class="chip NIT">NIT</span>"REMINDER TIME" / "REPEAT" labels tertiary CAPS → <span class="gid">G1</span>; time-edit icon appears &lt;44px — verify the whole time card opens the picker.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/reminder--on--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/reminder--on--light.png" alt="reminder on"></a>
+  <a href="../ui_kits/memox-app/shots/reminder--off--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/reminder--off--light.png" alt="reminder off"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-theme">
+<h3>Theme</h3>
+<p class="meta">3 states: light · dark · accent-picked</p>
+<p class="vnline">Card preview trực tiếp là điểm sáng; swatch màu cần label/aria và target 48px.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MIN">MINOR</span>Accent swatches are 40px, color-only, unlabeled — extend to 48px targets and give each an accessible name (Indigo, Violet, Green…) → <span class="gid">G2</span>.</li>
+  <li><span class="chip NIT">NIT</span>Segmented segs 38px → <span class="gid">G2</span>.</li>
+  <li><span class="chip OK">GOOD</span>Live preview card + text-size control — exactly the right anatomy for a theme screen.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/theme--light--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/theme--light--light.png" alt="theme"></a>
+  <a href="../ui_kits/memox-app/shots/theme--dark--dark.png" target="_blank"><img src="../ui_kits/memox-app/shots/theme--dark--dark.png" alt="theme dark"></a>
+</div></div>
+</div>
+
+<div class="screen" id="s-drawer">
+<h3>Drawer &amp; Languages</h3>
+<p class="meta">3 states: open · add-language · remove-language</p>
+<p class="vnline">Menu drawer gọn, activity tóm tắt trên đầu hợp lý; kiểm tra bề rộng drawer và contrast label.</p>
+<div class="row"><div class="txt">
+<ul>
+  <li><span class="chip MIN">MINOR</span>Drawer spans ~90% of the frame — M3 modal drawer max is 360dp with a visible scrim edge; narrow it so the scrim (and tap-to-close) is clearly available.</li>
+  <li><span class="chip NIT">NIT</span>"TODAY'S ACTIVITY" label tertiary CAPS → <span class="gid">G1</span>.</li>
+  <li><span class="chip OK">GOOD</span>Add/remove-language flows have dedicated states; icon + label rows are comfortable.</li>
+</ul>
+</div>
+<div class="thumbs">
+  <a href="../ui_kits/memox-app/shots/drawer--open--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/drawer--open--light.png" alt="drawer"></a>
+  <a href="../ui_kits/memox-app/shots/drawer--add-language--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/drawer--add-language--light.png" alt="add language"></a>
+</div></div>
+</div>
+
+<!-- ============ CHECKLIST ============ -->
+<h2 id="checklist">B. Handoff checklist (theo thứ tự ưu tiên)</h2>
+<table>
+<tr><th>#</th><th>Việc cần làm (repo gốc → /design-sync)</th><th>Phạm vi</th><th>Nhóm</th></tr>
+<tr><td>1</td><td>Sửa 6 giá trị token màu: tertiary alpha (light .40→.55, dark .55→.70), secondary .62→.66, dark <code>on-accent</code>/<code>on-info</code> → navy đậm, darken <code>success</code>/<code>error</code> light</td><td>tokens/colors.css</td><td><span class="gid">G1</span></td></tr>
+<tr><td>2</td><td>Thêm hit-area 48px cho chip / switch / btn--sm / icon-btn--sm / segmented / section-head__action (pseudo-element, giữ visual)</td><td>components.css</td><td><span class="gid">G2</span></td></tr>
+<tr><td>3</td><td>Editor: nâng Save thành nút 48px (hoặc full-width bottom bar)</td><td>flashcard-editor</td><td><span class="gid">G2</span></td></tr>
+<tr><td>4</td><td>Chuẩn progress: ProgressBar + "n/N" cho study-session, 4 games, player</td><td>6 screens</td><td><span class="gid">G3</span></td></tr>
+<tr><td>5</td><td>Action-bar convention: cặp nút đều nhau ≥48px, primary bên phải; nâng cặp Forgot/Got it của Recall thành cặp nút lớn</td><td>5 screens</td><td><span class="gid">G4</span></td></tr>
+<tr><td>6</td><td>Destructive: exit-session "Leave" → danger; Sign out → outline-danger + confirm</td><td>study-session, account-sync</td><td><span class="gid">G5</span></td></tr>
+<tr><td>7</td><td>Body bottom-padding trên màn có FAB: 96 → ~148px</td><td>components.css / scaffold</td><td><span class="gid">G6</span></td></tr>
+<tr><td>8</td><td>Stats: thêm nhãn thứ + legend cho heatmap, nhãn trục cho bar chart</td><td>statistics</td><td>—</td></tr>
+<tr><td>9</td><td>Nav label + badge lên 12px; đổi màu idle nav sang text-secondary</td><td>components.css</td><td><span class="gid">G7</span></td></tr>
+<tr><td>10</td><td>Chi tiết: ✓ unicode → icon; sheet handle đậm hơn; Stat font token; chevron ở hàng disabled; dup-warning copy; drawer ≤360dp; day-chip selected rõ hơn</td><td>rải rác</td><td><span class="gid">G8</span></td></tr>
+</table>
+
+<p class="sub" style="margin-top:32px">Ghi chú: kit hiện tại đã làm rất tốt phần khó nhất — phủ 117 states với loading/empty/error đầy đủ và copy nhất quán. Các fix trên chủ yếu là giá trị token + convention, không đụng đến tên token hay cấu trúc component (giữ đúng "golden rule" của hệ thống).</p>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+/* ============================================================
+   MemoX — Opacity scale  (Layer 1). Names frozen.
+   The alpha constants that were scattered inline (K.1): disabled
+   controls, muted rows, and sub-labels sitting ON tinted surfaces
+   (where a color token can't express "90% of whatever is on top").
+   Theme-independent.
+   ============================================================ */
+
+:root {
+  --memox-opacity-disabled: 0.45; /* @kind other */ /* disabled buttons / switches */
+  --memox-opacity-half: 0.5;      /* @kind other */ /* dimmed choice options */
+  --memox-opacity-muted: 0.55;    /* @kind other */ /* muted list rows */
+  --memox-opacity-label-soft: 0.85; /* @kind other */ /* faint sub-labels on tinted cards */
+  --memox-opacity-label: 0.9;     /* @kind other */ /* sub-labels on primary/tinted cards */
+}
