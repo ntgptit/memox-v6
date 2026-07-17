@@ -27,6 +27,30 @@ the checklist source is `docs/design/mobile-design-kit-audit-v5/` — 48 KIT gro
 acceptance criteria, and log gaps in `issue-register.md`. The `memox-design` skill
 explains how to apply it. Don't call design work done while a P0/P1 item is open.
 
+## Business / domain — source of truth
+
+The requirements and domain specification live at:
+
+```
+docs/business/
+```
+
+126 specs organized by **business object / aggregate** (Deck, Language Pair, Flashcard,
+Study Session, Learning Progress, Study Goal, Reminder, Preferences, Account, Backup,
+Content Transfer) and supporting capabilities (Study Mode, Audio Playback, Study Streak /
+Statistics, Search, Today Dashboard). Start from `docs/business/README.md` (object catalog)
+and each folder's `README.md`. Screens **consume** these contracts; each object owns its
+own invariants, lifecycle, and interaction contract — do not reinvent domain behavior in UI.
+
+### ⚠️ Business ↔ design-kit conflict rule (STOP-and-ask)
+
+Before developing any app feature, reconcile the **business spec** (`docs/business/`) with
+the **design kit** (`docs/design/MemoX Design System_v4/` + audit checklist). **If they
+diverge on any point** — a screen/flow, a domain concept (e.g. Deck vs nested-deck model),
+a state, a capability, naming, or scope — **do NOT proceed on assumption and do NOT silently
+pick one side. Stop and ask the user to resolve the divergence first**, quoting the specific
+business point and the conflicting kit point. Only develop once the user has decided.
+
 ## Code standard — main guard
 
 All code is verified by **code-verification-guard** (git submodule at
