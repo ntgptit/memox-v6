@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **Ready** — children A–B Done (2026-07-19); child C pending |
+| Status | **Done** (2026-07-19) — children A–C complete |
 | Owner/domain | Flutter UI + Accessibility / Shared `Mx*` |
 | Depends on | `3.1` — Done |
 | Decision gates | DG-02, DG-05 |
@@ -29,7 +29,7 @@
 | --- | --- | --- |
 | A | `MxTextField` core at the guard path: bare + labelled anatomy, empty/filled/focus/error/disabled/read-only/multiline states, keyboard/autofill passthrough, ring without layout shift, error live region | **Done** (2026-07-19) |
 | B | Hooks foundation: `flutter_hooks ^0.21.0` + `hooks_riverpod` resolving 3.3.1 (the newest line pinning riverpod 3.2.1; 3.3.2 excluded by the annotation pin — pub.dev evidence 2026-07-19), `useMxTextValue`, `useMxTextSubmitState` (trimmed-non-empty submit rule via `StringUtils`), `useMxSearchController` (trimmed query + clear; debounce arrives additively with WBS 10.x) under `shared/hooks/`; 3 HookBuilder tests | **Done** (2026-07-19) |
-| C | Form-state coverage: validation flow wiring, autofill/IME/long-text/200%-scale tests, `MxSearchField` (guard path) | Pending |
+| C | Form-state coverage: `MxSearchField` at the guard path (pill ground at the dock height, leading glyph, clear affordance with localized label, flat variant, focus ring; dock chrome stays with 3.6) + stress suite (expansion-length input at 320px, multiline CJK, autofill wiring, 200% text scale) | **Done** (2026-07-19) |
 
 ## Scope — child A (this delivery)
 
