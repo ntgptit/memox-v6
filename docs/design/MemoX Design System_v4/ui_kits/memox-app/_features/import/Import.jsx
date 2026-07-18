@@ -5,10 +5,12 @@ const NS = window.MemoXDesignSystem_2ffa54;
 const { MxScaffold, MxContextualAppBar, MxIconButton, MxCard, MxButton, MxChip, MxList } = NS;
 const { Table, SourceCard } = window.MemoXImport;
 
+// Business formats-v1 supports exactly memox-csv-v1 + memox-json-v1 (JSON preserves the deck
+// hierarchy). Excel is out of scope; text paste maps onto memox-csv-v1 — see ADR-009 / CF-11.
 const SOURCES = [
-  { icon: 'description', name: 'CSV file', desc: 'Import from a .csv file' },
-  { icon: 'table_chart', name: 'Excel', desc: 'Import from an .xlsx file' },
-  { icon: 'content_paste', name: 'Paste text', desc: 'Copy from somewhere else' },
+  { icon: 'description', name: 'CSV file', desc: 'memox-csv-v1 · flat cards' },
+  { icon: 'data_object', name: 'JSON file', desc: 'memox-json-v1 · keeps sub-decks' },
+  { icon: 'content_paste', name: 'Paste text', desc: 'One card per line (CSV)' },
 ];
 const SEPS = ['Tab', 'Comma', 'Semicolon'];
 const ROWS = [['Term', 'Meaning'], ['안녕하세요', 'Hello'], ['감사합니다', 'Thank you'], ['사랑', 'love'], ['학교', 'school']];
@@ -107,15 +109,19 @@ function Import({ state = 'source' }) {
     );
   }
 
-  // preview / dup-warning
+  // preview / dup-warning.
+  // NOTE (ADR-009 / CF-08): business resolve-import-duplicates.md requires per-item and bulk
+  // Skip / Merge / Import-anyway decisions with an incoming-vs-existing comparison — not a single
+  // all-or-nothing banner. The callout is the entry point; the resolution list + the created/
+  // merged/skipped commit breakdown are built at implementation time (see import.md state matrix).
   return (
     <MxScaffold node="import/screen" appBar={bar}>
       {state === 'dup-warning' ? (
-        <window.ActionCallout node="import/dup-warning" icon="warning" text="8 cards already exist — import anyway?" />
+        <window.ActionCallout node="import/dup-warning" icon="warning" text="8 cards already exist — review before importing." />
       ) : null}
       <SectionLabel>PREVIEW · 124 CARDS</SectionLabel>
       <Table rows={ROWS} />
-      <MxButton variant="primary" icon="download" block node="import/do-import">Import 124 cards</MxButton>
+      <MxButton variant="primary" icon="download" block node="import/do-import">{state === 'dup-warning' ? 'Review duplicates' : 'Import 124 cards'}</MxButton>
     </MxScaffold>
   );
 }

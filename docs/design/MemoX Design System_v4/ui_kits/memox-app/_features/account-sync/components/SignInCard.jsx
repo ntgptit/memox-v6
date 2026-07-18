@@ -1,4 +1,8 @@
-/* MemoX — Account-sync local: SignInCard (signed-out hero + Google sign-in). */
+/* MemoX — Account-sync local: SignInCard (signed-out hero).
+   Cloud provider is DEFERRED (business account/cloud-service-gate.md, ADR-009 / CF-02):
+   until the gate is accepted, no provider may be inferred and cloud CTAs must be absent or
+   explicitly labelled unavailable. The sign-in CTA is therefore disabled/"coming soon" — no
+   Google/email provider is pre-committed. The app is fully usable offline/local-first. */
 (function () {
 const NS = window.MemoXDesignSystem_2ffa54 || {};
 const { MxCard, MxButton, MxIconTile } = NS;
@@ -14,9 +18,9 @@ function SignInCard({ locale }) {
       <MxIconTile icon="cloud_sync" tone="accent" size="lg" />
       <div>
         <div style={{ fontSize: 'var(--memox-font-size-lg)', fontWeight: 'var(--memox-font-weight-extrabold)' }}>{t('account.signin.title', 'Sync across devices', null, o)}</div>
-        <div style={{ fontSize: 'var(--memox-font-size-base)', color: 'var(--memox-text-secondary)', marginTop: 'var(--memox-space-1)', maxWidth: 'var(--memox-size-4xl)' }}>{t('account.signin.body', 'Sign in to back up and sync cards across devices. The app still works offline.', null, o)}</div>
+        <div style={{ fontSize: 'var(--memox-font-size-base)', color: 'var(--memox-text-secondary)', marginTop: 'var(--memox-space-1)', maxWidth: 'var(--memox-size-4xl)' }}>{t('account.signin.body', 'Your decks and progress are saved on this device. Cloud backup and sync across devices are coming later.', null, o)}</div>
       </div>
-      <MxButton variant="primary" icon="login" block node="account/google">{t('account.signin.google', 'Sign in with Google', null, o)}</MxButton>
+      <MxButton variant="primary" icon="cloud_off" block disabled node="account/signin-cta">{t('account.signin.cta', 'Cloud sync — coming soon', null, o)}</MxButton>
     </MxCard>
   );
 }

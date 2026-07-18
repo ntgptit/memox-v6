@@ -3,7 +3,10 @@
 const NS = window.MemoXDesignSystem_2ffa54 || {};
 const { MxChip } = NS;
 
-const FILTERS = ['All', 'New', 'Due', 'Mastered'];
+/* Search filters along business dimensions (search/filter-search-results.md): object
+   type, language pair, deck scope, visibility — NOT SRS learning status. Search does not
+   index Progress content (update-search-index.md §3) — see ADR-009 / CF-14. */
+const FILTERS = ['All', 'Decks', 'Cards', 'Language', 'Deck scope', 'Visible'];
 
 function Chips({ active }) {
   return (

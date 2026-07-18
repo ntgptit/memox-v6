@@ -46,5 +46,5 @@ composition; the component map below is the authoritative set of pieces in play.
 ## Handoff notes
 
 Spacing scale `{4,8,12,16,24,32,48}`; screen padding 16; tokens only (no raw hex / off-scale).
-Exactly one primary objective; touch targets ≥ 44×44. This spec is generated from
+Exactly one primary objective; touch targets ≥ 48×48. This spec is generated from
 `tool/ui_kit_shots/registry.mjs` — edit the registry, not this file.

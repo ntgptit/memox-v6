@@ -360,11 +360,26 @@ the domain source of truth per `AGENTS.md`, but scope (in/out for v1) is a Produ
 is "Decision required." Consolidated from P0 findings B3-001, C4-001/002, C6-001/002, C7-001…008,
 F-001…008, F1-001, F22-001/002, SR-001, RP-001, IE-001/002/003, F4-008 (duplicates merged).
 
+**Resolution log — ✅ ALL 17 RESOLVED (2026-07-18):**
+- **CF-01, CF-03** → *business stands*, recorded in
+  [ADR-008](../architecture/adr/ADR-008-language-pair-removal-and-sync-conflict.md).
+- **CF-02, CF-04…CF-17** → decided in
+  [ADR-009](../architecture/adr/ADR-009-conflict-batch-resolution.md): *business stands* for every
+  Business↔Design row; CF-16 (Business↔Business) = soft-onboarding; CF-17 (design-internal) =
+  Web-responsive/keyboard in scope, Android tablet/landscape/orientation out (roadmap).
+- Design reconciled at copy/behavior/state/contract level (account-sync, deck-settings, export,
+  import, settings, flashcard-editor, search, reset dialog, the four graded-mode specs, first-launch
+  guard, issue-register scope). Net-new interaction surfaces (CF-05 audio attach/remove, CF-06
+  multi-translation list, CF-07 duplicate compare/merge, CF-08 import per-item resolution, CF-09
+  round-complete/retry-round screens) are recorded as **pending build** in the affected screen specs
+  — business-canonical and not silently dropped. Per the rows below, each CF is now decided; the
+  table is retained as the original evidence.
+
 | # | Conflict | Business evidence | Design evidence | Impact | PO decision | Recommendation (non-binding) |
 |---|---|---|---|---|---|---|
-| CF-01 | **Remove Language Pair cascade-deletes all decks/cards** | `language-pair/remove-language-pair.md:7-9,47` — "Không cascade delete Deck/Card"; block on dependency | `_features/languages/components/RemoveLanguageDialog.jsx:9-16` — "All decks and cards … will be deleted", single Remove | **Catastrophic data loss**; violates no-orphan invariant | Block-on-dependency (business) vs explicit cascade (design)? | Business stands; add dependency-blocked state, fix dialog copy |
+| CF-01 | ✅ **RESOLVED (ADR-008)** — Remove Language Pair cascade-deletes all decks/cards | `language-pair/remove-language-pair.md:7-9,47` — "Không cascade delete Deck/Card"; block on dependency | `_features/languages/components/RemoveLanguageDialog.jsx:9-16` — "All decks and cards … will be deleted", single Remove | **Catastrophic data loss**; violates no-orphan invariant | **Business stands** — no cascade; `remove-blocked` state added, confirm copy fixed | Applied: design reconciled to business per ADR-008 |
 | CF-02 | **Account sign-in pre-commits Google + email/password with live CTAs** | `account/cloud-service-gate.md:5,9,26,33` — provider deferred; CTAs absent/unavailable until gate accepted | `account-sync/SignInCard.jsx:13-21`, `AccountSync.jsx:30-46` — live "Sign in with Google" + email/password form ("alpha" caption only) | Pre-commits vendor + credential handling before Security sign-off | Accept gate now (name provider) vs disable CTAs (fail-closed)? | Disable/label-unavailable until gate accepted |
-| CF-03 | **Sync conflict auto-merges last-write-wins** | `account/resolve-sync-conflict.md:6,10` — "Không có default cloud-wins"; explicit whole-record resolution | `account-sync/SyncBlock.jsx:28-29` — "Merged / Kept the latest (last-write-wins)" | **Silent loss of Progress/Attempts/SRS history** | Explicit resolution (business) vs LWW (design)? | Business stands; build compare/choose surface |
+| CF-03 | ✅ **RESOLVED (ADR-008)** — Sync conflict auto-merges last-write-wins | `account/resolve-sync-conflict.md:6,10` — "Không có default cloud-wins"; explicit whole-record resolution | `account-sync/SyncBlock.jsx:28-29` — "Merged / Kept the latest (last-write-wins)" | **Silent loss of Progress/Attempts/SRS history** | **Business stands** — no LWW; conflict state routes to explicit Compare/decision | Applied: design reconciled to business per ADR-008 |
 | CF-04 | **Deck rename: 1-field dialog vs full Edit-Deck form** | `deck/edit-deck.md:17-20,45-58` — full-screen name+description+read-only pair, 13 states | `deck-settings/DeckSettings.jsx:27-38` — centered dialog, single "Deck name" field | Description can never be edited; missing dirty/failure states | Full form vs rename-only? | Decide scope; align both docs |
 | CF-05 | **Card audio drops Attach-file / Remove** | `flashcard/manage-card-audio.md:45-50,81-86` — Generate/Attach/Remove first-class + state matrix | `flashcard-editor/components/AudioRow.jsx:1-17` — "collapsed … auto-generated … a tap plays it"; no attach/remove | Users can't attach/remove audio | Attach+Remove in v1? | Decide scope; reconcile |
 | CF-06 | **Additional translations: single vs ordered list** | `flashcard/manage-card-translations.md:8,41-48,57` — ordered, reorderable, multi-item | `flashcard-editor/FlashcardEditor.jsx:20-27,182-187` — single `alt` slot, one field, no reorder | Multi-meaning cards unrepresentable | Multi vs single? | Decide scope; reconcile |

@@ -34,8 +34,13 @@ composition; the component map below is the authoritative set of pieces in play.
 | 4 | `long-text` |
 | 5 | `complete` |
 
+> **Business-required states, pending build (ADR-009 / CF-09):** `invalid-distractor-pool`
+> (fail-closed when fewer than 5 valid meanings), `round-complete` and `retry-round`
+> (guess-card-meaning.md §5). Business-canonical; authored at implementation time, not yet in
+> the interactive gallery above.
+
 ## Handoff notes
 
 Spacing scale `{4,8,12,16,24,32,48}`; screen padding 16; tokens only (no raw hex / off-scale).
-Exactly one primary objective; touch targets ≥ 44×44. This spec is generated from
+Exactly one primary objective; touch targets ≥ 48×48. This spec is generated from
 `tool/ui_kit_shots/registry.mjs` — edit the registry, not this file.

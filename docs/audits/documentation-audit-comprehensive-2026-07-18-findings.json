@@ -263,7 +263,14 @@
    "recommendation": "Product Owner must decide one of: (a) formally accept the cloud-service-gate decision record now, explicitly naming Google + email/password as the approved provider/mechanisms and updating cloud-service-gate.md's status accordingly; (b) instruct Design to replace the live sign-in mock with a gated/disabled placeholder per the fail-closed rule until the gate is accepted; or (c) explicitly document the design mock as illustrative-only/non-authoritative for provider choice and exclude it from the v1 Flutter build.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-02",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "B3-002",
@@ -839,7 +846,14 @@
    "recommendation": "Product Owner / Design System owner must decide, once, whether tablet/Web-expanded layout, landscape orientation, and hardware-keyboard input are in scope for the Flutter Web + Android Tier-1 release. Then update either SCOPE.md (if truly out of scope, downgrade the 10 issue-register rows from PARTIAL/P1 to ACCEPTED and recompute the release gate) or the KIT-11/32/34/35/36 Evidence Logs (if in scope, revert the ACCEPTED entries and keep them tracked as genuinely open PARTIAL work).",
    "docsToFix": null,
    "acceptanceCriteria": "issue-register.md and the corresponding KIT-XX.md Evidence Log agree on status/resolution for all 10 items; audit-summary.md's release-gate P1 count and BLOCKED/PASS conclusion is recomputed to match.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-17",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "C4-002",
@@ -1433,7 +1447,14 @@
    "recommendation": "Product Owner must decide: (a) update docs/business/deck/export-deck.md to match the simplified single-deck-only Export mock (dropping scope/Change/Summary/multi-select requirements), or (b) extend the Export.jsx mock and its spec/state matrix to add the Deck/Change row, Summary section, format-conditional options, and the missing scope/share-failure states before Flutter implementation begins.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-10",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "C6-002",
@@ -1451,7 +1472,14 @@
    "recommendation": "Product Owner must decide whether 'Edit Deck' (full form with description) is in scope for this release. If yes, the design kit needs a new full-screen Edit Deck mock (or the existing rename dialog needs to be expanded) before implementation; if the description field is deliberately out of scope, edit-deck.md should be revised to match the simpler rename-only reality and DeckActionsSheet's action label should be reconciled.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-04",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "C6-003",
@@ -1793,7 +1821,13 @@
    "recommendation": "Product Owner must decide the real removal UX: either (a) the design's cascading-delete confirm is correct and remove-language-pair.md's no-cascade/dependency-block rule is stale and should be revised, or (b) the design must add a dependency-check + blocked state (per business) before removal is ever offered, and the confirm copy must stop claiming decks/cards will be deleted.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-008",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "C7-002",
@@ -1811,7 +1845,14 @@
    "recommendation": "Product Owner must decide whether Merge and the comparison view are in scope for the MVP dup-resolution UI; if yes, the design kit needs a new dup-resolution screen/state, if no, resolve-duplicate-flashcard.md must be narrowed to match the simpler two-action model the design implements.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-07",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "C7-003",
@@ -1829,7 +1870,14 @@
    "recommendation": "Product Owner must confirm whether Attach-file/Remove are in scope for v1; if yes, AudioRow needs redesign to expose them; if no, manage-card-audio.md must be revised to reflect the auto-generate-only model actually built.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-05",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "C7-004",
@@ -1847,7 +1895,14 @@
    "recommendation": "Product Owner must decide whether multi-translation support is required for v1 (deck's alt-language model would need to become a list) or whether the business spec should be narrowed to the single-secondary-translation model actually designed.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-06",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "C7-005",
@@ -1865,7 +1920,14 @@
    "recommendation": "Product Owner must decide whether the richer per-item Skip/Merge resolution list is required for v1, and if so the import feature needs a new resolution-list state/screen; otherwise resolve-import-duplicates.md and commit-import.md should be narrowed to the single warning-and-continue model actually designed.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-08",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "C7-006",
@@ -1883,7 +1945,14 @@
    "recommendation": "Product Owner/Design must decide whether round-complete/retry-round/invalid-distractor-pool need dedicated screens and commission them, or explicitly document that the mastery loop is meant to be invisible/instantaneous between rounds and update guess-card-meaning.md's state matrix accordingly.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-09",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "C7-007",
@@ -1901,7 +1970,14 @@
    "recommendation": "Same decision needed as C7-006 for Match specifically — Product Owner/Design to commission round-complete/retry-round states or revise match-terms-and-meanings.md's state matrix.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-09",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "C7-008",
@@ -1919,7 +1995,14 @@
    "recommendation": "Product Owner/Design to decide which of these states need dedicated visual references (round-complete/retry-round almost certainly do) versus which are purely non-visual timer/accessibility behavior implementable from prose alone; update recall-and-self-grade.md or commission the missing screens accordingly.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-09",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "C7-009",
@@ -2472,7 +2555,13 @@
    "recommendation": "Product Owner must decide the canonical Remove Language Pair semantics: (a) block removal when dependent decks exist and require the user to move/delete decks first (business), or (b) allow an explicit cascade delete of decks+cards (design). Then reconcile the losing document.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-008",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F-002",
@@ -2490,7 +2579,14 @@
    "recommendation": "Product Owner + Security must decide: keep account/sync deferred (then the design must remove or disable the provider-specific CTAs and de-commit Google/email-password), or ratify a provider now via the cloud-service-gate decision record. Do not let the mock be the decision.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-02",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F-003",
@@ -2508,7 +2604,14 @@
    "recommendation": "Product Owner must decide whether deck metadata editing is a single-field rename dialog or the full-screen Edit Deck form (name+description+read-only pair). Align deck-settings design and edit-deck.md to one.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-04",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F-004",
@@ -2526,7 +2629,14 @@
    "recommendation": "Product Owner must decide whether v1 card audio supports Attach-file and Remove (business) or is auto-generate+play only (design). Reconcile manage-card-audio.md and the AudioRow contract accordingly.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-05",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F-005",
@@ -2544,7 +2654,14 @@
    "recommendation": "Product Owner must decide whether cards carry one additional translation (design) or an ordered multi-item list with reorder (business), then align FlashcardEditor and manage-card-translations.md.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-06",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F-006",
@@ -2562,7 +2679,14 @@
    "recommendation": "Product Owner must decide the duplicate-resolution decision set and whether a comparison view is required for v1; align DupBanner with resolve-duplicate-flashcard.md.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-07",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F-007",
@@ -2580,7 +2704,14 @@
    "recommendation": "Product Owner must decide the import-duplicate resolution model for v1 (all-or-nothing vs per-item/bulk Skip/Merge/Import-anyway with comparison); align Import.jsx with resolve-import-duplicates.md.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-08",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F-008",
@@ -2598,7 +2729,14 @@
    "recommendation": "Product Owner must decide (a) whether mode enable/disable/reorder + default is an in-scope v1 capability that needs a design screen, and (b) whether a configurable 'words per round' exists at all — if yes, the business round=all-cards model must be revised via decision table; if no, remove it from the design. Reconcile Settings.jsx, configure-mode-preferences.md and study-mode/README.md.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-12",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F-009",
@@ -2724,7 +2862,14 @@
    "recommendation": "Product Owner must decide whether the mastery-round loop (round-complete, retry-round) and the mode-specific safety states (Guess invalid-distractor-pool + loading; Fill validating + failure) are in Tier-1 design scope. If yes, add these states to each graded-mode design spec/fixture and to PATTERNS.md; if the design intentionally abstracts them, document the abstraction so the business-canonical states are traceably covered.",
    "docsToFix": null,
    "acceptanceCriteria": "Each graded-mode design spec covers round-complete and retry-round (and Guess invalid-distractor-pool/loading, Fill validating/failure), or a documented decision records why they are out of Tier-1 design scope.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-09",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F6-002",
@@ -2818,7 +2963,14 @@
     "docs/business/today-dashboard/handle-empty-library-today.md"
    ],
    "acceptanceCriteria": "navigation/README.md §First launch, create-deck.md §4, and handle-empty-library-today.md state the same first-screen and same no-pair guard behavior, with one owning doc and the others cross-linking.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-16",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F1-002",
@@ -2862,7 +3014,13 @@
     "docs/design/MemoX Design System_v4/ui_kits/memox-app/specs/languages.md"
    ],
    "acceptanceCriteria": "The design's remove-pair flow matches remove-language-pair.md: dependency-blocked path with dep count + manage/move handoff, no cascade delete of Deck/Card, and destructive confirm only for a zero-dependency pair.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-008",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F2-002",
@@ -2930,7 +3088,14 @@
     "docs/business/flashcard/manage-card-audio.md"
    ],
    "acceptanceCriteria": "Card Editor audio design and manage-card-audio.md agree on the action set (Generate/Attach/Remove or an explicitly reduced v1 set) and cover the corresponding states.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-05",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F4-002",
@@ -2952,7 +3117,14 @@
     "docs/business/flashcard/manage-card-translations.md"
    ],
    "acceptanceCriteria": "Card Editor design and manage-card-translations.md agree on translation cardinality and ordering/reorder support.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-06",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F4-003",
@@ -2974,7 +3146,14 @@
     "docs/business/flashcard/resolve-duplicate-flashcard.md"
    ],
    "acceptanceCriteria": "Design duplicate resolution and resolve-duplicate-flashcard.md agree on the decision set and the presence/absence of a side-by-side comparison.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-07",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F4-004",
@@ -2996,7 +3175,14 @@
     "docs/business/content-transfer/resolve-import-duplicates.md"
    ],
    "acceptanceCriteria": "Import design and resolve-import-duplicates.md agree on the duplicate decision set and comparison affordance.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-08",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F4-008",
@@ -3017,7 +3203,14 @@
     "docs/business/flashcard/create-flashcard.md"
    ],
    "acceptanceCriteria": "Every field and post-save behavior in the Card Editor design has a matching owner in docs/business/flashcard (and schema), or is removed; success behavior is stated consistently in both.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-13",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F4-007",
@@ -3164,7 +3357,14 @@
     "docs/design/MemoX Design System_v4/ui_kits/memox-app/specs/recall-mode.md"
    ],
    "acceptanceCriteria": "Each graded-mode spec's state matrix contains round-complete and retry-round states (and Guess an invalid-pool state), or a PO decision record supersedes answer-study-stage §10/§11.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-09",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F10-004",
@@ -3559,7 +3759,13 @@
     "docs/design/MemoX Design System_v4/ui_kits/memox-app/specs/account-sync.md"
    ],
    "acceptanceCriteria": "Design conflict state presents object/changed-fields/versions and an explicit keep-local/use-remote/merge decision with no automatic last-write-wins, matching resolve-sync-conflict.md; or a recorded PO decision changes the business contract.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-008",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F22-002",
@@ -3581,7 +3787,14 @@
     "docs/business/account/cloud-service-gate.md"
    ],
    "acceptanceCriteria": "Either an accepted cloud-service-gate decision record exists, or the design account screen shows no functional cloud sign-in CTA (absent or explicitly disabled/unavailable) for the Tier-1 release.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-02",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F22-003",
@@ -3724,7 +3937,14 @@
     "docs/design/.../specs/search.md"
    ],
    "acceptanceCriteria": "Business filter dimensions and design filter chips name the same filter set, and the Search index-scope invariant is consistent with whatever filter data is surfaced.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-14",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "SR-002",
@@ -3766,7 +3986,14 @@
     "docs/business/deck/reset-deck-progress.md"
    ],
    "acceptanceCriteria": "Design dialog labels and copy match the mandated business strings and support affected-count / parent-descendant-count substitution.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-15",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "RP-002",
@@ -3830,7 +4057,14 @@
     "docs/business/content-transfer/configure-export.md"
    ],
    "acceptanceCriteria": "Export options and the format contract agree on whether Learning Progress can be included in a content export.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-10",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "IE-002",
@@ -3852,7 +4086,14 @@
     "docs/business/content-transfer/formats-v1.md"
    ],
    "acceptanceCriteria": "Design import sources and export formats enumerate exactly the business-supported format set, including a hierarchy-preserving option.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-11",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "IE-003",
@@ -3873,7 +4114,14 @@
     "docs/design/.../specs/import.md"
    ],
    "acceptanceCriteria": "Import design provides Skip/Merge/Import-anyway decisions with incoming-vs-existing comparison matching resolve-import-duplicates.md.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-009",
+    "conflict": "CF-08",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "IE-004",
@@ -3916,6 +4164,197 @@
    ],
    "acceptanceCriteria": "Export config design displays scope counts and shows an explicit flatten warning for hierarchical-scope CSV exports.",
    "blocksImplementation": false
+  }
+ ],
+ "resolutions": [
+  {
+   "conflict": "CF-01",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-008-language-pair-removal-and-sync-conflict.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "C7-001",
+    "F-001",
+    "F2-001"
+   ],
+   "summary": "Language-pair removal: no cascade delete; block on dependency. Design reconciled (RemoveLanguageDialog.jsx blocked dialog + fixed confirm copy, Languages.jsx remove-blocked state, languages.md state matrix)."
+  },
+  {
+   "conflict": "CF-03",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-008-language-pair-removal-and-sync-conflict.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "F22-001"
+   ],
+   "summary": "Sync conflict: no default cloud-wins / no last-write-wins; explicit resolution required. Design reconciled (SyncBlock.jsx conflict state routes to Compare/decision, account-sync.md state matrix annotated)."
+  },
+  {
+   "conflict": "CF-02",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "B3-001",
+    "F-002",
+    "F22-002"
+   ],
+   "summary": "Cloud deferred; provider not committed; CTAs disabled/coming-soon (SignInCard.jsx, AccountSync.jsx)."
+  },
+  {
+   "conflict": "CF-04",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "C6-002",
+    "F-003"
+   ],
+   "summary": "Full Edit Deck form: name+description+read-only pair (DeckSettings.jsx)."
+  },
+  {
+   "conflict": "CF-05",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "C7-003",
+    "F-004",
+    "F4-001"
+   ],
+   "summary": "Audio owns Generate/Attach/Remove; attach+remove recorded pending build (AudioRow.jsx, flashcard-editor.md)."
+  },
+  {
+   "conflict": "CF-06",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "C7-004",
+    "F-005",
+    "F4-002"
+   ],
+   "summary": "Additional translations = ordered reorderable list; pending build (FlashcardEditor.jsx, flashcard-editor.md)."
+  },
+  {
+   "conflict": "CF-07",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "C7-002",
+    "F-006",
+    "F4-003"
+   ],
+   "summary": "Duplicate = 4-way Edit/Open/Keep-both/Merge + compare; pending build (DupBanner.jsx, flashcard-editor.md)."
+  },
+  {
+   "conflict": "CF-08",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "C7-005",
+    "F-007",
+    "F4-004",
+    "IE-003"
+   ],
+   "summary": "Import dup = per-item/bulk Skip/Merge/Import-anyway + compare; entry reworded, resolution list pending build (Import.jsx, import.md)."
+  },
+  {
+   "conflict": "CF-09",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "C7-006",
+    "C7-007",
+    "C7-008",
+    "F6-001",
+    "F10-001"
+   ],
+   "summary": "Graded modes keep mastery-round loop; round-complete/retry-round(+invalid-distractor-pool) recorded pending build in the 4 mode specs."
+  },
+  {
+   "conflict": "CF-10",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "C6-001",
+    "IE-001"
+   ],
+   "summary": "Export shows scope/Change+Summary; Progress toggle removed (Export.jsx)."
+  },
+  {
+   "conflict": "CF-11",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "IE-002"
+   ],
+   "summary": "Formats = memox-csv-v1 + memox-json-v1; Excel/clipboard dropped (FormatList.jsx, Import.jsx)."
+  },
+  {
+   "conflict": "CF-12",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "F-008"
+   ],
+   "summary": "Mode prefs = enable/disable/reorder+default; words-per-round & shuffle removed (Settings.jsx)."
+  },
+  {
+   "conflict": "CF-13",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "F4-008"
+   ],
+   "summary": "Example field + keep-adding removed (FlashcardEditor.jsx)."
+  },
+  {
+   "conflict": "CF-14",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "SR-001"
+   ],
+   "summary": "Search filters by type/language/deck/visibility not SRS status (Chips.jsx)."
+  },
+  {
+   "conflict": "CF-15",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "RP-001"
+   ],
+   "summary": "Reset dialog uses business copy Keep progress/Reset progress + counts (DeckResetConfirmDialog.jsx)."
+  },
+  {
+   "conflict": "CF-16",
+   "decision": "soft-onboarding",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "F1-001"
+   ],
+   "summary": "First launch soft-onboarding; Not-now to empty Today allowed (navigation/README.md)."
+  },
+  {
+   "conflict": "CF-17",
+   "decision": "scope split",
+   "recordedIn": "docs/architecture/adr/ADR-009-conflict-batch-resolution.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "C4-001"
+   ],
+   "summary": "Design scope split: Web-responsive/keyboard in scope, Android tablet/landscape/orientation out (issue-register.md)."
   }
  ]
 }

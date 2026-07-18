@@ -1,10 +1,13 @@
-/* MemoX — Languages: manage learning↔native language pairs. States: list · one · empty · add · remove
+/* MemoX — Languages: manage learning↔native language pairs.
+   States: list · one · empty · add · remove · remove-blocked · scripts
    Feature-local components: components/{LangCard,RemoveLanguageDialog}.jsx
-   Rehomed from the retired Drawer; reached from Settings › Study settings › Language pairs. */
+   Rehomed from the retired Drawer; reached from Settings › Study settings › Language pairs.
+   Removal follows ADR-008 / business remove-language-pair.md: a pair with dependent decks is
+   BLOCKED (no cascade delete); only a zero-dependency pair reaches the destructive `remove`. */
 (function () {
 const NS = window.MemoXDesignSystem_2ffa54;
 const { MxScaffold, MxContextualAppBar, MxIconButton, MxCard, MxButton } = NS;
-const { LangCard, RemoveLanguageDialog } = window.MemoXLanguages;
+const { LangCard, RemoveLanguageDialog, RemoveLanguageBlockedDialog } = window.MemoXLanguages;
 
 const PAIRS = [
   { title: '한국어 → English', sub: '1240 cards' },
@@ -22,9 +25,15 @@ const SCRIPT_SPECIMEN = [
   { title: '中文 → English', sub: '汉字（简体）· CJK · 512 cards' },
 ];
 
+// Zero-dependency pair: the only pair eligible for the destructive `remove` (ADR-008).
+const EMPTY_PAIR = [{ title: 'Français → English', sub: 'No decks yet' }];
+
 function pairsFor(state) {
   if (state === 'empty') return [];
   if (state === 'one') return PAIRS.slice(0, 1);
+  // `remove` confirms deletion of a pair with no decks — its fixture must show zero cards
+  // so the zero-dependency guard reads truthfully; `remove-blocked` shows a populated pair.
+  if (state === 'remove') return EMPTY_PAIR;
   return PAIRS;
 }
 
@@ -87,8 +96,13 @@ function Languages({ state = 'list' }) {
     </MxScaffold>
   );
 
+  // Zero-dependency pair only: destructive confirm that affects no deck/card (ADR-008).
   if (state === 'remove') {
     return <React.Fragment>{list}<RemoveLanguageDialog /></React.Fragment>;
+  }
+  // Pair with dependent decks: removal is blocked, routed to manage decks (ADR-008).
+  if (state === 'remove-blocked') {
+    return <React.Fragment>{list}<RemoveLanguageBlockedDialog /></React.Fragment>;
   }
   return list;
 }
