@@ -18,9 +18,11 @@ Map<String, Map<String, String>> _parseBlocks(String path) {
       r'^\s*(--memox-[a-z0-9-]+)\s*:\s*([^;]+);',
     ).firstMatch(line);
     if (declaration == null || context == null) continue;
-    blocks.putIfAbsent(context, () => <String, String>{})[declaration
-            .group(1)!] =
-        declaration.group(2)!.trim();
+    blocks.putIfAbsent(context, () => <String, String>{})[declaration.group(
+      1,
+    )!] = declaration
+        .group(2)!
+        .trim();
   }
   return blocks;
 }
@@ -34,9 +36,7 @@ Map<String, String> _resolveTheme(
     merged.addAll(blocks[selector] ?? const <String, String>{});
   }
   String resolve(String value, [int depth = 0]) {
-    final alias = RegExp(
-      r'^var\((--memox-[a-z0-9-]+)\)$',
-    ).firstMatch(value);
+    final alias = RegExp(r'^var\((--memox-[a-z0-9-]+)\)$').firstMatch(value);
     if (alias == null) return value;
     if (depth > 5) fail('alias loop at $value');
     return resolve(merged[alias.group(1)!]!, depth + 1);
