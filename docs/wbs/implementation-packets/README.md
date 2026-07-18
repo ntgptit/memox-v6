@@ -60,6 +60,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `1.5` | [Error and observability pipeline](./WBS-1.5-error-observability.md) | Done (2026-07-19) |
 | `1.6` | [Deterministic infrastructure](./WBS-1.6-deterministic-infrastructure.md) | Done (2026-07-19) |
 | `1.9` | [Localization foundation](./WBS-1.9-localization-foundation.md) | Done (2026-07-19) |
+| `2.1` | [Token inventory/mapping manifest](./WBS-2.1-token-manifest.md) | Done (2026-07-19) |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.

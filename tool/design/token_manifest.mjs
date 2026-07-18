@@ -1,0 +1,179 @@
+#!/usr/bin/env node
+// Token inventory / mapping manifest (WBS 2.1).
+//
+// Parses every `--memox-*` custom property in the design kit's tokens CSS,
+// derives each token's Dart owner (file + symbol) from a fixed family rule,
+// and reconciles the result with the committed manifest at
+// docs/design/token-manifest.json.
+//
+//   node tool/design/token_manifest.mjs --write   # regenerate the manifest
+//   node tool/design/token_manifest.mjs --check   # verify (verifier gate)
+//
+// The committed manifest is the frozen-name snapshot: a rename or deletion in
+// CSS surfaces as missing/orphaned entries and fails --check until the
+// manifest is regenerated in the same reviewed change (additive-only rule).
+
+import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const tokensDir = join(
+  repoRoot,
+  'docs',
+  'design',
+  'MemoX Design System_v4',
+  'tokens',
+);
+const manifestPath = join(repoRoot, 'docs', 'design', 'token-manifest.json');
+
+// Family rule: source CSS file -> Dart owner file and owning WBS item.
+// high-contrast.css only overrides values of tokens owned elsewhere, so it
+// sits last in precedence and owns only tokens unique to it.
+const FAMILIES = [
+  ['colors.css', 'lib/core/theme/tokens/app_colors.dart', '2.2'],
+  ['opacity.css', 'lib/core/theme/tokens/app_opacities.dart', '2.2'],
+  ['typography.css', 'lib/core/theme/tokens/app_typography.dart', '2.3'],
+  ['spacing.css', 'lib/core/theme/tokens/app_spacing.dart', '2.4'],
+  ['size.css', 'lib/core/theme/tokens/app_sizes.dart', '2.4'],
+  ['radius.css', 'lib/core/theme/tokens/app_radii.dart', '2.4'],
+  ['stroke.css', 'lib/core/theme/tokens/app_strokes.dart', '2.4'],
+  ['elevation.css', 'lib/core/theme/tokens/app_elevations.dart', '2.4'],
+  ['component.css', 'lib/core/theme/tokens/app_component_dimensions.dart', '2.4'],
+  ['motion.css', 'lib/core/theme/tokens/app_motion.dart', '2.5'],
+  ['icon-size.css', 'lib/core/theme/tokens/app_icon_sizes.dart', '2.5'],
+  ['high-contrast.css', 'lib/core/theme/tokens/app_high_contrast_overrides.dart', '2.9'],
+];
+
+function dartSymbol(tokenName) {
+  return tokenName
+    .replace(/^--memox-/, '')
+    .split('-')
+    .map((part, index) =>
+      index === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1),
+    )
+    .join('');
+}
+
+function parseTokens() {
+  const cssFiles = readdirSync(tokensDir).filter((file) => file.endsWith('.css'));
+  const familyOrder = FAMILIES.map(([file]) => file);
+  const unknown = cssFiles.filter((file) => !familyOrder.includes(file));
+  if (unknown.length) {
+    throw new Error(
+      `tokens CSS files without a family rule: ${unknown.join(', ')} — extend FAMILIES in tool/design/token_manifest.mjs`,
+    );
+  }
+
+  const tokens = new Map();
+  const duplicateDeclarations = [];
+
+  for (const [file] of FAMILIES) {
+    const path = join(tokensDir, file);
+    if (!existsSync(path)) continue;
+    const content = readFileSync(path, 'utf8');
+    const seenInFile = new Map();
+    // Track the selector context so a light/dark redeclaration is legal but a
+    // duplicate within one selector block is flagged.
+    let context = ':root';
+    for (const line of content.split(/\r?\n/)) {
+      const selector = line.match(/^\s*([^{}/]*\S)\s*\{/);
+      if (selector) context = selector[1];
+      const declaration = line.match(/^\s*(--memox-[a-z0-9-]+)\s*:/);
+      if (!declaration) continue;
+      const name = declaration[1];
+      const contextKey = `${context}::${name}`;
+      if (seenInFile.has(contextKey)) {
+        duplicateDeclarations.push(`${name} declared twice in ${file} under ${context}`);
+      }
+      seenInFile.set(contextKey, true);
+      if (!tokens.has(name)) tokens.set(name, { name, sources: [] });
+      const entry = tokens.get(name);
+      if (!entry.sources.includes(file)) entry.sources.push(file);
+    }
+  }
+
+  return { tokens, duplicateDeclarations };
+}
+
+function buildManifest() {
+  const { tokens, duplicateDeclarations } = parseTokens();
+  const entries = [...tokens.values()]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((entry) => {
+      const ownerFamily = FAMILIES.find(([file]) => entry.sources.includes(file));
+      return {
+        name: entry.name,
+        owner: ownerFamily[1],
+        symbol: dartSymbol(entry.name),
+        wbs: ownerFamily[2],
+        sources: entry.sources,
+      };
+    });
+  return { entries, duplicateDeclarations };
+}
+
+function main() {
+  const mode = process.argv[2];
+  const { entries, duplicateDeclarations } = buildManifest();
+
+  if (duplicateDeclarations.length) {
+    console.error('Duplicate token declarations:');
+    for (const message of duplicateDeclarations) console.error(`  - ${message}`);
+    process.exit(1);
+  }
+
+  const manifest = {
+    $comment:
+      'Generated by tool/design/token_manifest.mjs --write. Frozen token-name snapshot; additive-only. Do not hand-edit.',
+    tokenCount: entries.length,
+    entries,
+  };
+
+  if (mode === '--write') {
+    writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+    console.log(`Wrote ${entries.length} tokens to docs/design/token-manifest.json`);
+    return;
+  }
+
+  if (mode !== '--check') {
+    console.error('Usage: node tool/design/token_manifest.mjs --write | --check');
+    process.exit(2);
+  }
+
+  if (!existsSync(manifestPath)) {
+    console.error('docs/design/token-manifest.json is missing; run --write and review the diff.');
+    process.exit(1);
+  }
+
+  const committed = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  const committedByName = new Map(committed.entries.map((entry) => [entry.name, entry]));
+  const currentByName = new Map(entries.map((entry) => [entry.name, entry]));
+
+  const problems = [];
+  for (const name of currentByName.keys()) {
+    if (!committedByName.has(name)) {
+      problems.push(`missing from manifest (new/renamed CSS token): ${name}`);
+    }
+  }
+  for (const [name, entry] of committedByName) {
+    const current = currentByName.get(name);
+    if (!current) {
+      problems.push(`orphaned manifest entry (token removed/renamed in CSS): ${name}`);
+      continue;
+    }
+    if (JSON.stringify(current) !== JSON.stringify(entry)) {
+      problems.push(`manifest drift for ${name}; regenerate with --write and review`);
+    }
+  }
+
+  if (problems.length) {
+    console.error('Token manifest check failed (frozen names are additive-only):');
+    for (const problem of problems) console.error(`  - ${problem}`);
+    process.exit(1);
+  }
+
+  console.log(`Token manifest OK: ${entries.length} tokens, every one with a Dart owner.`);
+}
+
+main();

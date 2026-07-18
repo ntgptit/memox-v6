@@ -253,6 +253,11 @@ try {
     'python',
     ['docs/design/mobile-design-kit-audit-v5/scripts/validate.py'],
   );
+  command(
+    'design token manifest',
+    'node',
+    ['tool/design/token_manifest.mjs', '--check'],
+  );
 
   const guardRoot = join(repoRoot, 'tools', 'code-verification-guard');
   const guardTests = [
