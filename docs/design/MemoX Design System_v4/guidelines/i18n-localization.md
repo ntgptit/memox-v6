@@ -1,8 +1,9 @@
 # Internationalization & localization guide
 
 > Guideline / spec layer. This documents the i18n contract for the kit and the production
-> React Native app; the runtime wiring (string tables, format layer, RTL flip) is engineering's
-> job — this file defines the rules they build to. Additive only: no token/class/name changes.
+> Flutter app; runtime wiring uses generated `AppLocalizations`, locale-aware formatting and
+> logical-direction layout. This file defines the rules engineering builds to. Additive only:
+> no token/class/name changes.
 >
 > Owner: Design System team · Status: Current (v4, additive-only).
 > Closes audit items: KIT-09-04 (per-script font fallback), KIT-37-01 (expansion corpus
@@ -41,7 +42,7 @@ is a decision, not an accident:
 | Korean | — | iOS `Apple SD Gothic Neo`, Android `Noto Sans CJK KR` |
 | Arabic/Hebrew (future) | — | iOS `Geeza Pro`/system, Android `Noto Sans Arabic/Hebrew` |
 
-**RN production note.** Do not hard-code CJK family names in component styles; keep a single
+**Flutter production note.** Do not hard-code CJK family names in feature widgets; keep a single
 theme-level font constant that maps to `--memox-font-sans` and let the platform fall back per
 script. If a bundled CJK face is required for brand consistency, add it as a **new** theme font
 constant (additive) — never rename `--memox-font-sans`. Vietnamese diacritics (combining marks,
@@ -66,7 +67,7 @@ them, so no reflow is expected — capture per-script sample shots when adding a
 ## 4. Locale-aware date / number / relative-time formatting (KIT-37-04, KIT-20-04)
 
 Never hard-code English date/number strings (e.g. "Saturday · 27 Jun", "142", "2 days ago").
-Route every one through a **format layer** (`Intl` / RN i18n):
+Route every one through generated localization and a locale-aware format layer (`intl`):
 
 | Value kind | Rule | Example en → vi |
 | --- | --- | --- |

@@ -11,7 +11,7 @@ const t = (window.MemoXI18n && window.MemoXI18n.t) || ((k, fb) => fb);
 
 /* Email/password sign-in field (KIT-35-05). Carries autofill/password-manager
    affordances: web `autoComplete` + `name`/`type`, and `data-text-content-type`
-   as the React Native `textContentType`/`autoComplete` mapping. Real <input>s so
+   as the Flutter `AutofillHints`/Web `autocomplete` mapping. Real <input>s so
    the browser/OS password manager can offer to fill — used ONLY by the additive
    sign-in-form states, so no existing shot is affected. */
 function AuthField({ label, type, name, autoComplete, textContentType, placeholder, value, node, autoFocus }) {

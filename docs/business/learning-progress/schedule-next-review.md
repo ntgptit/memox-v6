@@ -9,7 +9,7 @@ Thuật toán source of truth là [SRS Policy v1 — Leitner 8 Box](./srs-8-box-
 - Schedule apply tối đa một lần cho terminal Attempt/outcome id.
 - Input dùng previous progress + terminal grade `correct|wrong` + `policyId = leitner-8-box-v1` + injected clock.
 - Output gồm stage, due time và scheduling metrics cần thiết.
-- Relearn có thể due trong current session hoặc tương lai theo policy; UI không hard-code interval.
+- Scheduling luôn tạo future due state. `relearn` là session type riêng từ stable missed set; scheduler không inject Card vào active session.
 - Scheduling không sửa Card content/Deck hierarchy.
 - Clock/timezone rules phải deterministic và testable.
 
@@ -18,7 +18,7 @@ Thuật toán source of truth là [SRS Policy v1 — Leitner 8 Box](./srs-8-box-
 | Outcome class | Expected direction |
 | --- | --- |
 | `correct` | Advance/maintain learned path theo policy |
-| Partial/hard/almost | Conservative next schedule theo policy |
+| `almost` đã aggregate | Terminal `wrong` theo sticky-lapse policy |
 | `wrong` | Lapse/relearn path theo policy |
 | Reviewed-only non-terminal | Không schedule |
 | Intermediate mastery-round evidence | Không schedule; chờ terminal Card outcome từ Study Session |
@@ -45,9 +45,7 @@ flowchart TD
     E --> F["Validate due/stage/metrics"]
     F --> G["Persist atomically with terminal Attempt"]
     G -- "Failure" --> H["Rollback · Retry safe"]
-    G -- "Success" --> I{"Current-session relearn?"}
-    I -- "Có" --> J["Enqueue relearn idempotently"]
-    I -- "Không" --> K["Future due/new state"]
+    G -- "Success" --> I["Future due/new state"]
 ```
 
 # 4. Validation invariants
@@ -64,7 +62,7 @@ flowchart TD
 - Same terminal outcome id trả same scheduled result.
 - Different concurrent terminal outcome cho same Card phải serialize/conflict; không last-write-wins im lặng.
 - Retry sau unknown commit kiểm tra outcome id trước compute lại.
-- Relearn queue item dùng stable identity để không duplicate.
+- Relearn session snapshot dùng stable source-session/Card identity để không duplicate; scheduling transaction không sở hữu queue mutation.
 
 # 6. Error/recovery contract
 
@@ -74,7 +72,7 @@ flowchart TD
 
 # 7. State matrix
 
-- New→learning; successful; partial/hard; failed/lapse/relearn.
+- New→learning; correct; wrong/lapse; future due; Relearn-session source set.
 - Already applied; concurrent conflict; invalid prior state/policy.
 - Clock/day boundary/timezone; offline; storage failure/retry.
 
@@ -84,5 +82,5 @@ flowchart TD
 - Intermediate `wrong`/`almost` dùng để tạo mastery round không tự tạo due state hoặc Relearn queue. Recall UI Forgot đã được map thành `wrong`.
 - Output tuân versioned policy và validation invariants.
 - Concurrent outcomes không overwrite im lặng.
-- Relearn item không duplicate qua retry/resume.
+- Relearn snapshot không duplicate qua retry/resume và không được append vào active source session.
 - Failure không để Attempt/progress lệch nhau.

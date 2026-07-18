@@ -2,14 +2,15 @@
    ONE Deck model (domain: Library › Deck › Card). A deck's `parentId` is `null` at the root
    and its parent deck's `id` one level down (what the UI shows as a nested deck). There is NO
    separate "Subdeck" object — a "subdeck" is just a Deck with a non-null parentId. `children`
-   is the count of child decks. id/parentId/children are not rendered (parity-neutral data). */
+   is the count of child decks. Deck kinds are exclusive: `children > 0` implies `cards === 0`;
+   `cards > 0` implies `children === 0`. */
 (function () {
 const DECKS = [
-  { id: 'd-topik1', parentId: null, icon: 'translate', tone: 'accent', name: 'Korean TOPIK I', cards: 486, due: 48, children: 5, progress: 64 },
+  { id: 'd-topik1', parentId: null, icon: 'translate', tone: 'accent', name: 'Korean TOPIK I', cards: 0, due: 48, children: 5, progress: 64 },
   { id: 'd-grammar', parentId: null, icon: 'menu_book', tone: 'accent', name: 'Basic Grammar', cards: 180, new: 23, children: 0, progress: 40 },
-  { id: 'd-conversation', parentId: null, icon: 'record_voice_over', tone: 'accent', name: 'Daily Conversation', cards: 150, upToDate: true, children: 3, progress: 100 },
+  { id: 'd-conversation', parentId: null, icon: 'record_voice_over', tone: 'accent', name: 'Daily Conversation', cards: 0, upToDate: true, children: 3, progress: 100 },
   { id: 'd-hanja', parentId: null, icon: 'history_edu', tone: 'accent', name: 'Hanja Roots', cards: 320, due: 12, children: 0, progress: 72 },
-  { id: 'd-travel', parentId: null, icon: 'travel_explore', tone: 'accent', name: 'Travel Phrases', cards: 96, new: 8, children: 2, progress: 30 },
+  { id: 'd-travel', parentId: null, icon: 'travel_explore', tone: 'accent', name: 'Travel Phrases', cards: 0, new: 8, children: 2, progress: 30 },
   { id: 'd-business', parentId: null, icon: 'work', tone: 'accent', name: 'Business Korean', cards: 210, upToDate: true, children: 0, progress: 100 },
 ];
 const DENSE = Array.from({ length: 22 }, (_, i) => {
@@ -48,6 +49,7 @@ function Status({ d }) {
 // Exactly TWO metadata groups (§7): card count · status. A brand-new EMPTY deck (0 cards) has
 // no due/new/up-to-date status yet — show the count ALONE, never a misleading "Up to date".
 function deckMeta(d) {
+  if (d.children > 0) return <React.Fragment>{d.children} nested decks · <Status d={d} /></React.Fragment>;
   if (d.cards === 0) return d.cards + ' cards';
   return <React.Fragment>{d.cards.toLocaleString()} cards · <Status d={d} /></React.Fragment>;
 }

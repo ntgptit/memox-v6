@@ -7,6 +7,7 @@ Flow này cho user so sánh local/remote versions, chọn hoặc merge khi objec
 - Không có default cloud-wins.
 - Conflict presentation nêu object, changed fields, timestamps/version và impact.
 - Merge chỉ khả dụng khi owning object có deterministic merge contract.
+- V1 chỉ cho three-way merge Preferences scalar và Deck description không cấu trúc theo [DATA-MERGE-v1](../../decision-tables/backup-sync-integrity.md); Deck parent/content type, Card content, Progress, Attempts, Session/SRS history bắt buộc explicit whole-record resolution.
 - Resolution revalidates remote/local versions trước commit.
 - Unaffected data tiếp tục usable theo sync policy.
 

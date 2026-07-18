@@ -35,7 +35,7 @@ The requirements and domain specification live at:
 docs/business/
 ```
 
-126 specs organized by **business object / aggregate** (Deck, Language Pair, Flashcard,
+127 Markdown contracts organized by **business object / aggregate** (Deck, Language Pair, Flashcard,
 Study Session, Learning Progress, Study Goal, Reminder, Preferences, Account, Backup,
 Content Transfer) and supporting capabilities (Study Mode, Audio Playback, Study Streak /
 Statistics, Search, Today Dashboard). Start from `docs/business/README.md` (object catalog)
@@ -71,6 +71,16 @@ weaken rules to pass — fix the code (or the rule, in the guard repo).
 
 ## Verification
 
-After changes, run the strongest available check: the guard
-(`python tools/code-verification-guard/guard/run.py check --project . --ruleset memox
---profile local`), plus `flutter analyze` and `flutter test`.
+All verification uses the canonical entry point:
+
+```text
+node tool/verify/run.mjs             # full gate
+node tool/verify/run.mjs --docs      # documentation/contract changes
+node tool/verify/run.mjs --quick     # inner loop
+node tool/verify/run.mjs --quick --test <path>
+```
+
+The verifier owns documentation/link/ID checks, design-audit validation, the
+MemoX guard, code generation when required, formatting, analyze and tests. Do
+not replace the final gate with loose commands because only the canonical entry
+emits `.dart_tool/memox_verify_pass.json`.

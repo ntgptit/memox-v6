@@ -48,3 +48,4 @@ flowchart TD
 - Cancel không hiển thị failure.
 - Invalid file không tới parser/commit.
 - Snapshot/fingerprint gắn đúng source qua toàn job.
+- Supported type/encoding/schema tuân [formats-v1](./formats-v1.md); file extension một mình không đủ xác nhận format.

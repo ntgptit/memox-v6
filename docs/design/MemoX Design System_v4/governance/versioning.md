@@ -61,8 +61,8 @@ exceptional and follows the breaking-change process below.
 
 ## Consumer notification
 
-When a release ships, consumers (the MemoX React Native app and any downstream mapping of
-tokens → theme constants / base classes → `Mx*` RN components) are notified via:
+When a release ships, consumers (the MemoX Flutter app and downstream mappings of
+tokens → `ThemeData`/`ThemeExtension`s and base classes → `Mx*` widgets) are notified via:
 
 1. the **`../CHANGELOG.md`** entry (source of truth), tagged with impact class;
 2. for **minor/major**, a short release note summarizing new artifacts and — for major —

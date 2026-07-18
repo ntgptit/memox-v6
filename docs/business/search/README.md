@@ -11,6 +11,14 @@ Search là read capability trên Deck và Flashcard với query, filters, recent
 - Ranking deterministic với cùng query/index/formula version.
 - Recent-search persistence không chứa content nhạy cảm ngoài policy đã chốt.
 
+## Ranking policy `search-rank-v1`
+
+Query normalization: Unicode NFC, locale-aware case fold, trim/collapse Unicode whitespace. Không bỏ dấu, không auto-translate và không fuzzy-match trong v1.
+
+Candidate tiers theo thứ tự tuyệt đối: exact normalized field match → token-prefix match → token-contained match. Trong cùng tier: matched field priority `Card.term` → `Card.primaryMeaning` → `Deck.name` → accepted Card translation; sau đó stable tie-break bằng object type, canonical Deck path và stable object id. Hidden/deleted content bị loại trước ranking. Filters chạy trước ranking. Cùng query/index/formula version phải cho cùng order.
+
+Acceptance: golden multilingual/duplicate-name fixtures; stale request token không publish; rebuild và incremental index cho cùng ordered ids.
+
 ## Flow catalog
 
 | File | Flow sở hữu | Trạng thái |

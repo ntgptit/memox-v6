@@ -13,6 +13,11 @@ Study Session sở hữu một lần học từ start snapshot tới finalize. D
 - Retry không tạo duplicate attempt.
 - Exit không âm thầm mất progress đã persist.
 - Finalize idempotent; retry không nhân đôi result/progress.
+- Mỗi session có đúng một `sessionType`: `newLearning`, `dueReview`, `relearn` hoặc `practice`.
+- `newLearning` bắt buộc hoàn tất `Review → Match → Guess → Recall → Fill`; `practice` chọn đúng một mode; `dueReview` và `relearn` dùng queue riêng và không được giả thành new-learning pipeline.
+- Practice không activate Box 0, không schedule SRS và không đóng góp Goal/Streak trong v1.
+
+Canonical decision table: [ST-SESSION-TYPE-v1](../../decision-tables/study-session-types.md).
 
 ## Primary learning flow
 
@@ -24,10 +29,8 @@ flowchart LR
     D -- "Còn Card không đạt" --> C
     D -- "0 Card không đạt" --> E{"Còn mode?"}
     E -- "Có" --> C
-    E -- "Không" --> F{"Terminal outcome"}
-    F -- "Needs recovery" --> G["Relearn"]
-    G --> C
-    F -- "Complete" --> H["Finalize"]
+    E -- "Không" --> F["Commit terminal outcomes"]
+    F --> H["Finalize"]
     C -- "Exit" --> I["Paused"]
     I --> J["Resume"]
     J --> C
@@ -35,7 +38,7 @@ flowchart LR
 
 Thứ tự source of truth: `deck/study-deck.md` → `start-study-session.md` → `answer-study-stage.md` → `relearn-cards.md` khi cần → `finalize-study-session.md`. `exit-study-session.md` và `resume-study-session.md` là nhánh interruption/recovery.
 
-Mastery-round state, Relearn queue và due-review queue là ba phần checkpoint riêng; không dùng Relearn thay cho retry round trong mode.
+Mastery-round state, Relearn-session queue và due-review-session queue là ba namespace riêng; không dùng Relearn thay cho retry round trong mode và không inject queue mới vào active session.
 
 ## Flow catalog
 
@@ -46,7 +49,7 @@ Mastery-round state, Relearn queue và due-review queue là ba phần checkpoint
 | [answer-study-stage.md](./answer-study-stage.md) | Submit answer, persist attempt và advance stage | Đã có |
 | [exit-study-session.md](./exit-study-session.md) | Exit confirm, saved progress và destination | Đã có |
 | [finalize-study-session.md](./finalize-study-session.md) | Finalizing, result summary, retry và completion | Đã có |
-| [relearn-cards.md](./relearn-cards.md) | Relearn/due-review branches trong current session | Đã có |
+| [relearn-cards.md](./relearn-cards.md) | Session type Relearn độc lập từ stable missed set | Đã có |
 
 ## Cross-object contracts
 

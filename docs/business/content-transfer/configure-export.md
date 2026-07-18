@@ -48,3 +48,4 @@ flowchart TD
 - Unsupported combination không tới generation.
 - Export không giả full Backup.
 - Configure không mutate Deck/Card.
+- Format selection chỉ gồm `memox-csv-v1` và `memox-json-v1` theo [formats-v1](./formats-v1.md); hierarchy với CSV bắt buộc explicit flatten warning.

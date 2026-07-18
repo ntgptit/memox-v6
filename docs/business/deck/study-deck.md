@@ -7,7 +7,7 @@ Phạm vi tài liệu này mô tả Deck-owned contract để bắt đầu Study
 - Empty không thể Study.
 - Leaf Study direct cards.
 - Parent Study aggregate cards từ descendant Leaves; không có direct cards.
-- Eligibility dựa trên current data và yêu cầu tối thiểu của mode.
+- Eligibility dựa trên current data và yêu cầu tối thiểu của session type.
 - Chọn Study không tự tạo/mutate content.
 - Một session nhận immutable start scope; thay đổi Deck sau khi session bắt đầu không silently đổi queue.
 - Kết quả Study quay đúng Deck context.
@@ -30,8 +30,8 @@ flowchart TD
     B --> C{"Card count"}
     C -- "0" --> D["Study unavailable"]
     C -- ">0" --> E["Mode Picker"]
-    E --> F["Choose mode + scope"]
-    F --> G{"Mode minimum met?"}
+    E --> F["Choose session type / practice mode + scope"]
+    F --> G{"Session-type minimum met?"}
     G -- "Không" --> H["Not enough cards"]
     G -- "Có" --> I["Create session snapshot"]
     I --> J["Study Session"]
@@ -53,8 +53,9 @@ Scope
 <eligible card count> cards
 <due/new breakdown when available>
 
-Choose a mode
-[ Mode options ]
+Choose how to study
+[ New learning / Due review / Relearn / Practice ]
+[ Mode options — chỉ khi Practice ]
 
                                        [ Start session ]
 ```
@@ -72,14 +73,29 @@ Choose a mode
 - Scope label luôn nêu path khi chọn deep child.
 - Scope đổi phải recalculate mode eligibility.
 
-# 6. Mode eligibility
+# 6. Session-type và mode eligibility
 
-- Mode Picker chỉ hiển thị/enable modes product hỗ trợ.
+Session type là contract bắt buộc, không được suy từ label màn hình:
+
+| Session type | Card source | Mode behavior |
+| --- | --- | --- |
+| `newLearning` | Box 0 eligible Cards | Luôn chạy `Review → Match → Guess → Recall → Fill`; không cho bỏ hoặc đổi thứ tự |
+| `dueReview` | Due queue Box 1..7 | Review flow theo terminal-grade contract; không activate Box 0 |
+| `relearn` | Relearn queue đã checkpoint | Chỉ xử lý queue được chỉ định; không thay mastery retry round |
+| `practice` | Eligible scope do user chọn | User chọn đúng một supported mode; không schedule hoặc activate SRS |
+
+- Mode Picker là selection surface và luôn có CTA `Start session`; chọn một tile không tự start.
+- `newLearning`, `dueReview` và `relearn` hiển thị session type nhưng không cho chọn một mode thay thế pipeline của type đó.
+- Chỉ `practice` nhận `selectedMode`; Practice outcome vẫn có thể ghi history nhưng không mutate SRS/Goal/Streak trong v1.
+
+- Practice Mode Picker chỉ hiển thị/enable modes product hỗ trợ.
 - Mode có minimum card count riêng; insufficient state nêu required/current và cách thêm/chọn scope khác.
-- Guess yêu cầu candidate pool có ít nhất năm Card với năm meaning hiển thị khác nhau sau normalize trong cùng language pair, để mọi question luôn có một correct + bốn distractor.
+- Guess yêu cầu candidate pool có ít nhất năm Card với năm meaning hiển thị khác nhau theo `guess-meaning-normalize-v1` trong cùng language pair, để mọi question luôn có một correct + bốn distractor.
 - Nếu không đạt Guess minimum, không cho Start; mọi Guess question vẫn bắt buộc đúng năm lựa chọn.
-- Review có thể dựa due queue; zero due hiển thị no-due choice theo Study contract, không giả tạo due cards.
-- Không auto-switch mode khi current selection invalid.
+- Due Review phải dựa due queue; zero due hiển thị caught-up state, không giả tạo due cards.
+- Không auto-switch session type/mode khi current selection invalid.
+
+Decision table source: [ST-SESSION-TYPE-v1](../../decision-tables/study-session-types.md).
 
 # 7. Start lifecycle
 
@@ -126,7 +142,7 @@ Choose a mode
 # 12. Acceptance criteria
 
 - Empty không bắt đầu session; Leaf direct; Parent aggregate descendants.
-- Mode minimum revalidate khi scope đổi.
+- Session-type/mode-plan minimum revalidate khi scope đổi.
 - Guess eligibility kiểm tra cả Card count và ít nhất năm meaning khác nhau; duplicate meaning không được tính để lấp đủ năm option.
 - Session start snapshot nhất quán và không orphan khi failure.
 - Retry giữ mode/scope; return dùng Deck id, không stale path.

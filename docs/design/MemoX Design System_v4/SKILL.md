@@ -1,12 +1,12 @@
 ---
 name: memox-design
-description: Use this skill to generate well-branded interfaces and assets for MemoX (a local-first flashcard / spaced-repetition study app built with React Native), either for production or throwaway prototypes/mocks. Contains essential design guidelines, color & type tokens, the Plus Jakarta Sans font, the frozen Mx* component family, and a full app UI kit for prototyping.
+description: Use this skill to generate well-branded Flutter interfaces and assets for MemoX, a local-first flashcard / spaced-repetition app shipping first on Web and Android. Contains the visual tokens, Plus Jakarta Sans font, frozen Mx* family and UI-kit prototypes.
 user-invocable: true
 ---
 
 Read the `readme.md` file within this skill first, and explore the other available files.
 
-MemoX ships as a **React Native** app. The CSS/HTML here is the design-reference and prototyping layer; production code maps these tokens and component base classes onto React Native styles and `Mx*` RN components. Keep names/ids stable across both.
+MemoX v6 ships as a **Flutter** app with Web and Android as Tier 1. The CSS/HTML/JSX here is the design-reference and prototyping layer; production maps tokens to Flutter themes and component base classes to `Mx*` widgets. Keep names/ids stable across both. Read `SCOPE.md` and `guidelines/flutter-adaptive-layout.md` before screen work.
 
 MemoX is a three-layer system with **frozen identifiers**:
 - **Tokens** — all visual values are `--memox-<role>` CSS custom properties (`tokens/*.css`, light in `:root`, dark in `[data-theme="dark"]`). Switch theme by setting `data-theme`; never override inside components. Token names are additive-only.

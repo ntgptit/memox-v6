@@ -1,8 +1,8 @@
 # MemoX Design System
 
-A from-scratch visual system for **MemoX** — a local-first flashcard / spaced-repetition study app (originally Material 3), built with **React Native**. This system **rebuilds the visual language entirely** (color, type, spacing, radius, density) while **freezing the technical identifiers** that downstream code binds to, so the redesign stays compatible with the existing engineering system.
+A from-scratch visual system for **MemoX** — a local-first flashcard / spaced-repetition study app built with **Flutter**. This system **rebuilds the visual language entirely** (color, type, spacing, radius, density) while **freezing the technical identifiers** that downstream code binds to, so the redesign stays compatible with the existing engineering system.
 
-> **Target platform:** MemoX ships as a **React Native** app. The CSS/HTML in this kit is the design-reference and prototyping layer — the single source of truth for every visual *value*. In production those values map onto React Native styles (token custom properties → theme constants, component base classes → `Mx*` RN components). Use this kit to prototype in HTML and to author production React Native code from the same tokens and rules.
+> **Target platform:** MemoX v6 ships first on **Flutter Web and Android**. The CSS/HTML/JSX in this kit is the design-reference and prototyping layer — the single source of truth for visual *values*. Production maps token custom properties to Flutter `ThemeData` / `ThemeExtension`s and component base classes to `Mx*` widgets. See `SCOPE.md` for Tier-1 adaptive, input and locale gates.
 
 > **The golden rule:** changing a *value* is free; changing a *name or id* breaks the system.
 
@@ -78,7 +78,7 @@ How MemoX writes copy:
   - `navigation/` — **MxBottomNav** (`bottom-nav`), **MxFab** (`fab`), **MxSearchDock** (`search-dock`), **MxIconButton** (`icon-btn`)
   - `core/` — **MxButton** (`btn` + primary/secondary/outline/ghost), **MxLink** (`link` — text/nav link button), **MxTextField** (`field`), **MxChip** (`chip`), **MxBadge** (`badge`), **MxSwitch** (`switch`), **MxSegmentedControl** (`segmented`), **MxAvatar** (`avatar`)
 - **`guidelines/`** — foundation specimen cards (Colors / Type / Spacing) shown on the Design System tab.
-- **`ui_kits/memox-app/`** — the screen gallery (26 screens × states × light/dark; the canonical list lives in `tool/ui_kit_shots/registry.mjs`).
+- **`ui_kits/memox-app/`** — the compact-profile screen gallery (27 screens × 211 registered historical states × light/dark). `specs/INDEX.md` is the current manifest; medium/expanded Tier-1 evidence remains gated by `SCOPE.md`.
 - **`fonts/`** — Plus Jakarta Sans variable TTF.
 - **`SKILL.md`** — Agent-Skill manifest for use in Claude Code.
 
@@ -90,7 +90,7 @@ Namespace for `@dsCard` / kit HTML: `window.MemoXDesignSystem_2ffa54`.
 
 - **No brand logo / app icon asset** was provided or available to copy — the wordmark is currently just Extrabold type. **Please share a MemoX logo / app-icon** if one exists.
 - The canonical palette is **deep violet**, defined in `tokens/colors.css` (the single colour source of truth — there is no runtime override). Colour values are checked by `node tool/ui_kit_shots/contrast.mjs` (wired into `verify:ui-kit`) for WCAG light + dark. If MemoX adopts different brand hues later, only the token *values* need to change.
-- Screens use **realistic placeholder** copy and data, per the initialization brief — no real content, navigation, or validation yet.
+- Screens use realistic fixture copy and data. They are visual/interaction references, not a running Flutter router, persistence implementation or validation engine.
 
 ## Kit composites (ui_kits/memox-app)
 

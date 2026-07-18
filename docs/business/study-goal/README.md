@@ -25,6 +25,8 @@ flowchart LR
 
 Session contribution được ghi bởi `track-daily-goal.md`; `complete-daily-goal.md` chỉ sở hữu transition/event; `handle-goal-day-boundary.md` sở hữu local-day bucketing.
 
+Goal v1 đo distinct qualified Cards theo [metrics-v1](../study-statistics/metric-formulas-v1.md); Practice không đóng góp.
+
 ## Flow catalog
 
 | File | Flow sở hữu | Trạng thái |

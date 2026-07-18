@@ -14,7 +14,7 @@ Study Mode là tập strategy biến Card prompt và user interaction thành can
 - Match, Guess, Recall và Fill chạy một hoặc nhiều mastery round. Round đầu nhận toàn bộ Card của stage; round kế chỉ nhận tập Card không đạt của round vừa hoàn tất.
 - Tập Card không đạt phải được khử trùng theo Card identity. Card đã đạt không xuất hiện lại trong round kế tiếp.
 - Một graded mode chỉ complete và chuyển mode khi round vừa hoàn tất có `nextRoundFailedCardIds` rỗng. Không giới hạn số mastery round.
-- Implementation của cả năm mode bắt buộc tuân theo [Factory Pattern + DI architecture](./factory-di-architecture.md): canonical enum, common interface, abstract template base, năm concrete modes và factory được inject instances.
+- Business chỉ bắt buộc typed mode identity/evidence và ownership boundaries; không bắt buộc factory, abstract base hay một class cho mỗi mode. Xem [legacy architecture note](./factory-di-architecture.md).
 
 ## Mastery-round contract
 
@@ -57,11 +57,10 @@ Study Mode là tập strategy biến Card prompt và user interaction thành can
 | [fill-card-answer.md](./fill-card-answer.md) | Text input, hint, comparison và feedback | Đã có |
 | [map-mode-outcome.md](./map-mode-outcome.md) | Chuẩn hóa mode-specific evidence cho Session | Đã có |
 
-## Implementation architecture
+## Implementation boundary
 
-- [factory-di-architecture.md](./factory-di-architecture.md) là contract bắt buộc cho lần refactor/implementation code tiếp theo.
-- Architecture được mô tả trung lập công nghệ; agent phải ánh xạ sang construct phù hợp của stack hiện tại nhưng không được bỏ các vai trò enum/interface/abstract base/concrete modes/factory/DI.
-- Tài liệu được chốt không đồng nghĩa source hiện tại đã tuân thủ; chỉ đánh dấu implemented sau khi code và contract tests đạt Definition of Done trong tài liệu này.
+- [factory-di-architecture.md](./factory-di-architecture.md) ghi rõ proposal factory/template-method cũ đã superseded và không phải implementation gate.
+- Architecture được chọn bởi accepted Flutter ADR dựa trên nhu cầu thực tế; Business chỉ giữ evidence, ownership và testability contracts.
 
 ## Cross-object contracts
 

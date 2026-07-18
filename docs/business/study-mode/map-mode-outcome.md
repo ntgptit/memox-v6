@@ -15,10 +15,10 @@ Flow này chuẩn hóa event riêng của từng Study Mode thành evidence duy 
 | Mode | Input chính | Canonical evidence |
 | --- | --- | --- |
 | Review | Completed Card set | `reviewed` |
-| Match | Pair event summary | score/error summary |
+| Match | Pair ids + normalized meaning comparison | `correct` / `wrong` / `almost` theo SM-MATCH-v1 |
 | Guess | Question id, five-option set, selected/correct choice ids | `correct` / `wrong` |
 | Recall | UI Remembered/Forgot action hoặc timer-expired event | `correct` / `wrong` + optional reason metadata |
-| Fill | Normalized comparison + hint | `correct` / `wrong` + metadata |
+| Fill | Input + accepted answer snapshot + comparison policy id | `correct` / `wrong` + metadata theo SM-FILL-v1 |
 
 ## 3. Mastery classification
 
@@ -37,6 +37,7 @@ Flow này chuẩn hóa event riêng của từng Study Mode thành evidence duy 
 - `remembered` và `forgot` không được xuất hiện trong canonical evidence/outcome column hoặc DB enum; chúng chỉ tồn tại trong presentation event/state trước mapping.
 - Mapper chỉ phân loại passing/non-passing; Study Session sở hữu việc khử trùng failed set, tạo round mới và quyết định chuyển mode.
 - Persistence Retry của cùng event trả prior mapping; attempt ở mastery round mới có identity mới.
+- Match classification dùng [SM-MATCH-v1](../../decision-tables/match-outcomes.md); Fill comparison dùng [SM-FILL-v1](../../decision-tables/fill-answer-normalization.md).
 
 ## 4. Master flow
 

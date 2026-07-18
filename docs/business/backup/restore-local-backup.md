@@ -28,6 +28,7 @@ flowchart TD
 - Objective: khôi phục dataset có chủ ý và an toàn.
 - Archetype: Destructive review/progress/result.
 - Replace dùng destructive confirmation; Merge nêu duplicate/conflict policy.
+- Merge/Replace semantics bắt buộc theo [DATA-MERGE-v1](../../decision-tables/backup-sync-integrity.md); Progress/Attempt/SRS không field-wise merge.
 
 ## 4. Lifecycle
 
@@ -48,3 +49,4 @@ flowchart TD
 - Mode/impact được user xác nhận rõ.
 - Failure giữ/khôi phục pre-restore state có thể kiểm chứng.
 - Success chạy validation/rebuild trước khi hoàn tất.
+- Mỗi row `DATA-MERGE-*` liên quan Restore có integration test dẫn exact ID.

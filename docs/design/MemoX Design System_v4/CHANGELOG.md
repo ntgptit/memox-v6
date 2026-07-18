@@ -16,6 +16,23 @@ contract. Dates are ISO. The kit's major version is encoded in the folder name
 
 ## [Unreleased] — targeting v4.1 kit freeze
 
+### Rebaseline — Product Owner decisions (2026-07-18) [docs] [additive]
+
+- Production target corrected to Flutter with Web and Android as Tier 1; iOS and desktop native
+  platforms are roadmap tiers.
+- Added compact/medium/expanded/compact-height adaptive contract, Android landscape/tablet and Web
+  keyboard/pointer requirements in `SCOPE.md` and `guidelines/flutter-adaptive-layout.md`.
+- Deck kinds are exclusive Empty/Leaf/Parent. Removed active conversion affordances; retained the
+  frozen `flashcard-list/convert-*` ids as deprecated, non-routable, fail-closed compatibility ids.
+- Practice Mode Picker now selects one mode then uses the explicit Start session CTA; Guess needs
+  five distinct normalized meanings. New learning remains a separate five-stage session.
+- Recall now specifies a deterministic 20-second timeout and a distinct terminal `timed-out` state.
+- SRS policy `leitner-8-box-v1` is displayed read-only in Settings.
+- Added Today `paused`, `offline`, `partial` and `error` contracts.
+- English and Vietnamese are v1 locales; added Flutter ARB handoff and Vietnamese prototype seed.
+- Re-opened all Web/Android responsive, runtime, localization and changed-state evidence gates.
+  `governance/release-signoff.md` is **BLOCKED** until those P1 items are verified.
+
 Audit-remediation batch (below) closing governance / release / scope / deprecation gaps from
 `../mobile-design-kit-audit-v5/issue-register.md` — **additive and documentation only** — plus a
 **unified Deck-model** workstream (kept additive to the frozen contract: no token / `Mx*` / base
@@ -76,7 +93,7 @@ there is no separate "Subdeck" object. A "subdeck" is only a Deck one level down
   (section labels DECKS / NESTED DECKS). The list adapter is `_features/library/components/
   DeckRowCard.jsx` and the create sheet `CreateDeckSheet.jsx` (renamed from the `Subdeck*`
   variants — these are `_features`-local file names, not `Mx*`/manifest/`data-mx-node`
-  identifiers). `SCOPE.md` §Domain model documents the contract.
+  identifiers). `SCOPE.md` §Domain decisions documents the current exclusive-kind contract.
 - **Library is now the ONE deck-list screen for every level.** The `library` screen renders the
   root (`parentId: null`, bottom-nav tab) and **delegates its 15 new `nested-*` states** to the
   `SubdeckList` render module (a deck's child decks). The nested mode is now **chrome-identical to
@@ -113,7 +130,7 @@ read as a single unbroken block in both light and dark. Only `selection` / `moda
 - The audit batch is additive/doc/asset changes; the Deck-model workstream is additive to the
   frozen contract (see above). No consumer migration required; no token/`Mx*`/class/
   `data-mx-node` identifier renamed or removed; existing 390×780 light+dark shots unchanged
-  aside from the added `library--nested-*` set (the new specs govern RN-runtime OS chrome /
+  aside from the added `library--nested-*` set (the new specs govern Flutter runtime OS chrome /
   states that no existing fixture triggers).
 - Open P0/P1 audit items (e.g. RTL/i18n KIT-37, responsive KIT-32, some a11y) remain
   tracked; release stays **BLOCKED** per `governance/release-signoff.md`.

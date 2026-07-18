@@ -21,6 +21,7 @@ Account sở hữu authentication state và sync coordination. MemoX local data 
 | [resolve-sync-conflict.md](./resolve-sync-conflict.md) | Compare, choose/merge và atomic apply | Đã có |
 | [recover-account-session.md](./recover-account-session.md) | Expired credentials, re-auth và offline continuation | Đã có |
 | [delete-account.md](./delete-account.md) | Identity/cloud impact và local-data choice nếu supported | Đã có — Conditional |
+| [cloud-service-gate.md](./cloud-service-gate.md) | Provider/security/retention decision gate | Deferred for v1 |
 
 ## Cross-object contracts
 
@@ -28,6 +29,7 @@ Account sở hữu authentication state và sync coordination. MemoX local data 
 - Mỗi object vẫn validate invariants khi remote changes được apply.
 - Backup là explicit snapshot/restore; Sync là ongoing reconciliation.
 - UI phải phân biệt auth error, network error và data conflict.
+- V1 conflict/merge behavior dùng [DATA-MERGE-v1](../../decision-tables/backup-sync-integrity.md); structural/Progress records không auto field-merge.
 
 ## Canonical state coverage
 

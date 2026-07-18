@@ -30,6 +30,14 @@ function Val({ v }) {
   );
 }
 
+function ReadOnlyVal({ v }) {
+  return (
+    <span style={{ color: 'var(--memox-text-secondary)', fontWeight: 'var(--memox-font-weight-semibold)', fontSize: 'var(--memox-font-size-sm)' }}>
+      {v}
+    </span>
+  );
+}
+
 // A nested child settings screen: back-titled bar + a single grouped card of rows.
 function Child({ title, node, children }) {
   const bar = <MxContextualAppBar variant="nested" title={title} node={node + '-appbar'} leading={<MxIconButton icon="arrow_back" node={node + '-back'} />} />;
@@ -80,8 +88,9 @@ function Settings({ state = 'loaded' }) {
   if (state === 'study-srs') {
     return (
       <Child title="Spaced repetition" node="settings/srs">
-        <Row icon="grid_view" title="Leitner boxes" sub="Number of review boxes" node="settings/srs-boxes" trailing={<Val v="8" />} />
-        <Row icon="timeline" title="Intervals (days)" sub="1 · 3 · 7 · 14 · 30 · 60 · 120" node="settings/srs-intervals" trailing={<Val v="" />} />
+        <Row icon="verified" title="Policy" sub="Fixed · read-only" node="settings/srs-policy" trailing={<ReadOnlyVal v="leitner-8-box-v1" />} />
+        <Row icon="grid_view" title="Leitner boxes" sub="Box 0 is new; Boxes 1–8 are scheduled/mastered" node="settings/srs-boxes" trailing={<ReadOnlyVal v="8" />} />
+        <Row icon="timeline" title="Intervals (days)" sub="1 · 3 · 7 · 14 · 30 · 60 · 120" node="settings/srs-intervals" trailing={<ReadOnlyVal v="Fixed" />} />
         <Row icon="notifications_active" title="Due notifications" last node="settings/srs-notif"
           trailing={<MxSwitch checked={notif} onChange={setNotif} node="settings/srs-notif-switch" />} />
       </Child>

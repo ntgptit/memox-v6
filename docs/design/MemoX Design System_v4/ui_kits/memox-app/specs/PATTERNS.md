@@ -23,7 +23,8 @@ state matrix; this file references those state ids rather than restating them.
 | `dashboard` | app launch / Today tab | authenticated or local session | study session, library, create sheet | tab change; Start review; FAB |
 | `library` | Library tab | — | deck detail, create sheet, search, selection | row tap; FAB; back exits mode first |
 | `flashcard-editor` | card row / add-card / import review | a target deck exists | list (saved) or list (discarded) | Save (valid); back/cancel → dirty guard |
-| `study-session` | mode picker / Start review / Continue | ≥1 due or selected card | study-result; dashboard (exit) | finish last stage; exit (X) → confirm |
+| `mode-picker` | Leaf Deck → Practice | selected scope is eligible; Guess has ≥5 distinct normalized meanings | practice session; origin | select one mode, then Start session; back cancels without creating a session |
+| `study-session` | eligible Leaf Deck / Today / Resume | valid session type and non-empty snapshot queue | study-result; dashboard (exit) | finish terminal outcome; exit (X) → confirm |
 | `study-result` | end of a study session | a completed session record | dashboard, next session | Continue studying; Done; retry on finalize error |
 | `import` | library / deck menu → Import | a target deck | deck (done) or discard | Import success → done; back/cancel → confirm if data entered |
 | `export` | deck/library menu → Export | ≥1 deck/card selected | share sheet / done | Export complete; back |
@@ -50,9 +51,11 @@ unsaved state (see §2 dirty guard and the navigation & overlays guide §3 for p
 5. **Retry** → available on any `*-error` state; re-attempts the same operation; repeated failure
    keeps the entered data and the error visible.
 
-**Focused study flow** (`study-session`): ProgressHeader → answer current stage → Next → next stage;
-last stage → `study-result`. **Back / exit (X)** raises the exit-confirm (progress is saved as far as
-completed); `resume-error` and `answer-save-error` states offer Retry.
+**Focused study flow** (`study-session`) depends on session type. New learning runs Review → Match
+→ Guess → Recall → Fill in order; due review, relearn and practice are separate sessions and do not
+inherit that stage pipeline. Recall owns a deterministic 20-second timeout. **Back / exit (X)**
+raises the exit-confirm; `resume-error` and `answer-save-error` offer Retry without duplicating an
+answer or scheduling operation.
 
 **List / selection flow** (`library`, `flashcard-list`): browse → (optional) enter selection mode →
 act via overflow → bulk confirm for destructive actions → outcome (success/partial/failure) →
@@ -67,9 +70,11 @@ filter/sort/search drops the current selection (see navigation & overlays guide 
 
 | Condition | Card queue | Answer save | → State / next |
 | --- | --- | --- | --- |
-| Session starts, cards due | has due cards | — | `stage1-review` (then 2→5 in order) |
-| Card previously failed / lapsed | relearn queue non-empty | — | `relearn` |
-| Due-again card surfaced mid-session | due-review triggered | — | `due-review` |
+| New-learning starts | eligible Box 0 snapshot | — | `stage1-review` (then 2→5 in order) |
+| Due-review starts | persisted due snapshot | — | `due-review`; never enter the five-stage pipeline |
+| Relearn starts | explicit relearn snapshot | — | `relearn`; never implicit mid-stage routing |
+| Practice starts | one selected mode + eligible scope | — | chosen mode only; no activation/SRS schedule |
+| Recall reaches 20 seconds | current answer still open | save pending | `timed-out`; reveal + terminal Timeout saved once |
 | User taps exit (X) | any | — | exit-confirm dialog; confirm → dashboard, cancel → stay |
 | Resume a prior session | prior session load fails | — | `resume-error` → Retry / start fresh |
 | Answer submitted | — | save fails | `answer-save-error` → Retry (answer preserved) |
@@ -110,8 +115,8 @@ screen:
 
 | Concern | Where it's specified | Applies to every pattern as |
 | --- | --- | --- |
-| Responsive / viewport / safe-area | `guidelines/` (viewport scope) + `mobile-ui-construction-contract.md` | phone-portrait 390×780 baseline; body scrolls, bars fixed; honour top/bottom safe-area |
-| Platform (RN) presentation | each component `*.prompt.md` (RN note) + `readme.md` | one visual language across iOS/Android; sheet/dialog/menu chosen by content, not platform |
+| Responsive / viewport / safe-area | `../../../guidelines/flutter-adaptive-layout.md` + `../../../SCOPE.md` | Tier-1 compact/medium/expanded and compact-height profiles; Android/Web safe bounds |
+| Flutter/platform presentation | `../../../guidelines/flutter-adaptive-layout.md` | shared semantics; bottom/rail and overlay presentation adapt by width/input environment |
 | Localization / i18n | `guidelines/i18n-localization.md` | externalized strings, locale date/number/plural formatting, +30–50% expansion, per-script fonts, RTL logical properties |
 | Overlays / navigation / state preservation | `guidelines/navigation-overlays.md` | one dismissable layer at a time; focus restore to trigger; scroll/search/filter preserve vs reset |
 | Keyboard / reading order / a11y | `guidelines/keyboard-focus-order.md` | DOM = reading = focus order; one heading; announced state changes; visible focus ring |

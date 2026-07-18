@@ -2,6 +2,8 @@
 
 Study Statistics là read-only projection từ committed Sessions, Attempts, Progress và Streak. Nó không sở hữu dữ liệu nguồn hoặc scheduling decisions.
 
+Canonical formula contract: [Metric formulas v1](./metric-formulas-v1.md).
+
 ## Invariants
 
 - Metrics chỉ derive từ committed/versioned records và formula version rõ.
@@ -20,6 +22,7 @@ Study Statistics là read-only projection từ committed Sessions, Attempts, Pro
 | [switch-statistics-scope.md](./switch-statistics-scope.md) | All/Deck/time-range selection và stale-response guard | Đã có |
 | [handle-insufficient-statistics.md](./handle-insufficient-statistics.md) | Empty/insufficient-data thresholds và recovery | Đã có |
 | [rebuild-statistics-projection.md](./rebuild-statistics-projection.md) | Reset/sync/restore reconciliation và retry | Đã có |
+| [metric-formulas-v1.md](./metric-formulas-v1.md) | Goal/Streak/Statistics formula ids, denominators và time bucketing | Đã có |
 
 ## Cross-object contracts
 

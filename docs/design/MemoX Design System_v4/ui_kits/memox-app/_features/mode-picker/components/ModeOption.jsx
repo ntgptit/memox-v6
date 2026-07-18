@@ -3,16 +3,22 @@
 const NS = window.MemoXDesignSystem_2ffa54;
 const { MxCard, MxIconTile } = NS;
 
-function ModeOption({ g, disabled }) {
+function ModeOption({ g, disabled, selected, onSelect }) {
   return (
-    <MxCard interactive padding="sm" node={'mode-picker/mode-' + g.id} style={{ opacity: disabled ? 'var(--memox-opacity-half)' : 1 }}>
+    <MxCard interactive={!disabled} padding="sm" node={'mode-picker/mode-' + g.id}
+      onClick={disabled ? undefined : onSelect} ariaLabel={'Select ' + g.name}
+      variant={selected ? 'primary-soft' : undefined}
+      style={{ opacity: disabled ? 'var(--memox-opacity-half)' : 1 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--memox-space-4)' }}>
         <MxIconTile icon={g.icon} tone="accent" />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 'var(--memox-font-weight-bold)', fontSize: 'var(--memox-font-size-base)' }}>{g.name}</div>
           <div style={{ fontSize: 'var(--memox-font-size-sm)', color: 'var(--memox-text-secondary)', marginTop: 'var(--memox-space-1)' }}>{g.desc}</div>
         </div>
-        <span className="material-symbols-rounded" style={{ color: 'var(--memox-text-tertiary)' }}>chevron_right</span>
+        <span className="material-symbols-rounded" aria-hidden="true"
+          style={{ color: selected ? 'var(--memox-primary)' : 'var(--memox-text-tertiary)' }}>
+          {selected ? 'radio_button_checked' : 'radio_button_unchecked'}
+        </span>
       </div>
     </MxCard>
   );

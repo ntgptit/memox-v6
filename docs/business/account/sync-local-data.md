@@ -9,6 +9,7 @@ Flow này điều phối upload/download versioned records, progress, retry và 
 - Remote change phải qua invariant validation của object sở hữu.
 - Offline giữ pending queue và local app usable.
 - Conflict không được auto cloud-wins nếu policy chưa rõ.
+- Mergeable registry, event dedupe và unknown-outcome recovery tuân [DATA-MERGE-v1](../../decision-tables/backup-sync-integrity.md).
 
 ## 2. Master flow
 
@@ -49,3 +50,4 @@ flowchart TD
 - Invalid remote object không phá local invariant.
 - Watermark chỉ advance sau committed apply.
 - UI phân biệt offline/error/conflict.
+- Mỗi row `DATA-MERGE-*` liên quan Sync có integration test dẫn exact ID.

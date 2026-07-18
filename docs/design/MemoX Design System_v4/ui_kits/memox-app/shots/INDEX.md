@@ -73,9 +73,9 @@ always matches the 219-state matrix (28 screens).
 | add sheet | `flashcard-list--add-sheet--light.png` | `flashcard-list--add-sheet--dark.png` |
 | card actions | `flashcard-list--card-actions--light.png` | `flashcard-list--card-actions--dark.png` |
 | delete confirm | `flashcard-list--delete-confirm--light.png` | `flashcard-list--delete-confirm--dark.png` |
-| convert dialog | `flashcard-list--convert-dialog--light.png` | `flashcard-list--convert-dialog--dark.png` |
-| convert submitting | `flashcard-list--convert-submitting--light.png` | `flashcard-list--convert-submitting--dark.png` |
-| convert failure | `flashcard-list--convert-failure--light.png` | `flashcard-list--convert-failure--dark.png` |
+| convert dialog (**deprecated historical**) | `flashcard-list--convert-dialog--light.png` | `flashcard-list--convert-dialog--dark.png` |
+| convert submitting (**deprecated historical**) | `flashcard-list--convert-submitting--light.png` | `flashcard-list--convert-submitting--dark.png` |
+| convert failure (**deprecated historical**) | `flashcard-list--convert-failure--light.png` | `flashcard-list--convert-failure--dark.png` |
 | loading | `flashcard-list--loading--light.png` | `flashcard-list--loading--dark.png` |
 | offline | `flashcard-list--offline--light.png` | `flashcard-list--offline--dark.png` |
 | error | `flashcard-list--error--light.png` | `flashcard-list--error--dark.png` |

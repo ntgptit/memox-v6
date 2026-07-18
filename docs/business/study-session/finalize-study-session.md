@@ -4,7 +4,7 @@ Flow này đóng session đã hết required queue, tạo summary và phát cont
 
 ## 1. Nguyên tắc đã chốt
 
-- Chỉ finalize khi không còn pending required answer/save, mastery-round item hoặc relearn item.
+- Chỉ finalize khi không còn pending required answer/save hoặc mastery-round item trong immutable snapshot của chính session. Relearn/Due Review phát sinh sau start thuộc session khác.
 - Finalize idempotent theo session id.
 - Completed status, summary và outbound contributions nhất quán.
 - Retry không nhân đôi progress, goal hoặc statistics events.
@@ -16,8 +16,10 @@ Flow này đóng session đã hết required queue, tạo summary và phát cont
 | Contract | Nội dung |
 | --- | --- |
 | Input | Session snapshot, committed Attempts, final checkpoint |
-| Validate | Mọi graded mode có final failed set rỗng; mastery/Relearn/due-review queues rỗng; không có pending writes |
+| Validate | Mọi graded mode thuộc mode plan có final failed set rỗng; current snapshot queue rỗng; không có pending writes |
 | Output | Completed status, finalized time, summary, goal/stat contribution ids |
+
+Contribution được điều kiện hóa theo session type: `newLearning`, `dueReview` và `relearn` phát contribution theo committed terminal outcomes; `practice` không mutate SRS/Goal/Streak trong v1 và contribution ids tương ứng là rỗng.
 
 # 3. Master flow
 
@@ -31,7 +33,7 @@ flowchart TD
     E -- "Success" --> G["Study Result"]
     G --> H{"Next action"}
     H -- "Continue" --> I["New Study entry"]
-    H -- "Review missed" --> J["New scoped session"]
+    H -- "Review missed" --> J["Start sessionType = relearn"]
     H -- "Done/Back" --> K["Deck/Dashboard"]
 ```
 
@@ -62,7 +64,7 @@ Session complete
 - Goal contribution phát một lần với stable event id.
 - Empty/invalid summary chặn Result và đi finalize recovery.
 - Attempt ở các mastery round đều được giữ để tính lịch sử; summary Card không double-count vì một Card xuất hiện nhiều round.
-- Trước finalize, Session tổng hợp đúng một terminal SRS grade cho mỗi SRS-active Card: chỉ `correct` khi không có committed lapse evidence; có bất kỳ wrong/almost/timeout thì terminal grade là `wrong`. Việc đạt ở retry round không đổi grade này.
+- Trước finalize session có scheduling enabled, Session tổng hợp đúng một terminal SRS grade cho mỗi SRS-active Card: chỉ `correct` khi không có committed lapse evidence; có bất kỳ wrong/almost/timeout thì terminal grade là `wrong`. Việc đạt ở retry round không đổi grade này. Practice không tạo terminal SRS grade.
 
 # 6. Lifecycle
 
@@ -88,6 +90,7 @@ Session complete
 - Repeated finalize from resume/device returns same completed result.
 - Deck/Card changed after snapshot không rewrite summary.
 - Deck deleted before return: Done → Library.
+- `Review missed` builds a stable distinct Card set from this completed summary and starts a new `relearn` session through the normal Start/idempotency contract; it never reopens/mutates the completed session.
 
 # 9. State matrix
 
@@ -96,7 +99,7 @@ Session complete
 
 # 10. Acceptance criteria
 
-- Finalize chỉ khi all required writes committed, mọi graded mode đã có round cuối với 0 Card không đạt và mọi required queue đều rỗng.
+- Finalize chỉ khi all required writes committed, mọi graded mode trong mode plan đã có round cuối với 0 Card không đạt và current snapshot queue rỗng.
 - Retry/reopen tạo một completion và một contribution set.
 - Result counts từ committed Attempts và không double-count stage events.
 - Finalize error không mất answers hoặc quay last question.

@@ -58,19 +58,22 @@ Your saved answers are still here.
 - Với graded mode, checkpoint bắt buộc giữ `mode`, `roundIndex`, `shuffleVersion`, generated `currentRoundCardIds` order, current position và `nextRoundFailedCardIds`.
 - Nếu attempt cuối round đã commit và failed set không rỗng, Resume mở round kế trong cùng mode; không chuyển mode.
 - Nếu attempt cuối round đã commit và failed set rỗng, Resume mở mode kế đúng một lần.
-- Mastery round, Relearn queue và due-review queue nằm ở các namespace checkpoint riêng.
+- Mastery round nằm trong current session checkpoint; Relearn và Due Review là session snapshots riêng, không được append vào current checkpoint.
 - Recall checkpoint trước reveal giữ timer version, `remainingMs` và resolution identity. Resume tiếp tục thời gian còn lại, không reset về 20 giây.
 - Nếu timeout đã commit trước interruption, Resume mở auto-revealed timeout feedback; không chạy timer hoặc cho self-grade lại.
 - Completed session luôn route Result, không mở last question.
 
 # 6. Changed-data decision table
 
+Canonical source: [ST-CONTENT-CHANGE-v1](../../decision-tables/study-session-content-changes.md). Bảng dưới đây là summary; không được chọn behavior khác ở Delete/Answer flow.
+
 | Change | Resume behavior |
 | --- | --- |
 | Deck moved/renamed | Resume theo Deck id; update display metadata |
 | Deck deleted | Cho finish snapshot nếu content snapshot đủ; return Library |
 | Card edited | Dùng version/snapshot đã chốt cho current session |
-| Card deleted | Skip có audit reason hoặc block theo snapshot policy; không substitute |
+| Card deleted trước current prompt | Skip với audit reason; không substitute, không tạo grade |
+| Current Card delete requested | Delete bị block cho tới explicit exit/commit/skip resolution |
 | Preferences changed | Session giữ effective preferences snapshot |
 
 # 7. Lifecycle
@@ -106,4 +109,5 @@ Your saved answers are still here.
 - Resume Recall không duplicate timeout Attempt và không mất Card khỏi next-round failed set.
 - Start fresh giữ progress đã commit và đóng old session rõ ràng.
 - Completed session đi Result; deleted/moved Deck không tạo navigation loop.
+- Missing/skipped Card bị loại khỏi accuracy denominator và không schedule; audit reason được giữ.
 - Canonical resume-error/session states parity dưới 3% mỗi theme.

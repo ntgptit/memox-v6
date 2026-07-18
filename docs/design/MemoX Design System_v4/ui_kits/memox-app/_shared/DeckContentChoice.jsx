@@ -2,7 +2,8 @@
    organised (radio cards — "Add cards directly" is preselected as the common case),
    then commit with the single primary CTA "Create deck". Import is a tertiary action.
    States: default · subdecks · validation · duplicate · submitting · submit-error.
-   Reached for an existing deck (rename + reorganise) the CTA reads "Save" — same form. */
+   This choice exists only while creating an Empty Deck; established Leaf/Parent kinds cannot
+   be converted by this screen. */
 (function () {
 const NS = window.MemoXDesignSystem_2ffa54;
 const { MxScaffold, MxContextualAppBar, MxButton, MxIconTile, MxTextField } = NS;

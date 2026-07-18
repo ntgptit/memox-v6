@@ -2,6 +2,8 @@
 
 Study Streak là projection theo local day từ finalized Study activity. Nó khác Daily Goal: Goal đo target trong ngày; Streak đo chuỗi ngày có activity hợp lệ.
 
+Qualified day/current/longest formulas dùng [metrics-v1](../study-statistics/metric-formulas-v1.md); Practice không tạo streak day.
+
 ## Invariants
 
 - Một local day đóng góp tối đa một streak-qualified day.

@@ -1,27 +1,30 @@
 # Issue Register
 
-Audit v5 trên MemoX Design System v4 — 119 issue, sau 3 vòng fix loop (vòng 3: đóng 14 mục PARTIAL bằng render/harness evidence). Reviewed by: Claude (automated kit audit + remediation) · 2026-07-16.
+Audit v5 trên MemoX Design System v4 — baseline 119 issue, rebaseline bổ sung 3 issue sau quyết định Product Owner. Re-reviewed 2026-07-18 cho Flutter Web + Android Tier 1.
 
 ## Trạng thái khắc phục
 
 | Resolution | Số lượng |
 |---|---|
 | `FIXED` | 105 |
-| `ACCEPTED` (scoped/documented) | 14 |
-| `PARTIAL` (root fixed, cần render/impl để đóng hẳn) | 0 |
-| `OPEN` | 0 |
-| **Tổng** | **119** |
+| `ACCEPTED` (scoped/documented) | 4 |
+| `PARTIAL` (contract đã sửa, thiếu runtime evidence Tier 1) | 10 |
+| `OPEN` | 3 |
+| **Tổng** | **122** |
 
-Severity gốc: `P0` 6 · `P1` 62 · `P2` 44 · `P3` 7.
-Còn mở (OPEN/PARTIAL) ảnh hưởng gate: `P0` 0 · `P1` 0.
+Severity: `P0` 6 · `P1` 65 · `P2` 44 · `P3` 7.
+Còn mở (OPEN/PARTIAL) ảnh hưởng gate: `P0` 0 · `P1` 13. Release status: **BLOCKED**.
 
 ## Issue
 
 | Issue ID | Checklist ID | Mô tả | Severity | Status | Fix / evidence | Owner | Target |
 |---|---|---|---|---|---|---|---|
+| ISS-REB-UI-01 | KIT-44-04 / KIT-48-04 | Deck exclusive, Practice picker, Guess≥5, Recall 20s, SRS read-only và Today recovery đã sửa source/spec nhưng chưa có shot Web/Android hiện hành. | `P1` | `OPEN` | Source/spec rebaselined 2026-07-18; cần light/dark × en/vi × Tier-1 evidence | Design System team | Before Tier-1 feature implementation sign-off |
+| ISS-REB-I18N-01 | KIT-37-01 / KIT-37-06 | Locale v1 là en/vi nhưng chưa externalize đủ mọi prototype string và chưa có ARB parity + 200% runtime evidence. | `P1` | `OPEN` | `guidelines/flutter-l10n-handoff.md`; vi prototype seed chỉ là khởi đầu | Localization + Flutter UI | Before first vertical-slice release |
+| ISS-REB-TOOL-01 | KIT-48-03 / KIT-48-04 | Các lệnh npm/parity/a11y cũ trỏ tới package/tool không tồn tại, nên không tái lập được evidence đã tuyên bố. | `P1` | `OPEN` | release-signoff/coverage-report đã bỏ PASS giả; cần verifier hiện hành | Design System tooling owner | Before any design sign-off |
 | ISS-KIT-42-02 | KIT-42-02 | Không có routing/nav để chạy task hoàn chỉnh bằng keyboard; không có focus-order log. | `P0` | `FIXED` | tool/a11y/keyboard-walkthrough.mjs + focus-order.*.json (9 stops, primary CTA reachable, no trap, reversible) + axe-report.json (0 serious role/name/aria); guidelines/keyboard-focus-order.md | Design System team | v4.1 kit freeze |
-| ISS-KIT-48-01 | KIT-48-01 | Chưa toàn bộ 48 nhóm có final status hoàn tất + evidence link tại thời điểm chốt release. | `P0` | `FIXED` | audit-summary.md 48/48 final status (40 PASS · 8 PARTIAL · 0 BLOCKED); validation-report.json PASS; every group has Evidence Log links | Design System team | v4.1 kit freeze |
-| ISS-KIT-48-02 | KIT-48-02 | Còn nhiều P0/P1 mở (a11y KIT-42, governance KIT-46, deprecation KIT-47, responsive KIT-32). | `P0` | `FIXED` | P0 0 · P1 0 open; governance/release-signoff.md 3-owner sign-off Approved; P2/P3 (asset G1 + scoped) have owner + target | Design System team | v4.1 kit freeze |
+| ISS-KIT-48-01 | KIT-48-01 | Chưa toàn bộ 48 nhóm có final status hoàn tất + evidence link tại thời điểm chốt release. | `P0` | `FIXED` | audit-summary.md có 48/48 final status (37 PASS · 11 PARTIAL · 0 BLOCKED); validation-report.json PASS; every group has Evidence Log links | Design System team | v4.1 kit freeze |
+| ISS-KIT-48-02 | KIT-48-02 | Baseline cũ còn P0/P1 ở a11y KIT-42, governance KIT-46, deprecation KIT-47 và responsive KIT-32. | `P0` | `FIXED` | Các P0/P1 baseline cũ đã được disposition; 13 P1 rebaseline mới vẫn được theo dõi riêng bởi ISS-REB-* và các dòng PARTIAL, nên release tiếp tục BLOCKED | Design System team | v4.1 kit freeze |
 | ISS-KIT-21-06 | KIT-21-06 | Reduced-motion phủ một phần (chỉ cappbar+spinner); không có 200% text-scaling verification. | `P1` | `FIXED` | shoot.mjs FONT_SCALES incl 2.0 (full matrix 100-200% clean); global reduced-motion reset; evidence/200pct-dialog-fixed--*.png | Design System team | v4.1 kit freeze |
 | ISS-KIT-25-04 | KIT-25-04 | Không có state render bàn phím mở để verify field/primary action không bị che; SaveBar sticky là mitigation chưa xác nhận. | `P1` | `FIXED` | shots/flashcard-editor--keyboard-open + account-sync--sign-in-keyboard (SaveBar/actions above KeyboardInset) | Design System team | v4.1 kit freeze |
 | ISS-KIT-35-01 | KIT-35-01 | Không có cơ chế/token keyboard-avoidance; sticky SaveBar chỉ là assertion; không render được keyboard-open. | `P1` | `FIXED` | shots/flashcard-editor--keyboard-open + account-sync--sign-in-keyboard (focused field + primary action visible above the raised keyboard) | Design System team | v4.1 kit freeze |
@@ -33,19 +36,19 @@ Còn mở (OPEN/PARTIAL) ảnh hưởng gate: `P0` 0 · `P1` 0.
 | ISS-KIT-09-04 | KIT-09-04 | Font stack phủ Vietnamese nhưng không có per-script (CJK/RTL) fallback list và không có per-script screenshots. | `P2` | `FIXED` | tokens/typography.css --memox-font-cjk/-vietnamese (per-script fallback list); shots/languages--scripts (vi/ko/ja/zh rendered) | Design System team | v4.1 kit freeze |
 | ISS-KIT-09-05 | KIT-09-05 | Không có 200% text-scaling before/after evidence; kit dùng fixed px sizes và fixed-height controls. | `P2` | `FIXED` | shoot.mjs FONT_SCALES incl 2.0; confirm-dialog action-row wrap (.mx-dialog-actions) fixes the only 200% overflow; evidence/200pct-dialog-fixed--*.png | Design System team | v4.1 kit freeze |
 | ISS-KIT-11-01 | KIT-11-01 | Fluid layout + gutter 16 có, nhưng không có phone viewport range grid spec; shots single-width 390x780. | `P2` | `FIXED` | shoot.mjs WIDTHS 320-430; coverage-report.md viewport-range (min 320 / default 390 / max 430); full matrix 0 overflow at any width | Design System team | v4.1 kit freeze |
-| ISS-KIT-32-01 | KIT-32-01 | Chỉ có profile phone-hẹp(320)/rộng(430); thiếu tablet và compact-height; không có breakpoint table. | `P1` | `ACCEPTED` | SCOPE.md: tablet/large-screen out of scope (phone-portrait kit) | Design System team | v4.1 kit freeze |
-| ISS-KIT-32-02 | KIT-32-02 | Không có composition tablet để so sánh reflow; chỉ 1 frame phone. | `P1` | `ACCEPTED` | SCOPE.md: tablet reflow out of scope | Design System team | v4.1 kit freeze |
-| ISS-KIT-32-03 | KIT-32-03 | Không có layout tablet/large-screen với max content width và nav/pane strategy. | `P1` | `ACCEPTED` | SCOPE.md: large-screen layout out of scope | Design System team | v4.1 kit freeze |
-| ISS-KIT-32-04 | KIT-32-04 | Không có pattern list-detail/multi-pane collapse về single-pane. | `P1` | `ACCEPTED` | SCOPE.md: multi-pane/list-detail out of scope | Design System team | v4.1 kit freeze |
-| ISS-KIT-32-05 | KIT-32-05 | Sheet/dialog/nav chọn theo loại nội dung, không có adaptive-presentation rule theo device profile. | `P1` | `ACCEPTED` | SCOPE.md: adaptive-presentation by device profile out of scope | Design System team | v4.1 kit freeze |
-| ISS-KIT-34-06 | KIT-34-06 | Không có landscape device frame để kiểm side cutout/rounded corner che target. | `P1` | `ACCEPTED` | SCOPE.md: landscape unsupported (no landscape cutout frame) | Design System team | v4.1 kit freeze |
-| ISS-KIT-35-06 | KIT-35-06 | Không có landscape compact-height và hardware-keyboard evidence. | `P1` | `ACCEPTED` | SCOPE.md: landscape + hardware-keyboard out of scope | Design System team | v4.1 kit freeze |
-| ISS-KIT-36-02 | KIT-36-02 | Không có landscape screenshots để kiểm nav/overlay/primary action ở compact height. | `P1` | `ACCEPTED` | SCOPE.md: landscape unsupported | Design System team | v4.1 kit freeze |
-| ISS-KIT-36-03 | KIT-36-03 | Không có rotation state-preservation rule/recording cho input/selection/scroll/nav. | `P1` | `ACCEPTED` | SCOPE.md: orientation change unsupported; state-preservation rule documented | Design System team | v4.1 kit freeze |
-| ISS-KIT-11-05 | KIT-11-05 | Không có phone-landscape evidence và không có max-readable-width cho reading/form content. | `P2` | `ACCEPTED` | SCOPE.md: landscape unsupported; single readable column documented | Design System team | v4.1 kit freeze |
+| ISS-KIT-32-01 | KIT-32-01 | Thiếu tablet, Web expanded và compact-height evidence. | `P1` | `PARTIAL` | Breakpoint contract added; boundary evidence open | Design System + Flutter UI | Before Tier-1 sign-off |
+| ISS-KIT-32-02 | KIT-32-02 | Chưa có annotated reflow phone/tablet/Web. | `P1` | `PARTIAL` | Reflow contract added; screenshots open | Design System + Flutter UI | Before Tier-1 sign-off |
+| ISS-KIT-32-03 | KIT-32-03 | Chưa có runtime large-screen/max-width/nav evidence. | `P1` | `PARTIAL` | Max widths/nav strategy specified; runtime evidence open | Design System + Flutter UI | Before Tier-1 sign-off |
+| ISS-KIT-32-04 | KIT-32-04 | Chưa có list-detail collapse recording. | `P1` | `PARTIAL` | Collapse/back preservation specified; recording open | Design System + Flutter UI | Before Tier-1 sign-off |
+| ISS-KIT-32-05 | KIT-32-05 | Chưa có adaptive overlay comparison. | `P1` | `PARTIAL` | Presentation matrix specified; runtime evidence open | Design System + Flutter UI | Before Tier-1 sign-off |
+| ISS-KIT-34-06 | KIT-34-06 | Chưa có Android landscape/cutout evidence. | `P1` | `PARTIAL` | Safe-region contract added; evidence open | Android UI reviewer | Before Tier-1 sign-off |
+| ISS-KIT-35-06 | KIT-35-06 | Chưa có Web hardware-keyboard và compact-height evidence. | `P1` | `PARTIAL` | Keyboard/pointer contract added; walkthrough open | Web accessibility reviewer | Before Tier-1 sign-off |
+| ISS-KIT-36-02 | KIT-36-02 | Chưa có landscape compact-height screenshots. | `P1` | `PARTIAL` | Compact-height rules specified; evidence open | Android UI reviewer | Before Tier-1 sign-off |
+| ISS-KIT-36-03 | KIT-36-03 | Chưa có rotation/resize state-preservation recording. | `P1` | `PARTIAL` | Preservation contract added; recording open | Android UI reviewer | Before Tier-1 sign-off |
+| ISS-KIT-11-05 | KIT-11-05 | Chưa có landscape readable-width evidence cho forms/study. | `P1` | `PARTIAL` | Readable width tokens/contract added; evidence open | Design System + Flutter UI | Before Tier-1 sign-off |
 | ISS-KIT-19-03 | KIT-19-03 | Không có drag/reorder pattern (handle, picked, drop target, cancel); ordering chỉ qua SortSheet. | `P2` | `ACCEPTED` | No drag/reorder in product scope; ordering via SortSheet (documented) | Design System team | v4.1 kit freeze |
 | ISS-KIT-38-04 | KIT-38-04 | Không có swipe/drag gesture motion; không chứng minh follow-finger/cancel-return. Mọi action button-driven. | `P2` | `ACCEPTED` | SCOPE.md: swipe/drag gesture motion out of scope (button-driven kit) | Design System team | v4.1 kit freeze |
-| ISS-KIT-33-02 | KIT-33-02 | Không có platform flow recordings cho back gesture/modal/navigation. | `P3` | `ACCEPTED` | SCOPE.md: platform flow recordings out of scope (single visual language, RN runtime) | Design System team | v4.1 kit freeze |
+| ISS-KIT-33-02 | KIT-33-02 | Không có platform flow recordings cho back gesture/modal/navigation. | `P3` | `ACCEPTED` | Static kit does not require clips; current Flutter Web/Android runtime walkthrough remains tracked by ISS-REB-UI-01 | Design System team | Revisit at Tier-1 runtime certification |
 | ISS-KIT-38-02 | KIT-38-02 | Push/pop/modal/pane transition không được implement hay ghi lại; duration scale có nhưng không có clip. | `P3` | `ACCEPTED` | SCOPE.md: transition clips out of scope (still-frame + parity contract) | Design System team | v4.1 kit freeze |
 | ISS-KIT-42-01 | KIT-42-01 | Screen thiếu heading landmark (title là div); không có screen-reader walkthrough chứng minh reading order. | `P0` | `FIXED` | MxContextualAppBar + MxSectionHeader role=heading/aria-level | Design System team | v4.1 kit freeze |
 | ISS-KIT-42-04 | KIT-42-04 | Announcement (role=status/alert) chỉ có ở flashcard-editor; export/import/study-result success/failure/progress không announce. | `P0` | `FIXED` | export/import/study-result aria-live status/alert regions added | Design System team | v4.1 kit freeze |

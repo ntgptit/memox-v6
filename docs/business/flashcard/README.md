@@ -40,7 +40,9 @@ Deck sở hữu target eligibility; Flashcard sở hữu content lifecycle; Lear
 | [hide-flashcard.md](./hide-flashcard.md) | Ẩn/hiện Card khỏi Study eligibility | Đã có |
 | [delete-flashcard.md](./delete-flashcard.md) | Impact, confirm và delete | Đã có |
 | [manage-card-translations.md](./manage-card-translations.md) | Add/edit/reorder/remove additional meanings | Đã có |
+| [manage-card-tags.md](./manage-card-tags.md) | Create/search/attach/remove reusable Card tags | Đã có |
 | [manage-card-audio.md](./manage-card-audio.md) | Generate/attach/play/remove audio reference | Đã có |
+| [view-card-detail.md](./view-card-detail.md) | Read projection, command handoffs và unavailable states | Đã có |
 
 ## Cross-object contracts
 
