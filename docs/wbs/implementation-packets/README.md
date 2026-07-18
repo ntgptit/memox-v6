@@ -54,7 +54,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 
 | WBS | Packet | Current status |
 | --- | --- | --- |
-| `1.1` | [Dependency baseline](./WBS-1.1-dependency-baseline.md) | **Ready** |
+| `1.1` | [Dependency baseline](./WBS-1.1-dependency-baseline.md) | Done (2026-07-19) |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.

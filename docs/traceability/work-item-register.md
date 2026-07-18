@@ -48,7 +48,7 @@ and item-specific, while Ready rows link exact execution packets.
 | `0.4` | Done | DG-01, DG-04 | Guard memox ruleset and architecture paths | `AC-WBS-0.4-01`; `TEST-WBS-0.4-01` | Not applicable — governance | `docs/code-verification-guard.md`; guard regression suite in the consolidated verifier |
 | `0.5` | Done | DG-01..DG-06 | Architecture, decisions, business, database, traceability | `AC-WBS-0.5-01`; `TEST-WBS-0.5-01` | Not applicable — governance | `docs/README.md`; docs inventory/link/traceability checks in the consolidated verifier |
 | `0.6` | Done | DG-02, DG-05 | ADR-002 and release scope/exclusions | `AC-WBS-0.6-01`; `TEST-WBS-0.6-01` | Not applicable — governance | `docs/architecture/adr/ADR-002-platform-and-adaptive-scope.md`; `docs/design/MemoX Design System_v4/SCOPE.md` |
-| `1.1` | **Ready** | DG-02, DG-05, DG-06 | Current pubspec/lock, ADR-002/004/005/006/007, database and guard contracts | `AC-WBS-1.1-01`; `TEST-WBS-1.1-01` | `docs/wbs/implementation-packets/WBS-1.1-dependency-baseline.md` | Pending; mandatory before Done |
+| `1.1` | Done | DG-02, DG-05, DG-06 | Current pubspec/lock, ADR-002/004/005/006/007, database and guard contracts | `AC-WBS-1.1-01`; `TEST-WBS-1.1-01` | `docs/wbs/implementation-packets/WBS-1.1-dependency-baseline.md` | `pubspec.yaml`/`pubspec.lock` (2026-07-19); full-gate pass marker `.dart_tool/memox_verify_pass.json`; `drift_dev` deferral evidence in the packet |
 | `1.2` | Done | DG-02 | Verifier, hooks, CI and guard tests | `AC-WBS-1.2-01`; `TEST-WBS-1.2-01` | Not applicable — tooling already implemented | `tool/verify/run.mjs`; pass marker `.dart_tool/memox_verify_pass.json` emitted by the full gate |
 
 ## Accepted decision gates

@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **Ready** |
+| Status | **Done** (2026-07-19) |
 | Owner/domain | Platform + QA / Bootstrap tooling |
 | Depends on | `0.4` — Done |
 | Decision gates | DG-02, DG-05, DG-06 |
@@ -39,7 +39,7 @@ item. Do not edit generated localization or Dart generator output.
 | Riverpod generator | `riverpod_generator`, `build_runner` | Preserve existing generator/build constraints |
 | Routing | `go_router` | `^17.3.0`; constants/wrappers remain owned by WBS 1.4 |
 | Persistence runtime | `drift`, `drift_flutter` | `^2.34.2`, `^0.3.1`; shared Web/Android opener owned by WBS 4.1 |
-| Persistence generator | `drift_dev` | `^2.34.4`; dev dependency |
+| Persistence generator | `drift_dev` | **Deferred to the WBS 4.1 packet** (analyzer/meta evidence below) |
 | Immutable/JSON runtime | `freezed_annotation`, `json_annotation` | compatible caret constraints resolved with current SDK |
 | Immutable/JSON generator | `freezed`, `json_serializable` | dev dependencies compatible with annotation packages |
 | Determinism | `clock`, `timezone`, `uuid` | compatible caret constraints; concrete ports/fakes owned by WBS 1.6 |
@@ -58,6 +58,23 @@ Version policy:
 The routing and Drift versions were checked against their official pub.dev
 package records on 2026-07-19. A later implementation date must re-check only
 compatibility/security, not automatically chase a newer major.
+
+Analyzer compatibility evidence (pub.dev + local toolchain, 2026-07-19), on
+Flutter 3.41.7 stable / Dart 3.11.5, where the SDK's `flutter_test` pins
+`meta 1.17.0`:
+
+- `riverpod_generator` stable line supports only analyzer `^9` (4.0.1–4.0.3)
+  or `^12` (4.0.4); no version supports analyzer 10, 11 or 13.
+- `drift_dev` requires analyzer `>=10 <13` (2.32.1–2.34.0) or `^13` (≥2.34.1).
+- Every analyzer release ≥10.0.2 (including all of 11, 12, 13) requires
+  `meta ^1.18`, which conflicts with the SDK-pinned `meta 1.17.0`.
+
+Therefore no (`riverpod_generator`, `drift_dev`) pair co-resolves on the
+pinned SDK. Accepted resolution: keep the Riverpod line and the `drift`/
+`drift_flutter` runtime unchanged, and defer `drift_dev` to the WBS 4.1
+packet, which owns the first generated Drift code. That packet must re-check
+this evidence (a newer `riverpod_generator` supporting analyzer `^13`, or an
+approved Flutter SDK upgrade shipping `meta ≥1.18`, unblocks it).
 
 ## Acceptance and test procedure
 
