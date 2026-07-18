@@ -65,6 +65,12 @@ dependencies:
   # like the built-in icon font. Checked against pub.dev on 2026-07-19.
   material_symbols_icons: ^4.2951.0
 
+  # Presentation-only hooks (guard: memox.hooks.*). hooks_riverpod resolves
+  # to 3.3.1, the newest line pinning riverpod 3.2.1 (our annotation pin);
+  # 3.3.2 moves to riverpod 3.3.2 and is excluded by the solver.
+  flutter_hooks: ^0.21.0
+  hooks_riverpod: ^3.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

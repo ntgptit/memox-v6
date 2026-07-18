@@ -215,7 +215,7 @@ whose dependencies are not Done.
 | Status | WBS | Reason / next action |
 | --- | --- | --- |
 | Done | `0.1–0.6`, `1.1–1.6`, `1.9`, `2.1–2.10`, `3.1–3.2` | Durable evidence is in the work-item register. Wave 2 (token→theme→responsive) is closed. |
-| **Ready** | `3.3` | XL packet with child boundaries; child A (`MxTextField` core) Done, children B–C (hooks, form-state coverage) in progress. |
+| **Ready** | `3.3` | XL packet with child boundaries; children A–B (`MxTextField` core, `useMx*` hooks) Done, child C (form-state coverage + `MxSearchField`) in progress. |
 | Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. |
 
 Sequencing note (2026-07-19): `1.7` (developer fixtures) and `1.10` (shared
