@@ -7,13 +7,5 @@
   "homeTitle": "MemoX Home",
   "@homeTitle": {
     "description": "Title of the home screen app bar."
-  },
-  "pushCounterMessage": "You have pushed the button this many times:",
-  "@pushCounterMessage": {
-    "description": "Label explaining the counter value on the home screen."
-  },
-  "incrementTooltip": "Increment",
-  "@incrementTooltip": {
-    "description": "Tooltip for the button that increments the counter."
   }
 }
