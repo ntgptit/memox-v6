@@ -97,6 +97,12 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # Design-kit primary family (variable wght 200-800); see assets/fonts/README.md.
+  fonts:
+    - family: Plus Jakarta Sans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Variable.ttf
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

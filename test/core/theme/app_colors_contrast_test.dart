@@ -38,7 +38,8 @@ void main() {
         expect(
           contrastRatio(fg, bg),
           greaterThanOrEqualTo(3.0),
-          reason: '$pair must meet UI/large-text contrast (>=3:1) in $themeName',
+          reason:
+              '$pair must meet UI/large-text contrast (>=3:1) in $themeName',
         );
       }
 
