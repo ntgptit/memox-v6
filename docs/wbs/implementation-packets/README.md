@@ -68,6 +68,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `2.6` | [Theme extensions/accessors](./WBS-2.6-theme-extensions.md) | Done (2026-07-19) |
 | `2.7` | [Theme assembly](./WBS-2.7-theme-assembly.md) | Done (2026-07-19) |
 | `2.8` | [Responsive foundation (XL)](./WBS-2.8-responsive-foundation.md) | Done (2026-07-19) — children A–C |
+| `2.9` | [High-contrast readiness](./WBS-2.9-high-contrast-readiness.md) | Done (2026-07-19) — readiness + explicit deferral |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.
