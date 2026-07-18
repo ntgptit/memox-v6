@@ -40,6 +40,10 @@ flowchart TD
 | Due | Learned item whose due time is reached |
 | New | Eligible Card with initial progress not yet introduced |
 
+- New = Box 0, `dueAt = null`.
+- Due = Box 1..7 có `dueAt <= nowUtc`.
+- Box 8 là mastered, không thuộc Due/New/Relearn queue.
+
 - Queue priority/order and new-card limit thuộc effective Study policy.
 - Zero due không được giả tạo due items; UI nêu đúng no-due state.
 

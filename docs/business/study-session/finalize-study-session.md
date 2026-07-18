@@ -62,6 +62,7 @@ Session complete
 - Goal contribution phát một lần với stable event id.
 - Empty/invalid summary chặn Result và đi finalize recovery.
 - Attempt ở các mastery round đều được giữ để tính lịch sử; summary Card không double-count vì một Card xuất hiện nhiều round.
+- Trước finalize, Session tổng hợp đúng một terminal SRS grade cho mỗi SRS-active Card: chỉ `correct` khi không có committed lapse evidence; có bất kỳ wrong/almost/timeout thì terminal grade là `wrong`. Việc đạt ở retry round không đổi grade này.
 
 # 6. Lifecycle
 

@@ -2,10 +2,12 @@
 
 Flow này chuyển terminal Card outcome thành next Learning Progress state theo effective SRS policy. Nó không sở hữu Study mode UI.
 
+Thuật toán source of truth là [SRS Policy v1 — Leitner 8 Box](./srs-8-box-policy.md): Box 0 là Card mới; Box 1..7 có interval `1, 3, 7, 14, 30, 60, 120` ngày; Box 8 mastered và không còn due.
+
 ## 1. Nguyên tắc đã chốt
 
 - Schedule apply tối đa một lần cho terminal Attempt/outcome id.
-- Input dùng previous progress + terminal outcome + effective policy version.
+- Input dùng previous progress + terminal grade `correct|wrong` + `policyId = leitner-8-box-v1` + injected clock.
 - Output gồm stage, due time và scheduling metrics cần thiết.
 - Relearn có thể due trong current session hoặc tương lai theo policy; UI không hard-code interval.
 - Scheduling không sửa Card content/Deck hierarchy.
@@ -21,7 +23,16 @@ Flow này chuyển terminal Card outcome thành next Learning Progress state the
 | Reviewed-only non-terminal | Không schedule |
 | Intermediate mastery-round evidence | Không schedule; chờ terminal Card outcome từ Study Session |
 
-Con số interval/ease cụ thể thuộc versioned SRS policy, không nằm trong screen/business flow khác.
+Chuyển box và interval:
+
+```text
+correct → min(currentBox + 1, 8)
+wrong   → max(currentBox - 1, 1)
+Box 1..7 due sau 1, 3, 7, 14, 30, 60, 120 ngày
+Box 8 dueAt = null
+```
+
+Card Box 0 chỉ activate vào Box 1 sau khi hoàn tất đủ năm Study Mode; intermediate mastery-round evidence không gọi scheduler.
 
 # 3. Master flow
 
@@ -45,6 +56,7 @@ flowchart TD
 - Repetitions/lapses không âm.
 - Stage transition nằm trong policy state machine.
 - Policy version được lưu/trace để reproduce decision.
+- Terminal grade dùng sticky-wrong aggregation: nếu Card có bất kỳ committed wrong/almost/timeout trong session thì grade là `wrong`, kể cả sau đó đạt ở retry round.
 - Deleted/missing Card không tạo new progress.
 
 # 5. Idempotency và concurrency

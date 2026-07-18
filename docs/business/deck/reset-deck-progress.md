@@ -62,7 +62,7 @@ Parent bổ sung `<descendant count> nested decks` trong impact summary.
 # 6. Reset semantics
 
 - Xóa/đưa scheduling state về initial chưa học theo Study domain.
-- Xóa due/interval/ease/repetition/lapse state thuộc cards trong scope.
+- Đưa current SRS state của Cards trong scope về Box 0, `dueAt = null`, repetitions/lapses về default theo `leitner-8-box-v1`; policy không dùng ease factor.
 - Không đổi card order/content, Deck counts hoặc hierarchy.
 - App-wide streak/history không bị sửa trừ khi product có policy riêng; tài liệu này không cấp quyền reset chúng.
 

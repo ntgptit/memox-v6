@@ -35,7 +35,7 @@ flowchart TD
 # 4. Reset semantics
 
 - Stage/state trở New theo initialisation policy.
-- Due/interval/ease/repetition/lapse scheduling fields trở policy defaults.
+- Current state trở `box = 0`, `dueAt = null`, repetitions/lapses về default và giữ `policyId = leitner-8-box-v1`; policy không dùng ease factor.
 - Existing Attempt/history records giữ nguyên và vẫn read-only traceable.
 - Goal/streak/completed session summaries không bị sửa ngược.
 - Hidden Card vẫn được reset nếu nằm trong confirmed scope; sau reset vẫn hidden.
@@ -71,3 +71,4 @@ flowchart TD
 - Retry/no-op idempotent.
 - Active session không bị silently invalidated.
 - Success refresh due/new projections và không rewrite historical Goal/Stats.
+- Card reset quay lại New queue, không vào Due queue cho tới khi hoàn thành lại đủ năm Study Mode và activate Box 1.
