@@ -70,6 +70,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `2.8` | [Responsive foundation (XL)](./WBS-2.8-responsive-foundation.md) | Done (2026-07-19) — children A–C |
 | `2.9` | [High-contrast readiness](./WBS-2.9-high-contrast-readiness.md) | Done (2026-07-19) — readiness + explicit deferral |
 | `2.10` | [Foundation contract tests](./WBS-2.10-foundation-contract-tests.md) | Done (2026-07-19) — wave-2 gate closed |
+| `3.1` | [Shared text/icon/tappable foundation](./WBS-3.1-shared-foundation.md) | Done (2026-07-19) |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.
