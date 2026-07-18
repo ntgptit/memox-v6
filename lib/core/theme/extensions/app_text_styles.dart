@@ -71,6 +71,22 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     ),
   );
 
+  /// Button label roles (kit `.btn`: bold at sm/base/md sizes).
+  TextStyle get buttonSm => _base.copyWith(
+    fontSize: AppTypography.fontSizeSm,
+    fontWeight: AppTypography.fontWeightBold,
+  );
+
+  TextStyle get button => _base.copyWith(
+    fontSize: AppTypography.fontSizeBase,
+    fontWeight: AppTypography.fontWeightBold,
+  );
+
+  TextStyle get buttonLg => _base.copyWith(
+    fontSize: AppTypography.fontSizeMd,
+    fontWeight: AppTypography.fontWeightBold,
+  );
+
   @override
   AppTextStyles copyWith() => const AppTextStyles();
 
