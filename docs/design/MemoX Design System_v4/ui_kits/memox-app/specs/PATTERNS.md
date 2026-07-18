@@ -71,8 +71,9 @@ filter/sort/search drops the current selection (see navigation & overlays guide 
 | Condition | Card queue | Answer save | → State / next |
 | --- | --- | --- | --- |
 | New-learning starts | eligible Box 0 snapshot | — | `stage1-review` (then 2→5 in order) |
-| Due-review starts | persisted due snapshot | — | `due-review`; never enter the five-stage pipeline |
-| Relearn starts | explicit relearn snapshot | — | `relearn`; never implicit mid-stage routing |
+| Due-review starts | persisted due snapshot | — | `due-review` using frozen `due-review-binary-v1`; never enter the five-stage pipeline |
+| Relearn starts, ≥5 distinct meanings | explicit relearn snapshot | — | `relearn` using frozen Guess plan |
+| Relearn starts, <5 distinct meanings | explicit relearn snapshot | — | `relearn-binary` using frozen binary fallback; never implicit mid-stage routing |
 | Practice starts | one selected mode + eligible scope | — | chosen mode only; no activation/SRS schedule |
 | Recall reaches 20 seconds | current answer still open | save pending | `timed-out`; reveal + terminal Timeout saved once |
 | User taps exit (X) | any | — | exit-confirm dialog; confirm → dashboard, cancel → stay |
@@ -117,10 +118,10 @@ screen:
 | --- | --- | --- |
 | Responsive / viewport / safe-area | `../../../guidelines/flutter-adaptive-layout.md` + `../../../SCOPE.md` | Tier-1 compact/medium/expanded and compact-height profiles; Android/Web safe bounds |
 | Flutter/platform presentation | `../../../guidelines/flutter-adaptive-layout.md` | shared semantics; bottom/rail and overlay presentation adapt by width/input environment |
-| Localization / i18n | `guidelines/i18n-localization.md` | externalized strings, locale date/number/plural formatting, +30–50% expansion, per-script fonts, RTL logical properties |
-| Overlays / navigation / state preservation | `guidelines/navigation-overlays.md` | one dismissable layer at a time; focus restore to trigger; scroll/search/filter preserve vs reset |
-| Keyboard / reading order / a11y | `guidelines/keyboard-focus-order.md` | DOM = reading = focus order; one heading; announced state changes; visible focus ring |
-| Component constraints & combinations | `guidelines/component-constraints-matrix.md` | text/action limits; legal prop combos; nested-interactive rule |
+| Localization / i18n | `../../../guidelines/i18n-localization.md` | externalized strings, locale date/number/plural formatting, +30–50% expansion, per-script fonts, RTL logical properties |
+| Overlays / navigation / state preservation | `../../../guidelines/navigation-overlays.md` | one dismissable layer at a time; focus restore to trigger; scroll/search/filter preserve vs reset |
+| Keyboard / reading order / a11y | `../../../guidelines/keyboard-focus-order.md` | DOM = reading = focus order; one heading; announced state changes; visible focus ring |
+| Component constraints & combinations | `../../../guidelines/component-constraints-matrix.md` | text/action limits; legal prop combos; nested-interactive rule |
 
 **Per-pattern accessibility notes.**
 - Forms (`flashcard-editor`, `import`, `export`): validation errors use `role="alert"`; the submit

@@ -12,12 +12,12 @@
 | `sourceAppVersion` | Yes | Informational; compatibility không chỉ dựa field này |
 | `snapshotId` | Yes | Stable UUID for one logical backup |
 | `contentHashAlgorithm` | Yes | `sha256` in v1 |
-| `entries[]` | Yes | Sorted canonical path, byte length, SHA-256 |
+| `entries[]` | Yes | Sorted canonical **payload** path, byte length, SHA-256; MUST exclude `manifest.json` |
 | `objectCounts` | Yes | Counts by aggregate; verified after decode |
 | `capabilities[]` | Yes | Included optional groups such as audio/account-free settings |
 | `encryption` | Yes | `none` or supported versioned descriptor; secrets never stored plaintext |
 
-Required entries: `manifest.json`, `language-pairs.jsonl`, `decks.jsonl`, `flashcards.jsonl`, `progress.jsonl`, `attempts.jsonl`, `sessions.jsonl`, `preferences.json`, `goals.jsonl`, `reminders.jsonl`. Optional binary assets live under `assets/<sha256>` and are content-addressed.
+Required archive members: `manifest.json`, `language-pairs.jsonl`, `decks.jsonl`, `flashcards.jsonl`, `progress.jsonl`, `attempts.jsonl`, `sessions.jsonl`, `preferences.json`, `goals.jsonl`, `reminders.jsonl`. `entries[]` hashes every required member except `manifest.json`; the manifest never contains a hash of itself. Optional binary assets live under `assets/<sha256>` and are content-addressed and included in `entries[]`.
 
 Account credentials, access/refresh tokens, OS permission grants, transient caches, search/statistics projections and active cryptographic secrets are never exported. Projections rebuild from source records.
 
@@ -25,6 +25,7 @@ Account credentials, access/refresh tokens, OS permission grants, transient cach
 
 - Serialize a consistent database snapshot; write temporary artifact, close it, verify every entry hash/count, then publish atomically.
 - Inspect rejects duplicate paths, path traversal, negative/overflow lengths, unsupported compression/encryption, hash mismatch and manifest/count mismatch.
+- Inspect rejects an `entries[]` row for `manifest.json`; manifest authenticity/integrity is provided by the enclosing authenticated encryption/signature boundary when enabled, while canonical schema validation always applies.
 - Parsers stream with explicit configured limits; limits are environment configuration surfaced before deep parse, never hidden magic constants in domain policy.
 - Filename is sanitized; original local paths are never embedded.
 
@@ -36,5 +37,6 @@ Account credentials, access/refresh tokens, OS permission grants, transient cach
 
 - Round-trip fixtures cover empty, representative, large/streamed and all optional capability groups.
 - Tampered/truncated/path-traversal archives fail before local mutation.
+- Fixture có manifest tự liệt kê chính nó bị reject; fixture hợp lệ chứng minh mọi payload member và không có self-hash.
 - Same logical snapshot yields stable record identities and object counts.
 - Restore Merge/Replace behavior follows [DATA-MERGE-v1](../../decision-tables/backup-sync-integrity.md).

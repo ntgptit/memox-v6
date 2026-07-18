@@ -3,8 +3,11 @@
 - Status: **Current**
 - Owner: Delivery / QA
 
-Every WBS work package resolves the following fields from its row plus the
-register. Prefix defaults are allowed; an item-specific override wins.
+Every WBS work package resolves the following fields in this deterministic
+order: WBS row → item-specific register override → longest matching prefix
+default. The first defined value wins. Prefix defaults may resolve
+`owner`, `domain`, `guard`, `decision_gate` and initial `status`; an item must
+override any field whose actual value differs.
 
 | Field | Rule |
 | --- | --- |
@@ -21,6 +24,7 @@ register. Prefix defaults are allowed; an item-specific override wins.
 | `decision_gate` | Accepted ADR/decision IDs or `none` |
 | `status` | Blocked, Ready, In progress, Done |
 | `evidence` | Test/report/ADR/trace path; mandatory for Done |
+| `implementation_packet` | Exact packet under `docs/wbs/implementation-packets/`; required for implementation items in Ready/In progress/Done |
 
 ## Acceptance and test inheritance
 
@@ -39,3 +43,14 @@ Ready requires accepted decisions, resolved sources, no open business/design P0,
 resolvable dependencies, owner assignment, fixtures/test approach, and no
 unapproved guard exception. Done requires acceptance/test IDs, evidence links,
 the consolidated verifier marker, traceability update, and zero relevant P0/P1.
+
+- Prefix status `Blocked` is the safe default; dependency completion alone never
+  promotes an item automatically.
+- `Ready` requires item-specific exact inputs and test/fixture evidence; a broad
+  glob inherited from a prefix is insufficient.
+- `Ready` implementation items also require an exact implementation packet;
+  documentation/governance-only items may use `not applicable` with reason.
+- `Done` always requires an item-specific register row with durable evidence.
+  Prefix defaults can never make a work item Done.
+- Status changes are reviewable register edits; no prose outside this register
+  silently changes delivery status.

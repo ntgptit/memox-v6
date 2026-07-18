@@ -278,7 +278,7 @@ function FormDialog({ title, subtitle, children, actions, node, scrimNode, onDis
    and legible, not a heavy saturated block. Every colour comes from the component's own flat token
    set (`--memox-snackbar-<tone>-*`, pre-composited opaque at the token layer) — no gradient /
    color-mix / raw composition here. The `action` is a caller-supplied ReactNode (an `MxLink`) so it
-   carries a real callback, the branded focus ring, and a ≥44px target — the helper never builds a
+   carries a real callback, the branded focus ring, and a ≥48px target — the helper never builds a
    raw action button. success = green, error = red, info = brand; `neutral` for tone-less. */
 function Snackbar({ text, action, tone = 'neutral', node }) {
   const t = ['success', 'error', 'info'].indexOf(tone) >= 0 ? tone : 'neutral';

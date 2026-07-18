@@ -1,0 +1,60 @@
+# MemoX implementation packet contract
+
+- Status: **Current**
+- Owner: Delivery / QA / owning feature
+
+Một WBS row mô tả delivery boundary; implementation packet biến boundary đó
+thành một đơn vị có thể giao cho developer/agent mà không phải tự phát minh
+architecture, file placement, test scope hoặc completion evidence.
+
+## Promotion rule
+
+- Mọi implementation item phải có packet trước khi chuyển sang `Ready`.
+- Packet phải được review lại khi input contract thay đổi.
+- Chỉ item có toàn bộ dependency `Done` mới được `Ready`; packet hoàn chỉnh
+  không tự vượt qua dependency.
+- Item `XL` phải có bảng child boundaries A/B/C…; mỗi child có file scope,
+  test scope và evidence độc lập. Không bắt đầu một XL item chỉ từ WBS row.
+- Chỉ item-specific register override được thay đổi status. Prefix default luôn
+  là `Blocked`.
+
+## Required packet schema
+
+1. Identity, owner, status, dependency và decision gates.
+2. Canonical inputs với exact paths/decision-table row ranges/KIT groups.
+3. In-scope và explicitly out-of-scope.
+4. Exact files: create/modify/delete/generated-do-not-edit.
+5. Exact symbols/APIs và dependency direction.
+6. State/action/error/concurrency/migration matrix khi áp dụng.
+7. Child boundaries cho item XL.
+8. Acceptance ID và concrete assertions.
+9. Test IDs, exact test files, fixtures và row-to-test mapping.
+10. Canonical verifier command và durable evidence paths.
+11. Completion procedure: update register to Done and unlock immediate children.
+
+Không dùng glob thay cho exact file list trong packet Ready. Một folder được
+phép khi packet đồng thời liệt kê exact files đầu tiên và rule cho các file được
+generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
+`lib/l10n/generated/**` không bao giờ là edit target.
+
+## Path ownership
+
+| Concern | Production root | Test/evidence root |
+| --- | --- | --- |
+| Bootstrap/router/DI | `lib/app/**` | `test/app/**` |
+| Theme/tokens/responsive | `lib/core/theme/**` | `test/core/theme/**` |
+| Deterministic infrastructure | `lib/core/{time,ids,errors,logging}/**` | `test/core/**` |
+| Domain | `lib/domain/**` | `test/domain/**` |
+| Drift/data | `lib/data/**` | `test/data/**`, `drift_schemas/**` |
+| Shared `Mx*` | `lib/presentation/shared/**` | `test/presentation/shared/**`, design evidence register |
+| Feature UI/providers | `lib/presentation/features/<feature>/**` | `test/presentation/features/<feature>/**` |
+| Localization | `lib/l10n/app_en.arb`, `lib/l10n/app_vi.arb` | localized widget/E2E tests |
+
+## Active packet index
+
+| WBS | Packet | Current status |
+| --- | --- | --- |
+| `1.1` | [Dependency baseline](./WBS-1.1-dependency-baseline.md) | **Ready** |
+
+Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
+đánh dấu trước chúng là Ready.

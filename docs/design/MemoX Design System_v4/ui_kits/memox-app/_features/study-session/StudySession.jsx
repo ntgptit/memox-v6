@@ -1,5 +1,5 @@
-/* MemoX — Study session (NewLearn 5 stages + DueReview).
-   States: stage1-review · stage2-match · stage3-guess · stage4-recall · stage5-fill · relearn · due-review · exit · resume-error · answer-save-error
+/* MemoX — Study session (NewLearn 5 stages + Relearn/DueReview plans).
+   States: stage1-review · stage2-match · stage3-guess · stage4-recall · stage5-fill · relearn · relearn-binary · due-review · exit · resume-error · answer-save-error
    Feature-local components: components/{PromptCard,StageReview,StageMatch,StageGuess,
    StageRecall,StageFill,ExitDialog,AnswerSaveErrorDialog,ResumeErrorState}.jsx */
 (function () {
@@ -13,6 +13,7 @@ const META = {
   'stage4-recall': { label: 'Stage 4 · Recall', done: 16, total: 25 },
   'stage5-fill': { label: 'Stage 5 · Fill', done: 21, total: 25 },
   'relearn': { label: 'Stage 3 · Guess', done: 12, total: 25 },
+  'relearn-binary': { label: 'Relearn · review cards', done: 4, total: 10 },
   'due-review': { label: 'Review · due cards', done: 10, total: 20 },
   'exit': { label: 'Stage 1 · Review', done: 4, total: 25 },
   'answer-save-error': { label: 'Stage 5 · Fill', done: 21, total: 25 },
@@ -20,7 +21,7 @@ const META = {
 
 const Note = window.Note;
 
-// Route a state to its stage component; due-review stays inline (not a NewLearn stage).
+// Route a state to its strategy; binary plans stay inline (not NewLearn stages).
 function Body({ state }) {
   const SS = window.MemoXStudySession;
   if (state === 'stage1-review' || state === 'exit') return <SS.StageReview />;
@@ -28,17 +29,18 @@ function Body({ state }) {
   if (state === 'stage3-guess' || state === 'relearn') return <SS.StageGuess relearn={state === 'relearn'} />;
   if (state === 'stage4-recall') return <SS.StageRecall />;
   if (state === 'stage5-fill' || state === 'answer-save-error') return <SS.StageFill />;
-  // due-review
+  const isRelearn = state === 'relearn-binary';
   return (
     <React.Fragment>
-      <Note icon="schedule" tone="warning" text="Reviewing due cards — results update the Leitner box." />
+      <Note icon={isRelearn ? "replay" : "schedule"} tone="warning"
+        text={isRelearn ? "Relearning missed cards — grade this card from the current box." : "Reviewing due cards — results update the Leitner box."} />
       <MxCard node="study-session/card" style={{ alignItems: 'center', textAlign: 'center', gap: 'var(--memox-space-3)', minHeight: 'var(--memox-size-3xl)', justifyContent: 'center' }}>
         <div style={{ fontSize: 'var(--memox-font-size-3xl)', fontWeight: 'var(--memox-font-weight-bold)' }}>학교</div>
         <div style={{ fontSize: 'var(--memox-font-size-xl)', fontWeight: 'var(--memox-font-weight-bold)' }}>school</div>
       </MxCard>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--memox-space-3)' }}>
         <MxButton variant="ghost" icon="replay" block node="study-session/due-relearn">Relearn</MxButton>
-        <MxButton variant="primary" icon="arrow_forward" block node="study-session/due-next">Next</MxButton>
+        <MxButton variant="primary" icon="arrow_forward" block node="study-session/due-next">Remembered</MxButton>
       </div>
     </React.Fragment>
   );

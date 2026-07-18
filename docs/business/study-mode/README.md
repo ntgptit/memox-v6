@@ -14,7 +14,7 @@ Study Mode là tập strategy biến Card prompt và user interaction thành can
 - Match, Guess, Recall và Fill chạy một hoặc nhiều mastery round. Round đầu nhận toàn bộ Card của stage; round kế chỉ nhận tập Card không đạt của round vừa hoàn tất.
 - Tập Card không đạt phải được khử trùng theo Card identity. Card đã đạt không xuất hiện lại trong round kế tiếp.
 - Một graded mode chỉ complete và chuyển mode khi round vừa hoàn tất có `nextRoundFailedCardIds` rỗng. Không giới hạn số mastery round.
-- Business chỉ bắt buộc typed mode identity/evidence và ownership boundaries; không bắt buộc factory, abstract base hay một class cho mỗi mode. Xem [legacy architecture note](./factory-di-architecture.md).
+- Business bắt buộc typed mode identity/evidence, ownership boundaries và `StudyModeFactory` thuần domain. Factory resolve sáu strategy: Review, Match, Guess, Recall, Fill và session-only `srsBinaryReview`. Xem [factory architecture](./factory-di-architecture.md).
 
 ## Mastery-round contract
 
@@ -25,6 +25,7 @@ Study Mode là tập strategy biến Card prompt và user interaction thành can
 | Guess | `correct` | `wrong` |
 | Recall | `correct` từ UI Remembered | `wrong` từ UI Forgot hoặc hết countdown 20 giây |
 | Fill | `correct` | `wrong` |
+| SRS Binary Review | `correct` từ Remembered | `wrong` từ Relearn |
 
 - `currentRoundCardIds` là immutable trong lúc round đang chạy; `nextRoundFailedCardIds` được tích lũy từ committed evidence của chính round đó.
 - Mỗi Card tạo tối đa một mastery classification trong một round. Riêng Match có thể có nhiều selection event nhưng classification là non-passing nếu Card từng có `wrong`/`almost` trong round.
@@ -35,6 +36,7 @@ Study Mode là tập strategy biến Card prompt và user interaction thành can
 - Missing/invalid Card được xử lý theo snapshot skip policy có audit reason; không được ghi giả là correct để thoát mastery loop.
 - Mọi Guess question bắt buộc có đúng năm lựa chọn gồm một correct và bốn distractor hợp lệ lấy từ stable session snapshot; không được giảm option count ở retry round.
 - Recall dùng Remembered/Forgot chỉ ở presentation layer. Mapper bắt buộc trả `correct/wrong`; timeout trước reveal map thành `wrong(reason = timeout)` và Card phải vào retry round.
+- `srsBinaryReview` hiển thị term + meaning rồi yêu cầu self-grade `Remembered`/`Relearn`; nó chỉ được chọn bởi versioned Due Review/Relearn plan, không xuất hiện trong Practice picker.
 
 ## Order-randomization contract
 
@@ -55,12 +57,13 @@ Study Mode là tập strategy biến Card prompt và user interaction thành can
 | [guess-card-meaning.md](./guess-card-meaning.md) | Choice generation, answer và feedback | Đã có |
 | [recall-and-self-grade.md](./recall-and-self-grade.md) | Reveal, UI Remembered/Forgot → canonical correct/wrong | Đã có |
 | [fill-card-answer.md](./fill-card-answer.md) | Text input, hint, comparison và feedback | Đã có |
+| [srs-binary-review.md](./srs-binary-review.md) | Binary self-grade cho Due Review và Relearn fallback | Đã có |
 | [map-mode-outcome.md](./map-mode-outcome.md) | Chuẩn hóa mode-specific evidence cho Session | Đã có |
 
 ## Implementation boundary
 
-- [factory-di-architecture.md](./factory-di-architecture.md) ghi rõ proposal factory/template-method cũ đã superseded và không phải implementation gate.
-- Architecture được chọn bởi accepted Flutter ADR dựa trên nhu cầu thực tế; Business chỉ giữ evidence, ownership và testability contracts.
+- [factory-di-architecture.md](./factory-di-architecture.md) là implementation gate bắt buộc cho Factory Pattern.
+- Factory/strategy chỉ validate và tạo evidence thuần domain. Attempt persistence, retry identity, checkpoint và scheduling vẫn thuộc Study Session/Learning Progress.
 
 ## Cross-object contracts
 

@@ -4,6 +4,7 @@ Các bảng trong thư mục này là executable business contracts: mỗi row c
 
 | Contract | Owner | Applies to |
 | --- | --- | --- |
+| [DECK-MIX-v1](./deck-mixed-content.md) | Deck | Exclusive content model, mixed-content rejection, cycle prevention |
 | [ST-SESSION-TYPE-v1](./study-session-types.md) | Study Session | Session type, mode plan, mutations |
 | [ST-CONTENT-CHANGE-v1](./study-session-content-changes.md) | Study Session | Edit/move/hide/delete trong active session |
 | [SM-MATCH-v1](./match-outcomes.md) | Study Mode | Match correct/wrong/almost |

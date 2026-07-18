@@ -80,6 +80,12 @@ SRS engine chỉ nhận grade binary `correct` hoặc `wrong`. Study Mode không
 
 Quy tắc “wrong sticky trong một session” giải quyết mâu thuẫn giữa mastery loop và Leitner: user vẫn phải học lại đến khi đạt để hoàn tất session, nhưng Card đã từng sai vẫn bị hạ box đúng một lần khi terminal outcome được commit.
 
+Sticky lapse không truyền sang session khác. Một `relearn` session mới đọc box đã
+persist sau lần demote và tạo terminal grade riêng. Nếu Card được chấm
+`Remembered` không có lapse trong session mới, policy áp dụng `correct` và có thể
+promote một box. Behavior này là progression mới từ current box, không rollback
+terminal outcome của session trước.
+
 ## 5. Chuyển box
 
 Với Card đã activate (`box 1..8`):
@@ -171,6 +177,7 @@ Migration v1 là initial assignment: Progress mới lưu `policyId=leitner-8-box
 - Interval cố định theo Box 1..7 là `1, 3, 7, 14, 30, 60, 120` ngày.
 - Box 8 mastered có `dueAt = null` và không nằm trong study queues.
 - Wrong trong bất kỳ mastery round nào vẫn tạo terminal wrong dù retry sau đó đạt.
+- Sticky wrong chỉ thuộc current session; Relearn session mới có thể promote từ current persisted box.
 - Intermediate Attempt không tự schedule; terminal outcome schedule đúng một lần.
 - Engine thuần, nhận clock/policy/input từ ngoài và không import Flutter/Drift/Riverpod.
 - Attempt, box transition, due time và checkpoint/finalization luôn nhất quán qua transaction.

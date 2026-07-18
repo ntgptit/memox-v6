@@ -35,7 +35,7 @@ The requirements and domain specification live at:
 docs/business/
 ```
 
-127 Markdown contracts organized by **business object / aggregate** (Deck, Language Pair, Flashcard,
+Markdown contracts organized by **business object / aggregate** (Deck, Language Pair, Flashcard,
 Study Session, Learning Progress, Study Goal, Reminder, Preferences, Account, Backup,
 Content Transfer) and supporting capabilities (Study Mode, Audio Playback, Study Streak /
 Statistics, Search, Today Dashboard). Start from `docs/business/README.md` (object catalog)

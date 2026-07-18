@@ -55,7 +55,7 @@ function walk(directory, acceptedExtensions, files = []) {
     if (['.git', '.dart_tool', 'build', 'node_modules'].includes(entry.name)) continue;
     const path = join(directory, entry.name);
     if (entry.isDirectory()) walk(path, acceptedExtensions, files);
-    if (entry.isFile() && acceptedExtensions.has(extname(entry.name).toLowerCase())) files.push(path);
+    if (entry.isFile() && (!acceptedExtensions || acceptedExtensions.has(extname(entry.name).toLowerCase()))) files.push(path);
   }
   return files;
 }
@@ -74,12 +74,20 @@ function normalizeLocalTarget(rawTarget) {
 
 function checkDocumentation() {
   const docsRoot = join(repoRoot, 'docs');
-  const files = walk(docsRoot, new Set(['.md', '.html']));
+  const allFiles = walk(docsRoot, null);
+  const linkFiles = allFiles.filter((file) => ['.md', '.html'].includes(extname(file).toLowerCase()));
+  const textExtensions = new Set([
+    '.arb', '.cjs', '.css', '.html', '.js', '.json', '.jsx', '.md', '.mjs',
+    '.svg', '.ts', '.tsx', '.txt', '.xml', '.yaml', '.yml',
+  ]);
+  const textFiles = allFiles.filter((file) => textExtensions.has(extname(file).toLowerCase()));
   const broken = [];
   const markdownLink = /\[[^\]]*\]\(([^)]+)\)/g;
   const htmlLink = /(?:href|src)=["']([^"']+)["']/gi;
 
-  for (const file of files) {
+  for (const file of textFiles) readFileSync(file, 'utf8');
+
+  for (const file of linkFiles) {
     const content = readFileSync(file, 'utf8');
     const patterns = extname(file).toLowerCase() === '.html' ? [htmlLink] : [markdownLink];
     for (const pattern of patterns) {
@@ -99,29 +107,131 @@ function checkDocumentation() {
 
   const wbsPath = join(repoRoot, 'docs', 'wbs', 'memox-v6-development-wbs.md');
   const duplicateIds = [];
+  const unresolvedDependencies = [];
+  const dependencyCycles = [];
+  let numericWbsCount = 0;
   if (existsSync(wbsPath)) {
+    const wbsContent = readFileSync(wbsPath, 'utf8');
     const ids = [];
     const rowId = /^\|\s*((?:\d+\.)+\d+|DG-\d+|FD-\d+)(?:\s+CP)?\s*\|/gm;
-    for (const match of readFileSync(wbsPath, 'utf8').matchAll(rowId)) ids.push(match[1]);
+    for (const match of wbsContent.matchAll(rowId)) ids.push(match[1]);
     for (const id of new Set(ids)) {
       if (ids.filter((candidate) => candidate === id).length > 1) duplicateIds.push(id);
     }
+
+    const numericIds = new Set(ids.filter((id) => /^\d/.test(id)));
+    numericWbsCount = numericIds.size;
+    const graph = new Map([...numericIds].map((id) => [id, []]));
+    const expandRange = (start, end) => {
+      if (!end) return [start];
+      const startParts = start.split('.').map(Number);
+      const endParts = end.split('.').map(Number);
+      const sameParent = startParts.length === endParts.length
+        && startParts.slice(0, -1).every((part, index) => part === endParts[index]);
+      if (!sameParent || endParts.at(-1) < startParts.at(-1)) return [start, end];
+      return Array.from(
+        { length: endParts.at(-1) - startParts.at(-1) + 1 },
+        (_, index) => [...startParts.slice(0, -1), startParts.at(-1) + index].join('.'),
+      );
+    };
+
+    for (const line of wbsContent.split(/\r?\n/)) {
+      const cells = line.split('|').slice(1, -1).map((cell) => cell.trim());
+      if (cells.length < 4) continue;
+      const itemId = cells[0].replace(/\s+CP$/, '');
+      if (!numericIds.has(itemId)) continue;
+      const dependencyCell = cells[3].replaceAll('`', '');
+      const dependencies = [];
+      const rangePattern = /(\d+(?:\.\d+)+)(?:\s*[–-]\s*(\d+(?:\.\d+)+))?/g;
+      for (const match of dependencyCell.matchAll(rangePattern)) {
+        dependencies.push(...expandRange(match[1], match[2]));
+      }
+      for (const dependency of new Set(dependencies)) {
+        if (!numericIds.has(dependency)) unresolvedDependencies.push(`${itemId} -> ${dependency}`);
+        else graph.get(itemId).push(dependency);
+      }
+    }
+
+    const visiting = new Set();
+    const visited = new Set();
+    const visit = (id, trail = []) => {
+      if (visiting.has(id)) {
+        dependencyCycles.push([...trail, id].join(' -> '));
+        return;
+      }
+      if (visited.has(id)) return;
+      visiting.add(id);
+      for (const dependency of graph.get(id)) visit(dependency, [...trail, id]);
+      visiting.delete(id);
+      visited.add(id);
+    };
+    for (const id of numericIds) visit(id);
+
+    const registerPath = join(repoRoot, 'docs', 'traceability', 'work-item-register.md');
+    const prefixes = [];
+    const itemStatuses = new Map();
+    const readyPackets = new Map();
+    if (existsSync(registerPath)) {
+      const registerContent = readFileSync(registerPath, 'utf8');
+      const prefixPattern = /^\|\s*`(\d+(?:\.\d+)*\.\*)`\s*\|/gm;
+      for (const match of registerContent.matchAll(prefixPattern)) {
+        prefixes.push(match[1].slice(0, -1));
+      }
+      for (const line of registerContent.split(/\r?\n/)) {
+        const cells = line.split('|').slice(1, -1).map((cell) => cell.trim());
+        if (cells.length < 2) continue;
+        const itemId = cells[0].replaceAll('`', '');
+        if (!numericIds.has(itemId)) continue;
+        const status = cells[1].replaceAll('*', '');
+        if (!['Ready', 'Done'].includes(status)) continue;
+        itemStatuses.set(itemId, status);
+        if (status !== 'Ready') continue;
+        const packetMatch = (cells[5] ?? '').match(/`(docs\/wbs\/implementation-packets\/[^]+?\.md)`/);
+        if (!packetMatch) {
+          unresolvedDependencies.push(`${itemId} -> Ready item missing implementation packet`);
+          continue;
+        }
+        readyPackets.set(itemId, packetMatch[1]);
+      }
+    }
+    for (const id of numericIds) {
+      if (!prefixes.some((prefix) => id.startsWith(prefix))) {
+        unresolvedDependencies.push(`${id} -> missing traceability prefix default`);
+      }
+    }
+    for (const [id, packet] of readyPackets) {
+      const packetPath = join(repoRoot, ...packet.split('/'));
+      if (!existsSync(packetPath)) {
+        unresolvedDependencies.push(`${id} -> missing packet ${packet}`);
+        continue;
+      }
+      const packetContent = readFileSync(packetPath, 'utf8');
+      for (const heading of ['## Canonical inputs', '## Scope', '## Acceptance and test procedure']) {
+        if (!packetContent.includes(heading)) {
+          unresolvedDependencies.push(`${id} -> packet missing section ${heading}`);
+        }
+      }
+      for (const dependency of graph.get(id)) {
+        if (itemStatuses.get(dependency) !== 'Done') {
+          unresolvedDependencies.push(`${id} -> Ready dependency ${dependency} is not Done`);
+        }
+      }
+    }
   }
 
-  if (broken.length || duplicateIds.length) {
+  if (broken.length || duplicateIds.length || unresolvedDependencies.length || dependencyCycles.length) {
     if (broken.length) process.stderr.write(`Broken local links:\n${broken.join('\n')}\n`);
     if (duplicateIds.length) process.stderr.write(`Duplicate WBS IDs: ${duplicateIds.join(', ')}\n`);
+    if (unresolvedDependencies.length) process.stderr.write(`Unresolved WBS/trace references:\n${unresolvedDependencies.join('\n')}\n`);
+    if (dependencyCycles.length) process.stderr.write(`WBS dependency cycles:\n${dependencyCycles.join('\n')}\n`);
     throw new Error('documentation contract check failed');
   }
 
-  results.push({ name: 'documentation links and IDs', status: 'pass' });
-  process.stdout.write(`Checked ${files.length} Markdown/HTML files; no broken local links or duplicate WBS IDs.\n`);
-}
-
-function guardSubmoduleIsDirty() {
-  const guardRoot = join(repoRoot, 'tools', 'code-verification-guard');
-  if (!existsSync(join(guardRoot, '.git'))) return false;
-  return output('git', ['status', '--porcelain'], guardRoot).length > 0;
+  results.push({ name: 'documentation inventory, links, WBS graph and traceability', status: 'pass' });
+  process.stdout.write(
+    `Inventoried ${allFiles.length} docs files; read ${textFiles.length} textual files; `
+    + `checked ${linkFiles.length} Markdown/HTML links and ${numericWbsCount} numeric WBS items.\n`,
+  );
 }
 
 function writePassMarker(mode) {
@@ -144,12 +254,17 @@ try {
     ['docs/design/mobile-design-kit-audit-v5/scripts/validate.py'],
   );
 
-  if (guardSubmoduleIsDirty()) {
+  const guardRoot = join(repoRoot, 'tools', 'code-verification-guard');
+  const guardTests = [
+    'tests/test_memox_architecture_guard_rules.py',
+    'tests/test_memox_v6_ruleset_contract.py',
+  ];
+  if (guardTests.every((path) => existsSync(join(guardRoot, path)))) {
     command(
       'guard ruleset regression tests',
       'pytest',
-      ['-q', 'tests/test_memox_architecture_guard_rules.py', 'tests/test_memox_v6_ruleset_contract.py'],
-      { cwd: join(repoRoot, 'tools', 'code-verification-guard') },
+      ['-q', ...guardTests],
+      { cwd: guardRoot },
     );
   }
 

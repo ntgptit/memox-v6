@@ -59,7 +59,7 @@ screens, to `tool/app_golden/shoot.mjs` TARGETS. Happy-path-only changes are rej
   `node tool/ui_kit_shots/contrast.mjs` (wired into `npm run verify:ui-kit`).
 - **Focus:** interactive elements expose a visible `:focus-visible` ring
   (`--memox-focus-ring` / `--memox-ring-focus`).
-- **Touch target:** ≥ 44×44 (kit baseline `--memox-touch-min: 48px`).
+- **Touch target:** ≥ 48×48, using kit baseline `--memox-touch-min: 48px`.
 - **Semantics:** correct `role` / `aria-*`; these never change rendered pixels.
 - **Reduced motion / high contrast:** respect `prefers-reduced-motion`
   (`--memox-duration-none`) and the additive `[data-hc='true']` profile where relevant.

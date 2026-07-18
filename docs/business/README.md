@@ -11,7 +11,7 @@ Thư mục này tổ chức đặc tả theo core business object/aggregate và 
 | --- | --- |
 | BD-001 | Tier 1 platforms are responsive Web and Android; iOS/Windows/macOS/Linux are roadmap |
 | BD-002 | Deck content state is exclusive Empty/Leaf/Parent; mixed content and direct Leaf↔Parent conversion are invalid |
-| BD-003 | Session types are `newLearning`, `dueReview`, `relearn`, `practice`; New Learning runs all five ordered modes, Practice selects one |
+| BD-003 | Session types are `newLearning`, `dueReview`, `relearn`, `practice`; New Learning runs five ordered modes, Due Review uses `srsBinaryReview`, Relearn snapshots Guess or its binary fallback, and Practice selects one user-facing mode |
 | BD-004 | Mode Picker selection does not start a session; explicit `Start session` is required; Guess needs 5 distinct normalized meanings |
 | BD-005 | Recall uses a deterministic 20-second active-interaction timer; timeout maps to canonical wrong |
 | BD-006 | `leitner-8-box-v1` is fixed/read-only in Settings |

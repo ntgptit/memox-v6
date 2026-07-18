@@ -8,7 +8,7 @@ MxIconButton — a round, icon-only action; transparent by default, `filled` (su
 
 **When not to use** — Not for primary text actions (use `MxButton`). Not when a visible label is essential to comprehension. Not as a navigation destination (use `MxBottomNav`).
 
-**States** — variants `plain`/`filled`/`primary`; size `sm`; hover / active / `:focus-visible` ring. No disabled variant is modeled — omit the action instead of showing a dead control. RN: `Pressable`, min 44×44 target, `accessibilityLabel` required.
+**States** — variants `plain`/`filled`/`primary`; size `sm`; hover / active / `:focus-visible` ring. No disabled variant is modeled — omit the action instead of showing a dead control. Flutter: semantic button, minimum 48×48 logical-px target and label required.
 
 **Content limits / i18n** — Exactly one icon; `ariaLabel` is REQUIRED and must be a human label ("Back", "More options"), never the raw ligature. Externalise/translate `ariaLabel`. RTL: directional icons (`arrow_back`, `chevron_*`) must mirror; symmetric icons don't.
 

@@ -1,6 +1,6 @@
 # SRS8-v1 — Leitner 8 Box exhaustive decision table
 
-Source policy: [SRS Policy v1](../business/learning-progress/srs-8-box-policy.md). `nowUtc` là injected instant; một day = 24 hours. IDs `SRS8-001..016` preserve the canonical summary IDs in the policy document.
+Source policy: [SRS Policy v1](../business/learning-progress/srs-8-box-policy.md). `nowUtc` là injected instant; một day = 24 hours. IDs `SRS8-001..028` are the complete v1 executable contract.
 
 | ID | Current/Given | Event | Next/Then | `dueAt` |
 | --- | --- | --- | --- | --- |

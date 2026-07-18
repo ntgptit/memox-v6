@@ -14,8 +14,9 @@ Study Session sở hữu một lần học từ start snapshot tới finalize. D
 - Exit không âm thầm mất progress đã persist.
 - Finalize idempotent; retry không nhân đôi result/progress.
 - Mỗi session có đúng một `sessionType`: `newLearning`, `dueReview`, `relearn` hoặc `practice`.
-- `newLearning` bắt buộc hoàn tất `Review → Match → Guess → Recall → Fill`; `practice` chọn đúng một mode; `dueReview` và `relearn` dùng queue riêng và không được giả thành new-learning pipeline.
+- `newLearning` bắt buộc hoàn tất `Review → Match → Guess → Recall → Fill`; `practice` chọn đúng một user-facing mode; `dueReview` dùng `due-review-binary-v1`; `relearn` snapshot `relearn-guess-v1` khi đủ pool hoặc `relearn-binary-v1` khi không đủ và không được giả thành new-learning pipeline.
 - Practice không activate Box 0, không schedule SRS và không đóng góp Goal/Streak trong v1.
+- Mode plan được resolve đúng một lần trước Start, persist cùng snapshot và không đổi khi Retry/Resume dù dữ liệu ngoài session thay đổi.
 
 Canonical decision table: [ST-SESSION-TYPE-v1](../../decision-tables/study-session-types.md).
 

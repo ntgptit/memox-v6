@@ -14,6 +14,7 @@ must not redefine it.
 | Design acceptance gates | [`design/mobile-design-kit-audit-v5/README.md`](./design/mobile-design-kit-audit-v5/README.md) | Design System / Accessibility | Current checklist |
 | Database and migrations | [`database/README.md`](./database/README.md) | Data | Accepted baseline |
 | Delivery plan | [`wbs/memox-v6-development-wbs.md`](./wbs/memox-v6-development-wbs.md) | Delivery | Baseline with accepted decisions |
+| Ready execution packets | [`wbs/implementation-packets/README.md`](./wbs/implementation-packets/README.md) | Delivery / QA | Current; WBS 1.1 Ready |
 | Traceability and work-item metadata | [`traceability/README.md`](./traceability/README.md) | Delivery / QA | Current |
 | Code guard | [`code-verification-guard.md`](./code-verification-guard.md) | Platform / Guard | Current enforced contract |
 
@@ -23,6 +24,7 @@ Cross-cutting supporting contracts:
 - [`architecture/tier1-resource-budgets.md`](./architecture/tier1-resource-budgets.md)
 - [`business/account/cloud-service-gate.md`](./business/account/cloud-service-gate.md)
 - [`audits/documentation-remediation-2026-07-18.md`](./audits/documentation-remediation-2026-07-18.md)
+- [`audits/documentation-coverage-2026-07-19.md`](./audits/documentation-coverage-2026-07-19.md)
 
 ## Stop rule
 
