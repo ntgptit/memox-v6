@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:memox_v6/core/theme/responsive/app_breakpoints.dart';
+import 'package:memox_v6/core/theme/tokens/app_sizes.dart';
 import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 
 /// Adaptive family values — child B of WBS 2.8.
@@ -73,11 +74,47 @@ final class AdaptiveLayout {
   bool get usesBottomNavigation => screenClass.isCompactAny;
 
   bool get usesNavigationRail => screenClass.isMediumOrWider;
+
+  /// Pane composition per WBS §5.3 (child C): single pane on compact
+  /// classes, an optional compact two-region layout on medium, optional
+  /// list/detail from expanded up.
+  PaneRule get paneRule => switch (screenClass) {
+    ScreenClass.compactMobile || ScreenClass.compact => PaneRule.single,
+    ScreenClass.medium => PaneRule.optionalTwoRegion,
+    ScreenClass.expanded || ScreenClass.large => PaneRule.optionalListDetail,
+  };
+
+  /// Large class never stretches phone surfaces: content is centered and
+  /// capped by [maxWidthFor].
+  bool get centersCappedContent => screenClass == ScreenClass.large;
 }
 
-/// Feature-facing adaptive accessors (WBS 2.8 child B).
+/// Pane composition options (WBS §5.3).
+enum PaneRule { single, optionalTwoRegion, optionalListDetail }
+
+/// Component values that adapt with the window (WBS 2.8 child C).
+///
+/// Each value is grounded in a kit component contract; new entries are
+/// added only when their owning `Mx*` spec lands (3.x).
+@immutable
+final class AdaptiveComponent {
+  const AdaptiveComponent._();
+
+  // Current values are class-independent caps; the class-taking factory
+  // keeps the call-site contract stable for when class-dependent values
+  // arrive with their owning Mx specs.
+  factory AdaptiveComponent.of(ScreenClass _) => const AdaptiveComponent._();
+
+  /// Dialog panel cap on wide screens (kit `.dialog` max-width =
+  /// `--memox-size-5xl`); panels stay full-width below it.
+  double get dialogMaxWidth => AppSizes.size5xl;
+}
+
+/// Feature-facing adaptive accessors (WBS 2.8 children B–C).
 extension AppAdaptiveContext on BuildContext {
   AdaptiveSpacing get spacing => AdaptiveSpacing.of(screenClass);
 
   AdaptiveLayout get layout => AdaptiveLayout.of(screenClass);
+
+  AdaptiveComponent get component => AdaptiveComponent.of(screenClass);
 }
