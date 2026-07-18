@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **Ready** — child A Done (2026-07-19); children B–C pending |
+| Status | **Ready** — children A–B Done (2026-07-19); child C pending |
 | Owner/domain | Design System + Flutter UI / Responsive |
 | Depends on | `2.7` — Done |
 | Decision gates | DG-02 (ADR-002 window matrix) |
@@ -27,8 +27,12 @@
 | Child | Boundary | Status |
 | --- | --- | --- |
 | A | Screen classes: `AppBreakpoints`, `ScreenClass.fromWidth`, `ScreenInfo`, `context.screenClass`/`context.screenInfo`; boundary tests at every §5.3 width | **Done** (2026-07-19) |
-| B | Adaptive family values: per-class gutters/density (`context.spacing`), content-width caps (`context.layout`), component adaptive values (`context.component`) | Pending |
-| C | Grid/pane rules (list/detail thresholds), resize/state-restoration tests across class transitions | Pending |
+| B | Adaptive family values: per-class gutters + compact-mobile density flag (`context.spacing`), kit content-width caps + navigation-container rule (`context.layout`) | **Done** (2026-07-19) |
+| C | Grid/pane rules (list/detail thresholds), `context.component` adaptive values (grounded in the Mx component specs they serve), resize/state-restoration tests across class transitions | Pending |
+
+Boundary note: `context.component` moved from B to C so its values are
+grounded in real component consumers instead of invented ahead of the `Mx*`
+specs (3.x); §5.3 contract coverage is unchanged.
 
 ## Scope — child A (this delivery)
 

@@ -67,7 +67,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `2.5` | [Motion/icon tokens](./WBS-2.5-motion-icon-tokens.md) | Done (2026-07-19) |
 | `2.6` | [Theme extensions/accessors](./WBS-2.6-theme-extensions.md) | Done (2026-07-19) |
 | `2.7` | [Theme assembly](./WBS-2.7-theme-assembly.md) | Done (2026-07-19) |
-| `2.8` | [Responsive foundation (XL)](./WBS-2.8-responsive-foundation.md) | **Ready** — child A Done, B–C pending |
+| `2.8` | [Responsive foundation (XL)](./WBS-2.8-responsive-foundation.md) | **Ready** — children A–B Done, C pending |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.
