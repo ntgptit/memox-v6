@@ -73,7 +73,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `3.1` | [Shared text/icon/tappable foundation](./WBS-3.1-shared-foundation.md) | Done (2026-07-19) |
 | `3.2` | [`MxButton` family](./WBS-3.2-mx-button.md) | Done (2026-07-19) |
 | `3.3` | [`MxTextField` and form foundation (XL)](./WBS-3.3-mx-text-field.md) | Done (2026-07-19) — children A–C |
-| `3.4` | [`MxCard`, list and surface primitives (XL)](./WBS-3.4-card-list-surfaces.md) | **Ready** — children A–B Done, C pending |
+| `3.4` | [`MxCard`, list and surface primitives (XL)](./WBS-3.4-card-list-surfaces.md) | Done (2026-07-19) — children A–C |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.

@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **Ready** — children A–B Done (2026-07-19); child C pending |
+| Status | **Done** (2026-07-19) — children A–C complete |
 | Owner/domain | Flutter UI + Accessibility / Shared `Mx*` |
 | Depends on | `3.1` — Done |
 | Decision gates | DG-02, DG-05 |
@@ -27,7 +27,7 @@
 | --- | --- | --- |
 | A | `MxCard`: five variants, padding steps, foreground inheritance for brand fills, interactive behavior (tap/hover-lift/press-scale/focus/semantics), long-content wrap evidence | **Done** (2026-07-19) |
 | B | List primitives: `MxList` (standard space-3 inter-item gap, token-only overrides; large lazy lists reuse the gap via separators in the library wave — row anatomy is feature composition per the kit) and `MxIconTile` (48/60 squares on tile/lg radii, five soft tones with the kit's accent-on-soft rule, solid fill, decorative-by-default semantics) | **Done** (2026-07-19) |
-| C | `MxSectionHeader` (title/caption/action), divider primitives, semantic tap-behavior matrix across the family | Pending |
+| C | `MxSectionHeader` (section-title role md/bold/tight, caption, single trailing accent action with tap/Enter/Space and focus states), `MxDivider` (theme hairline), and the semantic tap-behavior matrix test across the family (interactive surfaces expose button semantics; static surfaces never) | **Done** (2026-07-19) |
 
 ## Scope — child A (this delivery)
 
