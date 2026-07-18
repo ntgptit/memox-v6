@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **Ready** — child A Done (2026-07-19); children B–C pending |
+| Status | **Ready** — children A–B Done (2026-07-19); child C pending |
 | Owner/domain | Flutter UI + Accessibility / Shared `Mx*` |
 | Depends on | `2.10`, `3.1` — Done |
 | Decision gates | DG-02, DG-05 |
@@ -27,7 +27,7 @@
 | Child | Boundary | Status |
 | --- | --- | --- |
 | A | `MxContentShell` (class-driven gutter, optional centered width cap, flush) + `MxScaffold` core (slots, safe areas, default body scrolling with an opt-out for self-scrolling bodies) | **Done** (2026-07-19) |
-| B | Constrained shells: `MxListScaffold` (list cap, flush lazy body), `MxFormScaffold` (reading cap), `MxStudyScaffold` (study cap) preconfiguring the frame | Pending |
+| B | Constrained shells in `mx_constrained_scaffolds.dart`: `MxListScaffold` (lazy `ListView.separated` with space-3 separators and gutter padding, list cap centered, empty-state slot at zero items), `MxFormScaffold` (reading cap, scrolling), `MxStudyScaffold` (study cap, scroll opt-out for fixed stage compositions) | **Done** (2026-07-19) |
 | C | Retained-composition and stress evidence: RTL mirroring, safe-area insets, empty/short-viewport matrix across the family | Pending |
 
 ## Scope — child A (this delivery)
