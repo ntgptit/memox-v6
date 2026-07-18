@@ -71,6 +71,16 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     ),
   );
 
+  /// Section-header title role (kit `.section-head__title`: md/bold/tight).
+  TextStyle get sectionTitle => _base.copyWith(
+    fontSize: AppTypography.fontSizeMd,
+    fontWeight: AppTypography.fontWeightBold,
+    letterSpacing: AppTypography.letterSpacingFor(
+      AppTypography.letterSpacingTightEm,
+      AppTypography.fontSizeMd,
+    ),
+  );
+
   /// Field-group label role (kit `.field-group__label`: sm/semibold).
   TextStyle get fieldLabel => _base.copyWith(
     fontSize: AppTypography.fontSizeSm,
