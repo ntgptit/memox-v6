@@ -214,8 +214,8 @@ whose dependencies are not Done.
 
 | Status | WBS | Reason / next action |
 | --- | --- | --- |
-| Done | `0.1–0.6`, `1.1–1.4` | Durable evidence is in the work-item register. |
-| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Next promotion candidates once packeted: `1.5`, `1.6`, `1.9`. |
+| Done | `0.1–0.6`, `1.1–1.5` | Durable evidence is in the work-item register. |
+| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Next promotion candidates once packeted: `1.6`, `1.7`, `1.9`. |
 
 For an XL row, the packet must split child boundaries even when the stable WBS
 ID remains unchanged. This keeps dependency IDs stable while allowing one

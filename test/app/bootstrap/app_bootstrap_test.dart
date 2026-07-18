@@ -1,8 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/app/bootstrap/app_bootstrap.dart';
+import 'package:memox_v6/core/logging/app_logger.dart';
+import 'package:memox_v6/l10n/generated/app_localizations.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +51,81 @@ void main() {
       expect(reported, hasLength(1));
       expect(reported.single.exception, isA<StateError>());
       expect(reported.single.stack, isNotNull);
+    });
+  });
+
+  group('default pipeline', () {
+    late FlutterExceptionHandler? previousOnError;
+    late ErrorCallback? previousPlatformOnError;
+    late ErrorWidgetBuilder previousErrorWidgetBuilder;
+    late LogSink previousSink;
+    late List<LogRecord> records;
+
+    setUp(() {
+      previousOnError = FlutterError.onError;
+      previousPlatformOnError = PlatformDispatcher.instance.onError;
+      previousErrorWidgetBuilder = ErrorWidget.builder;
+      previousSink = AppLogger.sink;
+      records = <LogRecord>[];
+      AppLogger.sink = records.add;
+    });
+
+    tearDown(() {
+      FlutterError.onError = previousOnError;
+      PlatformDispatcher.instance.onError = previousPlatformOnError;
+      ErrorWidget.builder = previousErrorWidgetBuilder;
+      AppLogger.sink = previousSink;
+    });
+
+    test('reportToAppLogger emits a fatal record', () {
+      reportToAppLogger(
+        FlutterErrorDetails(
+          exception: StateError('pipeline failure'),
+          stack: StackTrace.current,
+        ),
+      );
+
+      expect(records.single.level, LogLevel.fatal);
+      expect(records.single.message, contains('pipeline failure'));
+      expect(records.single.error, isA<StateError>());
+    });
+
+    test('installGlobalErrorHandlers replaces ErrorWidget.builder', () {
+      installGlobalErrorHandlers(reportToAppLogger);
+
+      final widget = ErrorWidget.builder(
+        FlutterErrorDetails(exception: StateError('build failure')),
+      );
+
+      expect(widget, isA<SafeBuildErrorSurface>());
+    });
+
+    testWidgets('safe surface shows localized copy under the app', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: SafeBuildErrorSurface(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Something went wrong.'), findsOneWidget);
+    });
+
+    testWidgets('safe surface degrades to an icon without localizations', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: SafeBuildErrorSurface(),
+        ),
+      );
+
+      expect(find.byIcon(Icons.error_outline), findsOneWidget);
     });
   });
 
