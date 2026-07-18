@@ -214,8 +214,15 @@ whose dependencies are not Done.
 
 | Status | WBS | Reason / next action |
 | --- | --- | --- |
-| Done | `0.1–0.6`, `1.1–1.6`, `1.9` | Durable evidence is in the work-item register. |
-| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Next promotion candidates once packeted: `1.7`, `1.10`. |
+| Done | `0.1–0.6`, `1.1–1.6`, `1.9`, `2.1` | Durable evidence is in the work-item register. |
+| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Next promotion candidates once packeted: `2.2`–`2.5`. |
+
+Sequencing note (2026-07-19): `1.7` (developer fixtures) and `1.10` (shared
+test infrastructure) declare only wave-1 dependencies, but their deliverables
+(paused-session/due-card seeds, in-memory Drift and opener harness) require
+the database layer from `4.1+`. Their packets are deferred until those inputs
+exist; the `4.10` foundation gate — which requires `1.8–1.11` — still holds.
+The token→theme stream (`2.x`) proceeds first as the active vertical slice.
 
 For an XL row, the packet must split child boundaries even when the stable WBS
 ID remains unchanged. This keeps dependency IDs stable while allowing one
