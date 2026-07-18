@@ -9,6 +9,7 @@ Flow này tìm Deck và Flashcard theo query trong Library index mà không thay
 - Result luôn mang stable id, type và Deck path đủ phân biệt.
 - Hidden/deleted content tuân visibility policy tại thời điểm trả kết quả.
 - Rapid typing không để response cũ ghi đè query mới.
+- Normalize/rank theo [search-rank-v1](./README.md#ranking-policy-search-rank-v1); UI không tự re-sort result.
 
 ## 2. Master flow
 
@@ -49,3 +50,4 @@ flowchart TD
 - Deck/Card trùng tên vẫn mở đúng object qua id/path.
 - Blank và no-results là hai state khác nhau.
 - Search không mutate Deck/Card hoặc bypass visibility policy.
+- Exact/prefix/contained tier và stable tie-break có golden tests cho multilingual/duplicate paths.

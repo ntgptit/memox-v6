@@ -19,7 +19,16 @@
   --memox-space-12: 96px;
 
   /* layout rhythm */
-  --memox-gutter: 16px; /* screen edge padding (phone) — contract: screen horizontal padding = 16 */
+  --memox-gutter: 16px; /* compact screen edge padding */
+  /* Additive adaptive-layout roles. Values stay on the 4px grid. CSS prototypes
+     consume the width roles; Flutter maps them to named layout constants because
+     custom properties cannot drive media-query boundaries. */
+  --memox-gutter-medium: 24px;
+  --memox-gutter-expanded: 32px;
+  --memox-content-width-reading: 640px;
+  --memox-content-width-study: 720px;
+  --memox-content-width-list: 1200px;
+  --memox-content-width-dashboard: 1280px;
   /* Status-bar / notch inset above every app bar. Kit renders a fixed 24; on a real device
      the env() inset wins when larger. Production RN maps this to the SafeAreaView top inset. */
   --memox-safe-area-top: max(env(safe-area-inset-top, 0px), 24px);

@@ -9,7 +9,7 @@ only) for the `import` (dup-warning) and `mode-picker` (not-enough) banners.
   text="8 cards already exist — import anyway?" />
 
 <window.ActionCallout node="mode-picker/not-enough" icon="info"
-  text="This deck needs at least 4 words to play."
+  text="This deck needs at least 5 distinct meanings to play Guess."
   action={<MxButton variant="primary" size="sm" node="mode-picker/add-cards">Add words</MxButton>} />
 ```
 

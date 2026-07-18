@@ -1,117 +1,148 @@
-# Scope statement — MemoX Design System
+# Scope statement — MemoX Design System v4
 
-> Closes audit items **KIT-01-02** (no Current/Future/Deprecated status field),
-> **KIT-01-06** (no Supported/Not-supported/Planned scope matrix), **KIT-32-06**
-> (foldable/split-view/hinge support statement), **KIT-33-01…33-05** (platform-profile /
-> platform-parity scope), **KIT-36-06** (portrait-only statement), and the scope portions
-> of **KIT-13-05** / **KIT-37** (RTL / i18n scope).
+> Product decisions ratified 2026-07-18. This document is the canonical design-scope
+> contract. It supersedes the historical React Native / phone-portrait assumptions while
+> preserving every frozen `--memox-*`, `Mx*`, and `data-mx-node` identifier.
 
-This document states, explicitly, what the kit **supports**, what it **does not
-support**, and what is **planned**. Anything not listed as supported is out of scope and
-must not be assumed to work. This replaces the previously silent phone-portrait
-assumption.
+## Product and implementation target
 
-## Domain model
+MemoX v6 is a **Flutter, local-first, multi-platform application**. The CSS, HTML and JSX in
+this kit are reference/prototype artifacts; production maps the same values and semantic ids to
+Flutter `ThemeData`, `ThemeExtension`s and `Mx*` widgets.
 
-The kit models **one `Deck` object**, distinguished by `parentId`:
-
-- `parentId: null` → a **root deck** (listed in the Library).
-- `parentId: <deck id>` → a **nested deck** (shown in the UI as a deck inside another deck).
-
-There is **no separate "Subdeck" model** — a "subdeck" is only a Deck one level down. A Deck
-holds nested decks (a `children` count) and/or cards. Hierarchy: **Library › Deck (→ nested Deck…)
-› Card** — no Folder / Collection / Category / Workspace / Notebook layer.
-
-Because a nested deck IS a Deck, the kit models **one deck-list screen** — `library` — for every
-level: it renders the root (`parentId: null`, bottom-nav tab) and delegates its `nested-*` states
-(a deck's child decks: pushed chrome, back + breadcrumb) to the same `SubdeckList` render module.
-The standalone `subdeck-list` screen entry is retired (folded into `library`).
-
-User-facing copy and internal component names use "Deck" / "nested deck" (`DeckCard`,
-`DeckRowCard`, `CreateDeckSheet`). Per the AGENTS.md golden rule the group `SubdeckList`, its
-render module, and the `subdeck-*` / `subdeck-list/*` `data-mx-node` ids stay **stable** (frozen
-app-mapping contract — the `library` nested delegation renders those exact ids) even though the
-display reads "Deck".
-
-## Supported (in scope, verified)
-
-| Dimension | Supported value | Evidence |
+| Tier | Platform/profile | Release expectation |
 | --- | --- | --- |
-| Target platform | **React Native** app; CSS/HTML kit is the design-reference/prototyping layer | `readme.md`, `SKILL.md` |
-| Form factor | **Phone, portrait** | `ui_kits/memox-app/` gallery |
-| Reference frame | **390 × 780** portrait; parity shot frame 390×780 | `tool/parity/verify-app-parity.mjs`, kit `shots/` |
-| Themes | **Light** (`:root`) and **dark** (`[data-theme='dark']`) | `tokens/colors.css`; 168 light + 168 dark shots |
-| Visual language | **One** visual language across iOS + Android — no per-platform adaptation | this document (§Platform) |
-| Typography | Plus Jakarta Sans variable (200–800), identical on both platforms | `tokens/typography.css` |
-| Icons | Material Symbols Rounded (CDN), identical on both platforms | `readme.md` iconography |
-| Touch targets | ≥ 44×44 (baseline `--memox-touch-min: 48px`), identical on both platforms | `tokens/spacing.css` |
-| Language / direction | **English, LTR** placeholder content | `_features/**` |
+| **Tier 1** | Android phone and tablet; Flutter Web on phone, tablet and desktop browsers | Must satisfy responsive reflow, portrait/landscape where the window permits it, keyboard/pointer, safe-area and accessibility gates before release. |
+| **Tier 2 / roadmap** | iOS, Windows, macOS and Linux | Preserve framework-neutral contracts; platform certification and platform-specific QA are deferred. |
+| **Deferred profile** | RTL application chrome | New layout uses logical direction and must remain RTL-ready; v1 ships `en` and `vi`, both LTR. |
 
-## Not supported (out of scope, not planned)
+Android foldables use the Tier-1 window-size profiles. A separated hinge must be treated as an
+unsafe region; a dedicated dual-pane posture is roadmap work until runtime hinge evidence exists.
 
-| Dimension | Status | Note |
+## Domain decisions reflected by the kit
+
+### Deck kinds are exclusive
+
+There is one `Deck` aggregate, with three mutually exclusive kinds:
+
+- **Empty** — no direct cards and no child decks; the first content choice establishes the kind.
+- **Leaf** — owns direct flashcards and has no child decks.
+- **Parent** — owns child decks and has no direct flashcards.
+
+A nested deck is still a Deck (`parentId != null`), not a separate Subdeck aggregate. There is no
+mixed Deck and **no Leaf→Parent conversion flow**. A user who needs a different structure creates
+a new Parent Deck and explicitly moves content through a separately specified transfer operation.
+Historical `convert-*` shot/state identifiers are deprecated compatibility ids and are not valid
+entry states or implementation requirements; they must not schedule a conversion mutation.
+
+Hierarchy remains **Library › Deck (→ nested Deck…) › Flashcard**. Frozen `SubdeckList` names and
+`subdeck-*` / `subdeck-list/*` ids remain compatibility identifiers; user-facing copy says “Deck”.
+
+### Study entry points
+
+| Session type | Entry | Contract |
 | --- | --- | --- |
-| **Tablet / large-screen** layouts | Not supported | No large-screen breakpoints, adaptive grids, or multi-pane layouts. |
-| **Landscape** orientation | Not supported | Kit is portrait-only; landscape is not designed or shot. |
-| **Foldable / split-view / hinge** | Not supported | No foldable/dual-screen/hinge-aware layouts or postures. |
-| **Platform-specific (iOS vs. Android) adaptation** | Not supported | Single visual language; MemoX does **not** adapt controls to Cupertino/Material per platform. See platform decisions below. |
-| **RTL** (right-to-left) | Not supported | No logical properties/mirroring; directional icons (`chevron_right`, `arrow_back`) do not mirror. Product is LTR-only. |
-| **i18n / string externalization** | Not supported | Copy is English-only, hardcoded in JSX; no locale-format layer for number/date/plural/unit. |
-| **Swipe / drag gesture motion** | Not supported (accepted) | No follow-finger / cancel-return gesture motion. Every action is button-driven. See §Accepted scope decisions (KIT-38-04). |
-| **Push / pop / modal transition clips** | Not supported (accepted) | Duration/easing tokens exist, but no recorded transition clips are produced. See §Accepted scope decisions (KIT-38-02). |
-| **Platform flow recordings** (back-gesture / modal / nav) | Not supported (accepted) | One presentation documented; no per-platform flow recordings. See §Accepted scope decisions (KIT-33-02). |
+| **New learning** | eligible Leaf Deck / Today | Runs Review → Match → Guess → Recall → Fill in order for each eligible card. Completion of all five stages activates Learning Progress. |
+| **Due review** | Today / Deck due action | Reviews the persisted due queue; it does not run the five-stage learning pipeline. |
+| **Relearn** | terminal wrong/sticky-wrong outcome | Runs the explicit relearn queue; it is not an implicit sixth new-learning stage. |
+| **Practice / Single mode** | Mode Picker | User selects exactly one mode and then activates the explicit **Start session** CTA. Practice does not activate Box 0 cards or schedule SRS. |
 
-## Planned (future, not yet in the kit)
+Guess requires **at least five distinct normalized meanings**. Recall has a deterministic
+**20-second** countdown; timeout is an explicit terminal answer state and never silently becomes
+“Forgot”.
 
-| Item | Status | Tracked by |
-| --- | --- | --- |
-| Brand logo / app-icon asset + clear-space/min-size/dark-bg specs | Planned | `governance/asset-export-spec.md`, `exception-register.md` (EXC-02) |
-| Real product content replacing placeholders | Planned | `exception-register.md` (EXC-03) |
-| High-contrast profile (`[data-hc='true']`) rollout across screens | Planned | additive; token profile defined |
-| Localization expansion corpus + CJK/Vietnamese font-stack declaration | Planned | audit KIT-37 |
-| Dashboard slice completion | Planned | WBS 5.3, `REMAINING-DIVERGENCES.md` |
+### SRS settings
 
-## Platform decisions (single visual language)
+The Leitner 8-box schedule is a fixed versioned policy. Settings may display the policy id, eight
+boxes and intervals as **read-only information**. Only reminder/notification preferences are
+interactive; rows showing box count or intervals must not use chevrons, edit affordances or value
+pickers.
 
-MemoX ships **one** visual language on both iOS and Android — it does not swap to
-Cupertino or platform-native controls. The relevant component/interaction choices:
+## Adaptive layout contract
 
-| Concern | Decision | Rationale |
-| --- | --- | --- |
-| Switch / toggle | Custom `MxSwitch` (thumb grows as it travels) on both platforms | One brand feel; no iOS/Android divergence |
-| Segmented control | Custom `MxSegmentedControl` | Consistent tinted pill across platforms |
-| Selection / action sheets | Custom `MxCard`-based sheets (`DeckActionsSheet`, `SelectSheet`, `ValuePickerSheet`, …) | Brand-consistent bottom sheets, not OS action sheets |
-| Time picker | Custom `TimePickerSheet` (reminder) | Matches the kit's sheet system rather than the OS wheel/clock picker; consistent chrome and theming |
-| Back gesture / modal / navigation | One presentation, not platform-specific flow recordings | Single visual language; platform gesture behavior is delegated to RN navigation at runtime |
+The canonical matrix and Flutter mapping live in
+[`guidelines/flutter-adaptive-layout.md`](guidelines/flutter-adaptive-layout.md). Summary:
 
-There is intentionally **no** platform-parity matrix that adapts these controls per OS —
-the parity is "identical on both," which is the design decision, not a gap.
+| Profile | Window width (logical px) | Navigation | Content strategy |
+| --- | ---: | --- | --- |
+| Compact | `< 600` | bottom destinations | one pane; 16px gutter; scroll body |
+| Medium | `600–839` | navigation rail | one pane or supporting pane; readable content capped |
+| Expanded | `>= 840` | navigation rail | centered max-width content; list/detail may use two panes |
+| Compact height | `< 480` usable height | profile above, reduced chrome | primary action remains reachable; overlays scroll |
 
-## Accepted scope decisions (gesture motion & flow recordings)
+The historical 390×780 PNGs remain **compact-profile visual baselines**, not evidence for medium,
+expanded, landscape or keyboard/pointer readiness.
 
-MemoX v4 is a **button-driven, static visual reference kit**: it defines tokens,
-components, and screen *states* rendered as still frames at 390×780. The following are
-**ACCEPTED as out of scope** — a deliberate boundary of that kit, not an unaddressed gap.
+## Language and direction
 
-| ID | Decision (ACCEPTED, out of scope) | Rationale | Revisit trigger |
+- Shipping UI locales: **English (`en`) and Vietnamese (`vi`)**.
+- All user-facing production copy maps to Flutter `AppLocalizations`; no literal UI strings.
+- Locale-aware date, time, number and plural formatting is mandatory.
+- Study content can use any script independently of the application locale.
+- RTL chrome is deferred, but logical start/end properties and directional-icon ownership are
+  mandatory so RTL can be enabled additively.
+
+## Shared visual language and platform adaptation
+
+MemoX uses one branded visual language. Platform adaptation changes presentation and input
+behaviour, not semantic names:
+
+| Concern | Android | Web | Frozen semantic owner |
 | --- | --- | --- | --- |
-| **KIT-38-04** | **Swipe / drag gesture motion** (follow-finger tracking, cancel-return, rubber-banding) is not designed or demonstrated. | The kit is button-driven by design — every action has an explicit `Mx*` control (buttons, sheets, toggles). Continuous gesture *motion* is a runtime interaction concern delegated to React Native gesture/navigation libraries, not a static design-reference artifact. Demonstrating follow-finger physics needs a live runtime, not the still-frame kit. | Introduce a product feature whose primary interaction **is** a gesture (e.g. swipe-to-delete as the only affordance), or stand up an interaction-prototype layer. Then spec the gesture motion + cancel/commit thresholds. |
-| **KIT-38-02** | **Push / pop / modal / pane transition clips** are not produced. | The motion **tokens** (`--memox-duration-*`, easing) exist and govern transitions at runtime, and reduced-motion is handled (`--memox-duration-none`). Recording animated transition *clips* requires a running app and a video pipeline outside the still-frame + pixel-parity contract; capturing them would not feed the 390×780 parity gate. | Add a motion-spec / video-capture pipeline, or a requirement to certify specific transition curves. Then record push/pop/modal clips against the duration tokens. |
-| **KIT-33-02** | **Platform flow recordings** (per-OS back-gesture, modal presentation, navigation flow) are not produced. | MemoX ships **one** visual language on both platforms (see §Platform decisions). Platform gesture/navigation behaviour is delegated to RN navigation at runtime; recording per-OS flows would document runtime navigation, not the kit's single-presentation design. | Adopt a per-platform navigation divergence (contradicting the single-visual-language decision), or add a runtime-QA layer that certifies platform flows. Then record them. |
+| Navigation | system back + app back; bottom/rail by width | browser history + app back; bottom/rail by width | `MxScaffold`, `MxBottomNav`, route contract |
+| Pointer/keyboard | hardware keyboard optional but supported | required: Tab, Shift+Tab, Enter/Space, Escape and visible focus | each interactive `Mx*` widget |
+| Sheets/dialogs | bottom sheet compact; dialog medium/expanded | bottom sheet compact; dialog/popover medium/expanded | `MxSheet`, `MxDialog`, `MxMenu` |
+| File/media/time picker | Flutter/platform capability adapter | browser capability adapter with cancel/error fallback | feature interaction contract |
+| Safe area | system bars, cutouts, IME | browser viewport, virtual keyboard, resize | `MxScaffold` |
 
-These decisions are **reviewed each release** (see `governance/versioning.md`); if a
-revisit trigger fires, the item moves from ACCEPTED to Planned and is scoped in.
+Custom branded controls remain visually consistent, but must expose Flutter semantic roles and
+expected Web/Android interaction behaviour.
 
-## Artifact status taxonomy (Current / Future / Deprecated)
+## Supported design foundations
 
-The kit is a single `v4` release, so **every shipped artifact is implicitly `Current`**
-unless marked otherwise. This taxonomy makes the status explicit going forward:
+- Light and dark themes; high-contrast tokens exist but release evidence is tracked separately.
+- Plus Jakarta Sans with Vietnamese coverage and documented CJK system fallback.
+- Material Symbols Rounded with offline/runtime asset packaging required by implementation.
+- Minimum touch target 48 logical px; visible focus for keyboard/pointer.
+- Reduced-motion profile; no task relies on animation, haptic, sound or gesture alone.
+- Flat token fills; no gradients, photography or glassmorphism.
+
+## Release evidence boundary
+
+“Specified” is not the same as “verified”. Tier-1 sign-off requires all of the following:
+
+1. Android compact + medium portrait and landscape evidence.
+2. Web compact + medium + expanded evidence at breakpoint boundaries.
+3. Keyboard/pointer focus-order and activation walkthrough on Web.
+4. 200% text, `en`/`vi`, dark/light, reduced-motion and offline/error state coverage.
+5. Representative list/detail collapse, adaptive overlay and compact-height recordings.
+6. Zero open P0/P1 in `mobile-design-kit-audit-v5/issue-register.md`.
+
+Until that evidence exists, the design kit status is **BLOCKED for Tier-1 release**, even when
+token/component structural validation passes.
+
+## Artifact status taxonomy
 
 | Status | Meaning | Where recorded |
 | --- | --- | --- |
-| **Current** | Shipped in `v4`, supported, safe to use | default for all tokens/`Mx*`/composites in `_ds_manifest.json` |
-| **Future** | Planned, defined but not rolled out | this file §Planned; `CHANGELOG.md` [Unreleased] |
-| **Deprecated** | Replaced; new usage blocked; awaiting usage=0 removal | `governance/deprecation-policy.md` register |
+| **Current** | Supported contract for MemoX v6 | this file, component prompts, specs |
+| **Future** | Defined roadmap item, not a release dependency | `CHANGELOG.md` `[Unreleased]`, issue register |
+| **Deprecated** | Kept only for compatibility; new usage blocked | `governance/deprecation-policy.md` |
 
-Currently deprecated artifacts: legacy Tokyo color values (migrated/retired) and
-`--memox-appbar-lg-height` (kept for compatibility). See the deprecation register.
+Current deprecated artifacts include legacy Tokyo colour values,
+`--memox-appbar-lg-height`, and the non-routable `flashcard-list/convert-*` state family.
+
+## Accepted non-blocking scope decisions
+
+- Continuous swipe/drag is not a primary product interaction. Every task has a button/keyboard
+  alternative. A future gesture-primary feature must add follow-finger/cancel/commit evidence.
+- Tier-2 platform certification is roadmap work. This does not waive Tier-1 Web/Android gates.
+- A dedicated foldable dual-pane posture is roadmap work; resize, safe-region and hinge avoidance
+  remain required for Android.
+
+## Design artifact caveats
+
+- Existing still frames primarily cover compact 390×780; they are historical references.
+- The prototype catalog is not the production localization source; Flutter ARB files are.
+- A bespoke brand app icon still requires owner-provided source artwork and export evidence.
+- No release claim may cite unavailable `npm`, parity or screenshot commands as passed evidence.

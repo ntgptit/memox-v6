@@ -225,7 +225,7 @@ function FirstDeckSuccess({ NEW, rootBar, nav, fab, filter, deckMeta, initialDis
       {dismissed ? null : (
         <window.ActionCallout node="library/first-deck-callout" tone="accent" icon="celebration"
           title="Your first deck is ready"
-          text="Add cards or organise it into smaller decks whenever you’re ready."
+          text="Open the empty deck, then choose cards or nested decks. That choice fixes its deck kind."
           action={<MxButton variant="primary" size="sm" node="library/first-deck-open">Open deck</MxButton>}
           dismissNode="library/first-deck-dismiss" onDismiss={() => setDismissed(true)} />
       )}

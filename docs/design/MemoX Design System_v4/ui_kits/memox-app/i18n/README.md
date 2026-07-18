@@ -9,7 +9,7 @@ and gives **KIT-20-06** a real count+noun composer.
 
 | File | Purpose |
 |---|---|
-| `strings.js` | Keyed copy catalog. `window.MemoXI18n.t(key, fallback, vars, opts)`. Default locale `en` seeded byte-identical to the current JSX literals. Pseudo-locale `en-XA` grows every string 30–50% for the expansion stress fixtures (KIT-37-01). |
+| `strings.js` | Prototype keyed copy catalog. Includes `en`, `vi` and the `en-XA` expansion pseudo-locale. Production ARB remains authoritative. |
 | `format.js` | `window.MemoXFormat` — `Intl`-based `date` / `time` / `number` / `relativeTime` / `plural` / `count`. Degrades to a plain fallback if `Intl` is missing. |
 
 ## Parity contract (why this is safe to add)
@@ -51,13 +51,12 @@ new fixtures may format freely.
    Reference wirings shipped in this round: `account-sync` (SignInCard copy +
    sign-in form), `reminder` (labels + permission-denied copy), and
    `subdeck-list` (offline relative-time + not-found copy).
-3. **Add a real locale** by adding a `CATALOG.<bcp47>` block in `strings.js` and
+3. **Add another prototype locale** by adding a `CATALOG.<bcp47>` block in `strings.js` and
    calling `MemoXI18n.setLocale('<bcp47>')`. `format.js` needs no change — it
    reads `MemoXI18n.locale`.
-4. **React Native**: `MemoXI18n` maps to any RN i18n runtime (i18next / LinguiJS);
-   `MemoXFormat` maps to RN's `Intl` (Hermes `Intl` or `react-native-localize` +
-   `Intl` polyfill). Keys and the `count()` composition rule are the stable
-   contract; the backing runtime is swappable.
+4. **Flutter production**: prototype keys map to ARB entries consumed through generated
+   `AppLocalizations`. Date, time, number and plural formatting use the Flutter `intl`
+   integration. JSX fallback literals are never copied into production widgets.
 
 ## Expansion corpus (KIT-37-01)
 

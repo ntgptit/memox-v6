@@ -1,4 +1,5 @@
-/* MemoX — Mode picker ("Single mode"). States: default · scope-dropdown · not-enough
+/* MemoX — Practice mode picker. Selection never starts implicitly; the explicit Start session
+   CTA creates a Practice Session. States: default · scope-dropdown · not-enough
    Feature-local components: components/{ModeOption,ScopeCard,ScopeSheet}.jsx */
 (function () {
 const NS = window.MemoXDesignSystem_2ffa54;
@@ -15,20 +16,25 @@ const MODES = [
 
 function ModePicker({ state = 'default' }) {
   const notEnough = state === 'not-enough';
-  const bar = <MxContextualAppBar variant="nested" title="Single mode" node="mode-picker/appbar" leading={<MxIconButton icon="arrow_back" node="mode-picker/back" />} />;
+  const [selectedMode, setSelectedMode] = React.useState('review');
+  const bar = <MxContextualAppBar variant="nested" title="Practice mode" node="mode-picker/appbar" leading={<MxIconButton icon="arrow_back" node="mode-picker/back" />} />;
 
   const base = (
     <MxScaffold node="mode-picker/screen" appBar={bar}>
       {notEnough ? (
-        <window.ActionCallout node="mode-picker/not-enough" icon="info" text="This deck needs at least 4 words to play."
-          action={<MxButton variant="primary" size="sm" node="mode-picker/add-cards">Add words</MxButton>} />
+        <window.ActionCallout node="mode-picker/not-enough" icon="info" text="Guess practice needs at least 5 cards with distinct meanings."
+          action={<MxButton variant="primary" size="sm" node="mode-picker/add-cards">Add cards</MxButton>} />
       ) : null}
 
       <ScopeCard />
 
-      <MxList node="mode-picker/modes">{MODES.map((g) => <ModeOption key={g.id} g={g} disabled={notEnough} />)}</MxList>
+      <MxList node="mode-picker/modes">{MODES.map((g) => (
+        <ModeOption key={g.id} g={g} disabled={notEnough} selected={selectedMode === g.id}
+          onSelect={() => setSelectedMode(g.id)} />
+      ))}</MxList>
 
-      <div style={{ textAlign: 'center', fontSize: 'var(--memox-font-size-sm)', color: 'var(--memox-text-tertiary)', padding: 'var(--memox-space-1) 0' }}>5 words per round · change in Settings</div>
+      <div style={{ textAlign: 'center', fontSize: 'var(--memox-font-size-sm)', color: 'var(--memox-text-tertiary)', padding: 'var(--memox-space-1) 0' }}>Practice does not activate new cards or schedule SRS.</div>
+      <MxButton variant="primary" block size="lg" disabled={notEnough} node="mode-picker/start">Start session</MxButton>
     </MxScaffold>
   );
 

@@ -6,7 +6,7 @@ Audit expansion, scripts, RTL và locale formats.
 
 ## Checklist
 
-- [x] **KIT-37-01 — Chuỗi dài hơn 30–50% không cắt button, tab, dialog hoặc list row quan trọng.**
+- [ ] **KIT-37-01 — Chuỗi dài hơn 30–50% không cắt button, tab, dialog hoặc list row quan trọng.**
   - **Cách kiểm:** VM-08 — replace with expansion corpus.
   - **Evidence mong đợi:** Localization stress screenshots.
   - **Severity mặc định nếu không đạt:** `P1`
@@ -31,7 +31,7 @@ Audit expansion, scripts, RTL và locale formats.
   - **Evidence mong đợi:** Directionality scan report.
   - **Severity mặc định nếu không đạt:** `P1`
 
-- [x] **KIT-37-06 — Asset/copy không chứa text cố định hoặc English-only assumption.**
+- [ ] **KIT-37-06 — Asset/copy không chứa text cố định hoặc English-only assumption.**
   - **Cách kiểm:** VM-14 + VM-08 — scan assets and copy examples.
   - **Evidence mong đợi:** Localization exception list.
   - **Severity mặc định nếu không đạt:** `P1`
@@ -53,15 +53,16 @@ Audit expansion, scripts, RTL và locale formats.
 | KIT-37-05 | components.css logical properties (start/end) | FIXED | Remediation — audit v5 fix loop. |
 | KIT-37-06 | ui_kits/memox-app/i18n/strings.js keyed catalog (byte-identical) wired in 4 features | FIXED | Remediation — audit v5 fix loop. |
 | KIT-37-02 | shots/languages--scripts--{light,dark}.png (Tiếng Việt diacritics + Korean/Japanese/Chinese CJK + mixed-script render qua --memox-font-cjk); tokens/typography.css:18-33 (--memox-font-cjk + --memox-font-vietnamese); shots/flashcard-editor--keyboard-open (Korean) | FIXED | Vietnamese diacritics + CJK glyph (ko/ja/zh) + mixed-script render đúng, không tofu; per-script fallback stack đã khai báo + wire. |
+| KIT-37-01 / KIT-37-06 | `guidelines/flutter-l10n-handoff.md`; `issue-register.md` ISS-REB-I18N-01 | PARTIAL | en/vi là locale v1 và handoff đã có, nhưng ARB parity, full copy externalization và 200% runtime evidence vẫn mở. |
 
 ## Kết luận nhóm
 
 ```text
-Final status: PASS
+Final status: PARTIAL
 Open P0: 
-Open P1: 
+Open P1: ISS-REB-I18N-01
 Open P2: 
 Open P3: 
 Reviewed by: Claude (automated kit audit + remediation)
-Reviewed date: 2026-07-16
+Reviewed date: 2026-07-18
 ```

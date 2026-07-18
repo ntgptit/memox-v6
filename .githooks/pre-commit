@@ -1,25 +1,16 @@
 #!/usr/bin/env bash
 #
-# Main code guard (pre-commit).
-# Blocks commits that violate the memox ruleset, using code-verification-guard
-# (vendored as a git submodule under tools/code-verification-guard).
-#
-# Profile: local -> fails on ERRORS only (warnings are reported, not fatal).
+# Canonical MemoX verification entry (pre-commit).
 # Emergency bypass (use sparingly):  git commit --no-verify
 #
 set -e
 
-GUARD="tools/code-verification-guard/guard/run.py"
+VERIFY="tool/verify/run.mjs"
 
-if [ ! -f "$GUARD" ]; then
-  echo "guard: submodule not initialized." >&2
-  echo "       Run: git submodule update --init --recursive" >&2
-  echo "       Then: python -m pip install -r tools/code-verification-guard/requirements.txt" >&2
+if [ ! -f "$VERIFY" ]; then
+  echo "verify: missing $VERIFY" >&2
   exit 1
 fi
 
-PY="python"
-command -v python >/dev/null 2>&1 || PY="python3"
-
-echo "guard: verifying code against the 'memox' ruleset (profile: local)..."
-"$PY" "$GUARD" check --project . --ruleset memox --profile local
+echo "verify: running MemoX quick gate..."
+node "$VERIFY" --quick

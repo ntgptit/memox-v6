@@ -39,9 +39,9 @@ function DeckSettings({ state = 'action-sheet' }) {
   } else if (state === 'move') overlay = <DeckMoveSheet title={TITLE} />;
   else if (state === 'reset-confirm') overlay = <DeckResetConfirmDialog />;
   else if (state === 'delete-confirm') overlay = <DeckDeleteConfirmDialog />;
-  // leaf-actions (§14): a LEAF deck's overflow — adds "Organise into nested decks", the entry to
-  // the Leaf→Parent conversion dialog. Parent decks use the plain action-sheet (no Organise).
-  else if (state === 'leaf-actions') overlay = <DeckActionsSheet title={TITLE} leaf />;
+  // `leaf-actions` is retained as a frozen fixture alias. Deck kinds are exclusive and there is
+  // no Leaf→Parent conversion, so the action set is intentionally identical to the default.
+  else if (state === 'leaf-actions') overlay = <DeckActionsSheet title={TITLE} />;
   else overlay = <DeckActionsSheet title={TITLE} />; // action-sheet (default)
 
   return <React.Fragment>{base}{overlay}</React.Fragment>;

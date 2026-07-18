@@ -4,8 +4,8 @@
 > `autoComplete` / `textContentType` mapping per field type). Companion to
 > `keyboard-focus-order.md`.
 
-Every `MxTextField` must declare the correct **autofill hints** so the OS keyboard bar,
-iOS AutoFill, Android Autofill Framework, and third-party password managers can offer the
+Every `MxTextField` must declare the correct **autofill hints** so the browser/OS keyboard bar,
+Android Autofill Framework, and third-party password managers can offer the
 right value. Missing/incorrect hints break password-manager save+fill and force manual
 typing. Additive documentation only: this sets props on the existing `MxTextField` — no
 token/class/name changes, no rendered-pixel change (autofill hints are non-visual props).
@@ -16,41 +16,40 @@ Owner: Design System team · Status: Current (v4, additive-only).
 
 ## 1. Rules
 
-- **Every field carries both hints.** Set React Native `autoComplete` (cross-platform hint)
-  **and** iOS `textContentType`; on web/RN-web the hint maps to the HTML `autocomplete`
-  attribute. A field with no meaningful hint (search box, one-off) sets `autoComplete="off"`
+- **Every field carries a semantic hint.** Flutter `AutofillHints` is the production contract;
+  on Web it maps to the HTML `autocomplete` attribute. A field with no meaningful hint
+  (search box, one-off) sets autofill off
   explicitly — silence is a defect, not "off".
-- **Match the keyboard + capitalization to the field** (`keyboardType`,
-  `autoCapitalize`, `autoCorrect`) so autofill and manual entry agree — e.g. email fields
-  are `keyboardType="email-address"`, `autoCapitalize="none"`, `autoCorrect={false}`.
-- **`secureTextEntry` for every credential** (current + new password); pair with the
+- **Match the keyboard + capitalization to the field** (`TextInputType`,
+  `textCapitalization`, `autocorrect`) so autofill and manual entry agree.
+- **`obscureText` for every credential** (current + new password); pair with the
   password hints so managers offer save/fill and the strong-password generator.
 - **New vs. current password:** use `new-password` on create/confirm fields (invites the
   generator) and `password` on sign-in (invites fill). Never both `newPassword` and
   `password` on the same field.
-- **One-time codes:** `autoComplete="sms-otp"` / `textContentType="oneTimeCode"` so the OS
-  surfaces the code from Messages; `keyboardType="number-pad"`.
+- **One-time codes:** `AutofillHints.oneTimeCode` / `autocomplete="one-time-code"` lets the
+  platform surface the code; use `TextInputType.number`.
 
 ## 2. Field-type → hint mapping
 
-| Field type | RN `autoComplete` | iOS `textContentType` | `keyboardType` | Other props |
+| Field type | Flutter `AutofillHints` | Web `autocomplete` | `TextInputType` | Other contract |
 | --- | --- | --- | --- | --- |
-| Email | `email` | `emailAddress` | `email-address` | `autoCapitalize="none"`, `autoCorrect={false}` |
-| Username | `username` | `username` | `default` | `autoCapitalize="none"` |
-| Current password (sign-in) | `password` | `password` | `default` | `secureTextEntry` |
-| New password (create/confirm) | `new-password` | `newPassword` | `default` | `secureTextEntry` |
-| One-time code (OTP/2FA) | `sms-otp` | `oneTimeCode` | `number-pad` | — |
-| Person name (full) | `name` | `name` | `default` | `autoCapitalize="words"` |
-| Given / family name | `given-name` / `family-name` | `givenName` / `familyName` | `default` | `autoCapitalize="words"` |
-| Phone number | `tel` | `telephoneNumber` | `phone-pad` | — |
-| Street address | `street-address` | `fullStreetAddress` | `default` | `autoCapitalize="words"` |
-| Postal code | `postal-code` | `postalCode` | `number-pad` | — |
-| One-time / search / free text (no autofill) | `off` | `none` | as suited | explicit `off`, not omitted |
+| Email | `AutofillHints.email` | `email` | `emailAddress` | capitalization none; autocorrect false |
+| Username | `AutofillHints.username` | `username` | `text` | capitalization none |
+| Current password (sign-in) | `AutofillHints.password` | `current-password` | `visiblePassword` | `obscureText: true` |
+| New password (create/confirm) | `AutofillHints.newPassword` | `new-password` | `visiblePassword` | `obscureText: true` |
+| One-time code (OTP/2FA) | `AutofillHints.oneTimeCode` | `one-time-code` | `number` | — |
+| Person name (full) | `AutofillHints.name` | `name` | `name` | capitalization words |
+| Given / family name | `givenName` / `familyName` | `given-name` / `family-name` | `name` | capitalization words |
+| Phone number | `AutofillHints.telephoneNumber` | `tel` | `phone` | — |
+| Street address | `AutofillHints.fullStreetAddress` | `street-address` | `streetAddress` | capitalization words |
+| Postal code | `AutofillHints.postalCode` | `postal-code` | `number` | — |
+| One-time / search / free text | none | `off` | as suited | opt out explicitly |
 
 > The kit's placeholder screens are content-only (no real auth), so no fixture currently
 > renders a credential field; this spec is the contract the moment auth/profile fields
-> land. Names above are the RN/Expo hint tokens — verify against the Expo v57
-> `TextInput` docs before wiring, as accepted `autoComplete` values evolve.
+> land. Verify the mapping against the Flutter framework and target-browser support before
+> wiring, because browser autofill behaviour can vary.
 
 ## 3. Interaction with focus order
 

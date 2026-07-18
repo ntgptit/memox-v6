@@ -25,6 +25,7 @@ flowchart TD
 ## 3. Metric contract
 
 - Session count/time, cards/attempts, accuracy/retention khi đủ dữ liệu.
+- Formula/denominator/rounding bắt buộc theo [metrics-v1](./metric-formulas-v1.md); Practice được report riêng.
 - Daily activity/heatmap, current/longest streak và Deck scope summaries.
 - Unknown/insufficient metric trả availability state, không trả số 0 gây hiểu nhầm.
 

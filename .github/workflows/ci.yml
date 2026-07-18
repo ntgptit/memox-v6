@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-# Cancel in-progress runs for the same ref when a new commit is pushed.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -15,13 +14,12 @@ permissions:
   contents: read
 
 jobs:
-  # Main code guard: enforce the memox source standard via code-verification-guard.
-  guard:
-    name: Code Verification Guard
+  verify:
+    name: Canonical MemoX verification
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout (with guard submodule)
+      - name: Checkout with guard submodule
         uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -34,51 +32,11 @@ jobs:
       - name: Install guard dependencies
         run: python -m pip install -r tools/code-verification-guard/requirements.txt
 
-      # Profile: local -> fails on ERRORS only. Once the codebase is built out
-      # and stale-path warnings are resolved, tighten to --profile ci (or strict)
-      # to also fail on warnings.
-      - name: Run code guard
-        run: python tools/code-verification-guard/guard/run.py check --project . --ruleset memox --profile local
-
-  build:
-    name: Analyze & Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      # Generate localizations (AppLocalizations) from the ARB files. The
-      # generated output is gitignored, so regenerate it before analyze/test.
-      - name: Generate localizations (gen-l10n)
-        run: flutter gen-l10n
-
-      # Check formatting on tracked Dart files only (skips gitignored generated code).
-      - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed $(git ls-files '*.dart')
-
-      # Runs code generation only when build_runner is a dependency.
-      # Skips cleanly until you add build_runner (riverpod, freezed, etc.).
-      - name: Generate code (build_runner)
-        run: |
-          if flutter pub deps --style=compact | grep -q '\bbuild_runner\b'; then
-            echo "build_runner found, running code generation..."
-            dart run build_runner build
-          else
-            echo "build_runner not in dependencies, skipping code generation."
-          fi
-
-      - name: Analyze
-        run: flutter analyze
-
-      - name: Run tests
-        run: flutter test
+      - name: Run canonical verifier
+        run: node tool/verify/run.mjs

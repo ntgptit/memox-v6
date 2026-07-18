@@ -2,6 +2,8 @@
 
 Content Transfer sở hữu Import/Export jobs: source/file handling, parsing, mapping, duplicate plan, serialization và result file. Deck sở hữu target/scope eligibility; Flashcard sở hữu content validation.
 
+Supported schema/format source of truth: [Content transfer formats v1](./formats-v1.md).
+
 ## Invariants
 
 - Import plan phải được preview trước commit khi source có mapping/duplicates/hierarchy.
@@ -23,6 +25,7 @@ Content Transfer sở hữu Import/Export jobs: source/file handling, parsing, m
 | [configure-export.md](./configure-export.md) | Scope handoff, format và supported options | Đã có |
 | [generate-export-file.md](./generate-export-file.md) | Snapshot, serialization, write và failure | Đã có |
 | [share-export-file.md](./share-export-file.md) | Share/save result và share-only recovery | Đã có |
+| [formats-v1.md](./formats-v1.md) | CSV/JSON schema, hierarchy, encoding và round-trip | Đã có |
 
 ## Cross-object contracts
 

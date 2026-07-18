@@ -51,8 +51,8 @@ Bulk confirm nêu selected count và active-session intersections.
 | Condition | Behavior |
 | --- | --- |
 | No active session | Normal confirm |
-| In paused session | Remove/skip from remaining snapshot with traceable reason |
-| Current active prompt | Require leave/complete/skip policy before delete commit |
+| In paused/active session nhưng không là current prompt | Delete được phép; session skip Card với traceable reason khi tới lượt |
+| Current prompt hoặc pending answer | Block delete; user phải exit, commit answer hoặc explicit skip trước delete |
 | Already deleted | Idempotent not-found outcome; close safely |
 | Last Card in Deck | Deck becomes Empty after success |
 
@@ -82,6 +82,7 @@ Bulk confirm nêu selected count và active-session intersections.
 - Delete atomic across content/current Progress/Deck count.
 - Finalized summaries not rewritten.
 - Active Session not silently corrupted.
+- Delete/Answer/Resume tuân [ST-CONTENT-CHANGE-v1](../../decision-tables/study-session-content-changes.md), bao gồm race và denominator policy.
 - Last Card transitions Deck to Empty only after success.
 - Deck trở lại Empty không giữ mode Leaf cũ; content đầu tiên tiếp theo quyết định loại mới.
 - Delete-confirm canonical state parity dưới 3% mỗi theme.

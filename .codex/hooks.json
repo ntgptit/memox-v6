@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python 'D:\\workspace\\memox_v6\\.codex\\hooks\\guard_stop.py'"
+            "command": "python .codex/hooks/guard_stop.py"
           }
         ]
       }

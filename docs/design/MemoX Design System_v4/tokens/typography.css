@@ -21,9 +21,9 @@
      --memox-font-vietnamese is the primary itself — declared explicitly so the coverage is
      documented, not assumed. CJK (Korean/Japanese/Chinese) is NOT in the primary and must fall
      through to a platform CJK family; --memox-font-cjk makes that fallback EXPLICIT so a glyph
-     is never left to an undefined default. Production (React Native) maps each to a per-field
-     fontFamily fallback array keyed off the field/deck language; the web prototype uses the CSS
-     stack directly. RTL shaping is layout (dir/logical props), not a font — see i18n-localization.md. */
+     is never left to an undefined default. Production Flutter maps the selected stack through
+     ThemeData/TextStyle according to the field/deck language; the web prototype uses the CSS stack
+     directly. RTL shaping is layout (dir/logical props), not a font — see i18n-localization.md. */
   --memox-font-vietnamese: var(--memox-font-sans);
   --memox-font-cjk: 'Plus Jakarta Sans', 'Noto Sans CJK KR', 'Noto Sans KR',
     'Noto Sans CJK JP', 'Noto Sans JP', 'Noto Sans CJK SC', 'Noto Sans SC',

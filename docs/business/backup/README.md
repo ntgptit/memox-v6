@@ -2,6 +2,8 @@
 
 Backup sở hữu explicit snapshot, file compatibility và restore transaction. Nó khác Export content (dùng để chia sẻ học liệu) và khác Sync (ongoing reconciliation).
 
+Canonical file contract: [Backup format v1](./backup-format-v1.md). Canonical Merge/Replace table: [DATA-MERGE-v1](../../decision-tables/backup-sync-integrity.md).
+
 ## Invariants
 
 - Backup snapshot có version và integrity metadata.
@@ -21,6 +23,7 @@ Backup sở hữu explicit snapshot, file compatibility và restore transaction.
 | [handle-backup-compatibility.md](./handle-backup-compatibility.md) | Older/newer/corrupt file decisions | Đã có |
 | [recover-backup-failure.md](./recover-backup-failure.md) | Retry, rollback verification và support copy | Đã có |
 | [manage-cloud-backup.md](./manage-cloud-backup.md) | Cloud snapshot lifecycle khi provider được duyệt | Đã có — Conditional |
+| [backup-format-v1.md](./backup-format-v1.md) | Manifest, included/excluded data, integrity và compatibility | Đã có |
 
 ## Cross-object contracts
 
@@ -28,6 +31,7 @@ Backup sở hữu explicit snapshot, file compatibility và restore transaction.
 - Restore gọi validation của từng object trước commit.
 - Content Transfer export không được gắn nhãn Backup nếu thiếu progress/settings/history.
 - Account provider chỉ transport/store backup; Backup sở hữu compatibility/restore.
+- Cloud backup remains unavailable until the Account [cloud service gate](../account/cloud-service-gate.md) is accepted.
 
 ## Canonical state coverage
 

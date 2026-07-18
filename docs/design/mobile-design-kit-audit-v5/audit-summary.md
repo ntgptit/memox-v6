@@ -3,7 +3,7 @@
 - [x] Đã đọc và áp dụng `audit-rules.md`.
 - [x] Verification methods được dùng thống nhất.
 
-Sau 3 vòng fix loop: **40 PASS · 8 PARTIAL · 0 BLOCKED** / 48 nhóm. Khắc phục 119 issue: FIXED 105 · ACCEPTED 14 (scoped) · PARTIAL 0 · OPEN 0. Còn mở ảnh hưởng gate: P0 0 · P1 0. `[x]` = nhóm PASS (mọi mục đạt); PARTIAL = còn ACCEPTED item (0 issue mở).
+Rebaseline 2026-07-18: **37 PASS · 11 PARTIAL · 0 BLOCKED** / 48 nhóm. Register có 122 issue: FIXED 105 · ACCEPTED 4 · PARTIAL 10 · OPEN 3. Còn mở ảnh hưởng gate: P0 0 · P1 13. `[x]` = nhóm PASS; PARTIAL có contract nhưng còn accepted limitation hoặc Tier-1 evidence chưa đạt. Design release **BLOCKED** cho tới khi P1 bằng 0.
 
 - [x] [KIT-01 — Inventory và phạm vi](./KIT-01-inventory-va-pham-vi.md) — PASS
 - [x] [KIT-02 — Source of Truth](./KIT-02-source-of-truth.md) — PASS
@@ -41,24 +41,24 @@ Sau 3 vòng fix loop: **40 PASS · 8 PARTIAL · 0 BLOCKED** / 48 nhóm. Khắc p
 - [ ] [KIT-34 — Safe Area và System UI](./KIT-34-safe-area-va-system-ui.md) — PARTIAL
 - [ ] [KIT-35 — Keyboard và Input Environment](./KIT-35-keyboard-va-input-environment.md) — PARTIAL
 - [ ] [KIT-36 — Orientation và Device Conditions](./KIT-36-orientation-va-device-conditions.md) — PARTIAL
-- [x] [KIT-37 — Localization và RTL](./KIT-37-localization-va-rtl.md) — PASS
+- [ ] [KIT-37 — Localization và RTL](./KIT-37-localization-va-rtl.md) — PARTIAL
 - [ ] [KIT-38 — Motion và Transition](./KIT-38-motion-va-transition.md) — PARTIAL
 - [x] [KIT-39 — Dark Mode và High-contrast QA](./KIT-39-dark-mode-va-high-contrast-qa.md) — PASS
 - [x] [KIT-40 — Visual Consistency](./KIT-40-visual-consistency.md) — PASS
 - [x] [KIT-41 — Edge Cases và Stress Test](./KIT-41-edge-cases-va-stress-test.md) — PASS
 - [x] [KIT-42 — Accessibility End-to-End](./KIT-42-accessibility-end-to-end.md) — PASS
 - [x] [KIT-43 — Component Documentation](./KIT-43-component-documentation.md) — PASS
-- [x] [KIT-44 — Pattern Documentation](./KIT-44-pattern-documentation.md) — PASS
+- [ ] [KIT-44 — Pattern Documentation](./KIT-44-pattern-documentation.md) — PARTIAL
 - [x] [KIT-45 — Design Handoff Completeness](./KIT-45-design-handoff-completeness.md) — PASS
 - [x] [KIT-46 — Governance và Ownership](./KIT-46-governance-va-ownership.md) — PASS
 - [x] [KIT-47 — Deprecation và Duplication](./KIT-47-deprecation-va-duplication.md) — PASS
-- [x] [KIT-48 — Release Readiness](./KIT-48-release-readiness.md) — PASS
+- [ ] [KIT-48 — Release Readiness](./KIT-48-release-readiness.md) — PARTIAL
 
 ## Release gate
 
 - [x] Không còn P0.
-- [x] Không còn P1.
+- [ ] Không còn P1. Hiện còn 13 P1 OPEN/PARTIAL trong `issue-register.md`.
 - [x] P2/P3 có owner và target.
-- [x] `validation-report.json` là PASS (structural).
-- [x] `verify:ui-kit` PASSED (drift + contrast 4-profile + parity 92 comp + 18/18 tests + canonical shots).
-- [x] KIT-48 đã sign-off. (KIT-48 = PASS)
+- [ ] `validation-report.json` phải được tái sinh bởi canonical verifier sau rebaseline.
+- [ ] Tier-1 Flutter Web/Android parity, adaptive, a11y và localization evidence chưa hoàn tất.
+- [ ] KIT-48 chưa sign-off. (KIT-48 = PARTIAL)

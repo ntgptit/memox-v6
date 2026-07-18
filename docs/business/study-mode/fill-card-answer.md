@@ -10,6 +10,7 @@ Flow này nhận text answer, tùy chọn hint và so sánh theo policy đã phi
 - Sau Submit, answer bị khóa cho đến Retry hoặc Next.
 - Correct answer luôn được hiển thị trong feedback.
 - Card trả `wrong` được đưa vào round kế; Card trả `correct` được loại khỏi mastery queue của mode.
+- Comparison dùng fixed policy `fill-compare-v1` trong [SM-FILL-v1](../../decision-tables/fill-answer-normalization.md); không fuzzy-match, transliterate, stem hoặc auto-translate.
 
 ## 2. Master flow
 
@@ -37,7 +38,8 @@ flowchart TD
 
 ## 4. Validation và lifecycle
 
-- Trim outer whitespace; giữ nội dung có ý nghĩa theo script.
+- Normalize NFC, trim outer whitespace, collapse internal Unicode whitespace và locale-aware case fold. Giữ diacritics, punctuation và word order.
+- Exact-compare với primary meaning và explicit accepted translations trong immutable Card snapshot; không lấy synonym từ Search/index.
 - Comparison version nằm trong evidence để tái lập kết quả.
 - Card order được shuffle deterministic riêng cho mỗi Fill round; Round 1 không dùng lại nguyên Card sequence của Recall Round 1 khi có từ hai Card trở lên.
 - Keyboard submit tương đương CTA; không double-submit.
@@ -63,3 +65,4 @@ flowchart TD
 - Card `wrong` phải xuất hiện ở round kế; Card `correct` không xuất hiện lại.
 - Mode chỉ complete khi round vừa hoàn tất có 0 Card `wrong`.
 - Fill Round 1 và mỗi retry round dùng seed riêng; sequence collision với mode/round trước phải được resolve deterministic.
+- Mỗi row `SM-FILL-*` có automated test dẫn exact ID.

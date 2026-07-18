@@ -47,3 +47,4 @@ flowchart TD
 - Restore không bật cho file chưa xác định an toàn.
 - Fingerprint gắn preview với file sẽ restore.
 - UI phân biệt compatibility và integrity failure.
+- Inspector validate toàn bộ manifest/path/hash/count constraints trong [memox-backup-v1](./backup-format-v1.md) trước enable Restore.

@@ -16,12 +16,12 @@ Audit gate cuối; không lặp toàn bộ nội dung chi tiết.
   - **Evidence mong đợi:** Bảng tổng hợp severity.
   - **Severity mặc định nếu không đạt:** `P0`
 
-- [x] **KIT-48-03 — Duplicate-content validation, broken-link validation và ID validation đều pass.**
+- [ ] **KIT-48-03 — Duplicate-content validation, broken-link validation và ID validation đều pass.**
   - **Cách kiểm:** VM-11 + VM-12 — chạy scripts/validate.py.
   - **Evidence mong đợi:** `validation-report.json` có trạng thái `PASS`.
   - **Severity mặc định nếu không đạt:** `P0`
 
-- [x] **KIT-48-04 — Theme/component/state/accessibility/responsive coverage reports được đính kèm.**
+- [ ] **KIT-48-04 — Theme/component/state/accessibility/responsive coverage reports được đính kèm.**
   - **Cách kiểm:** VM-12 — inspect release evidence index.
   - **Evidence mong đợi:** Chỉ mục evidence phát hành.
   - **Severity mặc định nếu không đạt:** `P1`
@@ -51,17 +51,18 @@ Audit gate cuối; không lặp toàn bộ nội dung chi tiết.
 | KIT-48-04 | governance/coverage-report.md coverage aggregate | FIXED | Remediation — audit v5 fix loop. |
 | KIT-48-05 | CHANGELOG.md + governance/versioning.md version metadata | FIXED | Remediation — audit v5 fix loop. |
 | KIT-48-06 | governance/release-signoff.md sign-off record (design/a11y/governance rows) | FIXED | Remediation — audit v5 fix loop. |
-| KIT-48-01 | mobile-design-kit-audit-v5/audit-summary.md (48/48 nhóm có final status: 40 PASS · 8 PARTIAL · 0 BLOCKED); validation-report.json (kit_file_count 48, status PASS); mỗi nhóm có Evidence Log links | FIXED | 48/48 nhóm có final status + evidence link; 0 nhóm BLOCKED. |
-| KIT-48-02 | issue-register.md severity tally (P0 0 · P1 0 open; FIXED 105 · ACCEPTED 14 · PARTIAL 0 · OPEN 0); governance/release-signoff.md (3 owner sign-off Approved) | FIXED | Không còn P0/P1 mở; P2/P3 (asset G1 + scoped items) có owner + target. |
+| KIT-48-01 | mobile-design-kit-audit-v5/audit-summary.md (48/48 nhóm có final status: 37 PASS · 11 PARTIAL · 0 BLOCKED); validation-report.json (kit_file_count 48, status PASS); mỗi nhóm có Evidence Log links | FIXED | 48/48 nhóm có final status + evidence link; 0 nhóm chưa được review. |
+| KIT-48-03 / KIT-48-04 | `governance/coverage-report.md`; `governance/release-signoff.md`; ISS-REB-TOOL-01 / ISS-REB-UI-01 | PARTIAL | Canonical docs verifier exists, but the historical UI-kit commands are unavailable and Tier-1 runtime evidence remains open. |
+| KIT-48-02 | issue-register.md current tally (P0 0 · P1 13 OPEN/PARTIAL); governance/release-signoff.md (3 owner rows Not approved) | PARTIAL | Các P0 baseline đã đóng, nhưng release rebaseline vẫn bị chặn cho đến khi 13 P1 Tier-1 evidence bằng 0. |
 
 ## Kết luận nhóm
 
 ```text
-Final status: PASS
+Final status: PARTIAL
 Open P0: 
-Open P1: 
+Open P1: ISS-REB-TOOL-01, ISS-REB-UI-01, ISS-REB-I18N-01
 Open P2: 
 Open P3: 
 Reviewed by: Claude (automated kit audit + remediation)
-Reviewed date: 2026-07-16
+Reviewed date: 2026-07-18
 ```

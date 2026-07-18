@@ -8,7 +8,7 @@ Flow này tạo eligible queues cho Dashboard và Study entry từ current Progr
 - Hidden/deleted Cards và Cards ngoài Deck scope bị loại.
 - Parent scope aggregate descendant Leaves, không direct Parent cards và không double-count.
 - Cùng Card không xuất hiện hai lần trong một effective queue response.
-- Time comparison dùng effective local clock/timezone contract.
+- Due comparison dùng injected `nowUtc`; timezone chỉ dùng presentation và local-day new-card limit.
 - Reading queues không đánh dấu Card là studied hoặc thay due time.
 
 ## 2. Entry points
@@ -18,7 +18,7 @@ Flow này tạo eligible queues cho Dashboard và Study entry từ current Progr
 | Dashboard | All eligible Library content |
 | Study Deck | Current Leaf/subtree |
 | Resume Session | Snapshot queue, không query lại tùy ý |
-| Relearn flow | Session-owned pending queue identity |
+| Relearn entry | Finalized source-session id + missed terminal Card identities |
 
 # 3. Master flow
 
@@ -36,13 +36,14 @@ flowchart TD
 
 | Queue | Meaning |
 | --- | --- |
-| Relearn | Failed/lapsed item requiring priority recovery |
+| Relearn candidate | Distinct Card có terminal wrong trong finalized source session và được user chọn cho session `relearn` mới |
 | Due | Learned item whose due time is reached |
 | New | Eligible Card with initial progress not yet introduced |
 
 - New = Box 0, `dueAt = null`.
 - Due = Box 1..7 có `dueAt <= nowUtc`.
 - Box 8 là mastered, không thuộc Due/New/Relearn queue.
+- Relearn candidate set không phải SRS due state và không được inject vào active session. Khi Start, nó trở thành immutable Relearn session snapshot.
 
 - Queue priority/order and new-card limit thuộc effective Study policy.
 - Zero due không được giả tạo due items; UI nêu đúng no-due state.
@@ -65,7 +66,7 @@ flowchart TD
 # 7. Date/time boundaries
 
 - Due-at-equal-now được xem due.
-- Local day rollover recalculate Dashboard/new limits.
+- Local day rollover recalculate Dashboard/new limits; không thay `dueAt <= nowUtc`.
 - Timezone change không mutate stored history; chỉ re-evaluate effective queue theo policy.
 - Clock rollback/forward bất thường phải deterministic, không duplicate queue rows.
 
@@ -83,4 +84,5 @@ flowchart TD
 - Query read-only, không mutate progress.
 - Zero due/no eligible được phân biệt.
 - Time/day/timezone boundaries deterministic.
+- Due eligibility luôn dùng UTC instant equality/before; timezone change không làm đổi persisted `dueAt`.
 - Consumer canonical due/not-enough/loading states parity dưới 3% mỗi theme.

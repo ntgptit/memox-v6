@@ -47,3 +47,4 @@ flowchart TD
 - Không có half snapshot hoặc partial valid file.
 - Retry không duplicate committed artifact ngoài explicit new run.
 - Summary phản ánh snapshot thực tế.
+- Artifact tuân [memox-backup-v1](./backup-format-v1.md); publish chỉ sau khi entry hash, byte length và object counts được verify.

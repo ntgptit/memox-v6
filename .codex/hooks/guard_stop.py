@@ -1,24 +1,22 @@
 #!/usr/bin/env python3
-"""Claude Code Stop hook: run the code guard on agent-produced changes.
+"""Codex Stop hook: run the canonical MemoX quick verifier.
 
 On violations (guard exit != 0) this exits with code 2, which blocks the agent
 from ending its turn and feeds the guard output back so it can fix the issues.
 When the guard passes it exits 0 and the turn ends normally.
 
-Profile: local -> fails on ERRORS only (warnings are reported, not fatal).
 """
 
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-GUARD = REPO_ROOT / "tools" / "code-verification-guard" / "guard" / "run.py"
-RULESET = "memox"
-PROFILE = "local"
+VERIFY = REPO_ROOT / "tool" / "verify" / "run.mjs"
 
 
 def _read_hook_input() -> dict:
@@ -42,26 +40,16 @@ def main() -> int:
     if payload.get("stop_hook_active"):
         return 0
 
-    if not GUARD.exists():
-        # Do not block when the guard isn't set up; just leave a hint.
-        print(
-            "guard: submodule not initialized "
-            "(git submodule update --init --recursive)",
-            file=sys.stderr,
-        )
-        return 0
+    node = shutil.which("node")
+    if node is None or not VERIFY.exists():
+        print("verify: Node or tool/verify/run.mjs is missing", file=sys.stderr)
+        return 2
 
     result = subprocess.run(
         [
-            sys.executable,
-            str(GUARD),
-            "check",
-            "--project",
-            str(REPO_ROOT),
-            "--ruleset",
-            RULESET,
-            "--profile",
-            PROFILE,
+            node,
+            str(VERIFY),
+            "--quick",
         ],
         capture_output=True,
         text=True,
@@ -71,7 +59,7 @@ def main() -> int:
         return 0
 
     sys.stderr.write(
-        "Code guard found violations that must be fixed before finishing:\n\n"
+        "MemoX verification found violations that must be fixed before finishing:\n\n"
     )
     sys.stderr.write(result.stdout)
     sys.stderr.write(result.stderr)

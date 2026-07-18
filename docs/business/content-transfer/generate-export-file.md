@@ -47,3 +47,4 @@ flowchart TD
 - Không share partial/invalid artifact.
 - Retry không mutate Deck/Card hoặc duplicate logical result.
 - Result metadata khớp plan/snapshot.
+- Serializer và round-trip fixtures tuân [formats-v1](./formats-v1.md).

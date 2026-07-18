@@ -6,6 +6,10 @@ user-invocable: true
 
 # MemoX Design System (project design kit)
 
+> Compatibility mirror for Claude Code. The canonical repository skill is
+> `.agents/skills/memox-design/SKILL.md`; keep this mirror synchronized from the
+> canonical file instead of editing both independently.
+
 The canonical design kit lives at:
 
 ```

@@ -19,7 +19,7 @@ Learning Progress sở hữu trạng thái học dài hạn của mỗi Card: Le
 ```mermaid
 flowchart LR
     A["New Card"] --> B["Initialise Progress"]
-    B --> C["Surface Due/New/Relearn"]
+    B --> C["Surface Due/New + finalized missed set"]
     C --> D["Study Attempt"]
     D --> E{"Terminal?"}
     E -- "Không" --> D
@@ -39,14 +39,14 @@ Match, Guess, Recall và Fill có thể tạo nhiều Attempt cho cùng Card qua
 | [record-study-attempt.md](./record-study-attempt.md) | Apply answer outcome idempotently | Đã có |
 | [schedule-next-review.md](./schedule-next-review.md) | Tính box và due tiếp theo theo Leitner 8 Box | Đã có |
 | [srs-8-box-policy.md](./srs-8-box-policy.md) | Source of truth cho activation, terminal grade, chuyển Box và interval | Đã có |
-| [surface-due-cards.md](./surface-due-cards.md) | Eligibility và due/new/relearn queues | Đã có |
+| [surface-due-cards.md](./surface-due-cards.md) | Eligibility và due/new/finalized-missed candidate sets | Đã có |
 | [reset-learning-progress.md](./reset-learning-progress.md) | Scope reset và atomic recovery | Đã có |
 | [inspect-progress-history.md](./inspect-progress-history.md) | Read-only history cho Statistics/detail | Đã có |
 
 ## Cross-object contracts
 
 - Nhận Card id và Attempt outcome từ Study Session.
-- Trả due/new/relearn queues cho Dashboard và Study Session.
+- Trả due/new candidates và finalized missed set làm input tạo session snapshot; không append vào active session.
 - Trả aggregate progress cho Deck/Statistics projection.
 - Deck-level reset entry tuân theo `deck/reset-deck-progress.md`.
 

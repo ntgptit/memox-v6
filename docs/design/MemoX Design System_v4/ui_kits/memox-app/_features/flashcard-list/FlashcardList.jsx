@@ -281,37 +281,14 @@ function FlashcardList({ state = 'loaded' }) {
     );
   }
 
-  /* convert-* — Leaf → Parent conversion (§14). A leaf that already holds cards can't get a child
-     directly; the overflow "Organise into nested decks" opens a dialog that moves the existing
-     cards into a first nested deck. On success the deck becomes a Parent (card list gone). The
-     dialog carries a name field, so it's a Scrim+Sheet (not the icon/text ConfirmDialog). */
+  /* Deprecated compatibility states. Deck kinds are exclusive; these ids must never trigger a
+     Leaf→Parent mutation. Old deep links fail closed and return to the unchanged Flashcard List. */
   if (state === 'convert-dialog' || state === 'convert-submitting' || state === 'convert-failure') {
-    const submitting = state === 'convert-submitting';
-    const failure = state === 'convert-failure';
-    // ONE primary CTA: on failure the callout only reports the error and the bottom CTA becomes
-    // "Try again"; while submitting the name field is locked.
-    const actions = (
-      <React.Fragment>
-        <MxButton variant="ghost" disabled={submitting} node="flashcard-list/convert-cancel">Cancel</MxButton>
-        <MxButton variant="primary" disabled={submitting} node={failure ? 'flashcard-list/convert-retry' : 'flashcard-list/convert-ok'}>{submitting ? 'Organising…' : failure ? 'Try again' : 'Create and organise'}</MxButton>
-      </React.Fragment>
-    );
     return (
       <React.Fragment>{base}
-        <FormDialog title="Organise into nested decks?" node="flashcard-list/convert-dialog"
-          scrimNode="flashcard-list/convert-scrim" actions={actions}>
-          {failure ? (
-            <window.ActionCallout node="flashcard-list/convert-error" tone="error" icon="error"
-              text="Couldn’t organise the deck. Your nested deck name is still here." />
-          ) : null}
-          <p style={{ margin: 0, fontSize: 'var(--memox-font-size-base)', color: 'var(--memox-text-secondary)', lineHeight: 'var(--memox-line-height-normal)' }}>This deck currently contains 42 cards. Create a nested deck to keep those cards together.</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--memox-space-2)', ...(submitting ? { opacity: 'var(--memox-opacity-disabled, 0.5)', pointerEvents: 'none' } : {}) }}>
-            <div style={{ fontSize: 'var(--memox-font-size-sm)', fontWeight: 'var(--memox-font-weight-semibold)', color: 'var(--memox-text-secondary)' }}>Nested deck name *</div>
-            <div data-mx-node="flashcard-list/convert-name" style={{ display: 'flex', alignItems: 'center', boxSizing: 'border-box', minHeight: 'var(--memox-touch-min)', padding: 'var(--memox-space-2) var(--memox-space-4)', borderRadius: 'var(--memox-radius-control)', background: 'var(--memox-surface-sunken)', border: 'var(--memox-stroke-hairline) solid var(--memox-divider)' }}>
-              <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Vocabulary</span>
-            </div>
-          </div>
-        </FormDialog>
+        <window.ActionCallout node="flashcard-list/convert-dialog" tone="warning" icon="info"
+          text="This legacy action is no longer available. Leaf decks keep their cards and cannot become Parent decks."
+          action={<MxButton variant="primary" node="flashcard-list/convert-cancel">Back to cards</MxButton>} />
       </React.Fragment>
     );
   }

@@ -1,4 +1,5 @@
-/* MemoX — Dashboard (Today). States: loaded · not-studied · goal-met · streak-reset · caught-up · empty · loading
+/* MemoX — Dashboard (Today). States: loaded · not-studied · goal-met · streak-reset · caught-up ·
+   paused · offline · partial · error · empty · loading
    Action architecture: bottom nav = destinations only (Today/Library/Stats/Profile);
    "Add" is the FAB; the primary CTA "Start review" is attached to the Continue-studying
    section (not a floating button). `caught-up` = no cards due → the review CTA is
@@ -50,6 +51,12 @@ function Dashboard({ state = 'loaded' }) {
       avatar={<MxAvatar name="Linh Tran" size="sm" />} />
   );
   const greeting = <GreetingHeader title="Good evening, Linh" node="dashboard/greeting" />;
+  const StateShell = ({ children }) => (
+    <MxScaffold node="dashboard/screen" appBar={bar} bottomNav={nav} fab={<MxFabAdd />}>
+      {greeting}
+      {children}
+    </MxScaffold>
+  );
 
   if (state === 'loading') {
     const S = window.Skeleton;
@@ -100,6 +107,51 @@ function Dashboard({ state = 'loaded' }) {
         <OnboardingStep icon="local_fire_department" tone="warning" title="Build a daily streak"
           text="Hit your daily goal to keep the flame" node="dashboard/step-streak" />
       </MxScaffold>
+    );
+  }
+
+  if (state === 'paused') {
+    return (
+      <StateShell>
+        <window.ActionCallout node="dashboard/paused" tone="accent" icon="pause_circle"
+          title="Study session paused" text="12 of 20 cards · Recall stage. Your saved answers are unchanged."
+          action={<MxButton variant="primary" icon="play_arrow" node="dashboard/resume-session">Resume session</MxButton>} />
+        <MxButton variant="secondary" block node="dashboard/start-other-review">Review another due deck</MxButton>
+      </StateShell>
+    );
+  }
+
+  if (state === 'offline') {
+    return (
+      <StateShell>
+        <window.ActionCallout node="dashboard/offline" tone="warning" icon="cloud_off"
+          title="You're offline" text="Showing the saved due queue from this device. Progress will stay local until you're online." />
+        <MxSectionHeader title="Available offline" caption="24 saved cards due across 3 decks" node="dashboard/offline-head" />
+        <MxButton variant="primary" icon="bolt" block node="dashboard/start-review-offline">Start saved review</MxButton>
+      </StateShell>
+    );
+  }
+
+  if (state === 'partial') {
+    return (
+      <StateShell>
+        <window.ActionCallout node="dashboard/partial" tone="warning" icon="sync_problem"
+          title="Some totals are unavailable" text="Your saved due queue is ready. Goal, streak and statistics will refresh when data finishes loading."
+          action={<MxButton variant="secondary" size="sm" node="dashboard/partial-retry">Retry totals</MxButton>} />
+        <MxSectionHeader title="Continue studying" caption="24 saved cards due" node="dashboard/partial-head" />
+        <MxButton variant="primary" icon="bolt" block node="dashboard/start-review-partial">Start review</MxButton>
+      </StateShell>
+    );
+  }
+
+  if (state === 'error') {
+    return (
+      <StateShell>
+        <window.EmptyState node="dashboard/error" icon="error" tone="error" title="Today couldn't load"
+          text="Your decks are still on this device. Try loading Today again."
+          action={<MxButton variant="primary" icon="refresh" node="dashboard/error-retry">Retry</MxButton>} />
+        <MxButton variant="secondary" block node="dashboard/error-library">Open Library</MxButton>
+      </StateShell>
     );
   }
 
