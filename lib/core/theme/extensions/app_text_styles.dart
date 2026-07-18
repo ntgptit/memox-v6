@@ -71,6 +71,12 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     ),
   );
 
+  /// Field-group label role (kit `.field-group__label`: sm/semibold).
+  TextStyle get fieldLabel => _base.copyWith(
+    fontSize: AppTypography.fontSizeSm,
+    fontWeight: AppTypography.fontWeightSemibold,
+  );
+
   /// Button label roles (kit `.btn`: bold at sm/base/md sizes).
   TextStyle get buttonSm => _base.copyWith(
     fontSize: AppTypography.fontSizeSm,
