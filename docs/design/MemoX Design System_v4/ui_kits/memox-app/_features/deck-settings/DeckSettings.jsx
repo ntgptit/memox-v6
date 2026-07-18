@@ -25,10 +25,19 @@ function DeckSettings({ state = 'action-sheet' }) {
 
   let overlay;
   if (state === 'rename') {
+    // Edit deck metadata (ADR-009 / CF-04): business edit-deck.md defines name (required) +
+    // description (optional) + a read-only language pair — the same form serves rename and edit.
     overlay = (
       <Scrim align="center" node="deck-settings/rename-scrim">
-        <Dialog icon="edit" title="Rename deck" node="deck-settings/rename-dialog"
-          text={<DialogInput label="Deck name" value={TITLE} />}
+        <Dialog icon="edit" title="Edit deck" node="deck-settings/rename-dialog"
+          text={<React.Fragment>
+            <DialogInput label="Deck name" value={TITLE} />
+            <DialogInput label="Description" value="Vocabulary and grammar for TOPIK I" />
+            <div data-mx-node="deck-settings/rename-pair" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--memox-space-1)' }}>
+              <span style={{ fontSize: 'var(--memox-font-size-sm)', fontWeight: 'var(--memox-font-weight-bold)', color: 'var(--memox-text-secondary)' }}>Language pair</span>
+              <span style={{ fontSize: 'var(--memox-font-size-base)', color: 'var(--memox-text-tertiary)' }}>한국어 → English · read-only</span>
+            </div>
+          </React.Fragment>}
           actions={<React.Fragment>
             <div style={{ flex: 1 }} />
             <MxButton variant="ghost" node="deck-settings/rename-cancel">Cancel</MxButton>

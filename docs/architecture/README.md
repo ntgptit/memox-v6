@@ -25,6 +25,7 @@ Guard alignment and planned-path activation debt are recorded in
 | [ADR-006](./adr/ADR-006-navigation-contract.md) | GoRouter constants/wrappers and guarded learning entry | Accepted |
 | [ADR-007](./adr/ADR-007-riverpod-and-testing.md) | Riverpod Annotation, provider DI, deterministic test overrides | Accepted |
 | [ADR-008](./adr/ADR-008-language-pair-removal-and-sync-conflict.md) | Language-pair removal blocks on dependency (no cascade); sync conflicts require explicit resolution (no last-write-wins) | Accepted |
+| [ADR-009](./adr/ADR-009-conflict-batch-resolution.md) | Batch resolution of the remaining audit conflicts (CF-02, CF-04…CF-17): business stands; design reconciled | Accepted |
 
 ## Dependency direction
 

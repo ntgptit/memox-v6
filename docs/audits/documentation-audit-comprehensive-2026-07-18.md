@@ -360,11 +360,20 @@ the domain source of truth per `AGENTS.md`, but scope (in/out for v1) is a Produ
 is "Decision required." Consolidated from P0 findings B3-001, C4-001/002, C6-001/002, C7-001…008,
 F-001…008, F1-001, F22-001/002, SR-001, RP-001, IE-001/002/003, F4-008 (duplicates merged).
 
-**Resolution log:** **CF-01** and **CF-03** were decided by the Product Owner on 2026-07-18 —
-*business stands* for both — and recorded in
-[ADR-008](../architecture/adr/ADR-008-language-pair-removal-and-sync-conflict.md). The losing
-design docs (`RemoveLanguageDialog.jsx`, `Languages.jsx`, `SyncBlock.jsx` + the `languages` /
-`account-sync` specs) have been reconciled. The remaining rows are still open decisions.
+**Resolution log — ✅ ALL 17 RESOLVED (2026-07-18):**
+- **CF-01, CF-03** → *business stands*, recorded in
+  [ADR-008](../architecture/adr/ADR-008-language-pair-removal-and-sync-conflict.md).
+- **CF-02, CF-04…CF-17** → decided in
+  [ADR-009](../architecture/adr/ADR-009-conflict-batch-resolution.md): *business stands* for every
+  Business↔Design row; CF-16 (Business↔Business) = soft-onboarding; CF-17 (design-internal) =
+  Web-responsive/keyboard in scope, Android tablet/landscape/orientation out (roadmap).
+- Design reconciled at copy/behavior/state/contract level (account-sync, deck-settings, export,
+  import, settings, flashcard-editor, search, reset dialog, the four graded-mode specs, first-launch
+  guard, issue-register scope). Net-new interaction surfaces (CF-05 audio attach/remove, CF-06
+  multi-translation list, CF-07 duplicate compare/merge, CF-08 import per-item resolution, CF-09
+  round-complete/retry-round screens) are recorded as **pending build** in the affected screen specs
+  — business-canonical and not silently dropped. Per the rows below, each CF is now decided; the
+  table is retained as the original evidence.
 
 | # | Conflict | Business evidence | Design evidence | Impact | PO decision | Recommendation (non-binding) |
 |---|---|---|---|---|---|---|

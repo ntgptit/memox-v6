@@ -25,9 +25,15 @@ const SCRIPT_SPECIMEN = [
   { title: '中文 → English', sub: '汉字（简体）· CJK · 512 cards' },
 ];
 
+// Zero-dependency pair: the only pair eligible for the destructive `remove` (ADR-008).
+const EMPTY_PAIR = [{ title: 'Français → English', sub: 'No decks yet' }];
+
 function pairsFor(state) {
   if (state === 'empty') return [];
   if (state === 'one') return PAIRS.slice(0, 1);
+  // `remove` confirms deletion of a pair with no decks — its fixture must show zero cards
+  // so the zero-dependency guard reads truthfully; `remove-blocked` shows a populated pair.
+  if (state === 'remove') return EMPTY_PAIR;
   return PAIRS;
 }
 

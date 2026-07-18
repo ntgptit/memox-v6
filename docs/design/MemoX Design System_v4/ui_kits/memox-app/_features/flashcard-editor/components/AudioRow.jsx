@@ -3,7 +3,11 @@
    Pronunciation is auto-generated from the term, so it no longer needs its own section — a
    tap plays it; no autoplay. Status: auto (speaker, tap to hear) · generating (spinner,
    disabled) · ready (speaker) · error (retry icon). Kept as the `AudioRow` export + stable
-   `flashcard-editor/audio-*` nodes so the component id/contract stays stable. */
+   `flashcard-editor/audio-*` nodes so the component id/contract stays stable.
+   NOTE (ADR-009 / CF-05): business manage-card-audio.md owns Generate / Attach file / Remove
+   as first-class actions with their own state matrix. This compact control covers play/generate;
+   the Attach-file and Remove affordances (and their attach-valid/invalid + remove states) are
+   built at implementation time (see flashcard-editor.md state matrix). */
 (function () {
 const NS = window.MemoXDesignSystem_2ffa54;
 

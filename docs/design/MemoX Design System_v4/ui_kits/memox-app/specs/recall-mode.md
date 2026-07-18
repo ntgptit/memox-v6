@@ -34,6 +34,10 @@ composition; the component map below is the authoritative set of pieces in play.
 | 5 | `timed-out` |
 | 6 | `complete` |
 
+> **Business-required states, pending build (ADR-009 / CF-09):** `round-complete` and
+> `retry-round` — the unlimited mastery-round loop (recall-and-self-grade.md §6). Business-canonical;
+> authored at implementation time, not yet in the interactive gallery above.
+
 ## Timer behaviour
 
 - Duration is exactly 20 seconds from the injected session/monotonic clock.

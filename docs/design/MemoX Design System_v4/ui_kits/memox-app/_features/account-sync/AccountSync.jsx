@@ -27,20 +27,22 @@ function AuthField({ label, type, name, autoComplete, textContentType, placehold
   );
 }
 
-/* Email sign-in form — the password-manager path alongside Google sign-in. */
+/* Email sign-in form — kept ONLY as the autofill/password-manager accessibility specimen
+   (KIT-35-05). No cloud provider is committed: the gate is DEFERRED (cloud-service-gate.md,
+   ADR-009 / CF-02), so the submit CTAs are disabled/"unavailable" and no specific provider
+   (Google / email-password) is offered as a live action. */
 function EmailSignInForm({ emailFocus, passwordFilled }) {
   return (
     <MxCard node="account/signin-form" style={{ gap: 'var(--memox-space-4)', padding: 'var(--memox-space-6)' }}>
-      <div style={{ fontSize: 'var(--memox-font-size-lg)', fontWeight: 'var(--memox-font-weight-extrabold)' }}>{t('account.signin.title', 'Sync across devices')}</div>
+      <div style={{ fontSize: 'var(--memox-font-size-lg)', fontWeight: 'var(--memox-font-weight-extrabold)' }}>{t('account.signin.title', 'Cloud sync — coming soon')}</div>
       <AuthField node="account/signin-email" label={t('account.signin.email.label', 'Email')} type="email" name="email"
         autoComplete="email" textContentType="emailAddress" placeholder={t('account.signin.email.placeholder', 'you@example.com')}
         value="learner@example.com" autoFocus={emailFocus} />
       <AuthField node="account/signin-password" label={t('account.signin.password.label', 'Password')} type="password" name="password"
         autoComplete="current-password" textContentType="password" placeholder={t('account.signin.password.placeholder', 'Your password')}
         value={passwordFilled ? 'secret-passphrase' : ''} />
-      <MxButton variant="primary" icon="mail" block node="account/signin-email-cta">{t('account.signin.emailCta', 'Continue with email')}</MxButton>
-      <div style={{ textAlign: 'center', fontSize: 'var(--memox-font-size-sm)', color: 'var(--memox-text-tertiary)' }}>or</div>
-      <MxButton variant="outline" icon="login" block node="account/google">{t('account.signin.google', 'Sign in with Google')}</MxButton>
+      <MxButton variant="primary" icon="cloud_off" block disabled node="account/signin-email-cta">{t('account.signin.emailCta', 'Cloud sync — coming soon')}</MxButton>
+      <div style={{ textAlign: 'center', fontSize: 'var(--memox-font-size-sm)', color: 'var(--memox-text-tertiary)' }}>{t('account.signin.gateNote', 'The provider isn’t chosen yet. The app works fully offline.')}</div>
     </MxCard>
   );
 }

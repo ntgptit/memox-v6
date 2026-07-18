@@ -39,8 +39,16 @@ composition; the component map below is the authoritative set of pieces in play.
 | 9 | `submit-error` |
 | 10 | `submit-success` |
 
+> **Business-required capability, pending build (ADR-009):** the Card Editor must additionally
+> cover — CF-05 audio: Generate / **Attach file** / **Remove** with attach-valid/invalid + remove
+> states (manage-card-audio.md); CF-06 additional translations: an **ordered, reorderable
+> multi-item list** (manage-card-translations.md); CF-07 duplicate: a 4-way **Edit / Open-existing
+> / Keep-both / Merge** decision with a side-by-side compare (resolve-duplicate-flashcard.md). The
+> `Example` field and the "keep adding" mode were removed (CF-13) as not owned by the business
+> Flashcard model. These surfaces are authored at implementation time.
+
 ## Handoff notes
 
 Spacing scale `{4,8,12,16,24,32,48}`; screen padding 16; tokens only (no raw hex / off-scale).
-Exactly one primary objective; touch targets ≥ 44×44. This spec is generated from
+Exactly one primary objective; touch targets ≥ 48×48. This spec is generated from
 `tool/ui_kit_shots/registry.mjs` — edit the registry, not this file.

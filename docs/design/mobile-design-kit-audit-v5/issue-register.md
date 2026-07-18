@@ -15,6 +15,13 @@ Audit v5 trên MemoX Design System v4 — baseline 119 issue, rebaseline bổ su
 Severity: `P0` 6 · `P1` 65 · `P2` 44 · `P3` 7.
 Còn mở (OPEN/PARTIAL) ảnh hưởng gate: `P0` 0 · `P1` 13. Release status: **BLOCKED**.
 
+> Scope decision (ADR-009 / CF-17): the 10 PARTIAL responsive/orientation P1 items are split by
+> platform — **Web-expanded/responsive layout and hardware-keyboard support are IN Tier-1 scope**
+> (they stay tracked/open and need Web runtime evidence); **Android tablet/landscape/orientation
+> are OUT for v1** (roadmap) and become `ACCEPTED` per `SCOPE.md`. This removes the earlier
+> register↔KIT-Evidence-Log contradiction (each item now has one authoritative status). Per-row
+> status reclassification against this split is mechanical follow-through for the Design owner.
+
 ## Issue
 
 | Issue ID | Checklist ID | Mô tả | Severity | Status | Fix / evidence | Owner | Target |

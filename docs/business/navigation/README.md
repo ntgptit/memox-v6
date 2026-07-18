@@ -26,10 +26,19 @@ Navigation là supporting interaction contract, không sở hữu business data 
 
 ## First launch and guards
 
+> Decision (ADR-009 / CF-16): first launch uses the **soft-onboarding** model. A fresh user is
+> offered onboarding (create/import first content) but may choose **"Not now"** and land on an
+> empty Today (a first-class no-content state — see `../today-dashboard/handle-empty-library-today.md`
+> and `../deck/create-deck.md` §4). The Language-Pair prerequisite guards *content creation* (you
+> cannot build a Deck/Library without a pair), not reaching Today.
+
 1. Bootstrap local store and preferences.
-2. If no Language Pair exists, route to language-pair creation. Back/refresh may not bypass this prerequisite into an invalid Library.
+2. Fresh user with no content: show onboarding (create/import). "Not now" opens an empty Today.
+   Creating a Deck requires a Language Pair, so the create-content path routes to language-pair
+   creation first when none exists; Back/refresh may not bypass this prerequisite into an invalid Library.
 3. When at least one pair exists but none selected, route to selection.
-4. Otherwise open Today. Active/paused session is surfaced as Continue but never auto-resumed without user action.
+4. Otherwise open Today (empty Today is valid for a no-content user). Active/paused session is
+   surfaced as Continue but never auto-resumed without user action.
 5. Account sign-in is not a global guard; local-first routes remain usable signed out/offline.
 
 Feature guards re-read owning business state: Deck type/eligibility before Study, due state before Due Review, session status before Resume, backup compatibility before Restore. Guards return typed recovery destinations and never silently create/mutate data.

@@ -52,8 +52,6 @@ function Settings({ state = 'loaded' }) {
   const [notif, setNotif] = React.useState(true);
   const [gender, setGender] = React.useState(true);
   const [romaja, setRomaja] = React.useState(false);
-  const [shuffle, setShuffle] = React.useState(true);
-  const [autoplay, setAutoplay] = React.useState(false);
   const [tts, setTts] = React.useState(true);
   const [stt, setStt] = React.useState(false);
 
@@ -66,7 +64,7 @@ function Settings({ state = 'loaded' }) {
           <Row icon="translate" title="Language pairs" sub="한국어 → English · +1 more" node="settings/study-language" trailing={<Val v="" />} />
           <Row icon="format_shapes" title="Word display" sub="Native meaning · color by gender" node="settings/study-worddisplay" trailing={<Val v="" />} />
           <Row icon="schedule" title="Spaced repetition" sub="Boxes: 8 · Notifications on" node="settings/study-srs" trailing={<Val v="" />} />
-          <Row icon="tune" title="Mode settings" sub="5 words/round · shuffle" node="settings/study-mode" trailing={<Val v="" />} />
+          <Row icon="tune" title="Mode settings" sub="Enable, reorder & default" node="settings/study-mode" trailing={<Val v="" />} />
           <Row icon="record_voice_over" title="Voice" sub="TTS on · STT off" last node="settings/study-voice" trailing={<Val v="" />} />
         </MxCard>
       </MxScaffold>
@@ -98,13 +96,26 @@ function Settings({ state = 'loaded' }) {
   }
 
   if (state === 'study-mode') {
+    // Configure Mode Preferences (ADR-009 / CF-12): enable/disable/reorder the study modes and
+    // pick the default. No "words per round" (a graded round is ALL valid cards — study-mode
+    // README) and no shuffle toggle (order randomization is always deterministic).
+    const MODES = [
+      { icon: 'quiz', name: 'Review', purpose: 'Flip term ↔ meaning', on: true, def: true },
+      { icon: 'keyboard', name: 'Fill', purpose: 'Type the answer', on: true },
+      { icon: 'touch_app', name: 'Guess', purpose: 'Pick from 5 meanings', on: true, note: 'Needs ≥5 distinct meanings' },
+      { icon: 'grid_view', name: 'Match', purpose: 'Match terms and meanings', on: true },
+      { icon: 'psychology', name: 'Recall', purpose: 'Self-grade from memory', on: false },
+    ];
     return (
       <Child title="Mode settings" node="settings/mode">
-        <Row icon="filter_5" title="Words per round" sub="Cards shown each round" node="settings/mode-count" trailing={<Val v="5" />} />
-        <Row icon="shuffle" title="Shuffle cards" sub="Randomize order each round" node="settings/mode-shuffle"
-          trailing={<MxSwitch checked={shuffle} onChange={setShuffle} node="settings/mode-shuffle-switch" />} />
-        <Row icon="volume_up" title="Autoplay audio" sub="Play term audio on reveal" last node="settings/mode-autoplay"
-          trailing={<MxSwitch checked={autoplay} onChange={setAutoplay} node="settings/mode-autoplay-switch" />} />
+        {MODES.map((m, i) => (
+          <Row key={m.name} icon={m.icon} title={m.name + (m.def ? ' · Default' : '')} sub={m.note ? m.purpose + ' — ' + m.note : m.purpose}
+            last={i === MODES.length - 1} node={'settings/mode-' + m.name.toLowerCase()}
+            trailing={<div style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--memox-space-2)' }}>
+              <MxIconButton icon="drag_indicator" size="sm" node={'settings/mode-' + m.name.toLowerCase() + '-reorder'} ariaLabel={'Reorder ' + m.name} />
+              <MxSwitch checked={m.on} onChange={() => {}} node={'settings/mode-' + m.name.toLowerCase() + '-switch'} ariaLabel={'Enable ' + m.name} />
+            </div>} />
+        ))}
       </Child>
     );
   }

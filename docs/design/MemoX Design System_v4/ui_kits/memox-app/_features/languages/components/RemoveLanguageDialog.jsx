@@ -11,7 +11,7 @@ const { MxButton } = NS;
 function RemoveLanguageDialog() {
   return (
     <window.ConfirmDialog align="center" scrimNode="languages/remove-scrim"
-      icon="delete" tone="error" title="Remove 한국어 → English?"
+      icon="delete" tone="error" title="Remove Français → English?"
       text="This language pair has no decks. Removing it can't be undone."
       dialogNode="languages/remove-dialog"
       actions={<React.Fragment>
