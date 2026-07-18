@@ -1,5 +1,6 @@
 {
   "@@locale": "vi",
   "appTitle": "MemoX",
-  "homeTitle": "Trang chủ MemoX"
+  "homeTitle": "Trang chủ MemoX",
+  "routeNotFoundMessage": "Trang này không tồn tại."
 }

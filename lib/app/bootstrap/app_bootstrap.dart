@@ -27,15 +27,12 @@ Future<void> bootstrap({
   BootstrapLifecycleObserver? onLifecycleStateChanged,
 }) async {
   final report = onError ?? FlutterError.presentError;
-  await runZonedGuarded<Future<void>>(
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
-      installGlobalErrorHandlers(report);
-      installLifecycleListener(onLifecycleStateChanged);
-      runApp(buildRoot(overrides: overrides));
-    },
-    (error, stackTrace) => report(detailsForUncaughtError(error, stackTrace)),
-  );
+  await runZonedGuarded<Future<void>>(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    installGlobalErrorHandlers(report);
+    installLifecycleListener(onLifecycleStateChanged);
+    runApp(buildRoot(overrides: overrides));
+  }, (error, stackTrace) => report(detailsForUncaughtError(error, stackTrace)));
 }
 
 /// Routes [FlutterError.onError] and platform-dispatcher errors to [report].
@@ -53,9 +50,7 @@ void installGlobalErrorHandlers(BootstrapErrorReporter report) {
 AppLifecycleListener installLifecycleListener(
   BootstrapLifecycleObserver? observer,
 ) {
-  return AppLifecycleListener(
-    onStateChange: (state) => observer?.call(state),
-  );
+  return AppLifecycleListener(onStateChange: (state) => observer?.call(state));
 }
 
 /// Root composition: Riverpod scope around the app widget.
