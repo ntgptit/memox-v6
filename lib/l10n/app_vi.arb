@@ -1,7 +1,5 @@
 {
   "@@locale": "vi",
   "appTitle": "MemoX",
-  "homeTitle": "Trang chủ MemoX",
-  "pushCounterMessage": "Bạn đã nhấn nút này số lần:",
-  "incrementTooltip": "Tăng"
+  "homeTitle": "Trang chủ MemoX"
 }
