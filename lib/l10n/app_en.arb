@@ -15,5 +15,14 @@
   "somethingWentWrongMessage": "Something went wrong.",
   "@somethingWentWrongMessage": {
     "description": "User-safe message shown when a screen fails to render."
+  },
+  "cardCountLabel": "{count, plural, =0{No cards} =1{1 card} other{{count} cards}}",
+  "@cardCountLabel": {
+    "description": "Number of flashcards in a deck or scope.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

@@ -3,5 +3,6 @@
   "appTitle": "MemoX",
   "homeTitle": "Trang chủ MemoX",
   "routeNotFoundMessage": "Trang này không tồn tại.",
-  "somethingWentWrongMessage": "Đã có lỗi xảy ra."
+  "somethingWentWrongMessage": "Đã có lỗi xảy ra.",
+  "cardCountLabel": "{count, plural, other{{count} thẻ}}"
 }
