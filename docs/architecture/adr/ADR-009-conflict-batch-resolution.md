@@ -3,8 +3,8 @@
 - Status: **Accepted**
 - Owner: Product
 - Accepted: 2026-07-18
-- Decision gate: DG-09 (resolves the remaining conflicts in the
-  [comprehensive documentation audit](../../audits/documentation-audit-comprehensive-2026-07-18.md) §E,
+- Decision gate: DG-09 (resolves the remaining conflicts recorded by the
+  2026-07-18 comprehensive documentation audit — report since removed —
   after CF-01/CF-03 in [ADR-008](./ADR-008-language-pair-removal-and-sync-conflict.md))
 
 ## Context

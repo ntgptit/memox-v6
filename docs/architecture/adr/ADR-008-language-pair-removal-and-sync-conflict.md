@@ -7,9 +7,9 @@
 
 ## Context
 
-The comprehensive documentation audit
-([`../../audits/documentation-audit-comprehensive-2026-07-18.md`](../../audits/documentation-audit-comprehensive-2026-07-18.md))
-recorded two Business↔Design conflicts on data-loss-grade behavior:
+The comprehensive documentation audit (2026-07-18, report since removed — its
+findings are fully resolved by this ADR and ADR-009) recorded two
+Business↔Design conflicts on data-loss-grade behavior:
 
 - **CF-01** — Removing a Language Pair: business
   ([`../../business/language-pair/remove-language-pair.md`](../../business/language-pair/remove-language-pair.md))
