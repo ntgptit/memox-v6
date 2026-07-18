@@ -22,7 +22,13 @@ Cross-cutting supporting contracts:
 - [`business/validation-and-normalization-catalog.md`](./business/validation-and-normalization-catalog.md)
 - [`architecture/tier1-resource-budgets.md`](./architecture/tier1-resource-budgets.md)
 - [`business/account/cloud-service-gate.md`](./business/account/cloud-service-gate.md)
+- [`audits/documentation-audit-comprehensive-2026-07-18.md`](./audits/documentation-audit-comprehensive-2026-07-18.md)
+  — **latest audit (2026-07-18).** Supersedes the *cross-corpus reconciliation* verdict of the
+  remediation report below: it records 17 open Business↔Design/Business↔Business decision gates
+  (two data-loss-grade) that must be resolved before the affected feature UI is implemented.
 - [`audits/documentation-remediation-2026-07-18.md`](./audits/documentation-remediation-2026-07-18.md)
+  — earlier remediation record; its domain-doc closures stand, but its blanket "Closed / approved"
+  framing is **superseded on the Business↔Design axis** by the comprehensive audit above.
 
 ## Stop rule
 

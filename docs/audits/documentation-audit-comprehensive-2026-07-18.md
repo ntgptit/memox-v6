@@ -122,7 +122,7 @@ column as covering the *domain-doc* remediation, not the *cross-corpus* reconcil
 
 ## D. Findings (evidence-cited, grouped by severity)
 
-> 207 raw findings across 23 agents (36 P0, 28 P1, 91 P2, 52 P3), pre-deduplication. P0/P1 consolidate into the 17 conflicts of §E plus the architecture/guard/WBS/a11y/component defects below. Every row carries file:line evidence; full descriptions/impact/recommendation per finding are in the agent journal. No severity level is empty.
+> 207 raw findings across 23 agents (36 P0, 28 P1, 91 P2, 52 P3), pre-deduplication. P0/P1 consolidate into the 17 conflicts of §E plus the architecture/guard/WBS/a11y/component defects below. Every row carries file:line evidence; the **full per-finding description, impact, root cause, recommendation and acceptance criteria are in the machine-readable appendix committed alongside this report — [`documentation-audit-comprehensive-2026-07-18-findings.json`](./documentation-audit-comprehensive-2026-07-18-findings.json)** (keyed by the same finding IDs). No severity level is empty.
 
 ### P0 — 36 raw findings (pre-dedup)
 
@@ -791,7 +791,7 @@ port the tooling + regenerate evidence, or downgrade those rows to OPEN and re-v
 | R-03 | Reconcile "FIXED" evidence (C4-002) | issue-register.md + tool port | Port shot/a11y tooling & regenerate, or downgrade 12 rows to OPEN | — | No FIXED row cites a nonexistent artifact | Design owner |
 | R-04 | Reconcile guard vs folder contract + pubspec (E-002, D2-001, D1) | `memox-scopes.yaml`, WBS §4.2/§4.3, `pubspec.yaml`, `guard-compatibility.md` | Pick `providers/` vs `viewmodels/`; fix stale `folders/`; add Drift/go_router deps | — | Guard scopes match WBS tree; pubspec has accepted stack; guard re-run clean | Arch/Guard owner |
 | R-05 | Fix WBS CP closure (E-001) | `memox-v6-development-wbs.md` | Mark 0.6/1.7/1.8/2.9/3.8 CP or tighten ranges | — | CP set closed under depends-on; add verifier check | WBS owner |
-| R-06 | Add SRS Box-7→wrong decision row (SRS8-001) | `decision-tables/srs-8-box-v1.md` | Add the missing terminal transition; fix `..016`→`..028` | — | Row-to-test parity complete | Domain owner |
+| R-06 | Add SRS Box-7→wrong decision row (SRS8-001) | `decision-tables/srs-8-box-v1.md`, `wbs/memox-v6-development-wbs.md` | Append `SRS8-029` (Box 7→wrong→Box 6, +60d); set header + WBS 0.3 range `..016`→`..029` (the new row makes it 29, not 28) | — | Row-to-test parity complete; range matches actual row count | Domain owner |
 | R-07 | Fix first-launch routing contradiction (CF-16) | `navigation/README.md`, `deck/create-deck.md`, `handle-empty-library-today.md` | One canonical first-screen/no-pair-guard | R-01 | 3 docs agree; 5.7.4 E2E has one expected path | PO + Domain |
 | R-08 | Add missing decision tables & matrix | `recall-timer-race.md`, `capability-matrix.md`, reconciliation record | Create per §I | R-01 | Files exist, linked, populated | Lead |
 | R-09 | Fix systemic a11y (P1) | `MxIconButton.jsx`/`MxFab.jsx` + call sites; specs 44→48px | Remove silent ligature fallback; add ariaLabel; correct touch-min to `--memox-touch-min` | — | No icon button missing ariaLabel; specs say 48×48; add lint | Design owner |
@@ -813,12 +813,17 @@ ruling).
 **SRS8-001 (P2) — add the missing Box 7 → wrong row** to `docs/decision-tables/srs-8-box-v1.md`
 (insert alongside the other `→ wrong` rows; IDs illustrative):
 
+The table currently spans 28 rows (`SRS8-001..028`) with the Box 7 → wrong transition absent
+(`Box 7 → correct` is `SRS8-007`; `Box 8 → wrong` is `SRS8-009`; no `Box 7 → wrong`). Append the
+missing row as the **29th** row, `SRS8-029` (Box 7 → wrong → Box 6, whose interval is +60 days):
+
 ```diff
-  | SRS8-0xx | Box 7 | correct  | Box 8 | dueAt = null (mastered)      |
-+ | SRS8-0xx | Box 7 | wrong    | Box 6 | dueAt = nowUtc + 60 days     |
-  | SRS8-0xx | Box 8 | wrong    | Box 7 | dueAt = nowUtc + 120 days    |
+  | SRS8-028 | Unknown `policyId` | Apply | Typed policy error | Unchanged |
++ | SRS8-029 | Box 7 | wrong | Box 6 | `nowUtc + 60d` |
 ```
-and fix the header/`WBS 0.3` range `SRS8-001..016` → `SRS8-001..028`.
+and — because this **adds** a row — set the header (`srs-8-box-v1.md:3`) and `WBS 0.3` range to the
+new count: `SRS8-001..016` → **`SRS8-001..029`** (not `..028`; keeping `..028` would go stale the
+moment the row is added and could hide it from a range-based parity check).
 
 **A-001 (P3) — stop asserting a frozen business-doc count.** In `AGENTS.md` and WBS §10, replace
 the hardcoded "127"/"126" with a pointer, per the WBS's own §3.1 rule:
@@ -867,8 +872,10 @@ match `--memox-touch-min`.
   scope items and recompute the gate; port the shot/a11y tooling and regenerate evidence, or downgrade
   the 12 tool-dependent "FIXED" rows to OPEN.
 
-Full evidence for every proposed patch is in §D and the appendix (each finding carries `evidenceA`,
-`evidenceB`, `recommendation`, and acceptance criteria).
+Full evidence for every proposed patch is in §D and in the committed machine-readable appendix
+[`documentation-audit-comprehensive-2026-07-18-findings.json`](./documentation-audit-comprehensive-2026-07-18-findings.json)
+(each finding carries `evidenceA`, `evidenceB`, `description`, `impact`, `rootCause`,
+`recommendation`, and `acceptanceCriteria`, keyed by the finding IDs used throughout §D).
 
 
 ---
