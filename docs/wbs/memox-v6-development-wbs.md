@@ -214,8 +214,8 @@ whose dependencies are not Done.
 
 | Status | WBS | Reason / next action |
 | --- | --- | --- |
-| Done | `0.1–0.6`, `1.1–1.6`, `1.9`, `2.1–2.6` | Durable evidence is in the work-item register. |
-| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Next promotion candidate once packeted: `2.7`. |
+| Done | `0.1–0.6`, `1.1–1.6`, `1.9`, `2.1–2.7` | Durable evidence is in the work-item register. |
+| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Next promotion candidate once packeted: `2.8` (XL — packet must define child boundaries). |
 
 Sequencing note (2026-07-19): `1.7` (developer fixtures) and `1.10` (shared
 test infrastructure) declare only wave-1 dependencies, but their deliverables
