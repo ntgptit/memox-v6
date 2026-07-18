@@ -2,6 +2,11 @@
 
 Flow này cho user so sánh local/remote versions, chọn hoặc merge khi object contract cho phép, rồi apply atomically.
 
+> Decision: [ADR-008](../../architecture/adr/ADR-008-language-pair-removal-and-sync-conflict.md)
+> confirms this contract (business stands over the design mock): no default cloud-wins / no
+> last-write-wins; explicit resolution required. The design kit's sync-conflict state has been
+> reconciled to match.
+
 ## 1. Nguyên tắc đã chốt
 
 - Không có default cloud-wins.

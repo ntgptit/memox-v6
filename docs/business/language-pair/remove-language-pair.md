@@ -2,6 +2,10 @@
 
 Flow này xóa Pair chỉ khi không tạo orphan Deck và user đã hiểu dependency impact.
 
+> Decision: [ADR-008](../../architecture/adr/ADR-008-language-pair-removal-and-sync-conflict.md)
+> confirms this contract (business stands over the design mock): no cascade delete, block on
+> dependency. The design kit has been reconciled to match.
+
 ## 1. Nguyên tắc đã chốt
 
 - Pair có Deck dependency không được xóa trực tiếp.

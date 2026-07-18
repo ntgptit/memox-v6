@@ -1793,7 +1793,13 @@
    "recommendation": "Product Owner must decide the real removal UX: either (a) the design's cascading-delete confirm is correct and remove-language-pair.md's no-cascade/dependency-block rule is stale and should be revised, or (b) the design must add a dependency-check + blocked state (per business) before removal is ever offered, and the confirm copy must stop claiming decks/cards will be deleted.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-008",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "C7-002",
@@ -2472,7 +2478,13 @@
    "recommendation": "Product Owner must decide the canonical Remove Language Pair semantics: (a) block removal when dependent decks exist and require the user to move/delete decks first (business), or (b) allow an explicit cascade delete of decks+cards (design). Then reconcile the losing document.",
    "docsToFix": null,
    "acceptanceCriteria": null,
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-008",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F-002",
@@ -2862,7 +2874,13 @@
     "docs/design/MemoX Design System_v4/ui_kits/memox-app/specs/languages.md"
    ],
    "acceptanceCriteria": "The design's remove-pair flow matches remove-language-pair.md: dependency-blocked path with dep count + manage/move handoff, no cascade delete of Deck/Card, and destructive confirm only for a zero-dependency pair.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-008",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F2-002",
@@ -3559,7 +3577,13 @@
     "docs/design/MemoX Design System_v4/ui_kits/memox-app/specs/account-sync.md"
    ],
    "acceptanceCriteria": "Design conflict state presents object/changed-fields/versions and an explicit keep-local/use-remote/merge decision with no automatic last-write-wins, matching resolve-sync-conflict.md; or a recorded PO decision changes the business contract.",
-   "blocksImplementation": true
+   "blocksImplementation": true,
+   "resolution": {
+    "status": "resolved",
+    "decision": "business stands",
+    "adr": "ADR-008",
+    "date": "2026-07-18"
+   }
   },
   {
    "id": "F22-002",
@@ -3916,6 +3940,30 @@
    ],
    "acceptanceCriteria": "Export config design displays scope counts and shows an explicit flatten warning for hierarchical-scope CSV exports.",
    "blocksImplementation": false
+  }
+ ],
+ "resolutions": [
+  {
+   "conflict": "CF-01",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-008-language-pair-removal-and-sync-conflict.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "C7-001",
+    "F-001",
+    "F2-001"
+   ],
+   "summary": "Language-pair removal: no cascade delete; block on dependency. Design reconciled (RemoveLanguageDialog.jsx blocked dialog + fixed confirm copy, Languages.jsx remove-blocked state, languages.md state matrix)."
+  },
+  {
+   "conflict": "CF-03",
+   "decision": "business stands",
+   "recordedIn": "docs/architecture/adr/ADR-008-language-pair-removal-and-sync-conflict.md",
+   "date": "2026-07-18",
+   "coversFindingIds": [
+    "F22-001"
+   ],
+   "summary": "Sync conflict: no default cloud-wins / no last-write-wins; explicit resolution required. Design reconciled (SyncBlock.jsx conflict state routes to Compare/decision, account-sync.md state matrix annotated)."
   }
  ]
 }

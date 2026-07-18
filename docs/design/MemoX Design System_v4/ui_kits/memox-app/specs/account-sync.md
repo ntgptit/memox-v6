@@ -31,7 +31,7 @@ composition; the component map below is the authoritative set of pieces in play.
 | 1 | `signed-out` |
 | 2 | `signed-in` |
 | 3 | `syncing` |
-| 4 | `conflict` |
+| 4 | `conflict` (unresolved; routes to explicit Compare/decision — no last-write-wins, ADR-008) |
 | 5 | `offline` |
 | 6 | `sign-in-form` |
 | 7 | `sign-in-keyboard` |
