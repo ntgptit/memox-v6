@@ -3,10 +3,12 @@
 const NS = window.MemoXDesignSystem_2ffa54 || {};
 const { MxCard } = NS;
 
+/* Business content-transfer formats-v1 supports exactly two: memox-csv-v1 and
+   memox-json-v1 (JSON is the only hierarchy-preserving format). Excel/clipboard are
+   out of scope — see ADR-009 / CF-11. */
 const FORMATS = [
-  { icon: 'description', name: 'CSV', sub: '.csv file', id: 'csv' },
-  { icon: 'table_chart', name: 'Excel', sub: '.xlsx file', id: 'xlsx' },
-  { icon: 'content_copy', name: 'Copy text', sub: 'To clipboard', id: 'copy' },
+  { icon: 'description', name: 'CSV', sub: 'memox-csv-v1 · flat', id: 'csv' },
+  { icon: 'data_object', name: 'JSON', sub: 'memox-json-v1 · keeps sub-decks', id: 'json' },
 ];
 
 function FormatList() {

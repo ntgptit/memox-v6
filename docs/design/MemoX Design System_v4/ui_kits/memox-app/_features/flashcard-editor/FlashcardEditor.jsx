@@ -1,8 +1,14 @@
 /* MemoX — Card Editor. A focused create/update form for ONE flashcard; single primary
    action = Save (a sticky full-width button at the bottom, easy to reach one-handed).
-   Progressive disclosure: the default view shows only Term → Meaning (+ tags); Example,
+   Progressive disclosure: the default view shows only Term → Meaning (+ tags); the
    translation and advanced options are one tap away, so a blank card fits one screen with
    no scroll.
+   Business reconciliation (ADR-009): the Card model is term / meaning / additional
+   translations / tags / audio (no Example field — CF-13). Three sub-flows still need their
+   full business surface built at implementation time and are noted inline below:
+   - CF-05 audio: business owns Generate / Attach file / Remove (mock shows play/generate only).
+   - CF-06 additional translations: business is an ordered, reorderable multi-item list.
+   - CF-07 duplicate: business is a 4-way Edit / Open-existing / Keep-both / Merge with compare.
    10 states: create · edit · validation · duplicate · additional-translation ·
    audio-generating · submitting · submit-error · submit-success · discard-confirm.
    Language labels are DECK-DRIVEN (never hard-coded) so every language pair reads correctly.
@@ -83,28 +89,13 @@ function VisibilityRow({ disabled }) {
   );
 }
 
-// "Keep adding" option — a checkbox that changes what Save does (see spec / runtime notes):
-// checked → save, transient toast, clear the form, refocus Term (rapid entry); unchecked →
-// save and return to the card list. Production persists the last choice so it's a one-time tick.
-function KeepAdding({ initial, disabled }) {
-  const [on, setOn] = React.useState(!!initial);
-  return (
-    <button type="button" role="checkbox" aria-checked={on} onClick={() => setOn((v) => !v)}
-      data-mx-node="flashcard-editor/keep-adding" data-persist="last-choice" disabled={disabled}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--memox-space-2)', alignSelf: 'flex-start', padding: 'var(--memox-space-1) 0', border: 'none', background: 'transparent', cursor: 'pointer', opacity: disabled ? 'var(--memox-opacity-muted)' : 1 }}>
-      <span className="material-symbols-rounded" aria-hidden="true" style={{ fontSize: 'var(--memox-icon-size-md)', color: on ? 'var(--memox-primary)' : 'var(--memox-text-tertiary)' }}>{on ? 'check_box' : 'check_box_outline_blank'}</span>
-      <span style={{ fontSize: 'var(--memox-font-size-base)', color: 'var(--memox-text-secondary)' }}>Create another card after saving</span>
-    </button>
-  );
-}
-
 // Sticky bottom action bar — the single primary CTA, full-width, always reachable one-handed
 // even with the keyboard open. Width/label stable so it never shifts across submit states.
-// Carries the "keep adding" checkbox above Save, where the option is applied.
-function SaveBar({ label, disabled, keepAdding }) {
+// Per business create-flashcard.md §6, a successful Save closes the editor and returns to the
+// highlighted card list — there is no "keep adding" mode (removed per ADR-009 / CF-13).
+function SaveBar({ label, disabled }) {
   return (
     <div data-mx-node="flashcard-editor/save-bar" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--memox-space-2)', padding: 'var(--memox-space-3) var(--memox-space-4) var(--memox-space-4)', borderTop: 'var(--memox-stroke-hairline) solid var(--memox-divider)', background: 'var(--memox-surface)' }}>
-      <KeepAdding initial={keepAdding} disabled={disabled} />
       <MxButton variant="primary" block disabled={disabled} node="flashcard-editor/save">{label}</MxButton>
     </div>
   );
@@ -152,8 +143,8 @@ function FlashcardEditor({ state = 'create' }) {
   // (~640px tall) Term + Meaning + SaveBar remain reachable — the keyboard only ever
   // overlays the scrolling body, never the SaveBar.
   const bottomBar = keyboardOpen
-    ? <React.Fragment><SaveBar label={saveLabel} disabled={saveDisabled} keepAdding /><window.KeyboardInset node="flashcard-editor/keyboard" /></React.Fragment>
-    : <SaveBar label={saveLabel} disabled={saveDisabled} keepAdding={view === 'edit'} />;
+    ? <React.Fragment><SaveBar label={saveLabel} disabled={saveDisabled} /><window.KeyboardInset node="flashcard-editor/keyboard" /></React.Fragment>
+    : <SaveBar label={saveLabel} disabled={saveDisabled} />;
 
   const screen = (
     <MxScaffold node="flashcard-editor/screen" appBar={bar} bottomNav={bottomBar}>
@@ -179,7 +170,10 @@ function FlashcardEditor({ state = 'create' }) {
           labelAction={<MxIconButton icon="add" size="sm" node="flashcard-editor/add-translation" ariaLabel={'Add ' + DECK.alt.label + ' translation'} disabled={disabledForm} />}
           error={invalid ? 'Enter a meaning.' : null} disabled={disabledForm} />
 
-        {/* Additional translation — expands under Meaning; language-scoped, with a Remove action */}
+        {/* Additional translation — expands under Meaning; language-scoped, with a Remove action.
+            NOTE (ADR-009 / CF-06): business manage-card-translations.md requires an ordered,
+            reorderable, multi-item list (contiguous unique positions + accessible move actions);
+            this single slot is the entry point, full list built at implementation time. */}
         {view === 'additional-translation'
           ? <Field label={'Translation · ' + DECK.alt.label} node="flashcard-editor/translation"
               value="Xin chào" placeholder="Enter a translation" lang={DECK.alt.code}
@@ -190,7 +184,8 @@ function FlashcardEditor({ state = 'create' }) {
       <TagsField tags={tags} disabled={disabledForm} />
 
       {/* MORE OPTIONS — collapsed by default so the base form stays Term → Meaning. Holds the
-          optional Example pair and the advanced Hide-during-study switch. */}
+          advanced Hide-during-study switch. (Example/Example-translation fields removed —
+          not owned by the business Flashcard model; see ADR-009 / CF-13.) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--memox-space-3)' }}>
         {/* Collapsible show-more control (KIT-21-03): aria-expanded exposes the
             open/closed state to AT, aria-controls points at the region it toggles.
@@ -203,12 +198,6 @@ function FlashcardEditor({ state = 'create' }) {
         </button>
         {moreOpen ? (
           <div id="flashcard-editor/more-region" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--memox-space-3)' }}>
-            <Field label="Example" multiline node="flashcard-editor/example"
-              value={blank ? '' : '오늘 날씨가 좋네요.'} placeholder="Add an example sentence"
-              lang={DECK.term.code} disabled={disabledForm} />
-            <Field label="Example translation" multiline node="flashcard-editor/example-translation"
-              value={blank ? '' : 'The weather is nice today.'} placeholder="Translate the example"
-              lang={DECK.meaning.code} disabled={disabledForm} />
             <VisibilityRow disabled={disabledForm} />
           </div>
         ) : null}

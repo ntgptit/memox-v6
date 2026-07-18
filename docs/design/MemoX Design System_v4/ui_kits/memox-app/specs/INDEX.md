@@ -33,8 +33,8 @@
 | theme | Theme | `theme.md` | 3 |
 | import | Import | `import.md` | 8 |
 | export | Export | `export.md` | 4 |
-| languages | Language Pairs | `languages.md` | 6 |
+| languages | Language Pairs | `languages.md` | 7 |
 | study-session | Study Session plans | `study-session.md` | 11 |
 | settings | Settings | `settings.md` | 7 |
 
-Total: 27 screens · 214 active states.
+Total: 27 screens · 215 active states.

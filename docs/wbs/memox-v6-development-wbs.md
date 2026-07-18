@@ -29,7 +29,7 @@ Mỗi feature được bàn giao theo vertical slice xuyên suốt domain, use c
 ### 3.1 Baseline có bằng chứng
 
 - Business catalog: use `docs/business/README.md` as the generated/current denominator; do not freeze a hand-maintained file count here.
-- UI kit: 27 canonical screens and 211 canonical states; 23 documented `Mx*` component contracts.
+- UI kit: 27 canonical screens and 215 canonical states; 23 documented `Mx*` component contracts.
 - Current source: starter `main.dart`, ARB localization setup and Riverpod packages only.
 - Current guard: 246 rules; the remediation run passes with 0 errors but 170 scaffold warnings, largely because expected architecture paths do not exist yet. `intl` is pinned; WBS 1.8 retires the remaining warnings as canonical paths become active.
 - Accepted baseline artifacts now live under `docs/architecture`, `docs/database`, `docs/decision-tables` and `docs/traceability`; the consolidated verifier is active. Executable migration fixtures and the integration-test harness remain delivery outputs of this WBS.

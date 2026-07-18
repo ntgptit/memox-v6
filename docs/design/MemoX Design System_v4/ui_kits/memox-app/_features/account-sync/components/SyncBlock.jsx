@@ -23,10 +23,14 @@ function SyncBlock({ state }) {
     );
   }
   if (state === 'conflict') {
+    /* No default cloud-wins / last-write-wins (ADR-008 / resolve-sync-conflict.md):
+       a conflict pauses the affected sync scope and routes to the explicit
+       Compare/decision flow — nothing is applied until the user decides. */
     return (
       <MxCard node="account/sync" style={{ gap: 'var(--memox-space-3)' }}>
-        <window.ListRow icon="merge_type" tone="success" title="Merged" sub="Kept the latest (last-write-wins)" last node="account/sync-status" />
-        <window.Note icon="check_circle" tone="success" text="Your devices' data was merged safely." />
+        <window.ListRow icon="sync_problem" tone="warning" title="Sync paused" sub="Conflicting changes need your review" last node="account/sync-status"
+          trailing={<MxButton variant="outline" size="sm" node="account/sync-resolve">Review changes</MxButton>} />
+        <window.Note icon="info" tone="warning" text="Your data is unchanged until you choose what to keep." />
       </MxCard>
     );
   }

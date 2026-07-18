@@ -24,7 +24,7 @@ composition; the component map below is the authoritative set of pieces in play.
 
 `MxButton`, `MxCard`, `MxContextualAppBar`, `MxIconButton`, `MxScaffold`, `window.EmptyState`, `window.ListRow`, `window.SectionLabel`
 
-## State matrix (contract §6) — 6 states, each rendered light + dark
+## State matrix (contract §6) — 7 states, each rendered light + dark
 
 | # | state |
 | --- | --- |
@@ -32,8 +32,9 @@ composition; the component map below is the authoritative set of pieces in play.
 | 2 | `one` |
 | 3 | `empty` |
 | 4 | `add` |
-| 5 | `remove` |
-| 6 | `scripts` |
+| 5 | `remove` (zero-dependency pair only; affects no deck/card — ADR-008) |
+| 6 | `remove-blocked` (pair has dependent decks; removal blocked, routed to manage decks — ADR-008) |
+| 7 | `scripts` |
 
 ## Handoff notes
 

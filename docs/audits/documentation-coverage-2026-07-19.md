@@ -63,7 +63,7 @@ node tool/verify/run.mjs --docs
 | Relearn scheduling | Sticky wrong is session-local; a new Relearn session may promote from current persisted box | SRS policy; schedule/finalize contracts; ST-SESSION-TYPE rows |
 | Backup manifest | `entries[]` hashes payload members only and rejects `manifest.json` self-entry | Backup format; DATA-MERGE-013/014 |
 | Traceability | Row→override→longest-prefix resolution, default Blocked, explicit Done evidence | Work-item schema/register |
-| Design state manifest | Dashboard 13, Flashcard List 16, Recall 6, Study Session 11; total 214 active states | Design specs `INDEX.md`; coverage report |
+| Design state manifest | Dashboard 13, Flashcard List 16, Recall 6, Study Session 11, Language Pairs 7; total 215 active states | Design specs `INDEX.md`; coverage report |
 | Accessibility baseline | One canonical 48×48 logical-pixel minimum across active design contracts | Design `SCOPE.md`, governance, components and specs |
 | WBS implementation readiness | Exact packet schema introduced; WBS 1.1 has files, dependency manifest, tests, scope and is the sole Ready implementation item | `wbs/implementation-packets/README.md`; work-item register |
 

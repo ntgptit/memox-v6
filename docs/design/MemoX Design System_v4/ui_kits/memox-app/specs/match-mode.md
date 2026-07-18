@@ -35,6 +35,11 @@ composition; the component map below is the authoritative set of pieces in play.
 | 5 | `almost` |
 | 6 | `complete` |
 
+> **Business-required states, pending build (ADR-009 / CF-09):** `round-complete` and
+> `retry-round` — the unlimited mastery-round loop (answer-study-stage.md, study-mode/README.md).
+> They are business-canonical and must exist; their screens/fixtures are authored at
+> implementation time and are not yet in the interactive gallery above.
+
 ## Handoff notes
 
 Spacing scale `{4,8,12,16,24,32,48}`; screen padding 16; tokens only (no raw hex / off-scale).

@@ -1,8 +1,9 @@
 export interface SyncBlockProps {
   /**
    * Sync status. Omit for the synced base (Synced + Sync now); `syncing` shows a
-   * progress bar, `offline` a will-sync note, `conflict` a merged/last-write-wins
-   * banner.
+   * progress bar, `offline` a will-sync note, `conflict` an UNRESOLVED conflict that
+   * pauses sync and routes to explicit Compare/decision — no last-write-wins / no default
+   * cloud-wins (ADR-008 / resolve-sync-conflict.md).
    */
   state?: 'syncing' | 'offline' | 'conflict';
 }

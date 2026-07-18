@@ -1,7 +1,11 @@
 /* MemoX — Flashcard-editor local: DupBanner. A compact WARNING (not an error — a duplicate
    isn't a system failure) that steers the user to the safe action. Hierarchy: "View existing"
    is the emphasized action; "Add anyway" is a low-emphasis ghost override. Actions wrap safely
-   at 320px. No nested card. */
+   at 320px. No nested card.
+   NOTE (ADR-009 / CF-07): business resolve-duplicate-flashcard.md requires a fuller decision
+   surface — Edit / Open existing / Keep both / Merge, with a side-by-side incoming-vs-existing
+   comparison. This banner is the entry point; the full compare/merge screen is built at
+   implementation time (see flashcard-editor.md state matrix). */
 (function () {
 const NS = window.MemoXDesignSystem_2ffa54 || {};
 const { MxButton } = NS;
