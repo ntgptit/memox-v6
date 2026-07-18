@@ -1,0 +1,64 @@
+# WBS 3.3 — `MxTextField` and form foundation implementation packet (XL)
+
+| Field | Value |
+| --- | --- |
+| Status | **Ready** — child A Done (2026-07-19); children B–C pending |
+| Owner/domain | Flutter UI + Accessibility / Shared `Mx*` |
+| Depends on | `3.1` — Done |
+| Decision gates | DG-02, DG-05 |
+| Acceptance | `AC-WBS-3.3-01` |
+| Test | `TEST-WBS-3.3-01` |
+
+## Canonical inputs
+
+- Kit `components/core/MxTextField.prompt.md` (frozen) + `.field` /
+  `.field-group` CSS: bare by default (visible box belongs to the
+  container), labelled group adds label (sm/semibold/secondary) with error
+  `*`, helper (sm/tertiary), error (sm/error, hides helper, announces);
+  field text base/`text` with primary caret, placeholder tertiary, error
+  recolors text+caret, disabled tertiary + group opacity, read-only
+  secondary without caret, branded focus ring on `:focus-visible`.
+- Guard hooks contract: `mx_text_field.dart` may own its controller (rule
+  exclusion); every consumer must go through `useMx*` hooks under
+  `lib/presentation/shared/hooks/` (child B); hooks stay
+  presentation-only.
+
+## Child boundaries (XL rule)
+
+| Child | Boundary | Status |
+| --- | --- | --- |
+| A | `MxTextField` core at the guard path: bare + labelled anatomy, empty/filled/focus/error/disabled/read-only/multiline states, keyboard/autofill passthrough, ring without layout shift, error live region | **Done** (2026-07-19) |
+| B | Hooks foundation: `flutter_hooks`/`hooks_riverpod` deps (version-evidenced), `useMxTextValue`, `useMxTextSubmitState`, `useMxSearchController` under `shared/hooks/` | Pending |
+| C | Form-state coverage: validation flow wiring, autofill/IME/long-text/200%-scale tests, `MxSearchField` (guard path) | Pending |
+
+## Scope — child A (this delivery)
+
+Create:
+
+- `lib/presentation/shared/widgets/inputs/mx_text_field.dart` —
+  `MxTextField` per the contract above; internal controller fallback,
+  focus ring reserving its stroke (no layout shift), `Semantics(textField,
+  label ?? placeholder)`, error `liveRegion`.
+- `lib/core/theme/extensions/app_text_styles.dart` — `fieldLabel` role
+  (kit `.field-group__label` sm/semibold).
+- `test/.../inputs/mx_text_field_test.dart` — 9 tests over the state
+  matrix (bare/labelled, onChanged, required star, error-over-helper +
+  recolor + live region, disabled, read-only, multiline, keyboard type,
+  focus ring without shift).
+
+Out of scope for child A: hooks (B), search field and stress-state suite
+(C), form-level submit orchestration (3.9 async runner).
+
+## Acceptance and test procedure
+
+`AC-WBS-3.3-01` (child A portion): every kit state renders with exact
+token colors; error state hides helper and announces; keyboard/autofill
+parameters pass through; ring reserves space. Full canonical gate passes.
+
+`TEST-WBS-3.3-01` (child A portion): `mx_text_field_test.dart` in every
+gate. Run once through `node tool/verify/run.mjs`.
+
+## Failure and completion
+
+- Child B promotion requires child A merged and green; the WBS `3.3` row
+  stays Ready until child C completes.

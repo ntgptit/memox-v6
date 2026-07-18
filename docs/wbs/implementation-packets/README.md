@@ -72,6 +72,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `2.10` | [Foundation contract tests](./WBS-2.10-foundation-contract-tests.md) | Done (2026-07-19) — wave-2 gate closed |
 | `3.1` | [Shared text/icon/tappable foundation](./WBS-3.1-shared-foundation.md) | Done (2026-07-19) |
 | `3.2` | [`MxButton` family](./WBS-3.2-mx-button.md) | Done (2026-07-19) |
+| `3.3` | [`MxTextField` and form foundation (XL)](./WBS-3.3-mx-text-field.md) | **Ready** — child A Done, B–C pending |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.
