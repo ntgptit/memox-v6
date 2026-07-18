@@ -19,6 +19,7 @@ Flow này sở hữu validation cuối và tạo session snapshot sau `deck/stud
 | Scope | Có | Current Deck/subtree selection |
 | Session type | Có | Study entry/Mode Picker |
 | Selected mode | Chỉ `practice` | Practice Mode Picker |
+| Mode plan id | Có | Session-type policy; resolved before create |
 | Eligible Card ids | Recomputed | Learning Progress + Card eligibility |
 | Preferences | Effective snapshot | Preferences |
 
@@ -86,7 +87,10 @@ Mode Picker chỉ cập nhật selection. Session chỉ được tạo sau expli
 - Card content dùng stable version/snapshot policy để answer current prompt nhất quán.
 - Snapshot giữ stable Guess distractor candidate pool có ít nhất năm meaning khác nhau; mọi retry round tiếp tục dùng pool này dù `currentRoundCardIds` còn ít hơn năm.
 - `newLearning` có stage order bắt buộc: Review → Match → Guess → Recall → Fill.
-- `practice` có đúng một selected mode và `scheduleSrs = false`; `dueReview` và `relearn` dùng queue/mode plan được version hóa theo owning contract.
+- `practice` có đúng một selected user-facing mode và `scheduleSrs = false`.
+- `dueReview` luôn snapshot `due-review-binary-v1 = [srsBinaryReview]` với `scheduleSrs = true`.
+- `relearn` snapshot `relearn-guess-v1 = [guess]` khi stable candidate pool có ít nhất năm distinct normalized meanings; nếu không snapshot `relearn-binary-v1 = [srsBinaryReview]`. Cả hai có `scheduleSrs = true`.
+- Mode plan id, strategy ids và candidate pool/fallback reason được persist trong Session snapshot. Retry/Resume dùng lại plan; không re-resolve từ dữ liệu hiện tại.
 - Checkpoint ban đầu trỏ Stage 1 Review và Card đầu tiên trong shuffled Review order.
 - Khi bắt đầu mỗi graded mode, `roundIndex = 1`, `currentRoundCardIds` nhận toàn bộ Card hợp lệ trong session snapshot và `nextRoundFailedCardIds` rỗng.
 - Review không khởi tạo mastery retry round; nó dùng browse position riêng.

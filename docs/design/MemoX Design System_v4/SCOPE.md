@@ -43,13 +43,13 @@ Hierarchy remains **Library › Deck (→ nested Deck…) › Flashcard**. Froze
 | Session type | Entry | Contract |
 | --- | --- | --- |
 | **New learning** | eligible Leaf Deck / Today | Runs Review → Match → Guess → Recall → Fill in order for each eligible card. Completion of all five stages activates Learning Progress. |
-| **Due review** | Today / Deck due action | Reviews the persisted due queue; it does not run the five-stage learning pipeline. |
-| **Relearn** | terminal wrong/sticky-wrong outcome | Runs the explicit relearn queue; it is not an implicit sixth new-learning stage. |
+| **Due review** | Today / Deck due action | Freezes `due-review-binary-v1`; each due Card uses Remembered/Relearn binary self-grade and does not run the five-stage learning pipeline. |
+| **Relearn** | terminal wrong/sticky-wrong outcome | Freezes Guess when the stable snapshot has ≥5 distinct meanings, otherwise binary Remembered/Relearn; it is not an implicit sixth new-learning stage. |
 | **Practice / Single mode** | Mode Picker | User selects exactly one mode and then activates the explicit **Start session** CTA. Practice does not activate Box 0 cards or schedule SRS. |
 
 Guess requires **at least five distinct normalized meanings**. Recall has a deterministic
 **20-second** countdown; timeout is an explicit terminal answer state and never silently becomes
-“Forgot”.
+“Forgot”. The resolved session mode plan is immutable across retry/resume.
 
 ### SRS settings
 

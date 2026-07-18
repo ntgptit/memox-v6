@@ -50,7 +50,7 @@ Owner: Design System team · Status: Current (v4, additive-only).
   *denied* not *restricted*); secondary = "Open Settings" (`Linking.openSettings()`);
   always expose the **non-permission alternative** that lets the primary task finish.
 - **Copy:** state the value ("to scan cards"), not the mechanism; never blame the user.
-- **A11y:** the state is announced via `role="status"`; actions are ≥ 44×44 with a visible
+- **A11y:** the state is announced via `role="status"`; actions are ≥ 48×48 with a visible
   `:focus-visible` ring; icon has an accessible label.
 - **Recovery loop:** on returning from OS Settings (app foreground), re-read the permission
   and refresh the state automatically — do not require a manual retry.

@@ -19,6 +19,7 @@ Flow này chuẩn hóa event riêng của từng Study Mode thành evidence duy 
 | Guess | Question id, five-option set, selected/correct choice ids | `correct` / `wrong` |
 | Recall | UI Remembered/Forgot action hoặc timer-expired event | `correct` / `wrong` + optional reason metadata |
 | Fill | Input + accepted answer snapshot + comparison policy id | `correct` / `wrong` + metadata theo SM-FILL-v1 |
+| SRS Binary Review | UI Remembered/Relearn action | `correct` / `wrong` |
 
 ## 3. Mastery classification
 
@@ -29,12 +30,13 @@ Flow này chuẩn hóa event riêng của từng Study Mode thành evidence duy 
 | Guess | `correct` | `wrong` |
 | Recall | `correct` từ UI Remembered | `wrong` từ UI Forgot hoặc timeout |
 | Fill | `correct` | `wrong` |
+| SRS Binary Review | `correct` từ UI Remembered | `wrong` từ UI Relearn |
 
 - Evidence của graded mode phải giữ `roundIndex`, Card/pair identity và attempt identity để Session dựng retry round deterministic.
 - Guess event chỉ hợp lệ khi option set có đúng năm choice identities gồm một correct và bốn distractor; malformed option count fail closed và không tạo evidence.
 - Recall timeout event chỉ hợp lệ với timer identity/version, threshold 20 giây và elapsed active time đã đạt deadline; event hợp lệ map deterministic thành canonical `wrong` với metadata `reason = timeout`.
 - Manual reveal/self-grade và timeout dùng một resolution identity; event đến sau khi resolution đã commit trả prior result hoặc conflict, không tạo grade thứ hai.
-- `remembered` và `forgot` không được xuất hiện trong canonical evidence/outcome column hoặc DB enum; chúng chỉ tồn tại trong presentation event/state trước mapping.
+- `remembered`, `forgot` và `relearn` action không được xuất hiện trong canonical evidence/outcome column hoặc DB enum; chúng chỉ tồn tại trong presentation event/state trước mapping.
 - Mapper chỉ phân loại passing/non-passing; Study Session sở hữu việc khử trùng failed set, tạo round mới và quyết định chuyển mode.
 - Persistence Retry của cùng event trả prior mapping; attempt ở mastery round mới có identity mới.
 - Match classification dùng [SM-MATCH-v1](../../decision-tables/match-outcomes.md); Fill comparison dùng [SM-FILL-v1](../../decision-tables/fill-answer-normalization.md).

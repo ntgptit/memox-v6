@@ -11,6 +11,7 @@ Flow này sở hữu session type `relearn` độc lập cho Cards có terminal 
 - Source session được finalize sau khi terminal outcomes commit; Relearn là session mới do user explicit start từ `Review missed`/relearn entry.
 - Card trở thành due trong khi session đang chạy không được inject vào queue; nó thuộc một future `dueReview` session.
 - Relearn không thay thế mastery retry round của Match, Guess, Recall hoặc Fill.
+- Relearn mode plan được resolve tại Start: ưu tiên `relearn-guess-v1` khi có stable pool ≥5 distinct meanings; nếu không dùng `relearn-binary-v1`. Không block Relearn chỉ vì thiếu distractor.
 
 ## 2. Entry conditions
 
@@ -58,7 +59,8 @@ Relearn
 - Queue order ổn định theo session policy và được checkpoint.
 - Relearn answer dùng cùng idempotent Attempt contract.
 - Mỗi Card nhận một terminal outcome trong Relearn session; scheduler apply đúng một lần và tạo future due state. Không có current-session scheduling branch.
-- Card resolved trong current Relearn snapshot sau khi mastery loop của mode plan hoàn tất; terminal sticky-wrong vẫn áp dụng cho SRS.
+- Card resolved trong current Relearn snapshot sau khi mastery loop của mode plan hoàn tất; terminal sticky-wrong chỉ aggregate evidence của chính Relearn session.
+- Relearn intentionally schedules again from current persisted Progress. Nếu source session vừa hạ box và Relearn đạt `correct` ngay lần đầu, Card được tăng một box trở lại theo policy hiện hành. Đây là v1 accepted behavior; không carry sticky-wrong từ source session sang Relearn.
 - Exit giữ remaining queue trong paused snapshot.
 
 # 6. Lifecycle và errors

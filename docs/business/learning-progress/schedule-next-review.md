@@ -55,6 +55,7 @@ flowchart TD
 - Stage transition nằm trong policy state machine.
 - Policy version được lưu/trace để reproduce decision.
 - Terminal grade dùng sticky-wrong aggregation: nếu Card có bất kỳ committed wrong/almost/timeout trong session thì grade là `wrong`, kể cả sau đó đạt ở retry round.
+- Sticky-wrong không carry qua session boundary; Relearn tính grade mới từ evidence của chính session và schedule từ current persisted box, vì vậy một Relearn correct có thể promote sau demotion trước đó.
 - Deleted/missing Card không tạo new progress.
 
 # 5. Idempotency và concurrency

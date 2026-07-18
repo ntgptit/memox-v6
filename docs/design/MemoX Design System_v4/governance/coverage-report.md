@@ -9,7 +9,7 @@ verification**. A file existing on disk is not proof that a missing command was 
 | --- | --- | --- |
 | Platform | Flutter; Web + Android Tier 1 | Specified in `SCOPE.md`; medium/expanded Android/Web runtime evidence open |
 | Screen manifest | 27 specs in `ui_kits/memox-app/specs/INDEX.md` | Manifest is manually rebaselined because its cited generator/registry is absent |
-| Active registered state count | 213 after removing 3 conversion states and adding Recall timeout + 4 Today states | Source/spec count; fresh shots for additions open |
+| Active registered state count | 214 after removing 3 conversion states and adding Recall timeout, 4 Today states and Relearn binary fallback | Source/spec count; fresh shots for additions open |
 | Compact historical shots | Existing PNGs under `ui_kits/memox-app/shots/` | Visual references only; predominantly 390×780 |
 | Themes | Light and dark token profiles | Token contract present; changed-screen re-shoot open |
 | Locales | English and Vietnamese v1; RTL-ready/deferred | `vi` prototype seed and Flutter handoff present; complete ARB parity/runtime evidence open |
@@ -19,7 +19,7 @@ verification**. A file existing on disk is not proof that a missing command was 
 
 Existing 390×780 PNGs may support compact-profile comparisons for unchanged states. They do not
 prove Web expanded layouts, Android tablet/landscape, keyboard/pointer behaviour, Vietnamese text,
-new Recall timeout, new Today failure/recovery states, or the rebaselined Deck/Mode/SRS semantics.
+new Recall timeout, new Today failure/recovery states, Relearn binary fallback, or the rebaselined Deck/Mode/SRS semantics.
 
 Older documents cited these unavailable paths/commands:
 

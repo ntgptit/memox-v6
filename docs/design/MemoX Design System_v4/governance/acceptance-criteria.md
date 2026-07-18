@@ -37,7 +37,7 @@ a token. That is the single hard gate that keeps Layer 1 the source of truth.
 | C1 | Stable PascalCase name + stable base class; variants are **modifiers**, never new names | Diff review + Lint |
 | C2 | Consumes **only tokens** — no raw values in the component | Component reviewer + Lint |
 | C3 | Full state matrix rendered: default / hover / press / focus / disabled + loading/empty/error where applicable | Kit gallery |
-| C4 | Visible `:focus-visible` ring; touch target ≥ 44×44 | Component + Accessibility reviewer |
+| C4 | Visible `:focus-visible` ring; touch target ≥ 48×48 | Component + Accessibility reviewer |
 | C5 | `role` / `aria-*` correct (pixel-neutral) | Accessibility reviewer |
 | C6 | Renders correctly in light **and** dark | Kit gallery (both themes) |
 | C7 | Registered in `_ds_manifest.json` components list with `sourcePath` | manifest diff |

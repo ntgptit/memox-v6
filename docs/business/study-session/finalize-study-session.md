@@ -65,6 +65,7 @@ Session complete
 - Empty/invalid summary chặn Result và đi finalize recovery.
 - Attempt ở các mastery round đều được giữ để tính lịch sử; summary Card không double-count vì một Card xuất hiện nhiều round.
 - Trước finalize session có scheduling enabled, Session tổng hợp đúng một terminal SRS grade cho mỗi SRS-active Card: chỉ `correct` khi không có committed lapse evidence; có bất kỳ wrong/almost/timeout thì terminal grade là `wrong`. Việc đạt ở retry round không đổi grade này. Practice không tạo terminal SRS grade.
+- Sticky lapse kết thúc tại session boundary. `Review missed` tạo Relearn session mới với terminal grade độc lập; session mới có thể promote từ current persisted box khi không có lapse.
 
 # 6. Lifecycle
 

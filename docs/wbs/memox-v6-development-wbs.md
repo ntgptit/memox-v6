@@ -29,7 +29,7 @@ Mỗi feature được bàn giao theo vertical slice xuyên suốt domain, use c
 ### 3.1 Baseline có bằng chứng
 
 - Business catalog: use `docs/business/README.md` as the generated/current denominator; do not freeze a hand-maintained file count here.
-- UI kit: 27 canonical screens and 211 canonical states; 23 documented `Mx*` component contracts.
+- UI kit: 27 canonical screens and 215 canonical states; 23 documented `Mx*` component contracts.
 - Current source: starter `main.dart`, ARB localization setup and Riverpod packages only.
 - Current guard: 246 rules; the remediation run passes with 0 errors but 170 scaffold warnings, largely because expected architecture paths do not exist yet. `intl` is pinned; WBS 1.8 retires the remaining warnings as canonical paths become active.
 - Accepted baseline artifacts now live under `docs/architecture`, `docs/database`, `docs/decision-tables` and `docs/traceability`; the consolidated verifier is active. Executable migration fixtures and the integration-test harness remain delivery outputs of this WBS.
@@ -203,8 +203,26 @@ A work package may move to `Ready` only when all conditions are true:
 5. Relevant design screens/KIT gates and guard rules are identified; exceptions have owner, expiry and approval.
 6. Persistence work names schema version, transaction, idempotency and migration impact; time-sensitive work names the injected clock/timezone contract.
 7. The item is small enough for independent review; an XL wave has child evidence boundaries before implementation starts.
+8. Every implementation item links a conforming
+   [implementation packet](./implementation-packets/README.md) with exact
+   create/modify files, symbols, test files, evidence and out-of-scope.
 
-### 6.2 Feature delivery sequence
+### 6.2 Current implementation readiness
+
+The WBS is executed sequentially; `Ready` is never assigned to descendants
+whose dependencies are not Done.
+
+| Status | WBS | Reason / next action |
+| --- | --- | --- |
+| **Ready** | `1.1` | Dependencies and decisions are resolved; execute [the dependency-baseline packet](./implementation-packets/WBS-1.1-dependency-baseline.md). |
+| Done | `0.1–0.6`, `1.2` | Durable evidence is in the work-item register. |
+| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. |
+
+For an XL row, the packet must split child boundaries even when the stable WBS
+ID remains unchanged. This keeps dependency IDs stable while allowing one
+independently reviewable child at a time.
+
+### 6.3 Feature delivery sequence
 
 Every feature work package follows FD-01 through FD-16. A PR may complete one or more consecutive steps, but no step is silently skipped.
 
@@ -241,7 +259,7 @@ Sizing is relative (`S`, `M`, `L`, `XL`) and is not a calendar estimate. A work 
 | --- | --- | --- | --- | --- |
 | 0.1 CP | Reconcile accepted DG-01 Deck model | M | — | ADR-001 is accepted; business/design prose and fixtures agree; mixed-content decision table exists. |
 | 0.2 CP | Publish accepted DG-02/05 platform scope | M | — | ADR-002 Tier-1 Web+Android and en/vi/RTL-ready window/input/parity matrix is linked from owning docs. |
-| 0.3 CP | Freeze accepted SRS Policy v1 | M | — | ADR-003 and `leitner-8-box-v1` decision rows SRS8-001..016 agree; canonical math path is `lib/domain/learning_progress/srs_8_box_policy.dart`; UTC deterministic contract tests are specified. |
+| 0.3 CP | Freeze accepted SRS Policy v1 | M | — | ADR-003 and `leitner-8-box-v1` decision rows SRS8-001..028 agree; canonical math path is `lib/domain/learning_progress/srs_8_box_policy.dart`; UTC deterministic contract tests are specified. |
 | 0.4 CP | Align guard upstream | L | 0.1, 0.3 | Old `folders` paths removed/replaced with Deck paths; SRS rule permits the approved domain policy; submodule pin updated. |
 | 0.5 CP | Establish documentation set | M | 0.1–0.4 | `docs/architecture`, `docs/decision-tables`, `docs/business/navigation`, `docs/database`, `docs/traceability`, ADR index and work-item register are linked and pass docs validation. |
 | 0.6 | Define release scope/exceptions | S | 0.2 | Explicit v1 locales, platforms, RTL/high-contrast/cloud exclusions, owners and revisit targets. |
@@ -250,7 +268,7 @@ Sizing is relative (`S`, `M`, `L`, `XL`) and is not a calendar estimate. A work 
 
 | WBS | Work package | Size | Depends on | Deliverable / Definition of Done |
 | --- | --- | --- | --- | --- |
-| 1.1 CP | Dependency baseline | M | 0.4 | Pin `intl`; add approved go_router, Drift, immutable/model, ID, clock and test dependencies; lockfile reproducible. |
+| 1.1 CP | Dependency baseline | M | 0.4 | Execute [WBS-1.1 packet](./implementation-packets/WBS-1.1-dependency-baseline.md): approved direct manifest in `pubspec.yaml`, reproducible `pubspec.lock`, no disallowed dependency source, full verifier pass. |
 | 1.2 CP | Consolidated verifier | L | 0.4 | `tool/verify/run.mjs` or equivalent owns pub-get/l10n/codegen/format/guard/analyze/tests and emits a pass marker; CI/hooks call the same entry. |
 | 1.3 CP | App bootstrap | M | 1.1 | `main.dart` contains only bootstrap; ProviderScope, error zones, lifecycle and app widget are wired. |
 | 1.4 CP | Router skeleton | L | 1.1 | RouteNames/RoutePaths, navigation extension, app router, feature route registries and empty shell routes; no raw route strings. |
@@ -373,19 +391,19 @@ No work package below is accepted as “complete” without applying FD-01–FD-
 
 | WBS | Work package | Size | Depends on | Completion boundary |
 | --- | --- | --- | --- | --- |
-| 5.5.1 CP | Canonical mode/evidence model | L | 5.4.5 | One enum, typed input/evidence/outcome/metadata and no UI/data types. |
-| 5.5.2 CP | Abstract template pipeline | XL | 5.5.1 | Validate→order→evaluate→map→persist→checkpoint→advance pipeline; no bypass. |
+| 5.5.1 CP | Canonical mode/evidence model | L | 5.4.5 | One enum for Review/Match/Guess/Recall/Fill/SRS Binary Review, typed input/evidence/outcome/metadata and no UI/data types. |
+| 5.5.2 CP | Pure strategy template | L | 5.5.1 | Mandatory domain-only validate→evaluate→map template; no Attempt persistence, checkpoint, navigation, Riverpod or Drift. |
 | 5.5.3 CP | Deterministic shuffle/round policy | L | 1.6, 5.5.2 | Mode/round seed, collision resolution, persisted orders and resume stability. |
-| 5.5.4 CP | Five concrete modes | XL | 5.5.2–5.5.3 | Review, Match, Guess, Recall and Fill implement only their hooks and required evidence rules. |
-| 5.5.5 CP | StudyModeFactory + DI | L | 5.5.4 | Exactly one instance per enum; missing/duplicate fail fast; orchestrator depends only on factory. |
-| 5.5.6 CP | Mode contract tests | XL | 5.5.5 | Shared contract tests over all modes plus Guess five-options, Recall 20s race, Fill normalization and Match classification. |
+| 5.5.4 CP | Six concrete strategies | XL | 5.5.2–5.5.3 | Review, Match, Guess, Recall, Fill and session-only SRS Binary Review implement only pure hooks/evidence rules. |
+| 5.5.5 CP | Mandatory StudyModeFactory + DI | L | 5.5.4 | Exhaustive enum→strategy resolution; exactly one instance per id; missing/duplicate/unknown fail fast; app-level generated provider injects the factory; Session depends only on factory. |
+| 5.5.6 CP | Mode/factory contract tests | XL | 5.5.5 | Shared tests over six strategies plus exhaustive factory resolution, Guess five-options, Recall 20s race, binary self-grade, Fill normalization and Match classification. |
 
 #### 5.6 Study Session engine and UI
 
 | WBS | Work package | Size | Depends on | Completion boundary |
 | --- | --- | --- | --- | --- |
 | 5.6.1 CP | Mode picker and eligibility | L | 5.3.4, 5.4.2 | Leaf/subtree scope, hidden/due/new counts, mode minimums and Guess distinct-meaning check. |
-| 5.6.2 CP | Start session snapshot | XL | 5.5.6, 5.6.1 | Exactly one active session; stable card/content/preferences/pool/order snapshot; no orphan start. |
+| 5.6.2 CP | Start session snapshot | XL | 5.5.6, 5.6.1 | Exactly one active session; stable card/content/preferences/mode-plan/pool/order snapshot; Due uses binary plan and Relearn snapshots Guess or binary fallback; no orphan start. |
 | 5.6.3 CP | Session command provider | XL | 5.6.2 | Immutable state/checkpoint orchestration; typed effects/errors; no repository access from UI. |
 | 5.6.4 CP | Shared study shell | L | 3.12 | Constrained progress/header/prompt/action/error composition across all stages and widths. |
 | 5.6.5 CP | Review UI | L | 5.6.3–5.6.4, 5.6.10 | Browse/audio/edit handoff/loading/error/end states through the durable answer boundary. |
@@ -566,7 +584,7 @@ A feature is complete only when all items below are true:
 - Stable idempotency and deterministic shuffle services: necessary for retry/resume and exactly-once session behavior.
 - A formal DB schema/migration program from schema v1, not after the first production release.
 - A single verification wrapper shared by developers, hooks and CI to prevent “passes locally but no pass marker” drift.
-- Decision-table-driven tests and WBS traceability, because 126 business docs contain many branch-heavy contracts.
+- Decision-table-driven tests and WBS traceability, because the business corpus contains many branch-heavy contracts and continues to evolve.
 - Developer state fixtures and a screen-state gallery in Flutter, so every kit state is reviewable without manually reproducing data.
 - Error taxonomy, redacted logging and recovery UX before adding sync/import/backup.
 - Platform capability adapters and a support matrix; multi-platform does not mean every plugin behaves identically.
@@ -579,6 +597,7 @@ A feature is complete only when all items below are true:
 ## 11. Nhịp triển khai đề xuất
 
 - Keep one active vertical slice per integration stream. Avoid parallel writes to router, schema, theme, shared widgets or generated provider inputs.
+- Never start an implementation row without its reviewed packet; only `1.1` is Ready in the current baseline.
 - Begin each slice with FD-01–FD-03 and finish with FD-13–FD-16; do not leave visual/a11y/docs cleanup for a separate indefinite phase.
 - Use small PR boundaries: contract/decision table, domain+data, presentation state, UI+evidence, then integration gate when separation improves reviewability.
 - Run the quick targeted verifier during the inner loop and the full verifier at the slice gate.

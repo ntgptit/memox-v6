@@ -14,5 +14,7 @@
 | DATA-MERGE-010 | Sync | Different edits share base | Three-way field merge only for Preferences/metadata fields declared mergeable; otherwise conflict |
 | DATA-MERGE-011 | Any | Unknown commit outcome | Read transaction/event identity before retry |
 | DATA-MERGE-012 | Any | Validation/integrity failure | Roll back whole operation; persist recovery state, not partial success |
+| DATA-MERGE-013 | Inspect manifest | `entries[]` contains `manifest.json` | Reject malformed manifest; never attempt recursive/self hash verification |
+| DATA-MERGE-014 | Inspect manifest | Every payload member appears exactly once and length/hash match | Integrity precondition passes; continue schema/object validation |
 
 Mergeable-field registry v1: Preferences scalar fields and non-structural Deck description may use three-way merge when only one side changed each field. Deck parent, Deck content type, Card term/meaning, Progress, Attempts, Session checkpoints and SRS history are not field-mergeable.

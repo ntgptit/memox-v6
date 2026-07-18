@@ -16,6 +16,14 @@ contract. Dates are ISO. The kit's major version is encoded in the folder name
 
 ## [Unreleased] — targeting v4.1 kit freeze
 
+### Study-plan reconciliation (2026-07-19) [docs] [additive]
+
+- Added `relearn-binary` as the fallback state when a Relearn snapshot cannot
+  satisfy Guess's five-distinct-meaning precondition; Due Review uses the same
+  Remembered/Relearn interaction contract.
+- Preserved all frozen `Mx*` and `data-mx-node` identifiers and reconciled the
+  active screen manifest to 214 states.
+
 ### Rebaseline — Product Owner decisions (2026-07-18) [docs] [additive]
 
 - Production target corrected to Flutter with Web and Android as Tier 1; iOS and desktop native

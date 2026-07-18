@@ -72,6 +72,9 @@ and are ancestors of the first-learning release gate, not blockers to starting f
 | Guard naming/alignment targeted suite | Pass; 13 tests |
 | Guard local profile | Pass with expected scaffold warnings; no source implementation exists for most configured future paths |
 
+The complete follow-up inventory and current verification evidence are recorded in
+[`documentation-coverage-2026-07-19.md`](./documentation-coverage-2026-07-19.md).
+
 The canonical command is `node tool/verify/run.mjs`. Its full mode additionally runs dependency
 resolution, localization generation, code generation, formatting, analysis and Flutter tests.
 
@@ -81,7 +84,7 @@ resolution, localization generation, code generation, formatting, analysis and F
 | --- | --- | --- |
 | Business | Ready | Cloud capabilities remain explicitly deferred/gated |
 | Design contract | Ready to implement | Release evidence/sign-off remains blocked until runtime proof exists |
-| Architecture | Ready | Implement only the documented boundaries; no extra factory layer |
+| Architecture | Ready | Implement the mandatory Study Mode Factory boundary without adding unrelated factories |
 | Riverpod | Ready | Annotation/generator and deterministic override contract accepted |
 | Guard | Ready for foundation | Missing-target warnings retire as WBS creates the canonical paths; CI is strict |
 | Test strategy | Ready | Decision/property/repository/provider/widget/E2E layers are traced |

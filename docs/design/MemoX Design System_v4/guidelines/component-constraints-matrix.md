@@ -38,7 +38,7 @@ view: hard limits, legal prop combinations, and the rules that hold across the w
 
 **Global rules.** Spacing only from `{4,8,12,16,24,32,48}`; screen padding 16; max 3 nested
 surfaces; max 5 typography roles per screen; exactly one top-level heading and one primary CTA;
-touch targets ≥ 44×44. No raw color/radius/typography/spacing above the token layer.
+touch targets ≥ 48×48. No raw color/radius/typography/spacing above the token layer.
 
 ---
 

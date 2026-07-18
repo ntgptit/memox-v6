@@ -80,8 +80,8 @@ Session type là contract bắt buộc, không được suy từ label màn hìn
 | Session type | Card source | Mode behavior |
 | --- | --- | --- |
 | `newLearning` | Box 0 eligible Cards | Luôn chạy `Review → Match → Guess → Recall → Fill`; không cho bỏ hoặc đổi thứ tự |
-| `dueReview` | Due queue Box 1..7 | Review flow theo terminal-grade contract; không activate Box 0 |
-| `relearn` | Relearn queue đã checkpoint | Chỉ xử lý queue được chỉ định; không thay mastery retry round |
+| `dueReview` | Due queue Box 1..7 | `due-review-binary-v1 = [srsBinaryReview]`; không activate Box 0 |
+| `relearn` | Relearn queue đã checkpoint | Guess khi snapshot có ≥5 distinct meanings; nếu không dùng `relearn-binary-v1 = [srsBinaryReview]` |
 | `practice` | Eligible scope do user chọn | User chọn đúng một supported mode; không schedule hoặc activate SRS |
 
 - Mode Picker là selection surface và luôn có CTA `Start session`; chọn một tile không tự start.
@@ -92,6 +92,7 @@ Session type là contract bắt buộc, không được suy từ label màn hìn
 - Mode có minimum card count riêng; insufficient state nêu required/current và cách thêm/chọn scope khác.
 - Guess yêu cầu candidate pool có ít nhất năm Card với năm meaning hiển thị khác nhau theo `guess-meaning-normalize-v1` trong cùng language pair, để mọi question luôn có một correct + bốn distractor.
 - Nếu không đạt Guess minimum, không cho Start; mọi Guess question vẫn bắt buộc đúng năm lựa chọn.
+- Riêng Relearn không bị chặn khi thiếu Guess pool: Start snapshot fallback sang `srsBinaryReview`; plan id được hiển thị trong diagnostics và không đổi khi Resume.
 - Due Review phải dựa due queue; zero due hiển thị caught-up state, không giả tạo due cards.
 - Không auto-switch session type/mode khi current selection invalid.
 
