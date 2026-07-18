@@ -48,18 +48,18 @@
 
 <h1>MemoX — UI/UX Audit</h1>
 <p class="sub">22 màn hình · 117 states · light + dark · đối chiếu Material 3 + Apple HIG + foundations của chính design system · 06/07/2026.<br>
-Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM specs (<code>ui_kits/memox-app/specs/</code>, bounding box px thật) và ảnh render (<code>shots/</code>). Vì DS được sync từ code, mọi fix cần thực hiện ở repo gốc rồi chạy lại <code>/design-sync</code>.</p>
+Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code> và DOM specs có version trong Git (<code>ui_kits/memox-app/specs/</code>). Ảnh render dưới <code>shots/</code> là artifact QA cục bộ, được loại khỏi Git; chúng không phải bằng chứng release nếu chưa được tái tạo và lưu trong hồ sơ sign-off.</p>
 
 <div style="border:2px solid #d9822b;border-radius:12px;padding:16px 20px;margin:20px 0;background:#fff7ed;color:#3b2a12">
   <strong>⚠ Status update (2026-07-13) — historical snapshot.</strong>
-  <p style="margin:8px 0 0">This report is a point-in-time audit of the kit as of <strong>06/07/2026 (22 screens · 117 states)</strong>. The kit has since grown to <strong>26 screens · 168 states</strong>, and render-health closure is now <strong>objective and continuous</strong>, not a one-off report:</p>
+  <p style="margin:8px 0 0">This report is a point-in-time audit of the kit as of <strong>06/07/2026 (22 screens · 117 states)</strong>. The kit has since grown, so current implementation work must use the committed manifests and <code>SCOPE.md</code>. This repository does not contain the historical screenshot renderer; the statements below distinguish versioned contracts from local or historical evidence:</p>
   <ul style="margin:8px 0 0">
-    <li><strong>Single source of truth</strong> — <code>tool/ui_kit_shots/registry.mjs</code>; the gallery, per-screen specs, and shots index are generated from it (no drift).</li>
-    <li><strong>Committed visual baseline</strong> — 336 canonical PNGs (168 states × light/dark) under <code>../ui_kits/memox-app/shots/</code>.</li>
-    <li><strong>One gate</strong> — <code>npm run verify:ui-kit</code> renders the full matrix and fails on any overflow / clip / render-error, and checks drift + missing shots. Wired into CI (<code>.github/workflows/ui-kit.yml</code>).</li>
+    <li><strong>Versioned source of truth</strong> — the gallery, per-screen specs and <a href="../ui_kits/memox-app/shots/INDEX.md">state manifest</a> committed in this repository.</li>
+    <li><strong>Local visual artifacts</strong> — compact-profile PNG renders may exist under <code>../ui_kits/memox-app/shots/</code>, but <code>.gitignore</code> intentionally excludes them; the manifest records expected state names without claiming that PNG evidence is committed.</li>
+    <li><strong>Repository gate</strong> — <code>node tool/verify/run.mjs</code> verifies committed documentation, links, IDs, guard rules, Flutter analysis and tests. Screenshot/parity commands are not available in this repository and must not be cited as passed release evidence.</li>
   </ul>
-  <p style="margin:8px 0 0"><strong>Verified closed (2026-07-13, re-measured against current source):</strong> full-matrix render-health (0 overflow/clip/render-error across 168 states); progress-convention unification (one <code>ProgressHeader</code>); destructive-action colour (remove/delete use <code>danger</code>); app-bar consolidation; <strong>G2 touch targets</strong> — every flagged control (<code>chip</code>/<code>switch</code>/<code>btn--sm</code>/<code>icon-btn--sm</code>/<code>segmented__seg</code>/<code>section-head__action</code>/<code>accent-swatch</code>) now gets an <code>::after</code> hit-area overlay to 48px (components.css §"M3-1 hit areas"); <strong>G7 chart labels</strong> — Bars renders x-axis labels and every Stats chart has a caption.</p>
-  <p style="margin:8px 0 0"><strong>Verified closed (2026-07-13): G1 contrast + palette SSOT.</strong> The palette source-of-truth conflict is resolved — <strong>deep violet</strong> is now the canonical palette, ported into <code>tokens/colors.css</code> as the single colour source; <code>theme-override.css</code> has been <strong>deleted</strong> and is no longer loaded by <code>index.html</code>, so palette is no longer decided by CSS load order (0 shared-token conflicts). Contrast is now gated deterministically by <code>tool/ui_kit_shots/contrast.mjs</code> (wired into <code>npm run verify:ui-kit[:structural]</code> and CI): every required foreground/background pair passes WCAG AA in <strong>light and dark</strong> — normal text ≥ 4.5:1, large/UI ≥ 3.0:1 — and a missing or unparseable required token is a hard gate failure (never a warning). <code>text-tertiary</code> is gated as <strong>normal</strong> text (it labels small 11–13px meta) and was set to <code>#6f6b81</code> (light) — 4.73:1 on bg / 5.13:1 on surface, staying below <code>text-secondary</code> so the hierarchy holds; dark tertiary already clears 4.5. Solid <code>success</code>/<code>error</code> were darkened and amber <code>on-warning</code> switched to dark ink for AA; the dark on-surface foreground (<code>primary-strong</code>) was lightened to <code>#b4aadd</code>; and <code>.chip--accent</code>/<code>.avatar--accent</code> (and the accent-soft guideline swatch) now use <code>--memox-accent</code> (not the white <code>on-accent</code>) on the soft tint. The lowest gated normal-text ratio is ≥ 4.5. There are <strong>no current open contrast findings</strong>.</p>
+  <p style="margin:8px 0 0"><strong>Historical source-repository evidence (2026-07-13; not independently reproducible in this repository):</strong> the source report recorded full-matrix render health, progress-convention unification, destructive-action colour, app-bar consolidation, 48px hit areas and chart labels. Treat these as historical observations, not current Tier-1 release evidence; Web/Android runtime evidence remains governed by <code>SCOPE.md</code> and the mobile-kit issue register.</p>
+  <p style="margin:8px 0 0"><strong>Current versioned palette contract:</strong> deep violet in <code>tokens/colors.css</code> is the single colour source and <code>theme-override.css</code> is absent. Historical contrast measurements were produced outside this repository; current release sign-off must attach reproducible Web/Android accessibility evidence rather than citing unavailable <code>npm</code>, parity or screenshot commands.</p>
 </div>
 
 <!-- ============ TÓM TẮT TIẾNG VIỆT ============ -->
@@ -174,8 +174,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/dashboard--loaded--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/dashboard--loaded--light.png" alt="dashboard loaded"></a>
-  <a href="../ui_kits/memox-app/shots/dashboard--empty--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/dashboard--empty--light.png" alt="dashboard empty"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -193,8 +192,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/library--loaded--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/library--loaded--light.png" alt="library loaded"></a>
-  <a href="../ui_kits/memox-app/shots/library--nested-play--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/library--nested-play--light.png" alt="library nested play sheet"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -212,8 +210,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/flashcard-list--loaded--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/flashcard-list--loaded--light.png" alt="deck card list loaded"></a>
-  <a href="../ui_kits/memox-app/shots/flashcard-list--delete-confirm--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/flashcard-list--delete-confirm--light.png" alt="delete confirm"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -230,8 +227,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/search--results--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/search--results--light.png" alt="search results"></a>
-  <a href="../ui_kits/memox-app/shots/search--no-results--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/search--no-results--light.png" alt="no results"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -249,8 +245,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/flashcard-editor--create--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/flashcard-editor--create--light.png" alt="editor create"></a>
-  <a href="../ui_kits/memox-app/shots/flashcard-editor--validation--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/flashcard-editor--validation--light.png" alt="editor validation"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -268,8 +263,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/study-session--stage1-review--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/study-session--stage1-review--light.png" alt="stage 1"></a>
-  <a href="../ui_kits/memox-app/shots/study-session--exit--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/study-session--exit--light.png" alt="exit dialog"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -286,8 +280,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/review-mode--browsing--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/review-mode--browsing--light.png" alt="review browsing"></a>
-  <a href="../ui_kits/memox-app/shots/review-mode--editing--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/review-mode--editing--light.png" alt="review editing"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -303,8 +296,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/study-result--standard--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/study-result--standard--light.png" alt="study result"></a>
-  <a href="../ui_kits/memox-app/shots/study-result--finalize-error--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/study-result--finalize-error--light.png" alt="finalize error"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -320,8 +312,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/player--playing--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/player--playing--light.png" alt="player"></a>
-  <a href="../ui_kits/memox-app/shots/player--end--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/player--end--light.png" alt="player end"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -338,8 +329,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/mode-picker--default--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/mode-picker--default--light.png" alt="game picker"></a>
-  <a href="../ui_kits/memox-app/shots/mode-picker--not-enough--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/mode-picker--not-enough--light.png" alt="not enough"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -356,8 +346,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/match-mode--playing--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/match-mode--playing--light.png" alt="matching"></a>
-  <a href="../ui_kits/memox-app/shots/match-mode--complete--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/match-mode--complete--light.png" alt="matching complete"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -372,8 +361,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/guess-mode--wrong--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/guess-mode--wrong--light.png" alt="mc wrong"></a>
-  <a href="../ui_kits/memox-app/shots/guess-mode--correct--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/guess-mode--correct--light.png" alt="mc correct"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -389,8 +377,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/recall-mode--revealed--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/recall-mode--revealed--light.png" alt="recall revealed"></a>
-  <a href="../ui_kits/memox-app/shots/recall-mode--complete--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/recall-mode--complete--light.png" alt="recall complete"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -406,8 +393,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/fill-mode--typing--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/fill-mode--typing--light.png" alt="typing"></a>
-  <a href="../ui_kits/memox-app/shots/fill-mode--hint--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/fill-mode--hint--light.png" alt="typing hint"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -424,8 +410,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/import--mapping--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/import--mapping--light.png" alt="import mapping"></a>
-  <a href="../ui_kits/memox-app/shots/import--dup-warning--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/import--dup-warning--light.png" alt="dup warning"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -441,8 +426,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/export--config--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/export--config--light.png" alt="export config"></a>
-  <a href="../ui_kits/memox-app/shots/export--done--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/export--done--light.png" alt="export done"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -460,8 +444,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/statistics--loaded--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/statistics--loaded--light.png" alt="stats"></a>
-  <a href="../ui_kits/memox-app/shots/statistics--insufficient--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/statistics--insufficient--light.png" alt="stats insufficient"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -477,8 +460,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/settings--loaded--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/settings--loaded--light.png" alt="settings"></a>
-  <a href="../ui_kits/memox-app/shots/settings--loaded--dark.png" target="_blank"><img src="../ui_kits/memox-app/shots/settings--loaded--dark.png" alt="settings dark"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -495,8 +477,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/account-sync--signed-in--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/account-sync--signed-in--light.png" alt="account signed in"></a>
-  <a href="../ui_kits/memox-app/shots/account-sync--conflict--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/account-sync--conflict--light.png" alt="account conflict"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -512,8 +493,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/reminder--on--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/reminder--on--light.png" alt="reminder on"></a>
-  <a href="../ui_kits/memox-app/shots/reminder--off--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/reminder--off--light.png" alt="reminder off"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -529,8 +509,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/theme--light--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/theme--light--light.png" alt="theme"></a>
-  <a href="../ui_kits/memox-app/shots/theme--dark--dark.png" target="_blank"><img src="../ui_kits/memox-app/shots/theme--dark--dark.png" alt="theme dark"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
@@ -546,8 +525,7 @@ Nguồn đo đạc: <code>components.css</code>, <code>tokens/*</code>, DOM spec
 </ul>
 </div>
 <div class="thumbs">
-  <a href="../ui_kits/memox-app/shots/languages--list--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/languages--list--light.png" alt="languages list"></a>
-  <a href="../ui_kits/memox-app/shots/languages--add--light.png" target="_blank"><img src="../ui_kits/memox-app/shots/languages--add--light.png" alt="add language"></a>
+  <a href="../ui_kits/memox-app/shots/INDEX.md">Open the versioned state manifest</a>
 </div></div>
 </div>
 
