@@ -30,8 +30,9 @@ void main() {
     expect(find.text('MemoX Home'), findsOneWidget);
   });
 
-  testWidgets('unknown location renders the localized not-found screen',
-      (tester) async {
+  testWidgets('unknown location renders the localized not-found screen', (
+    tester,
+  ) async {
     final router = createAppRouter();
     await tester.pumpWidget(_appWithRouter(router));
     await tester.pumpAndSettle();
@@ -43,8 +44,9 @@ void main() {
     expect(find.text("This page doesn't exist."), findsOneWidget);
   });
 
-  testWidgets('goHome extension returns to the home placeholder',
-      (tester) async {
+  testWidgets('goHome extension returns to the home placeholder', (
+    tester,
+  ) async {
     final router = createAppRouter();
     await tester.pumpWidget(_appWithRouter(router));
     await tester.pumpAndSettle();

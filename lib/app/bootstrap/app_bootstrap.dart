@@ -2,15 +2,17 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:memox_v6/app/app.dart';
+import 'package:memox_v6/core/logging/app_logger.dart';
+import 'package:memox_v6/l10n/generated/app_localizations.dart';
 
 /// Single sink for every uncaught framework, platform or zone error.
 ///
-/// WBS 1.5 rewires the default to the redacted `AppLogger` pipeline; until
-/// then the only guard-approved sink is [FlutterError.presentError].
+/// The default routes through the redacted [AppLogger] pipeline and, in
+/// debug builds, still presents full details on the console.
 typedef BootstrapErrorReporter = void Function(FlutterErrorDetails details);
 
 /// Receives app lifecycle transitions observed by the root listener.
@@ -26,7 +28,7 @@ Future<void> bootstrap({
   BootstrapErrorReporter? onError,
   BootstrapLifecycleObserver? onLifecycleStateChanged,
 }) async {
-  final report = onError ?? FlutterError.presentError;
+  final report = onError ?? reportToAppLogger;
   await runZonedGuarded<Future<void>>(() async {
     WidgetsFlutterBinding.ensureInitialized();
     installGlobalErrorHandlers(report);
@@ -35,7 +37,19 @@ Future<void> bootstrap({
   }, (error, stackTrace) => report(detailsForUncaughtError(error, stackTrace)));
 }
 
-/// Routes [FlutterError.onError] and platform-dispatcher errors to [report].
+/// Default reporter: redacted fatal log, plus full console details in debug.
+@visibleForTesting
+void reportToAppLogger(FlutterErrorDetails details) {
+  AppLogger.fatal(
+    'Uncaught error: ${details.exceptionAsString()}',
+    error: details.exception,
+    stackTrace: details.stack,
+  );
+  if (kDebugMode) FlutterError.presentError(details);
+}
+
+/// Routes [FlutterError.onError] and platform-dispatcher errors to [report]
+/// and replaces the framework build-failure dump with a user-safe surface.
 @visibleForTesting
 void installGlobalErrorHandlers(BootstrapErrorReporter report) {
   FlutterError.onError = report;
@@ -43,6 +57,7 @@ void installGlobalErrorHandlers(BootstrapErrorReporter report) {
     report(detailsForUncaughtError(error, stackTrace));
     return true;
   };
+  ErrorWidget.builder = (details) => const SafeBuildErrorSurface();
 }
 
 /// Registers the root lifecycle listener; the binding retains it.
@@ -71,4 +86,25 @@ FlutterErrorDetails detailsForUncaughtError(
     library: 'memox bootstrap',
     context: ErrorDescription('uncaught asynchronous error'),
   );
+}
+
+/// User-safe replacement for the framework build-failure widget.
+///
+/// Shows localized copy when localizations are reachable at the failure
+/// point and degrades to an icon-only surface otherwise; never exposes
+/// exception text to the user.
+@visibleForTesting
+class SafeBuildErrorSurface extends StatelessWidget {
+  @visibleForTesting
+  const SafeBuildErrorSurface({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    return Center(
+      child: l10n == null
+          ? const Icon(Icons.error_outline)
+          : Text(l10n.somethingWentWrongMessage),
+    );
+  }
 }
