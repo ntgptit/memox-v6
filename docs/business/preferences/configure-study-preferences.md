@@ -36,6 +36,14 @@ flowchart TD
 - Active Session banner nêu thay đổi áp dụng lần sau.
 - Restore group default là explicit secondary action.
 
+## 4.1 SRS v1 boundary
+
+- MemoX v1 dùng policy cố định `leitner-8-box-v1` theo `learning-progress/srs-8-box-policy.md`.
+- Settings được hiển thị tám box và interval `1 · 3 · 7 · 14 · 30 · 60 · 120` ở dạng read-only.
+- User không đổi số box, interval, thuật toán lapse hoặc policy id trong v1.
+- New-card limit có thể là preference nếu flow/decision table riêng chốt range và default; thay đổi chỉ áp dụng khi dựng session mới.
+- Thay đổi SRS model trong tương lai cần policy version, migration và impact review; không mutate current Progress im lặng.
+
 ## 5. State matrix
 
 - Defaults/custom/mixed, invalid ranges/combinations.

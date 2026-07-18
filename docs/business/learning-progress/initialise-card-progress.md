@@ -6,7 +6,7 @@ Flow này tạo trạng thái học ban đầu cho Card mới/imported. Nó khô
 
 - Mỗi Card có tối đa một current progress state.
 - Initialisation idempotent theo Card id.
-- Card mới bắt đầu ở stage `new`/chưa học theo policy hiện hành.
+- Card mới bắt đầu ở stage `new`, `box = 0`, `dueAt = null` và chưa activate SRS theo [SRS Policy v1](./srs-8-box-policy.md).
 - Import progress chỉ được restore khi source/compatibility contract cho phép; không giả lập progress từ card content.
 - Hidden Card có progress nhưng không eligible cho Study queue.
 - Initialisation failure không làm Card save thành công giả nếu transaction yêu cầu progress record.
@@ -37,9 +37,9 @@ flowchart TD
 
 # 4. Initial state contract
 
-- Required: Card id, state/stage, created/updated time và policy version cần thiết.
+- Required: Card id, state/stage, `box = 0`, `dueAt = null`, created/updated time và `policyId = leitner-8-box-v1`.
 - Due eligibility của New Card do `surface-due-cards.md` quyết định.
-- Interval/ease/repetition/lapse values dùng policy defaults, không hard-code tại UI/docs flow khác.
+- Box/interval/repetition/lapse dùng SRS Policy v1; policy này không dùng ease factor và UI không hard-code scheduling.
 - Không tạo Attempt khi initialise.
 
 # 5. Validation và recovery
