@@ -215,7 +215,7 @@ whose dependencies are not Done.
 | Status | WBS | Reason / next action |
 | --- | --- | --- |
 | Done | `0.1–0.6`, `1.1–1.6`, `1.9`, `2.1–2.10`, `3.1–3.7`, `3.9–3.10`, `4.1` | Durable evidence is in the work-item register. Wave 2 (token→theme→responsive) is closed. |
-| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Gates 4.10 and 3.12 PASSED (2026-07-19). 5.1 block complete (2026-07-19). Next promotion candidate once packeted: `5.2.4` (Library and open Deck, XL — owns the first-run success callout), then `5.2.5`. |
+| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Gates 4.10 and 3.12 PASSED (2026-07-19). 5.1 block complete (2026-07-19). Next promotion candidate once packeted: `5.2.4` children B/C (open-deck branching, dialog/states), then `5.2.5`. |
 
 Sequencing note (2026-07-19): `1.7` (developer fixtures) and `1.10` (shared
 test infrastructure) declare only wave-1 dependencies, but their deliverables

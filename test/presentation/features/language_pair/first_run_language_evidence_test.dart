@@ -48,6 +48,24 @@ void main() {
     });
   });
 
+  Future<void> disposeAndFlushStreams(WidgetTester tester) async {
+    // Dispose the tree first so drift's stream-retention timer gets
+    // scheduled, then advance time so it fires before the binding's
+    // pending-timer check.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
+  }
+
+  Future<void> pumpLibrary(WidgetTester tester) async {
+    // The Library renders a stream-fed list; bounded pumps let the first
+    // emission land without racing the loading spinner's animation.
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    // Let any just-scheduled stream fetch timer fire before teardown.
+    await tester.pump(const Duration(seconds: 1));
+  }
+
   group('E2E over the real app router', () {
     testWidgets('first run completes through to home', (tester) async {
       final router = createAppRouter();
@@ -81,10 +99,12 @@ void main() {
       await tester.enterText(find.byType(TextField).first, 'Korean TOPIK I');
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create deck'));
-      await tester.pumpAndSettle();
+      await pumpLibrary(tester);
 
-      // Landed on the real home route with the pair and deck persisted.
-      expect(find.text('MemoX'), findsOneWidget);
+      // Landed in the Library with the pair and deck persisted.
+      expect(find.text('Library'), findsOneWidget);
+
+      await disposeAndFlushStreams(tester);
       final deck = await database
           .customSelect('SELECT COUNT(*) AS n FROM decks')
           .getSingle();
