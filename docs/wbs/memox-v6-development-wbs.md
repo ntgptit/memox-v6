@@ -214,8 +214,8 @@ whose dependencies are not Done.
 
 | Status | WBS | Reason / next action |
 | --- | --- | --- |
-| Done | `0.1–0.6`, `1.1–1.6`, `1.9`, `2.1–2.10`, `3.1–3.4` | Durable evidence is in the work-item register. Wave 2 (token→theme→responsive) is closed. |
-| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Current XL in progress: `3.5` (children A–B Done; C pending). |
+| Done | `0.1–0.6`, `1.1–1.6`, `1.9`, `2.1–2.10`, `3.1–3.5` | Durable evidence is in the work-item register. Wave 2 (token→theme→responsive) is closed. |
+| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Next promotion candidate once packeted: `3.6` (navigation primitives). |
 
 Sequencing note (2026-07-19): `1.7` (developer fixtures) and `1.10` (shared
 test infrastructure) declare only wave-1 dependencies, but their deliverables
