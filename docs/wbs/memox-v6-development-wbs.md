@@ -476,13 +476,13 @@ yet measured under this gate.
 | MX-VIS-001 | First-run landing | Default | `create-deck-firstrun--landing` | **Playwright PASS — 1.71% light / 1.84% dark** |
 | MX-VIS-002 | First-run landing | Not-now dismissing | `create-deck-firstrun--not-now` | Blocked — the shot is the Today dashboard after dismissal, not a landing state (5.7; also search 5.x, avatar 9.x) |
 | MX-VIS-003 | First-run language (step 1) | Empty draft | *no kit reference* | Pending — kit decision needed |
-| MX-VIS-004 | First-run language (step 1) | Complete selection | `create-deck-firstrun--step1` | Enforced |
+| MX-VIS-004 | First-run language (step 1) | Complete selection | `create-deck-firstrun--step1` | **Playwright PASS — 1.37% light / 1.38% dark** (fresh launch → Create first deck → select Korean→Vietnamese; capture at `E`, journey continues to a created deck in Library) |
 | MX-VIS-005 | First-run language (step 1) | Validation error | `create-deck-firstrun--step1-validation` | Blocked — step-1 field validation + `MxSelectRow` error slot (5.1.2); Continue is disabled while incomplete, so the state is unreachable |
 | MX-VIS-006 | Language select sheet | Unfiltered list | *no kit reference* (nearest `languages--list`) | Pending — kit decision needed |
 | MX-VIS-007 | Language select sheet | Search filtered | *no kit reference* | Pending — kit decision needed |
 | MX-VIS-008 | Language select sheet | No match | *no kit reference* | Pending — kit decision needed |
-| MX-VIS-009 | First-run deck setup (step 2) | Name filled | `create-deck-firstrun--step2` | Enforced |
-| MX-VIS-010 | First-run deck setup (step 2) | Optional section expanded | `create-deck-firstrun--step2-optional` | Pending — **actionable** |
+| MX-VIS-009 | First-run deck setup (step 2) | Name filled | `create-deck-firstrun--step2` | **Playwright PASS — 0.80% light / 1.28% dark** (fresh launch → step 1 → step 2 with the deck name filled; capture at `H`, journey continues to Library) |
+| MX-VIS-010 | First-run deck setup (step 2) | Optional section expanded | `create-deck-firstrun--step2-optional` | Blocked (remediation) — the app builds the Description field with `multiline: true`, ~4.4% over the gate; single- vs multi-line is a business/design decision (P0.5) |
 | MX-VIS-011 | First-run deck setup (step 2) | Submitting | `create-deck-firstrun--submitting` | Pending — **actionable** after a `Creating…` CTA label swap |
 | MX-VIS-012 | First-run deck setup (step 2) | Submit failure banner | `create-deck-firstrun--submit-failure` | Pending — **actionable** after moving the banner above the title and wiring `Try again` |
 | MX-VIS-013 | First-run deck setup (step 2) | Duplicate name conflict | `create-deck-firstrun--duplicate` | Pending — **actionable** |
