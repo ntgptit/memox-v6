@@ -166,11 +166,13 @@ class _MxButtonState extends State<MxButton> {
           MxIcon(icon: icon, size: iconSize, color: style.fg),
           const MxGap.s2(),
         ],
-        Text(
-          widget.label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: metrics.labelStyle.copyWith(color: style.fg),
+        Flexible(
+          child: Text(
+            widget.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: metrics.labelStyle.copyWith(color: style.fg),
+          ),
         ),
       ],
     );

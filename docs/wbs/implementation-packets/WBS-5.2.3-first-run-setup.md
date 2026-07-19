@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — children A, B Done (2026-07-19); C pending |
+| Status | **Done** (2026-07-19) — children A, B, C shipped one PR each |
 | Owner/domain | Deck / Presentation |
 | Depends on | `3.12`, `5.1.2`, `5.2.2` — Done |
 | Decision gates | DG-01 |
@@ -71,6 +71,23 @@
   the 5.1.3 E2E extended through step 2 to the real home with the deck
   persisted.
 
+## Child C — evidence + hardening (Done, 2026-07-19)
+
+- **E2E from the landing** over the production router: landing →
+  Create your first deck → both language selections → step 2 → deck
+  created → home, with pair + deck persisted.
+- vi locale renders for the landing and step 2; 8 committed goldens
+  (landing + deck setup × light/dark × 390/1024).
+- Shared hardening surfaced by the 390 goldens: `MxButton` labels now
+  flex with single-line ellipsis, so long localized labels can never
+  overflow the button row.
+- **Success-callout boundary**: the §7 success surface is the Library
+  with the new deck highlighted and the contextual callout — that
+  surface literally does not exist until `5.2.4`, so the callout ships
+  with the Library screen (recorded; the WBS row's "callout states"
+  requirement transfers there). Until then success lands on the home
+  placeholder.
+
 ## Acceptance and test procedure
 
 `AC-WBS-5.2.3-01`: the full landing→two-step→created-deck journey
@@ -83,6 +100,5 @@ first-run.
 
 ## Failure and completion
 
-- Success per child: PR merged with the canonical gate green. 5.2.3
-  flips Done when C merges; `5.2.4` (Library/open deck) may proceed
-  after B.
+- Completed 2026-07-19: A (#69), B (#70), C closed the packet. `5.2.4`
+  (Library/open deck, XL) is next and owns the success callout.

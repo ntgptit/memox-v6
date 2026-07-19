@@ -99,7 +99,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `5.1.3` | [Language Pair evidence](./WBS-5.1.3-language-pair-evidence.md) | Done (2026-07-19) |
 | `5.2.1` | [Deck entity/state derivation](./WBS-5.2.1-deck-domain.md) | Done (2026-07-19) |
 | `5.2.2` | [Create Deck transaction](./WBS-5.2.2-create-deck.md) | Done (2026-07-19) |
-| `5.2.3` | [First-run landing/setup (XL)](./WBS-5.2.3-first-run-setup.md) | In progress — children A, B Done (2026-07-19) |
+| `5.2.3` | [First-run landing/setup (XL)](./WBS-5.2.3-first-run-setup.md) | Done (2026-07-19) |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.
