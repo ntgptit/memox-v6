@@ -482,7 +482,7 @@ yet measured under this gate.
 | MX-VIS-007 | Language select sheet | Search filtered | *no kit reference* | Pending — kit decision needed |
 | MX-VIS-008 | Language select sheet | No match | *no kit reference* | Pending — kit decision needed |
 | MX-VIS-009 | First-run deck setup (step 2) | Name filled | `create-deck-firstrun--step2` | **Playwright PASS — 0.80% light / 1.28% dark** (fresh launch → step 1 → step 2 with the deck name filled; capture at `H`, journey continues to Library) |
-| MX-VIS-010 | First-run deck setup (step 2) | Optional section expanded | `create-deck-firstrun--step2-optional` | Blocked (remediation) — the app builds the Description field with `multiline: true`, ~4.4% over the gate; single- vs multi-line is a business/design decision (P0.5) |
+| MX-VIS-010 | First-run deck setup (step 2) | Optional section expanded | `create-deck-firstrun--step2-optional` | **Playwright PASS — 0.86% light / 1.63% dark** (step 2 → expand OPTIONAL → type the description; capture at `H`, journey continues to Library). Remediated in P0.5: the field rested at two rows because `MxTextField` defaulted multiline `minLines` to 2. It is now `MxTextArea(rows: 1)` — still multi-line, per `edit-deck.md` §Description |
 | MX-VIS-011 | First-run deck setup (step 2) | Submitting | `create-deck-firstrun--submitting` | Pending — **actionable** after a `Creating…` CTA label swap |
 | MX-VIS-012 | First-run deck setup (step 2) | Submit failure banner | `create-deck-firstrun--submit-failure` | Pending — **actionable** after moving the banner above the title and wiring `Try again` |
 | MX-VIS-013 | First-run deck setup (step 2) | Duplicate name conflict | `create-deck-firstrun--duplicate` | Pending — **actionable** |

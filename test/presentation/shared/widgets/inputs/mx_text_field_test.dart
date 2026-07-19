@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/core/theme/tokens/app_colors.dart';
 import 'package:memox_v6/core/theme/tokens/app_opacities.dart';
+import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_area.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
 
 Widget _host(Widget child) => MaterialApp(
@@ -111,13 +112,32 @@ void main() {
     expect(_field(tester).style?.color, AppColors.light.textSecondary);
   });
 
-  testWidgets('multiline expands lines and uses the multiline keyboard', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_host(const MxTextField(multiline: true)));
+  testWidgets('single-line field is pinned to one line', (tester) async {
+    await tester.pumpWidget(_host(const MxTextField()));
 
     final field = _field(tester);
-    expect(field.minLines, 2);
+    expect(field.minLines, 1);
+    expect(field.maxLines, 1);
+  });
+
+  testWidgets('MxTextArea defaults to the kit rows and grows to maxRows', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_host(const MxTextArea()));
+
+    final field = _field(tester);
+    expect(field.minLines, 3);
+    expect(field.maxLines, 6);
+    expect(field.keyboardType, TextInputType.multiline);
+  });
+
+  testWidgets('MxTextArea rests at the rows it is given', (tester) async {
+    await tester.pumpWidget(_host(const MxTextArea(rows: 1)));
+
+    final field = _field(tester);
+    expect(field.minLines, 1);
+    // Still a multi-line control: one row at rest, but it grows and the
+    // Enter key inserts a newline rather than submitting.
     expect(field.maxLines, 6);
     expect(field.keyboardType, TextInputType.multiline);
   });

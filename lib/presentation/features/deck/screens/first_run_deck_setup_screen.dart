@@ -14,6 +14,7 @@ import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
+import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_area.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
@@ -114,12 +115,16 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
         ),
         if (showOptional.value) ...[
           const MxGap.s2(),
-          MxTextField(
+          // A description keeps intentional line breaks (`edit-deck.md`
+          // §Description), so it is a real multi-line control. It rests at
+          // one row like the kit and grows into its content, rather than
+          // reserving empty rows before anything is typed.
+          MxTextArea(
             controller: description.controller,
             label: l10n.deckDescriptionLabel,
             boxed: true,
             enabled: !isSubmitting,
-            multiline: true,
+            rows: 1,
             onChanged: (value) => ref
                 .read(firstRunDeckDraftViewmodelProvider.notifier)
                 .setDeckDescription(value),

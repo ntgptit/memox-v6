@@ -1,8 +1,8 @@
 {
   "thresholdPercentage": 3,
-  "generatedAtUtc": "2026-07-19T19:43:17.374Z",
-  "measuredStateThemes": 10,
-  "passed": 10,
+  "generatedAtUtc": "2026-07-19T23:41:35.310Z",
+  "measuredStateThemes": 12,
+  "passed": 12,
   "failed": 0,
   "results": [
     {
@@ -151,6 +151,58 @@
       "actual": "actual.png",
       "diff": "diff.png",
       "differencePercentage": 0.8,
+      "result": "PASS",
+      "kitSize": {
+        "width": 780,
+        "height": 1560
+      },
+      "actualSize": {
+        "width": 780,
+        "height": 1560
+      }
+    },
+    {
+      "wbsId": "MX-VIS-010",
+      "screen": "First-run deck setup (step 2)",
+      "state": "Optional section expanded",
+      "masterFlow": "docs/business/deck/create-deck.md",
+      "flowNode": "H[\"Step 2 · First Deck setup\"]",
+      "kitReference": "create-deck-firstrun--step2-optional--dark.png",
+      "route": "/first-run/deck",
+      "fixture": "MX-VIS-010",
+      "viewport": "390x780 @2x",
+      "theme": "dark",
+      "spec": "/tool/parity/specs/first-run-steps.spec.ts",
+      "expected": "expected.png",
+      "actual": "actual.png",
+      "diff": "diff.png",
+      "differencePercentage": 1.63,
+      "result": "PASS",
+      "kitSize": {
+        "width": 780,
+        "height": 1560
+      },
+      "actualSize": {
+        "width": 780,
+        "height": 1560
+      }
+    },
+    {
+      "wbsId": "MX-VIS-010",
+      "screen": "First-run deck setup (step 2)",
+      "state": "Optional section expanded",
+      "masterFlow": "docs/business/deck/create-deck.md",
+      "flowNode": "H[\"Step 2 · First Deck setup\"]",
+      "kitReference": "create-deck-firstrun--step2-optional--light.png",
+      "route": "/first-run/deck",
+      "fixture": "MX-VIS-010",
+      "viewport": "390x780 @2x",
+      "theme": "light",
+      "spec": "/tool/parity/specs/first-run-steps.spec.ts",
+      "expected": "expected.png",
+      "actual": "actual.png",
+      "diff": "diff.png",
+      "differencePercentage": 0.86,
       "result": "PASS",
       "kitSize": {
         "width": 780,

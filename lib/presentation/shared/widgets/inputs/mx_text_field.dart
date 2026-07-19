@@ -1,32 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
-import 'package:memox_v6/core/theme/tokens/app_border_radii.dart';
-import 'package:memox_v6/core/theme/tokens/app_opacities.dart';
-import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
-import 'package:memox_v6/core/theme/tokens/app_strokes.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
+import 'package:memox_v6/presentation/shared/widgets/inputs/mx_field_scaffold.dart';
 
-/// Inline text input (kit `MxTextField` / `.field`).
+/// Single-line text input (kit `MxTextField` / `.field`).
 ///
 /// Purpose:
-/// The single text-input surface: bare by default (the visible box belongs
-/// to the surrounding container), or a full labelled field group with
-/// label, helper and validation state — all colors and type from tokens.
+/// One line of free text: bare by default (the visible box belongs to the
+/// surrounding container), or a full labelled field group with label,
+/// helper and validation state — all colors and type from tokens.
 ///
 /// Use when:
-/// Any free-text entry — editor fields, answers, paste boxes, forms.
+/// The value is one line — a name, an answer, an email, a search term.
+/// Enter submits rather than inserting a newline.
 ///
 /// Do not use when:
-/// Choosing from a fixed set (segmented/chips/menu) or on/off
-/// (`MxSwitch`).
+/// The value may contain line breaks — use [MxTextArea], which is a real
+/// multi-line control. Choosing from a fixed set (segmented/chips/menu) or
+/// on/off (`MxSwitch`) are different components again.
 ///
 /// Category:
 /// input
 ///
 /// Public API:
 /// - controller: optional external controller (owned via `useMx*` hooks by
-///   consumers; this file may own one internally per guard exclusion).
+///   consumers; this family may own one internally per guard exclusion).
 /// - onChanged / onSubmitted: value callbacks.
 /// - label: renders the labelled field group and names the input.
 /// - helper: support copy, hidden while `errorText` is set.
@@ -34,15 +30,14 @@ import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 ///   announcement; hides helper.
 /// - requiredField: visual `*` and required semantics with a label.
 /// - placeholder: hint at text-tertiary; names the input when bare.
+/// - boxed: kit `Field` surface box.
 /// - enabled / readOnly: kit `field--disabled` / `field--readonly` states.
-/// - multiline / minLines / maxLines: kit multiline variant.
 /// - keyboardType / textInputAction / autofillHints / focusNode /
 ///   textAlign: input environment passthrough.
 ///
 /// States:
-/// empty, filled, focus (branded ring), error, disabled, read-only,
-/// multiline.
-class MxTextField extends StatefulWidget {
+/// empty, filled, focus (branded ring), error, disabled, read-only.
+class MxTextField extends StatelessWidget {
   const MxTextField({
     super.key,
     this.controller,
@@ -56,9 +51,6 @@ class MxTextField extends StatefulWidget {
     this.placeholder,
     this.enabled = true,
     this.readOnly = false,
-    this.multiline = false,
-    this.minLines,
-    this.maxLines,
     this.keyboardType,
     this.textInputAction,
     this.autofillHints,
@@ -72,19 +64,11 @@ class MxTextField extends StatefulWidget {
   final String? label;
   final String? helper;
   final String? errorText;
-
-  /// Renders the kit `Field` surface box (touch-height white surface
-  /// with hairline border; error swaps to the emphasis error border).
-  /// Default false: the surrounding container owns the visible box.
   final bool boxed;
-
   final bool requiredField;
   final String? placeholder;
   final bool enabled;
   final bool readOnly;
-  final bool multiline;
-  final int? minLines;
-  final int? maxLines;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final Iterable<String>? autofillHints;
@@ -92,184 +76,28 @@ class MxTextField extends StatefulWidget {
   final TextAlign textAlign;
 
   @override
-  State<MxTextField> createState() => _MxTextFieldState();
-}
-
-class _MxTextFieldState extends State<MxTextField> {
-  TextEditingController? _ownedController;
-  bool _focused = false;
-
-  TextEditingController get _controller =>
-      widget.controller ?? (_ownedController ??= TextEditingController());
-
-  @override
-  void dispose() {
-    _ownedController?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final styles = context.textStyles;
-    final hasError = widget.errorText != null;
-
-    final textColor = !widget.enabled
-        ? colors.textTertiary
-        : widget.readOnly
-        ? colors.textSecondary
-        : hasError
-        ? colors.error
-        : colors.text;
-
-    Widget input = TextField(
-      controller: _controller,
-      onChanged: widget.onChanged,
-      onSubmitted: widget.onSubmitted,
-      enabled: widget.enabled,
-      readOnly: widget.readOnly,
-      showCursor: widget.readOnly ? false : null,
-      keyboardType:
-          widget.keyboardType ??
-          (widget.multiline ? TextInputType.multiline : null),
-      textInputAction: widget.textInputAction,
-      autofillHints: widget.autofillHints,
-      focusNode: widget.focusNode,
-      textAlign: widget.textAlign,
-      minLines: widget.multiline ? (widget.minLines ?? 2) : 1,
-      maxLines: widget.multiline ? (widget.maxLines ?? 6) : 1,
-      cursorColor: hasError ? colors.error : colors.primary,
-      style: styles.body.copyWith(color: textColor),
-      decoration: InputDecoration(
-        isCollapsed: true,
-        border: InputBorder.none,
-        hintText: widget.placeholder,
-        hintStyle: styles.body.copyWith(color: colors.textTertiary),
-      ),
-    );
-
-    // Branded focus ring (kit `.field:focus-visible`). ONE ring only:
-    // a boxed field draws it over its own surface edge, a bare field
-    // around the input — never nested, never taking layout space.
-    final showRing = _focused && widget.enabled;
-    input = Focus(
-      canRequestFocus: false,
-      skipTraversal: true,
-      onFocusChange: (focused) => setState(() => _focused = focused),
-      child: widget.boxed
-          ? input
-          : DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: AppBorderRadii.xs,
-                border: Border.all(
-                  color: showRing
-                      ? colors.focusRing
-                      : colors.focusRing.withAlpha(0),
-                  width: AppStrokes.focus,
-                ),
-              ),
-              child: input,
-            ),
-    );
-
-    if (widget.boxed) {
-      input = Container(
-        alignment: Alignment.centerLeft,
-        constraints: const BoxConstraints(minHeight: AppSpacing.touchMin),
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.space2,
-          horizontal: AppSpacing.space4,
-        ),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: AppBorderRadii.control,
-          border: Border.all(
-            color: hasError ? colors.error : colors.divider,
-            width: hasError ? AppStrokes.emphasis : AppStrokes.hairline,
-          ),
-        ),
-        // The ring paints over the surface edge on focus, replacing the
-        // resting hairline instead of nesting a second outline inside.
-        foregroundDecoration: BoxDecoration(
-          borderRadius: AppBorderRadii.control,
-          border: Border.all(
-            color: showRing ? colors.focusRing : colors.focusRing.withAlpha(0),
-            width: AppStrokes.focus,
-          ),
-        ),
-        child: input,
-      );
-    }
-
-    final label = widget.label;
-    if (label == null &&
-        widget.helper == null &&
-        !hasError &&
-        !widget.requiredField) {
-      return input;
-    }
-
-    final Widget? support = hasError
-        ? Semantics(
-            liveRegion: true,
-            child: MxText(
-              widget.errorText ?? '',
-              role: MxTextRole.caption,
-              color: colors.error,
-            ),
-          )
-        : widget.helper != null
-        ? MxText(
-            widget.helper ?? '',
-            role: MxTextRole.caption,
-            color: colors.textTertiary,
-          )
-        : null;
-
-    final children = <Widget>[
-      if (label != null) ...[
-        Padding(
-          // Kit `SectionLabel` nudge (s1 top/left) — field labels share
-          // the section-label treatment in the kit Field helper.
-          padding: const EdgeInsets.only(
-            top: AppSpacing.space1,
-            left: AppSpacing.space1,
-          ),
-          child: Text.rich(
-            TextSpan(
-              text: label,
-              style: styles.sectionLabel.copyWith(color: colors.textSecondary),
-              children: [
-                if (widget.requiredField)
-                  TextSpan(
-                    text: ' *',
-                    style: styles.sectionLabel.copyWith(color: colors.error),
-                  ),
-              ],
-            ),
-          ),
-        ),
-        const MxGap.s2(),
-      ],
-      input,
-      if (support != null) ...[const MxGap.s2(), support],
-    ];
-
-    Widget group = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: children,
-    );
-
-    if (!widget.enabled) {
-      group = Opacity(opacity: AppOpacities.opacityDisabled, child: group);
-    }
-
-    return Semantics(
-      textField: true,
-      enabled: widget.enabled,
-      label: label ?? widget.placeholder,
-      child: group,
+    return MxFieldScaffold(
+      // Pinned: a single-line field never grows, and the platform gives it
+      // a submit key instead of a newline key.
+      minLines: 1,
+      maxLines: 1,
+      controller: controller,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      label: label,
+      helper: helper,
+      errorText: errorText,
+      boxed: boxed,
+      requiredField: requiredField,
+      placeholder: placeholder,
+      enabled: enabled,
+      readOnly: readOnly,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      autofillHints: autofillHints,
+      focusNode: focusNode,
+      textAlign: textAlign,
     );
   }
 }

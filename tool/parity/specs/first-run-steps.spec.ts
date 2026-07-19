@@ -22,6 +22,7 @@ import { expectKitParity, expectStableCapture } from '../kit';
  * placeholders of its own.
  */
 const KIT_DECK_NAME = 'Korean TOPIK I';
+const KIT_DECK_DESCRIPTION = 'Vocabulary and grammar for TOPIK I';
 
 /** A → B(Fresh install) → C → D("Create first deck") → E. */
 async function reachStepOne(page: Page): Promise<void> {
@@ -122,9 +123,43 @@ test('MX-VIS-009 fills the first deck name in step 2', async ({
   await holdDemoFrame(page);
 });
 
-// MX-VIS-010 (Optional section expanded) is deliberately not here yet. Its
-// kit shot renders the Description field at single-line height; the app
-// builds it with `multiline: true`, which measures ~4.4% — above the gate.
-// Whether the description is single- or multi-line is a business/design
-// question, not a styling tweak, so it is tracked as its own remediation
-// rather than silently forced to match the shot.
+// MX-VIS-010 · First-run deck setup (step 2) · Optional section expanded
+// Master flow: docs/business/deck/create-deck.md §3
+// Flow node: H["Step 2 · First Deck setup"]
+test('MX-VIS-010 expands the optional section in step 2', async ({
+  page,
+}, testInfo) => {
+  await enterFlow(page, {
+    masterFlow: 'docs/business/deck/create-deck.md',
+    fixture: 'MX-VIS-010',
+  });
+
+  await reachStepOne(page);
+  await selectKitLanguagePair(page);
+  await reachStepTwo(page);
+  await fillField(page, /Deck name/i, KIT_DECK_NAME);
+
+  // The section is collapsed by default and its control toggles to `Hide`,
+  // so the label doubles as the assertion that it actually expanded.
+  await tapControl(page, 'Show');
+  await expect(page.getByRole('button', { name: 'Hide' })).toBeVisible();
+
+  // The kit shot has the description already typed, so the capture belongs
+  // after it is filled, not before.
+  await fillField(page, /Description/i, KIT_DECK_DESCRIPTION);
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-010',
+    shot: 'create-deck-firstrun--step2-optional',
+    screen: 'First-run deck setup (step 2)',
+    state: 'Optional section expanded',
+    masterFlow: 'docs/business/deck/create-deck.md',
+    flowNode: 'H["Step 2 · First Deck setup"]',
+    fixture: 'MX-VIS-010',
+    route: '/first-run/deck',
+  });
+
+  await submitDeckAndExpectLibrary(page, KIT_DECK_NAME);
+  await holdDemoFrame(page);
+});

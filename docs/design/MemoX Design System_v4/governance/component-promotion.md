@@ -38,12 +38,21 @@ existing composite names stay (additive-only), so no consumer breaks.
 | `ActionCallout` | ≥ 2 | Hold — below the bar; monitor. |
 | `EmptyState`, `Skeleton`, `ProgressBar`, `ListRow`, `Stat` (`kit-helpers`) | many | **Strong future candidates** — generic, token-built, used across screens. Recommend promotion evaluation in the next minor as `Mx*` primitives (e.g. `MxEmptyState`, `MxSkeleton`, `MxProgressBar`). Deferred here to keep this batch docs-only. |
 
+### Split candidate — `MxTextField` multiline
+
+| Candidate | Feature usages | Recommendation |
+| --- | --- | --- |
+| `MxTextField` `multiline` prop → a separate **`MxTextArea`** | Single-line: many. Multi-line: deck description (`create-deck` step 2, `edit-deck`), with note/paste fields expected in `13.x` import and `5.3.x` card content | **Split recommended (minor / additive)** — the two are different controls, not one control with a flag. Multiline renders `<textarea>`, keeps intentional line breaks (`docs/business/deck/edit-deck.md` §Description) and gives Enter to the text; single-line renders `<input>` and gives Enter to the form. One component with a boolean hides that difference behind a default: the Flutter port defaulted a multiline field to two resting rows, which silently cost ~4.4% against `create-deck-firstrun--step2-optional` until it was measured. Proposed frozen name **`MxTextArea`** (base class `field--multiline`, already in `components.css`), keeping `rows`/`maxRows`. `MxTextField` then drops `multiline`/`rows`, so the wrong control cannot be selected by accident. |
+
+**Status:** implemented on the Flutter side ahead of the kit (`lib/presentation/shared/widgets/inputs/mx_text_area.dart`), matching how `MxEmptyState`, `MxSelectRow`, `MxSectionLabel` and `MxLink` were adopted. The kit-side rename is what needs an owner decision; until it lands, the app carries an `Mx*` name the kit does not define.
+
 ## Recommendation summary
 
 | Action | Artifacts | Bump | Notes |
 | --- | --- | --- | --- |
 | **Promote (recommended, next minor)** | `Dialog`→`MxDialog`, `Sheet`→`MxSheet` (+ `SelectSheet` variant) | Minor / additive | New frozen names + base classes; domain wrappers unchanged; must ship full state matrix + parity per `acceptance-criteria.md` |
 | **Evaluate next** | `EmptyState`, `Skeleton`, `ProgressBar` from `kit-helpers` | Minor / additive | Generic, high reuse |
+| **Split (recommended)** | `MxTextField` `multiline` → `MxTextArea` | Minor / additive | Different control, not a flag; already split in the Flutter port |
 | **Keep feature-local** | All `Deck*` dialogs/sheets, `ValuePickerSheet`, `TimePickerSheet`, `ProfileCard`, `DeckCard` | — | Encode product copy/behavior; promoting would leak domain into core |
 | **Hold (below ≥ 3)** | `StatusCardRow`, `ActionCallout` | — | Monitor usage |
 
