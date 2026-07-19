@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:memox_v6/app/router/app_router.dart';
+import 'package:memox_v6/app/router/router_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/app/bootstrap/app_bootstrap.dart';
 
@@ -24,7 +26,13 @@ void main() {
         addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
 
         tester.view.physicalSize = entry.value;
-        await tester.pumpWidget(buildRoot());
+        await tester.pumpWidget(
+          buildRoot(
+            overrides: [
+              appRouterInstanceProvider.overrideWithValue(createAppRouter()),
+            ],
+          ),
+        );
         await tester.pumpAndSettle();
 
         await expectLater(
