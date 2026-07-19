@@ -230,6 +230,10 @@
       }
     }
   },
+  "importCardsLabel": "Nhập thẻ",
+  "@importCardsLabel": {
+    "description": "Empty-deck tertiary action opening the import flow (WBS 5.2.5)."
+  },
   "somethingWentWrongMessage": "Đã có lỗi xảy ra.",
   "cardCountLabel": "{count, plural, other{{count} thẻ}}"
 }
