@@ -34,10 +34,11 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  # Aligned to the riverpod 3.2.1 line so codegen packages resolve together:
-  # riverpod_generator 4.0.3 (stable) pins riverpod_annotation 4.0.2 -> riverpod 3.2.1.
+  # Aligned so codegen packages resolve together on analyzer 12.x
+  # (Flutter 3.44.6 / Dart 3.12 unblocked meta >=1.18 on 2026-07-19):
+  # riverpod_generator 4.0.4 pins riverpod_annotation 4.0.3 -> riverpod 3.3.2.
   flutter_riverpod: ^3.2.1
-  riverpod_annotation: 4.0.2
+  riverpod_annotation: 4.0.3
 
   # Localization: user-facing copy flows through generated AppLocalizations
   # (memox i18n rules forbid hardcoded strings in UI code).
@@ -84,10 +85,12 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   build_runner: ^2.15.1
-  riverpod_generator: ^4.0.3
-  # drift_dev is deferred to the WBS 4.1 packet: no stable version co-resolves
-  # with riverpod_generator on this Flutter SDK (analyzer/meta evidence in
-  # docs/wbs/implementation-packets/WBS-1.1-dependency-baseline.md).
+  riverpod_generator: ^4.0.4
+  # drift_dev resolves to 2.34.0 (analyzer >=10 <13) alongside
+  # riverpod_generator 4.0.4 (analyzer ^12); >=2.34.1 requires analyzer ^13
+  # and stays excluded until the Riverpod generator line supports it
+  # (re-check evidence in WBS-1.1 and WBS-4.1 packets).
+  drift_dev: ^2.34.0
   freezed: ^3.0.0
   json_serializable: ^6.9.0
   mocktail: ^1.0.4
