@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
-import 'package:memox_v6/app/router/route_names.dart';
 import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
@@ -10,7 +9,6 @@ import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.d
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_bottom_nav.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_badge.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_deck_card.dart';
@@ -23,7 +21,8 @@ import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// Library root (WBS 5.2.4A, kit shell per 3.15B): the reactive
 /// root-deck list of the active pair inside the shared chrome
-/// (contextual app bar + bottom nav), the kit LIB-04 empty state, the
+/// (contextual app bar; the tab bar belongs to `AppTabShell`), the kit
+/// LIB-04 empty state, the
 /// transferred first-run success callout and per-row deck navigation.
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({super.key});
@@ -32,39 +31,10 @@ class LibraryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
+    // No `bottomNav` here: Library is a branch of `AppTabShell`, which
+    // owns the persistent tab bar for every root destination.
     return MxScaffold(
       appBar: MxContextualAppBar(title: l10n.libraryTitle),
-      bottomNav: MxBottomNav(
-        items: [
-          MxBottomNavItem(
-            id: RouteNames.home,
-            label: l10n.navTodayLabel,
-            icon: Symbols.today_rounded,
-          ),
-          MxBottomNavItem(
-            id: RouteNames.library,
-            label: l10n.libraryTitle,
-            icon: Symbols.style_rounded,
-          ),
-          MxBottomNavItem(
-            id: RouteNames.stats,
-            label: l10n.navStatsLabel,
-            icon: Symbols.insights_rounded,
-          ),
-          MxBottomNavItem(
-            id: RouteNames.profile,
-            label: l10n.navProfileLabel,
-            icon: Symbols.person_rounded,
-          ),
-        ],
-        value: RouteNames.library,
-        onChanged: (id) => switch (id) {
-          RouteNames.home => context.goHome(),
-          RouteNames.stats => context.goStats(),
-          RouteNames.profile => context.goProfile(),
-          _ => null,
-        },
-      ),
       scrollable: false,
       body: const _LibraryBody(),
     );
