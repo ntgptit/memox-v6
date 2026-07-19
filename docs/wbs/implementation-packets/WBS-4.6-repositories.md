@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — child A Done (2026-07-19); B, C pending |
+| Status | **In progress** — children A, B Done (2026-07-19); C pending |
 | Owner/domain | Data + Domain / Persistence boundary |
 | Depends on | `4.4`, `4.5` — Done (PRs #47–#50) |
 | Decision gates | DG-06 (ADR-004), ADR-005 failure taxonomy |
@@ -53,6 +53,29 @@ Shared rules:
 - `test/data/repositories/content_repositories_test.dart` — duplicate
   pair conflict, deck cycle/duplicate conflicts, atomic commit,
   idempotent retry, full rollback on abort, conflict-guarded lifecycle.
+
+## Child B — progress and rhythm repositories (Done, 2026-07-19)
+
+- Ports: `LearningProgressRepository` (operations 4 and 6),
+  `PreferenceRepository`, `StudyGoalRepository`, `StreakRepository`
+  (`recordDay` takes an injected `recordedAt` — repositories never read
+  the clock).
+- **Operation 4** `applyScheduledOutcome`: one transaction persists the
+  terminal attempt evidence and applies the policy-computed schedule
+  behind the revision guard. The attempt idempotency key dedupes
+  replays (replay → success, no reapply); a stale revision raises
+  `ConflictFailure(code: 'revision')` and the evidence insert rolls
+  back with it. Box/due/counters always arrive from the SRS policy.
+- **Operation 6** `resetCard`: delete + reinsert inside one transaction
+  returns progress to Box 0/no due date with cleared counters and the
+  baseline policy identity; card content untouched.
+- Preference save encodes JSON in the data layer; reads inherit the
+  mapper null-fallback. Goal day buckets upsert by unique local date;
+  streak recording replays are absorbed by design.
+- `test/data/repositories/progress_repositories_test.dart` —
+  exactly-once apply + replay, stale-revision rollback (evidence absent
+  after conflict), reset semantics, due paging/count, preference
+  corruption fallback, goal/streak port round-trips.
 
 ## Acceptance and test procedure
 
