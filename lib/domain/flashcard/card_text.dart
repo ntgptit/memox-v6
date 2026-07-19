@@ -9,16 +9,17 @@ import 'package:memox_v6/core/utils/string_utils.dart';
 /// never raw strings).
 
 /// Trims and requires non-empty text; [field] names the offending
-/// input in the typed failure.
+/// input in the typed failure. VAL-001: Unicode NFC + outer trim.
 String validateCardText(String raw, {required String field}) {
-  final trimmed = StringUtils.trimmed(raw);
+  final trimmed = StringUtils.trimmed(StringUtils.nfc(raw));
   if (trimmed.isEmpty) {
     throw ValidationFailure(field: field, code: 'required');
   }
   return trimmed;
 }
 
-/// The duplicate-candidate identity of a term.
+/// The duplicate-candidate identity of a term (and of any card text
+/// compared for normalized duplicates, e.g. additional translations).
 String normalizeCardTerm(String term) {
-  return StringUtils.lowerCased(StringUtils.trimmed(term));
+  return StringUtils.caseFolded(StringUtils.trimmed(StringUtils.nfc(term)));
 }

@@ -75,6 +75,7 @@ dependencies:
   # 3.3.2 moves to riverpod 3.3.2 and is excluded by the solver.
   flutter_hooks: ^0.21.0
   hooks_riverpod: ^3.2.1
+  unorm_dart: ^0.3.2
 
 dev_dependencies:
   flutter_test:
