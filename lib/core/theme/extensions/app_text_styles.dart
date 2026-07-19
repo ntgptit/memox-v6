@@ -71,6 +71,16 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     ),
   );
 
+  /// Bottom-nav label role (kit `.bottom-nav__item`: xs/semibold; active
+  /// items raise to bold via `copyWith`).
+  TextStyle get navLabel => _base.copyWith(
+    fontSize: AppTypography.fontSizeXs,
+    fontWeight: AppTypography.fontWeightSemibold,
+  );
+
+  /// Bold weight accessor for active states composed over other roles.
+  FontWeight get boldWeight => AppTypography.fontWeightBold;
+
   /// Section-header title role (kit `.section-head__title`: md/bold/tight).
   TextStyle get sectionTitle => _base.copyWith(
     fontSize: AppTypography.fontSizeMd,

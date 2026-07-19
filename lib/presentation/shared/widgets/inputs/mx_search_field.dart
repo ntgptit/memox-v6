@@ -51,6 +51,7 @@ class MxSearchField extends StatefulWidget {
     this.flat = false,
     this.autofocus = false,
     this.focusNode,
+    this.trailing,
   });
 
   final TextEditingController? controller;
@@ -61,6 +62,9 @@ class MxSearchField extends StatefulWidget {
   final bool flat;
   final bool autofocus;
   final FocusNode? focusNode;
+
+  /// Optional trailing control after the clear affordance (dock filters).
+  final Widget? trailing;
 
   @override
   State<MxSearchField> createState() => _MxSearchFieldState();
@@ -87,6 +91,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final trailing = widget.trailing;
     final styles = context.textStyles;
 
     final input = TextField(
@@ -124,6 +129,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
             );
           },
         ),
+        ?trailing,
       ],
     );
 
