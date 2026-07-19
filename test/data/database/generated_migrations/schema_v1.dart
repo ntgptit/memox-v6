@@ -1824,6 +1824,14 @@ class DatabaseAtV1 extends GeneratedDatabase {
     'CREATE TRIGGER trg_decks_move_no_cycle BEFORE UPDATE OF parent_id ON decks WHEN NEW.parent_id IS NOT NULL AND NEW.parent_id IS NOT OLD.parent_id AND(NEW.parent_id = NEW.id OR EXISTS (WITH RECURSIVE descendants (id) AS (SELECT id FROM decks WHERE parent_id = NEW.id UNION ALL SELECT d.id FROM decks AS d INNER JOIN descendants AS s ON d.parent_id = s.id) SELECT 1 FROM descendants WHERE id = NEW.parent_id))BEGIN SELECT RAISE (ABORT, \'deck-cycle\');END',
     'trg_decks_move_no_cycle',
   );
+  late final Trigger trgDecksInsertSamePair = Trigger(
+    'CREATE TRIGGER trg_decks_insert_same_pair BEFORE INSERT ON decks WHEN NEW.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM decks WHERE id = NEW.parent_id) AND (SELECT language_pair_id FROM decks WHERE id = NEW.parent_id) IS NOT NEW.language_pair_id BEGIN SELECT RAISE (ABORT, \'deck-pair-mismatch\');END',
+    'trg_decks_insert_same_pair',
+  );
+  late final Trigger trgDecksMoveSamePair = Trigger(
+    'CREATE TRIGGER trg_decks_move_same_pair BEFORE UPDATE OF parent_id ON decks WHEN NEW.parent_id IS NOT NULL AND NEW.parent_id IS NOT OLD.parent_id AND (SELECT language_pair_id FROM decks WHERE id = NEW.parent_id) IS NOT NEW.language_pair_id BEGIN SELECT RAISE (ABORT, \'deck-pair-mismatch\');END',
+    'trg_decks_move_same_pair',
+  );
   late final StudySessions studySessions = StudySessions(this);
   late final Index idxStudySessionsSingleActive = Index(
     'idx_study_sessions_single_active',
@@ -1885,6 +1893,8 @@ class DatabaseAtV1 extends GeneratedDatabase {
     trgFlashcardsRestoreNoMixedContent,
     trgDecksInsertNoSelfParent,
     trgDecksMoveNoCycle,
+    trgDecksInsertSamePair,
+    trgDecksMoveSamePair,
     studySessions,
     idxStudySessionsSingleActive,
     studySessionCards,
@@ -1941,6 +1951,20 @@ class DatabaseAtV1 extends GeneratedDatabase {
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'flashcards',
+        limitUpdateKind: UpdateKind.update,
+      ),
+      result: [],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'decks',
+        limitUpdateKind: UpdateKind.insert,
+      ),
+      result: [],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'decks',
         limitUpdateKind: UpdateKind.update,
       ),
       result: [],
