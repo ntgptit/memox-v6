@@ -1,8 +1,8 @@
 {
   "thresholdPercentage": 3,
-  "generatedAtUtc": "2026-07-19T15:51:03.831Z",
-  "measuredStateThemes": 4,
-  "passed": 4,
+  "generatedAtUtc": "2026-07-19T18:47:42.673Z",
+  "measuredStateThemes": 6,
+  "passed": 6,
   "failed": 0,
   "results": [
     {
@@ -47,6 +47,58 @@
       "actual": "actual.png",
       "diff": "diff.png",
       "differencePercentage": 1.71,
+      "result": "PASS",
+      "kitSize": {
+        "width": 780,
+        "height": 1560
+      },
+      "actualSize": {
+        "width": 780,
+        "height": 1560
+      }
+    },
+    {
+      "wbsId": "MX-VIS-018",
+      "screen": "Library",
+      "state": "Empty",
+      "masterFlow": "docs/business/deck/browse-nested-decks.md",
+      "flowNode": "M[\"Root destination · tap Library tab\"] → N[\"Load root decks của active pair\"] → O{\"Root load result\"} → Q[\"Library · empty\"]",
+      "kitReference": "library--empty--dark.png",
+      "route": "/library",
+      "fixture": "MX-VIS-018",
+      "viewport": "390x780 @2x",
+      "theme": "dark",
+      "spec": "/tool/parity/specs/library.spec.ts",
+      "expected": "expected.png",
+      "actual": "actual.png",
+      "diff": "diff.png",
+      "differencePercentage": 1.93,
+      "result": "PASS",
+      "kitSize": {
+        "width": 780,
+        "height": 1560
+      },
+      "actualSize": {
+        "width": 780,
+        "height": 1560
+      }
+    },
+    {
+      "wbsId": "MX-VIS-018",
+      "screen": "Library",
+      "state": "Empty",
+      "masterFlow": "docs/business/deck/browse-nested-decks.md",
+      "flowNode": "M[\"Root destination · tap Library tab\"] → N[\"Load root decks của active pair\"] → O{\"Root load result\"} → Q[\"Library · empty\"]",
+      "kitReference": "library--empty--light.png",
+      "route": "/library",
+      "fixture": "MX-VIS-018",
+      "viewport": "390x780 @2x",
+      "theme": "light",
+      "spec": "/tool/parity/specs/library.spec.ts",
+      "expected": "expected.png",
+      "actual": "actual.png",
+      "diff": "diff.png",
+      "differencePercentage": 1.43,
       "result": "PASS",
       "kitSize": {
         "width": 780,

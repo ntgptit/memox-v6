@@ -2,15 +2,14 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
+import 'package:memox_v6/app/router/app_router.dart';
 import 'package:memox_v6/app/router/route_paths.dart';
 import 'package:memox_v6/core/random/deterministic_random.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/domain/deck/deck_name.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
-import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
 
@@ -127,10 +126,9 @@ void main() {
 
   group('vi locale evidence', () {
     Widget app(String initialLocation) {
-      final router = GoRouter(
-        initialLocation: initialLocation,
-        routes: deckRoutes(),
-      );
+      // Real shell composition: Library's chrome includes the
+      // persistent tab bar that `AppTabShell` owns.
+      final router = createAppRouter(initialLocation: initialLocation);
       return ProviderScope(
         overrides: [appDatabaseProvider.overrideWithValue(database)],
         child: MaterialApp.router(
@@ -194,10 +192,9 @@ void main() {
 
   group('light/dark goldens', () {
     Widget app(String initialLocation, Brightness brightness) {
-      final router = GoRouter(
-        initialLocation: initialLocation,
-        routes: deckRoutes(),
-      );
+      // Real shell composition: Library's chrome includes the
+      // persistent tab bar that `AppTabShell` owns.
+      final router = createAppRouter(initialLocation: initialLocation);
       return ProviderScope(
         overrides: [appDatabaseProvider.overrideWithValue(database)],
         child: MaterialApp.router(

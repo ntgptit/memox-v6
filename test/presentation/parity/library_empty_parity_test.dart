@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
+import 'package:memox_v6/app/router/app_router.dart';
+import 'package:memox_v6/app/router/route_paths.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
-import 'package:memox_v6/presentation/features/deck/screens/library_screen.dart';
 
 import '../../support/kit_parity.dart';
 
@@ -42,14 +43,17 @@ void main() {
   Widget app(Brightness brightness) {
     return ProviderScope(
       overrides: [appDatabaseProvider.overrideWithValue(database)],
-      child: MaterialApp(
+      // Entered through the real router: the kit shot includes the
+      // persistent tab bar, which `AppTabShell` owns, so mounting
+      // `LibraryScreen` bare would compare against the wrong chrome.
+      child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         theme: brightness == Brightness.dark
             ? AppTheme.dark()
             : AppTheme.light(),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const LibraryScreen(),
+        routerConfig: createAppRouter(initialLocation: RoutePaths.library),
       ),
     );
   }

@@ -1,9 +1,11 @@
 # Đặc tả UI/UX hoàn chỉnh — Browse Nested Decks
 
-Phạm vi tài liệu này mô tả duyệt cây Deck, breadcrumb và child list. Create/Move/Delete/Edit child mở đặc tả tương ứng, không được định nghĩa lại ở đây.
+Phạm vi tài liệu này mô tả Library root — điểm vào cây Deck từ root destination — cùng việc duyệt cây Deck, breadcrumb và child list. Create/Move/Delete/Edit child mở đặc tả tương ứng, không được định nghĩa lại ở đây. Phân loại một Deck sau khi mở thuộc [open-deck.md](./open-deck.md).
 
 ## 1. Nguyên tắc đã chốt
 
+- Library root là level 0 của cây: chỉ liệt kê root Deck của active language pair, không liệt kê descendant.
+- Library root là một root destination, luôn tới được bằng tab và không bao giờ là màn hình cuối đường.
 - Parent chỉ hiển thị direct child Deck, không hiển thị direct card.
 - Aggregate card count bao gồm mọi descendant Leaf.
 - Tap child luôn đi qua `open-deck.md` để phân loại child hiện tại.
@@ -15,6 +17,8 @@ Phạm vi tài liệu này mô tả duyệt cây Deck, breadcrumb và child list
 
 | Context | Trigger | Initial context |
 | --- | --- | --- |
+| Bất kỳ root destination | Tap tab `Library` | Library root |
+| First-run success | `Open deck` hoặc Back | Library root với callout |
 | Library | Open Parent | Parent root của subtree |
 | Parent | Open child Parent | Level tiếp theo |
 | Search result | Open nested Deck | Path tới Deck được tái tạo |
@@ -23,8 +27,20 @@ Phạm vi tài liệu này mô tả duyệt cây Deck, breadcrumb và child list
 
 # 3. Master flow
 
+Level 0 (`M`–`T`) là Library root; từ `S` user mở một Parent và đi tiếp vào cây (`A` trở đi). Node `A`–`L` giữ nguyên định danh cũ.
+
 ```mermaid
 flowchart TD
+    M["Root destination · tap Library tab"] --> N["Load root decks của active pair"]
+    N --> O{"Root load result"}
+    O -- "Đang tải" --> P["Library · loading"]
+    O -- "Không có root Deck" --> Q["Library · empty"]
+    O -- "Lỗi phục hồi" --> R["Library · error · Retry"]
+    O -- "Có root Deck" --> S["Library · root deck list"]
+    Q --> T["Create deck"]
+    R --> N
+    S --> A
+
     A["Open Parent"] --> B["Load path + direct children + aggregate counts"]
     B --> C{"Result"}
     C -- "Loaded" --> D["Child deck list"]
@@ -40,9 +56,28 @@ flowchart TD
 
 # 4. Objective, archetype và composition
 
-- Objective: tìm và mở đúng child Deck trong current subtree.
+- Objective: tìm và mở đúng Deck, bắt đầu từ Library root rồi đi xuống subtree.
 - Archetype: List.
 - Primary CTA: `Create deck`.
+
+## Library root
+
+```text
+   Library                              Search      Avatar
+
+[ Deck A                          320 cards ]
+[ Deck B                          120 cards ]
+
+                                           + Create deck
+
+   Today      Library       Stats      Profile
+```
+
+- Không có Back: Library root là root destination, thoát bằng tab khác.
+- Bottom navigation chỉ xuất hiện ở đây, không lặp trong nested context.
+- Empty dùng EmptyState với `Create deck` primary và `Import cards` secondary.
+
+## Nested Parent
 
 ```text
 ←  <Parent name>                         Search       More
@@ -78,6 +113,10 @@ Library / <ancestor> / <Parent>
 
 # 7. Load/error lifecycle
 
+- Library root loading: skeleton rows giữ app bar và bottom navigation; tab vẫn đổi được.
+- Library root empty: EmptyState, không phải list rỗng giả; không coi là error.
+- Library root recoverable error: `Couldn’t load your library. Try again.` + `Try again`; bottom navigation vẫn hoạt động.
+- Library root không có trạng thái not-found: root luôn tồn tại kể cả khi chưa có Deck nào.
 - Loading: skeleton rows giữ app bar/breadcrumb.
 - Offline: hiển thị cached list nếu có + offline callout; Retry refresh.
 - Recoverable error: `Couldn’t load the nested decks. Try again.`
@@ -100,6 +139,7 @@ Library / <ancestor> / <Parent>
 
 # 10. State matrix
 
+- Library root empty/loading/loaded/dense/error; first-deck callout và callout dismissed.
 - Nested loaded/minimum/dense/deep; loading/offline/error/not-found.
 - Search/results/no-results; selection; child actions; play sheet.
 - Nested create/move/delete success highlight.
@@ -109,6 +149,9 @@ Library / <ancestor> / <Parent>
 
 | Surface | Create child | Add card | Search | Study |
 | --- | ---: | ---: | ---: | ---: |
+| Library root loaded | Primary | Không | Có | Không |
+| Library root empty | Primary | Không | Không | Không |
+| Library root loading/error | Không | Không | Không | Không |
 | Parent loaded | Primary | Không | Có | Aggregate |
 | Parent search | FAB giữ context | Không | Active | Theo result/parent |
 | Selection | Không | Không | Không | Khi hợp lệ |
@@ -117,6 +160,9 @@ Library / <ancestor> / <Parent>
 
 # 12. Acceptance criteria
 
+- Library root chỉ liệt kê root Deck của active pair; không có Back và luôn giữ bottom navigation.
+- Library root empty hiển thị EmptyState, không phải list rỗng, và không bị coi là error.
+- Library root error giữ được bottom navigation và phục hồi bằng `Try again` mà không rời route.
 - Parent list chỉ có direct child rows, không direct card rows.
 - Deep navigation và Back giữ đúng ancestor path/context.
 - Aggregate count chính xác, không double-count.

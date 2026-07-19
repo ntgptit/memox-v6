@@ -36,7 +36,7 @@ Chi tiết phân loại và UI khi mở Deck nằm tại [open-deck.md](./open-d
 
 | Thứ tự | File | Flow sở hữu | Trạng thái |
 | --- | --- | --- | --- |
-| 7 | [browse-nested-decks.md](./browse-nested-decks.md) | Duyệt cây Deck, breadcrumb, deep nesting, danh sách child và quay lại đúng context | Đã có |
+| 7 | [browse-nested-decks.md](./browse-nested-decks.md) | Library root, duyệt cây Deck, breadcrumb, deep nesting, danh sách child và quay lại đúng context | Đã có |
 | 8 | [search-decks.md](./search-decks.md) | Tìm kiếm, lọc và chọn Deck tại Library hoặc trong Parent Deck | Đã có |
 | 9 | [add-content-to-deck.md](./add-content-to-deck.md) | Chọn target khi Add Card/Import; Leaf và Empty hợp lệ, Parent bị chặn | Đã có |
 
@@ -57,7 +57,7 @@ Các file cross-feature chỉ đặc tả phần contract do Deck sở hữu: en
 - `README.md` sở hữu canonical content-state contract áp dụng cho mọi Deck flow.
 - `open-deck.md` sở hữu cách xác định Empty/Leaf/Parent mỗi lần mở hoặc refresh Deck và phải dẫn chiếu contract này.
 - `organise-deck.md` sở hữu guard và các chuyển trạng thái hợp lệ sau khi Deck đã tồn tại; không sở hữu direct Leaf → Parent conversion vì flow đó không được hỗ trợ.
-- `browse-nested-decks.md` sở hữu navigation trong cây; không sở hữu create, move hay delete.
+- `browse-nested-decks.md` sở hữu Library root (level 0 của cây) và navigation trong cây; không sở hữu create, move hay delete.
 - `add-content-to-deck.md` sở hữu điều kiện Deck có thể nhận card/import; không sở hữu form Card hoặc parser Import.
 - `edit-deck.md`, `move-deck.md`, `delete-deck.md` là ba flow độc lập vì có validation, failure và hậu quả khác nhau.
 

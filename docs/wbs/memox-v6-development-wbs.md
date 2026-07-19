@@ -490,7 +490,7 @@ yet measured under this gate.
 | MX-VIS-015 | First-run deck setup (step 2) | Resume draft | `create-deck-firstrun--resume-draft` | Pending |
 | MX-VIS-016 | First-run deck setup (step 2) | Success handoff | `create-deck-firstrun--success` | Pending |
 | MX-VIS-017 | First-run | Import branch | `create-deck-firstrun--import-branch` | Blocked — import flow (13.1) |
-| MX-VIS-018 | Library | Empty | `library--empty` | Enforced (1.10% light) |
+| MX-VIS-018 | Library | Empty | `library--empty` | **Playwright PASS — 1.43% light / 1.93% dark** (fresh launch → Today → tap Library tab → empty branch; capture at `Q`, PASS only after Create deck commits and the deck replaces the empty state) |
 | MX-VIS-019 | Library | Loading | `library--loading` | Pending |
 | MX-VIS-020 | Library | Loaded list | `library--loaded` | Blocked — FilterRow + SRS counters (10.2, 5.4.2) |
 | MX-VIS-021 | Library | First-deck callout | `library--first-deck-created` | Blocked — same as MX-VIS-020 |

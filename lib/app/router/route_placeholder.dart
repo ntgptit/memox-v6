@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 
 /// Skeleton home screen; replaced when the Today feature (WBS 5.7) lands.
 class HomePlaceholderScreen extends StatelessWidget {
@@ -12,21 +10,9 @@ class HomePlaceholderScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.homeTitle)),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(l10n.appTitle),
-            const MxGap.s4(),
-            // Entry into the built flows until the Today dashboard
-            // (WBS 5.7) replaces this placeholder.
-            FilledButton(
-              onPressed: () => context.goLibrary(),
-              child: Text(l10n.libraryTitle),
-            ),
-          ],
-        ),
-      ),
+      // Entry into the built flows is the shell's tab bar; this stays a
+      // bare placeholder until the Today dashboard (WBS 5.7) replaces it.
+      body: Center(child: Text(l10n.appTitle)),
     );
   }
 }
