@@ -1,0 +1,85 @@
+import 'content.drift';
+
+-- Schema v1 — cross-table constraints (WBS 4.3).
+-- Contract: docs/database/schema-v1.md "Deck exclusivity" and the deck
+-- business rules (organise-deck.md blocks mixed content; move-deck.md
+-- checks cycles). SQL-first by owner directive.
+--
+-- The accepted implementation is SQL triggers: they run inside the
+-- writing transaction under SQLite's single-writer lock, so a write
+-- that would make a Deck hold both child decks and direct cards fails
+-- atomically no matter which writer attempts it. Soft-deleted cards
+-- (deleted_at set) no longer count as content.
+
+CREATE TRIGGER trg_decks_insert_no_mixed_content
+BEFORE INSERT ON decks
+WHEN NEW.parent_id IS NOT NULL AND EXISTS (
+  SELECT 1 FROM flashcards
+  WHERE deck_id = NEW.parent_id AND deleted_at IS NULL
+)
+BEGIN
+  SELECT RAISE(ABORT, 'deck-mixed-content');
+END;
+
+CREATE TRIGGER trg_decks_move_no_mixed_content
+BEFORE UPDATE OF parent_id ON decks
+WHEN NEW.parent_id IS NOT NULL
+  AND NEW.parent_id IS NOT OLD.parent_id
+  AND EXISTS (
+    SELECT 1 FROM flashcards
+    WHERE deck_id = NEW.parent_id AND deleted_at IS NULL
+  )
+BEGIN
+  SELECT RAISE(ABORT, 'deck-mixed-content');
+END;
+
+CREATE TRIGGER trg_flashcards_insert_no_mixed_content
+BEFORE INSERT ON flashcards
+WHEN EXISTS (SELECT 1 FROM decks WHERE parent_id = NEW.deck_id)
+BEGIN
+  SELECT RAISE(ABORT, 'deck-mixed-content');
+END;
+
+CREATE TRIGGER trg_flashcards_move_no_mixed_content
+BEFORE UPDATE OF deck_id ON flashcards
+WHEN NEW.deck_id IS NOT OLD.deck_id
+  AND EXISTS (SELECT 1 FROM decks WHERE parent_id = NEW.deck_id)
+BEGIN
+  SELECT RAISE(ABORT, 'deck-mixed-content');
+END;
+
+-- Restoring a soft-deleted card re-adds content to its deck, so it must
+-- re-check exclusivity: a child deck may have arrived meanwhile.
+CREATE TRIGGER trg_flashcards_restore_no_mixed_content
+BEFORE UPDATE OF deleted_at ON flashcards
+WHEN NEW.deleted_at IS NULL AND OLD.deleted_at IS NOT NULL
+  AND EXISTS (SELECT 1 FROM decks WHERE parent_id = NEW.deck_id)
+BEGIN
+  SELECT RAISE(ABORT, 'deck-mixed-content');
+END;
+
+-- Deck tree stays acyclic: no self-parenting on insert, and a move may
+-- not target the deck itself or any of its descendants.
+CREATE TRIGGER trg_decks_insert_no_self_parent
+BEFORE INSERT ON decks
+WHEN NEW.parent_id IS NOT NULL AND NEW.parent_id = NEW.id
+BEGIN
+  SELECT RAISE(ABORT, 'deck-cycle');
+END;
+
+CREATE TRIGGER trg_decks_move_no_cycle
+BEFORE UPDATE OF parent_id ON decks
+WHEN NEW.parent_id IS NOT NULL AND NEW.parent_id IS NOT OLD.parent_id AND (
+  NEW.parent_id = NEW.id OR EXISTS (
+    WITH RECURSIVE descendants (id) AS (
+      SELECT id FROM decks WHERE parent_id = NEW.id
+      UNION ALL
+      SELECT d.id FROM decks d
+        INNER JOIN descendants s ON d.parent_id = s.id
+    )
+    SELECT 1 FROM descendants WHERE id = NEW.parent_id
+  )
+)
+BEGIN
+  SELECT RAISE(ABORT, 'deck-cycle');
+END;

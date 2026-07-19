@@ -17,6 +17,7 @@ const String appDatabaseName = 'memox';
     'tables/content.drift',
     'tables/progress.drift',
     'tables/sessions.drift',
+    'tables/constraints.drift',
   },
 )
 class AppDatabase extends _$AppDatabase {
