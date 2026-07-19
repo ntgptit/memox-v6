@@ -52,6 +52,10 @@ dependencies:
   # Local persistence: one shared Drift schema; platform openers owned by WBS 4.1.
   drift: 2.34.0
   drift_flutter: ^0.3.1
+  # Direct dep: sqlite_error_mapper imports SqliteException from the
+  # platform-neutral sqlite3/common.dart (drift/native.dart is FFI-only
+  # and breaks web builds).
+  sqlite3: ^3.5.0
 
   # Immutable models / JSON codecs (generators are dev dependencies below).
   freezed_annotation: ^3.0.0

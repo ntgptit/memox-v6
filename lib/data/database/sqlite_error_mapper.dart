@@ -1,4 +1,4 @@
-import 'package:drift/native.dart';
+import 'package:sqlite3/common.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 
 /// SQLite error → failure taxonomy mapping (WBS 4.6).

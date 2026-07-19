@@ -164,6 +164,48 @@
   "@dismissLabel": {
     "description": "Library / first-deck callout copy (WBS 5.2.4A)."
   },
+  "emptyDeckTitle": "This deck is empty",
+  "@emptyDeckTitle": {
+    "description": "Open-deck (WBS 5.2.4B) copy."
+  },
+  "emptyDeckBody": "Add cards directly, or create its first nested deck.",
+  "@emptyDeckBody": {
+    "description": "Open-deck (WBS 5.2.4B) copy."
+  },
+  "addCardLabel": "Add card",
+  "@addCardLabel": {
+    "description": "Open-deck (WBS 5.2.4B) copy."
+  },
+  "createNestedDeckLabel": "Create nested deck",
+  "@createNestedDeckLabel": {
+    "description": "Open-deck (WBS 5.2.4B) copy."
+  },
+  "cardCountSummary": "{count} cards",
+  "@cardCountSummary": {
+    "description": "Open-deck (WBS 5.2.4B) copy.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nestedDeckCountSummary": "{count} nested decks",
+  "@nestedDeckCountSummary": {
+    "description": "Open-deck (WBS 5.2.4B) copy.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deckNotFoundMessage": "This deck is no longer available.",
+  "@deckNotFoundMessage": {
+    "description": "Open-deck (WBS 5.2.4B) copy."
+  },
+  "backToLibraryLabel": "Back to Library",
+  "@backToLibraryLabel": {
+    "description": "Open-deck (WBS 5.2.4B) copy."
+  },
   "somethingWentWrongMessage": "Something went wrong.",
   "@somethingWentWrongMessage": {
     "description": "User-safe message shown when a screen fails to render."

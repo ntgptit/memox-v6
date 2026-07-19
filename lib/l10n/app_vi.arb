@@ -155,6 +155,48 @@
   "@dismissLabel": {
     "description": "Library / first-deck callout copy (WBS 5.2.4A)."
   },
+  "emptyDeckTitle": "Deck này đang trống",
+  "@emptyDeckTitle": {
+    "description": "Open-deck (WBS 5.2.4B) copy."
+  },
+  "emptyDeckBody": "Thêm thẻ trực tiếp, hoặc tạo deck con đầu tiên.",
+  "@emptyDeckBody": {
+    "description": "Open-deck (WBS 5.2.4B) copy."
+  },
+  "addCardLabel": "Thêm thẻ",
+  "@addCardLabel": {
+    "description": "Open-deck (WBS 5.2.4B) copy."
+  },
+  "createNestedDeckLabel": "Tạo deck con",
+  "@createNestedDeckLabel": {
+    "description": "Open-deck (WBS 5.2.4B) copy."
+  },
+  "cardCountSummary": "{count} thẻ",
+  "@cardCountSummary": {
+    "description": "Open-deck (WBS 5.2.4B) copy.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nestedDeckCountSummary": "{count} deck con",
+  "@nestedDeckCountSummary": {
+    "description": "Open-deck (WBS 5.2.4B) copy.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deckNotFoundMessage": "Deck này không còn tồn tại.",
+  "@deckNotFoundMessage": {
+    "description": "Open-deck (WBS 5.2.4B) copy."
+  },
+  "backToLibraryLabel": "Về Thư viện",
+  "@backToLibraryLabel": {
+    "description": "Open-deck (WBS 5.2.4B) copy."
+  },
   "somethingWentWrongMessage": "Đã có lỗi xảy ra.",
   "cardCountLabel": "{count, plural, other{{count} thẻ}}"
 }
