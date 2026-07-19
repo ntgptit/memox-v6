@@ -84,6 +84,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `4.3` | [Schema constraints](./WBS-4.3-schema-constraints.md) | Done (2026-07-19) |
 | `4.4` | [DAO layer (XL)](./WBS-4.4-dao-layer.md) | Done (2026-07-19) |
 | `4.5` | [Mapper/model layer](./WBS-4.5-mappers.md) | Done (2026-07-19) |
+| `4.6` | [Repositories (XL)](./WBS-4.6-repositories.md) | In progress — child A Done (2026-07-19) |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.
