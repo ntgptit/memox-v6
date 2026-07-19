@@ -6,6 +6,9 @@ import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
+/// Kit action-column widths for [MxEmptyState.action].
+enum MxEmptyStateActionWidth { standard, wide }
+
 /// Full-screen empty/result state (kit `EmptyState` helper).
 ///
 /// Purpose:
@@ -27,8 +30,9 @@ import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 /// - icon: the tile glyph.
 /// - title: short headline (kit: lg/extrabold/tight).
 /// - body: supporting copy (base, secondary, normal line height).
-/// - action: optional action block, constrained to the kit action
-///   width (`--memox-size-3xl`).
+/// - action: optional action block, constrained to [actionWidth].
+/// - actionWidth: standard (`--memox-size-3xl`) or wide
+///   (`--memox-size-4xl`, full-screen deck actions).
 /// - tone: tile tone (default primary).
 class MxEmptyState extends StatelessWidget {
   const MxEmptyState({
@@ -37,6 +41,7 @@ class MxEmptyState extends StatelessWidget {
     required this.title,
     this.body,
     this.action,
+    this.actionWidth = MxEmptyStateActionWidth.standard,
     this.tone = MxIconTileTone.primary,
   });
 
@@ -44,6 +49,7 @@ class MxEmptyState extends StatelessWidget {
   final String title;
   final String? body;
   final Widget? action;
+  final MxEmptyStateActionWidth actionWidth;
   final MxIconTileTone tone;
 
   @override
@@ -88,7 +94,13 @@ class MxEmptyState extends StatelessWidget {
             ),
             if (action != null) ...[
               const MxGap.s4(),
-              SizedBox(width: AppSizes.size3xl, child: action),
+              SizedBox(
+                width: switch (actionWidth) {
+                  MxEmptyStateActionWidth.standard => AppSizes.size3xl,
+                  MxEmptyStateActionWidth.wide => AppSizes.size4xl,
+                },
+                child: action,
+              ),
             ],
           ],
         ),

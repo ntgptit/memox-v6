@@ -84,7 +84,7 @@ class MxContextualAppBar extends StatelessWidget
           title,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: styles.title.copyWith(color: colors.text),
+          style: styles.appBarTitle.copyWith(color: colors.text),
         ),
       ],
     );

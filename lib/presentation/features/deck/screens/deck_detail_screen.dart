@@ -10,23 +10,38 @@ import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.d
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// Open Deck (WBS 5.2.4B; `open-deck.md`): Empty/Leaf/Parent derived
 /// from the reactive content streams — transitions update in place and
 /// nothing keeps a stored mode.
-class DeckDetailScreen extends StatelessWidget {
+class DeckDetailScreen extends ConsumerWidget {
   const DeckDetailScreen({super.key, required this.deckId});
 
   final String deckId;
 
   @override
-  Widget build(BuildContext context) {
-    return MxScaffold(scrollable: true, body: _DeckDetailBody(deckId: deckId));
+  Widget build(BuildContext context, WidgetRef ref) {
+    // guard:allow-screen-watch -- reason: the kit nested app bar carries
+    // the watched deck's name as its title (empty-deck/appbar).
+    final l10n = AppLocalizations.of(context);
+    final deck = ref.watch(deckDetailProvider(deckId: deckId));
+
+    return MxScaffold(
+      appBar: MxContextualAppBar(
+        title: deck.value?.name ?? '',
+        onBack: () => context.backFromDeck(),
+        backLabel: l10n.backLabel,
+      ),
+      scrollable: false,
+      body: _DeckDetailBody(deckId: deckId),
+    );
   }
 }
 
@@ -83,46 +98,20 @@ class _DeckContent extends ConsumerWidget {
     final children = ref.watch(deckChildrenProvider(deckId: deck.id));
     final cards = ref.watch(deckCardsProvider(deckId: deck.id));
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const MxGap.s4(),
-        Row(
-          children: [
-            MxIconButton(
-              icon: Symbols.arrow_back,
-              semanticLabel: l10n.backLabel,
-              onPressed: () => context.backFromDeck(),
-            ),
-            const MxGap.s2(),
-            Expanded(
-              child: MxText(
-                deck.name,
-                role: MxTextRole.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+    return MxAsyncBuilder<List<Deck>>(
+      value: children,
+      loadingLabel: l10n.loadingLabel,
+      errorTitle: l10n.somethingWentWrongMessage,
+      data: (context, childDecks) => MxAsyncBuilder<List<Flashcard>>(
+        value: cards,
+        loadingLabel: l10n.loadingLabel,
+        errorTitle: l10n.somethingWentWrongMessage,
+        data: (context, directCards) => _DeckBranch(
+          deck: deck,
+          childDecks: childDecks,
+          directCards: directCards,
         ),
-        const MxGap.s4(),
-        MxAsyncBuilder<List<Deck>>(
-          value: children,
-          loadingLabel: l10n.loadingLabel,
-          errorTitle: l10n.somethingWentWrongMessage,
-          data: (context, childDecks) => MxAsyncBuilder<List<Flashcard>>(
-            value: cards,
-            loadingLabel: l10n.loadingLabel,
-            errorTitle: l10n.somethingWentWrongMessage,
-            data: (context, directCards) => _DeckBranch(
-              deck: deck,
-              childDecks: childDecks,
-              directCards: directCards,
-            ),
-          ),
-        ),
-        const MxGap.s6(),
-      ],
+      ),
     );
   }
 }
@@ -142,11 +131,31 @@ class _DeckBranch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The empty branch centers in the fixed shell; content branches
+    // own their scrolling (the shell is non-scrollable).
     if (childDecks.isNotEmpty) {
-      return _ParentBranch(deck: deck, childDecks: childDecks);
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const MxGap.s4(),
+            _ParentBranch(deck: deck, childDecks: childDecks),
+            const MxGap.s6(),
+          ],
+        ),
+      );
     }
     if (directCards.isNotEmpty) {
-      return _LeafBranch(directCards: directCards);
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const MxGap.s4(),
+            _LeafBranch(directCards: directCards),
+            const MxGap.s6(),
+          ],
+        ),
+      );
     }
     return _EmptyBranch(deck: deck);
   }
@@ -160,37 +169,47 @@ class _EmptyBranch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const MxGap.s6(),
-        MxText(l10n.emptyDeckTitle, role: MxTextRole.headline),
-        const MxGap.s2(),
-        MxText(l10n.emptyDeckBody, role: MxTextRole.body),
-        const MxGap.s6(),
-        // Content-choice CTAs activate with 5.2.5 (add card lands with
-        // the 5.3 flashcard flow, nested create with the 5.2.4C dialog).
-        MxButton(label: l10n.addCardLabel, block: true, onPressed: null),
-        const MxGap.s3(),
-        MxButton(
-          label: l10n.createNestedDeckLabel,
-          variant: MxButtonVariant.secondary,
-          block: true,
-          onPressed: () => showCreateDeckDialog(
-            context,
-            parentDeckId: deck.id,
-            parentDeckName: deck.name,
+
+    // Kit `empty-deck--default`: the shared EmptyState with the wide
+    // (size-4xl) action column and the import link centered below.
+    return MxEmptyState(
+      icon: Symbols.inbox_rounded,
+      title: l10n.emptyDeckTitle,
+      body: l10n.emptyDeckBody,
+      actionWidth: MxEmptyStateActionWidth.wide,
+      action: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Add card activates with the 5.3 flashcard flow.
+          MxButton(
+            label: l10n.addCardLabel,
+            icon: Symbols.add_rounded,
+            block: true,
+            onPressed: null,
           ),
-        ),
-        const MxGap.s3(),
-        // Import activates with the content-transfer flow (WBS 8.x).
-        MxButton(
-          label: l10n.importCardsLabel,
-          variant: MxButtonVariant.ghost,
-          block: true,
-          onPressed: null,
-        ),
-      ],
+          const MxGap.s3(),
+          MxButton(
+            label: l10n.createNestedDeckLabel,
+            icon: Symbols.account_tree_rounded,
+            variant: MxButtonVariant.secondary,
+            block: true,
+            onPressed: () => showCreateDeckDialog(
+              context,
+              parentDeckId: deck.id,
+              parentDeckName: deck.name,
+            ),
+          ),
+          const MxGap.s1(),
+          // Import activates with the content-transfer flow (WBS 8.x).
+          Center(
+            child: MxLink(
+              label: l10n.importCardsLabel,
+              icon: Symbols.upload_file_rounded,
+              onTap: null,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

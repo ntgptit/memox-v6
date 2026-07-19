@@ -105,6 +105,17 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   double get lineHeightNormal => AppTypography.lineHeightNormal;
   double get lineHeightRelaxed => AppTypography.lineHeightRelaxed;
 
+  /// App-bar title role (kit `.cappbar__title`: lg/semibold/tight —
+  /// every bar variant shares it).
+  TextStyle get appBarTitle => _base.copyWith(
+    fontSize: AppTypography.fontSizeLg,
+    fontWeight: AppTypography.fontWeightSemibold,
+    letterSpacing: AppTypography.letterSpacingFor(
+      AppTypography.letterSpacingTightEm,
+      AppTypography.fontSizeLg,
+    ),
+  );
+
   /// Empty-state title role (kit `EmptyState` helper: lg/extrabold/tight).
   TextStyle get emptyStateTitle => _base.copyWith(
     fontSize: AppTypography.fontSizeLg,

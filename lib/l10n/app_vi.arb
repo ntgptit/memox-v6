@@ -155,10 +155,6 @@
   "@libraryEmptyBody": {
     "description": "Library empty state (kit LIB-04, WBS 3.15B)."
   },
-  "importCardsLabel": "Import thẻ",
-  "@importCardsLabel": {
-    "description": "Library empty state (kit LIB-04, WBS 3.15B)."
-  },
   "navTodayLabel": "Hôm nay",
   "@navTodayLabel": {
     "description": "Bottom navigation labels (kit shell NAV)."
@@ -204,7 +200,7 @@
   "@emptyDeckTitle": {
     "description": "Open-deck (WBS 5.2.4B) copy."
   },
-  "emptyDeckBody": "Thêm thẻ trực tiếp, hoặc tạo deck con đầu tiên.",
+  "emptyDeckBody": "Thêm thẻ trực tiếp, hoặc chia deck này thành các deck nhỏ hơn.",
   "@emptyDeckBody": {
     "description": "Open-deck (WBS 5.2.4B) copy."
   },

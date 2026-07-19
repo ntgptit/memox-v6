@@ -91,7 +91,18 @@ Fixes that came out of the first screen (system-wide, kit-correct):
 | `create-deck-firstrun--step2--light/dark` | **Enforced** (`first_run_step2_parity_test.dart`) | <3% |
 | remaining shipped states (library loaded/dense, empty-deck, subdeck list, create-deck dialog, validation/error variants) | pending | — |
 
-Loaded-library groundwork (this iteration): shared `MxDeckCard` (kit
+Empty-deck groundwork (2026-07-19): the deck screen mounts the kit
+nested bar (back + deck-name title) and the empty branch renders the
+shared EmptyState (inbox tile, wide size-4xl action column, centered
+import link — `MxLink` gained its leading icon). App-bar titles now
+use the kit `.cappbar__title` role (lg/semibold/tight) everywhere via
+`AppTextStyles.appBarTitle`. Enforcement for `empty-deck--default`
+(measured 9.68% light / 13.58% dark) is BLOCKED on the 5.3.2 add-card
+flow: the kit shot shows the primary "Add card" CTA enabled, and its
+disabled rendering alone costs ~5-6% of the frame; the suite lands
+with that flow.
+
+Loaded-library groundwork (earlier iteration): shared `MxDeckCard` (kit
 `DeckCard`) + `MxBadge` (kit `.badge`), and library rows now render the
 kit deck-card with a REAL "N cards" meta (new reactive
 `watchRootDeckSummaries` query → `DeckSummary` domain rows). The
