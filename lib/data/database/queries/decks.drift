@@ -1,0 +1,41 @@
+import '../tables/content.drift';
+
+-- Deck aggregate queries (WBS 4.4A). Rename/move/delete are explicit
+-- UPDATE/DELETE statements so the 4.3 exclusivity and cycle triggers
+-- guard every path.
+
+insertDeck:
+INSERT INTO decks (
+  id, language_pair_id, parent_id, name, normalized_name, created_at,
+  updated_at
+) VALUES (
+  :id, :languagePairId, :parentId, :name, :normalizedName, :createdAt,
+  :updatedAt
+);
+
+findDeckById:
+SELECT * FROM decks WHERE id = :id;
+
+watchRootDecks:
+SELECT * FROM decks
+WHERE language_pair_id = :languagePairId AND parent_id IS NULL
+ORDER BY normalized_name, id;
+
+watchChildDecks:
+SELECT * FROM decks WHERE parent_id = :parentId
+ORDER BY normalized_name, id;
+
+renameDeck:
+UPDATE decks SET name = :name, normalized_name = :normalizedName,
+  updated_at = :updatedAt
+WHERE id = :id;
+
+moveDeck:
+UPDATE decks SET parent_id = :parentId, updated_at = :updatedAt
+WHERE id = :id;
+
+deleteDeck:
+DELETE FROM decks WHERE id = :id;
+
+countChildDecks:
+SELECT COUNT(*) AS child_count FROM decks WHERE parent_id = :parentId;

@@ -1,5 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:memox_v6/core/database/database_opener.dart';
+import 'package:memox_v6/data/database/daos/deck_dao.dart';
+import 'package:memox_v6/data/database/daos/flashcard_dao.dart';
+import 'package:memox_v6/data/database/daos/language_pair_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -19,6 +22,7 @@ const String appDatabaseName = 'memox';
     'tables/sessions.drift',
     'tables/constraints.drift',
   },
+  daos: [LanguagePairDao, DeckDao, FlashcardDao],
 )
 class AppDatabase extends _$AppDatabase {
   /// Opens the production database through the platform opener.
