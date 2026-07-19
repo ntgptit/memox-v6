@@ -67,10 +67,14 @@ test('MX-VIS-018 reaches the empty Library from a root destination', async ({
   await fillField(page, /Deck name/i, 'Beginner Grammar');
 
   // The empty-state CTA and the dialog's submit share the `Create deck`
-  // label, and Flutter keeps the route beneath a dialog in the semantics
-  // tree. Submit through the last match — the dialog is mounted above the
-  // screen — and let the assertions below prove the right one was hit.
-  await page.getByRole('button', { name: 'Create deck' }).last().click();
+  // label, but they never coexist: an open `MxDialog` scopes the route, so
+  // Flutter drops the screen beneath it from the semantics tree and only
+  // the dialog's own button is exposed. The count assertion pins that
+  // observed behaviour — if it ever changes, this fails loudly here
+  // instead of silently clicking the CTA and reopening the dialog.
+  const submit = page.getByRole('button', { name: 'Create deck' });
+  await expect(submit).toHaveCount(1);
+  await submit.click();
 
   await expect(nameField).toHaveCount(0);
   await expect(page.getByText('Beginner Grammar')).toBeVisible();

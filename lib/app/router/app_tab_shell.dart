@@ -72,6 +72,7 @@ class AppTabShell extends StatelessWidget {
   /// Re-tapping the active tab pops that branch back to its root, which is
   /// the platform convention on both Tier-1 targets.
   void _goBranch(int index) {
+    assert(index >= 0, 'Tab id does not match any root destination');
     if (index < 0) return;
     navigationShell.goBranch(
       index,
