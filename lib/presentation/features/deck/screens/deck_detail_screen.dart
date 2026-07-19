@@ -6,6 +6,7 @@ import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
@@ -113,8 +114,11 @@ class _DeckContent extends ConsumerWidget {
             value: cards,
             loadingLabel: l10n.loadingLabel,
             errorTitle: l10n.somethingWentWrongMessage,
-            data: (context, directCards) =>
-                _DeckBranch(childDecks: childDecks, directCards: directCards),
+            data: (context, directCards) => _DeckBranch(
+              deck: deck,
+              childDecks: childDecks,
+              directCards: directCards,
+            ),
           ),
         ),
         const MxGap.s6(),
@@ -126,25 +130,32 @@ class _DeckContent extends ConsumerWidget {
 /// The §5 branching: Parent when children exist, Leaf when cards
 /// exist, Empty otherwise. Mixed content cannot be persisted (4.3).
 class _DeckBranch extends StatelessWidget {
-  const _DeckBranch({required this.childDecks, required this.directCards});
+  const _DeckBranch({
+    required this.deck,
+    required this.childDecks,
+    required this.directCards,
+  });
 
+  final Deck deck;
   final List<Deck> childDecks;
   final List<Flashcard> directCards;
 
   @override
   Widget build(BuildContext context) {
     if (childDecks.isNotEmpty) {
-      return _ParentBranch(childDecks: childDecks);
+      return _ParentBranch(deck: deck, childDecks: childDecks);
     }
     if (directCards.isNotEmpty) {
       return _LeafBranch(directCards: directCards);
     }
-    return const _EmptyBranch();
+    return _EmptyBranch(deck: deck);
   }
 }
 
 class _EmptyBranch extends StatelessWidget {
-  const _EmptyBranch();
+  const _EmptyBranch({required this.deck});
+
+  final Deck deck;
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +176,11 @@ class _EmptyBranch extends StatelessWidget {
           label: l10n.createNestedDeckLabel,
           variant: MxButtonVariant.secondary,
           block: true,
-          onPressed: null,
+          onPressed: () => showCreateDeckDialog(
+            context,
+            parentDeckId: deck.id,
+            parentDeckName: deck.name,
+          ),
         ),
       ],
     );
@@ -219,19 +234,21 @@ class _LeafBranch extends StatelessWidget {
   }
 }
 
-class _ParentBranch extends StatelessWidget {
-  const _ParentBranch({required this.childDecks});
+class _ParentBranch extends ConsumerWidget {
+  const _ParentBranch({required this.deck, required this.childDecks});
 
+  final Deck deck;
   final List<Deck> childDecks;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final subtreeCards = ref.watch(deckSubtreeCardsProvider(deckId: deck.id));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         MxText(
-          l10n.nestedDeckCountSummary(childDecks.length),
+          l10n.parentDeckSummary(childDecks.length, subtreeCards.value ?? 0),
           role: MxTextRole.caption,
         ),
         const MxGap.s3(),
@@ -251,8 +268,15 @@ class _ParentBranch extends StatelessWidget {
             ),
           ),
         const MxGap.s6(),
-        // Nested create lands with the 5.2.4C dialog.
-        MxButton(label: l10n.createDeckLabel, block: true, onPressed: null),
+        MxButton(
+          label: l10n.createDeckLabel,
+          block: true,
+          onPressed: () => showCreateDeckDialog(
+            context,
+            parentDeckId: deck.id,
+            parentDeckName: deck.name,
+          ),
+        ),
       ],
     );
   }

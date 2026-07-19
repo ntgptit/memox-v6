@@ -197,6 +197,39 @@
   "@backToLibraryLabel": {
     "description": "Open-deck (WBS 5.2.4B) copy."
   },
+  "createDeckTitle": "Tạo deck",
+  "@createDeckTitle": {
+    "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
+  },
+  "insideLibraryLabel": "Trong Thư viện",
+  "@insideLibraryLabel": {
+    "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
+  },
+  "insideDeckLabel": "Trong {name}",
+  "@insideDeckLabel": {
+    "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C).",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelLabel": "Hủy",
+  "@cancelLabel": {
+    "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
+  },
+  "parentDeckSummary": "{deckCount} deck con · {cardTotal} thẻ",
+  "@parentDeckSummary": {
+    "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C).",
+    "placeholders": {
+      "deckCount": {
+        "type": "int"
+      },
+      "cardTotal": {
+        "type": "int"
+      }
+    }
+  },
   "somethingWentWrongMessage": "Đã có lỗi xảy ra.",
   "cardCountLabel": "{count, plural, other{{count} thẻ}}"
 }

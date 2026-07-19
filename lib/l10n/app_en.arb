@@ -206,6 +206,39 @@
   "@backToLibraryLabel": {
     "description": "Open-deck (WBS 5.2.4B) copy."
   },
+  "createDeckTitle": "Create deck",
+  "@createDeckTitle": {
+    "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
+  },
+  "insideLibraryLabel": "Inside Library",
+  "@insideLibraryLabel": {
+    "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
+  },
+  "insideDeckLabel": "Inside {name}",
+  "@insideDeckLabel": {
+    "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C).",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelLabel": "Cancel",
+  "@cancelLabel": {
+    "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
+  },
+  "parentDeckSummary": "{deckCount} nested decks · {cardTotal} cards",
+  "@parentDeckSummary": {
+    "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C).",
+    "placeholders": {
+      "deckCount": {
+        "type": "int"
+      },
+      "cardTotal": {
+        "type": "int"
+      }
+    }
+  },
   "somethingWentWrongMessage": "Something went wrong.",
   "@somethingWentWrongMessage": {
     "description": "User-safe message shown when a screen fails to render."

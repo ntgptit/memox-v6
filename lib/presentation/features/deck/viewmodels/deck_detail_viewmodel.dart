@@ -22,3 +22,13 @@ Stream<List<Deck>> deckChildren(Ref ref, {required String deckId}) {
 Stream<List<Flashcard>> deckCards(Ref ref, {required String deckId}) {
   return ref.watch(openDeckUseCaseProvider).cardsOf(deckId);
 }
+
+/// Aggregate active-card count of the subtree (`open-deck.md` §5
+/// Parent summary). Re-fetches when the direct child list changes;
+/// deep-descendant card changes refresh on the next visit (recorded
+/// boundary).
+@riverpod
+Future<int> deckSubtreeCards(Ref ref, {required String deckId}) async {
+  await ref.watch(deckChildrenProvider(deckId: deckId).future);
+  return ref.watch(openDeckUseCaseProvider).subtreeCardCount(deckId);
+}

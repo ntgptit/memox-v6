@@ -47,3 +47,12 @@ WHERE id = :id;
 countDecksForLanguagePair:
 SELECT COUNT(*) AS deck_count FROM decks
 WHERE language_pair_id = :languagePairId;
+
+countSubtreeCards:
+WITH RECURSIVE subtree (id) AS (
+  SELECT :deckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+)
+SELECT COUNT(*) AS card_count FROM flashcards
+WHERE deck_id IN (SELECT id FROM subtree) AND deleted_at IS NULL;

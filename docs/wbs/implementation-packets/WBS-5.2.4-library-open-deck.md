@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — children A, B Done (2026-07-19); C pending |
+| Status | **Done** (2026-07-19) — children A, B, C shipped one PR each |
 | Owner/domain | Deck / Presentation |
 | Depends on | `5.2.2` — Done; owns the transferred 5.2.3 success callout |
 | Decision gates | DG-01 |
@@ -71,6 +71,31 @@ the consistency-error surface land with child C's states pass;
 aggregate card counts for Parent summaries need a subtree count query
 (C).
 
+## Child C — create dialog + states/evidence (Done, 2026-07-19)
+
+- **§8 create-deck dialog** (`widgets/create_deck_dialog.dart` +
+  command viewmodel): form + gated actions inside the shared dialog
+  body; "Inside Library"/"Inside <Parent>" context line; required name
+  with inline duplicate/validation errors keeping input; Cancel/Create
+  disabled while submitting. Root creates use the active pair; nested
+  creates **inherit the parent's pair** (resolved from the parent row,
+  so the pair-mismatch trigger can never fire from this path).
+- Wired everywhere §8 applies: Library root CTA, Parent-branch
+  `Create deck`, Empty-branch `Create nested deck`. First-run still
+  never opens a dialog.
+- **Parent summary completed**: `countSubtreeCards` (recursive CTE)
+  through the port feeds "`N` nested decks · `M` cards"; re-fetches on
+  direct-child changes (deep-descendant card changes refresh on next
+  visit — recorded).
+- State evidence: duplicate-inline + cancel, deep nesting (5 levels
+  browsed), long-name ellipsis at 390 without layout breakage.
+- Recorded boundaries: skeleton loading belongs to 3.13 feedback
+  expansion; offline states are n/a for the local-first store;
+  the consistency-error surface is unreachable while the 4.3 triggers
+  hold (derivation maps it to typed corruption); Search/More app-bar
+  actions land with the 6.x deck lifecycle; the root dialog's pair
+  selector activates with multi-pair management (6.x).
+
 ## Acceptance and test procedure
 
 `AC-WBS-5.2.4-01`: Library lists roots reactively with correct
@@ -82,5 +107,5 @@ behaves per §7; all named states covered by C's evidence.
 
 ## Failure and completion
 
-- Success per child: PR merged with the canonical gate green. 5.2.4
-  flips Done when C merges; `5.2.5` follows.
+- Completed 2026-07-19: A (#72), B (#73), C closed the packet —
+  `5.2.5` (Empty Deck content choice) is next.

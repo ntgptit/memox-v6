@@ -36,6 +36,10 @@ abstract interface class DeckRepository {
   /// (`deriveDeckContentState`).
   Future<DeckContentCounts> contentCounts(String deckId);
 
+  /// Active cards in [deckId]'s whole subtree (the Parent summary's
+  /// aggregate count in `open-deck.md` §5).
+  Future<int> countSubtreeCards(String deckId);
+
   /// Number of decks (any depth) owned by [languagePairId]; the
   /// language-pair removal guard reads this.
   Future<int> countForLanguagePair(String languagePairId);

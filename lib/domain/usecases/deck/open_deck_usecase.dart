@@ -25,4 +25,8 @@ class OpenDeckUseCase {
   /// Active (non-deleted) direct cards; hidden cards still count as
   /// content per the canonical contract.
   Stream<List<Flashcard>> cardsOf(String deckId) => _cards.watchByDeck(deckId);
+
+  /// Aggregate active-card count across the subtree (Parent summary).
+  Future<int> subtreeCardCount(String deckId) =>
+      _decks.countSubtreeCards(deckId);
 }

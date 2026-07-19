@@ -5,9 +5,11 @@ import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
@@ -61,6 +63,12 @@ class _LibraryBody extends ConsumerWidget {
                       ),
                   ],
                 ),
+        ),
+        const MxGap.s6(),
+        MxButton(
+          label: l10n.createDeckLabel,
+          block: true,
+          onPressed: () => showCreateDeckDialog(context),
         ),
         const MxGap.s6(),
       ],

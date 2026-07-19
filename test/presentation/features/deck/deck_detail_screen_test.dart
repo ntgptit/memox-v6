@@ -133,7 +133,7 @@ void main() {
     await tester.pumpWidget(app('root'));
     await pumpDeck(tester);
 
-    expect(find.text('1 nested decks'), findsOneWidget);
+    expect(find.textContaining('1 nested decks'), findsOneWidget);
     expect(find.text('Asia'), findsOneWidget);
     expect(find.text('Add card'), findsNothing);
 
@@ -144,7 +144,7 @@ void main() {
     expect(find.text('1 cards'), findsOneWidget);
     await tester.tap(find.byIcon(Symbols.arrow_back).first);
     await pumpDeck(tester);
-    expect(find.text('1 nested decks'), findsOneWidget);
+    expect(find.textContaining('1 nested decks'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });
