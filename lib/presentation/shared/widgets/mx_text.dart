@@ -14,6 +14,10 @@ enum MxTextRole {
   overline,
 }
 
+/// Kit line-height tokens (`--memox-line-height-*`) for copy whose spec
+/// calls out a reading rhythm (e.g. landing body uses `relaxed`).
+enum MxLineHeight { none, tight, snug, normal, relaxed }
+
 /// Semantic text for feature UI.
 ///
 /// Purpose:
@@ -49,6 +53,7 @@ class MxText extends StatelessWidget {
     super.key,
     this.role = MxTextRole.body,
     this.color,
+    this.lineHeight,
     this.maxLines,
     this.overflow,
     this.textAlign,
@@ -61,6 +66,9 @@ class MxText extends StatelessWidget {
   /// Overrides the role's default color (body roles: `colors.text`;
   /// caption/overline: `colors.textSecondary`).
   final Color? color;
+
+  /// Applies a kit line-height token; null keeps the font's own metrics.
+  final MxLineHeight? lineHeight;
 
   final int? maxLines;
   final TextOverflow? overflow;
@@ -84,9 +92,17 @@ class MxText extends StatelessWidget {
         role == MxTextRole.caption || role == MxTextRole.overline
         ? context.colors.textSecondary
         : context.colors.text;
+    final height = switch (lineHeight) {
+      null => null,
+      MxLineHeight.none => styles.lineHeightNone,
+      MxLineHeight.tight => styles.lineHeightTight,
+      MxLineHeight.snug => styles.lineHeightSnug,
+      MxLineHeight.normal => styles.lineHeightNormal,
+      MxLineHeight.relaxed => styles.lineHeightRelaxed,
+    };
     return Text(
       role == MxTextRole.overline ? StringUtils.upperCased(text) : text,
-      style: style.copyWith(color: color ?? defaultColor),
+      style: style.copyWith(color: color ?? defaultColor, height: height),
       maxLines: maxLines,
       overflow: overflow,
       textAlign: textAlign,

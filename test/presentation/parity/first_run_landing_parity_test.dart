@@ -6,44 +6,28 @@ import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
-import 'package:memox_v6/presentation/features/deck/screens/library_screen.dart';
-
-import 'dart:io';
-import 'dart:ui' as ui;
+import 'package:memox_v6/presentation/features/deck/screens/first_run_landing_screen.dart';
 
 import '../../support/kit_parity.dart';
 
-/// Parity measurement probe (WBS 3.15A): prints the current diff ratio
-/// of shipped screens against their kit shots. Enforcement tests grow
-/// from these measurements.
+/// Kit-parity gate (WBS 3.15): the shipped first-run landing must stay
+/// within the pre-merge threshold against its kit shot, light and dark.
 void main() {
+  const threshold = 0.03;
+
   late db.AppDatabase database;
 
   setUpAll(loadAppFonts);
 
-  setUp(() async {
+  setUp(() {
     database = db.AppDatabase.forTesting(NativeDatabase.memory());
-    await database.languagePairDao.insertLanguagePair(
-      'lp1',
-      'en',
-      'vi',
-      'en|vi',
-      0,
-      0,
-    );
-    await database.preferenceDao.upsertPreference(
-      'activeLanguagePairId',
-      '"lp1"',
-      1,
-      0,
-    );
   });
 
   tearDown(() async {
     await database.close();
   });
 
-  Widget app(Widget home, Brightness brightness) {
+  Widget app(Brightness brightness) {
     return ProviderScope(
       overrides: [appDatabaseProvider.overrideWithValue(database)],
       child: MaterialApp(
@@ -53,7 +37,7 @@ void main() {
             : AppTheme.light(),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: home,
+        home: const FirstRunLandingScreen(),
       ),
     );
   }
@@ -65,18 +49,15 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   }
 
-  Future<void> probe(
-    WidgetTester tester, {
-    required Widget home,
-    required String shotName,
-    required Brightness brightness,
-  }) async {
+  Future<void> expectParity(WidgetTester tester, String shotName) async {
     final shot = kitShotSize(shotName);
     tester.view.devicePixelRatio = 2.0;
     tester.view.physicalSize = shot;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(app(home, brightness));
+    await tester.pumpWidget(
+      app(shotName.endsWith('--dark') ? Brightness.dark : Brightness.light),
+    );
     await pumpStreams(tester);
 
     final result = await compareWithKitShot(
@@ -84,33 +65,23 @@ void main() {
       find.byType(MaterialApp),
       shotName: shotName,
     );
-    await tester.runAsync(() async {
-      final captured = await captureImage(
-        find.byType(MaterialApp).evaluate().single,
-      );
-      final png = await captured.toByteData(format: ui.ImageByteFormat.png);
-      Directory('build/parity').createSync(recursive: true);
-      File(
-        'build/parity/$shotName.rendered.png',
-      ).writeAsBytesSync(png!.buffer.asUint8List());
-    });
-    // ignore: avoid_print
-    print(
-      'PARITY $shotName: '
-      '${(result.ratio * 100).toStringAsFixed(2)}% differing '
-      '(kit ${result.kitSize}, rendered ${result.renderedSize})',
+    expect(
+      result.ratio,
+      lessThan(threshold),
+      reason:
+          '$shotName differs by '
+          '${(result.ratio * 100).toStringAsFixed(2)}% (gate: <3%)',
     );
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(seconds: 1));
   }
 
-  testWidgets('measure library empty vs kit', (tester) async {
-    await probe(
-      tester,
-      home: const LibraryScreen(),
-      shotName: 'library--empty--light',
-      brightness: Brightness.light,
-    );
+  testWidgets('first-run landing matches its kit shot (light)', (tester) async {
+    await expectParity(tester, 'create-deck-firstrun--landing--light');
+  });
+
+  testWidgets('first-run landing matches its kit shot (dark)', (tester) async {
+    await expectParity(tester, 'create-deck-firstrun--landing--dark');
   });
 }

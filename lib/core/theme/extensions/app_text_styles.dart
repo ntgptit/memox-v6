@@ -27,14 +27,24 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     fontFamilyFallback: AppTypography.fontFamilyFallback,
   );
 
+  // Display and headline carry the kit's tight tracking
+  // (`type-scale.html`: letter-spacing -0.02em on both hero roles).
   TextStyle get display => _base.copyWith(
     fontSize: AppTypography.fontSize3xl,
     fontWeight: AppTypography.fontWeightExtrabold,
+    letterSpacing: AppTypography.letterSpacingFor(
+      AppTypography.letterSpacingTightEm,
+      AppTypography.fontSize3xl,
+    ),
   );
 
   TextStyle get headline => _base.copyWith(
     fontSize: AppTypography.fontSize2xl,
     fontWeight: AppTypography.fontWeightExtrabold,
+    letterSpacing: AppTypography.letterSpacingFor(
+      AppTypography.letterSpacingTightEm,
+      AppTypography.fontSize2xl,
+    ),
   );
 
   TextStyle get title => _base.copyWith(
@@ -80,6 +90,14 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
 
   /// Bold weight accessor for active states composed over other roles.
   FontWeight get boldWeight => AppTypography.fontWeightBold;
+
+  /// Kit line-height tokens (`--memox-line-height-*`) for copy whose
+  /// spec calls out a reading rhythm; consumed via `MxText.lineHeight`.
+  double get lineHeightNone => AppTypography.lineHeightNone;
+  double get lineHeightTight => AppTypography.lineHeightTight;
+  double get lineHeightSnug => AppTypography.lineHeightSnug;
+  double get lineHeightNormal => AppTypography.lineHeightNormal;
+  double get lineHeightRelaxed => AppTypography.lineHeightRelaxed;
 
   /// Section-header title role (kit `.section-head__title`: md/bold/tight).
   TextStyle get sectionTitle => _base.copyWith(

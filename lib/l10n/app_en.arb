@@ -68,7 +68,7 @@
   "@firstRunLandingTitle": {
     "description": "First-use landing headline."
   },
-  "firstRunLandingBody": "Create your first deck and add content whenever you're ready. MemoX will schedule reviews after you start studying.",
+  "firstRunLandingBody": "Create your first deck and add content whenever you’re ready. MemoX will schedule reviews after you start studying.",
   "@firstRunLandingBody": {
     "description": "First-use landing supporting copy."
   },
@@ -152,7 +152,7 @@
   "@firstDeckReadyTitle": {
     "description": "Library / first-deck callout copy (WBS 5.2.4A)."
   },
-  "firstDeckReadyBody": "Add cards or organise it into smaller decks whenever you're ready.",
+  "firstDeckReadyBody": "Add cards or organise it into smaller decks whenever you’re ready.",
   "@firstDeckReadyBody": {
     "description": "Library / first-deck callout copy (WBS 5.2.4A)."
   },

@@ -43,6 +43,41 @@
 | `library--empty--light` | 11.48% | <3% |
 | (remaining shipped states: step1/step2, library loaded, empty-deck, subdeck list, create-deck dialog — measured in B) | — | <3% |
 
+## Child B — retro coverage (in progress)
+
+Comparison methodology (frozen with the first enforcing test):
+per-pixel diff on the physical 2× grid with per-channel tolerance 24
+**plus ±1 logical px spatial slack** (pixelmatch-style: a pixel counts
+as differing only when nothing within a 2-physical-px radius of the
+kit shot matches it). The slack absorbs the cross-engine glyph-advance
+drift between the kit's browser rasterizer and Flutter (~3% wider
+advances at 15px; measured, not fixable from Flutter), while wrong
+colors and layout offsets of ≥2 logical px stay fully visible —
+`library--empty` still measures 9.33% under this metric, so the gate
+retains its sensitivity to real divergence.
+
+Fixes that came out of the first screen (system-wide, kit-correct):
+
+- `AppTextStyles.display/headline` now carry the kit's tight tracking
+  (`type-scale.html`: −0.02em on both hero roles).
+- `MxText` gained a `lineHeight` token param (`MxLineHeight`) mapped
+  through `AppTextStyles.lineHeight*` accessors.
+- The parity harness loads the Material Symbols **Rounded** font — the
+  kit renders icons with `material-symbols-rounded` (`MxButton.jsx`),
+  so kit-parity screens use `*_rounded` icon variants.
+- Landing body copy uses the kit's curly apostrophe (`you’re`).
+
+| Screen state | Status | Diff |
+| --- | --- | --- |
+| `create-deck-firstrun--landing--light` | **Enforced** (`first_run_landing_parity_test.dart`) | 1.28% |
+| `create-deck-firstrun--landing--dark` | **Enforced** | <3% (asserted) |
+| `library--empty--light` | probe | 9.33% |
+| remaining shipped states | pending | — |
+
+Known divergence (documented, within threshold): the landing import
+CTA renders disabled until the first-run import flow ships (WBS 8.x);
+the kit shot shows it enabled.
+
 - **Process rule live from this merge**: every future PR that adds or
   changes a screen must include its parity comparison and pass <3%
   (or land the fix in the same PR). Recorded in the WBS §6.2 note and
