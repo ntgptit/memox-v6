@@ -11,7 +11,7 @@ import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/language_pair/routes/language_pair_routes.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
+import 'package:memox_v6/presentation/shared/widgets/inputs/mx_select_row.dart';
 
 void main() {
   late db.AppDatabase database;
@@ -56,7 +56,7 @@ void main() {
     required int fieldIndex,
     required String rowText,
   }) async {
-    await tester.tap(find.byType(MxTappable).at(fieldIndex));
+    await tester.tap(find.byType(MxSelectRow).at(fieldIndex));
     await tester.pumpAndSettle();
     await tester.tap(find.text(rowText).last);
     await tester.pumpAndSettle();
@@ -86,7 +86,7 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(MxTappable).first);
+    await tester.tap(find.byType(MxSelectRow).first);
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField), 'viet');
@@ -180,8 +180,8 @@ void main() {
 
     expect(find.byType(MxBanner), findsOneWidget);
     expect(find.text('Could not save'), findsOneWidget);
-    expect(find.text('English · English'), findsOneWidget);
-    expect(find.text('Tiếng Việt · Vietnamese'), findsOneWidget);
+    expect(find.text('English'), findsOneWidget);
+    expect(find.text('Vietnamese'), findsOneWidget);
     expect(find.text('deck-step-stub'), findsNothing);
   });
 }

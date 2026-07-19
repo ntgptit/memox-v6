@@ -151,9 +151,9 @@ void main() {
       ),
     );
 
-    // MxTappable reserves the focus-ring stroke on each side so focusing
-    // never shifts layout.
-    expect(tester.getSize(find.byType(Ink)).width, 300 - 2 * AppStrokes.focus);
+    // The focus ring paints in the foreground (kit outline), so the
+    // block surface fills the full available width.
+    expect(tester.getSize(find.byType(Ink)).width, 300);
   });
 
   testWidgets('leading icon renders at font-size-lg in the label color', (

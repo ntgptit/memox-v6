@@ -183,6 +183,7 @@ Future<void> expectKitParity(
   WidgetTester tester, {
   required Widget app,
   required String shotName,
+  Future<void> Function(WidgetTester tester)? prepare,
 }) async {
   applyKitViewport(tester, shotName);
 
@@ -191,6 +192,10 @@ Future<void> expectKitParity(
     await tester.pump(const Duration(milliseconds: 50));
   }
   await tester.pump(const Duration(seconds: 1));
+  if (prepare != null) {
+    await prepare(tester);
+    await tester.pump(const Duration(seconds: 1));
+  }
 
   final result = await compareWithKitShot(
     tester,

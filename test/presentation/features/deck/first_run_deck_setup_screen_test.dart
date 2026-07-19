@@ -11,7 +11,7 @@ import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
 import 'package:memox_v6/presentation/features/language_pair/routes/language_pair_routes.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
+import 'package:memox_v6/presentation/shared/widgets/inputs/mx_select_row.dart';
 
 void main() {
   late db.AppDatabase database;
@@ -86,7 +86,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Step 2 of 2'), findsOneWidget);
-    expect(find.text('English → Tiếng Việt'), findsOneWidget);
+    expect(find.text('English → Vietnamese'), findsOneWidget);
 
     MxButton createButton() =>
         tester.widget<MxButton>(find.widgetWithText(MxButton, 'Create deck'));
@@ -106,15 +106,15 @@ void main() {
 
     await tester.tap(find.text('Change'));
     await tester.pumpAndSettle();
-    expect(find.text('I am learning'), findsOneWidget);
+    expect(find.text('What are you learning? *'), findsOneWidget);
 
     // Re-confirm the selections on step 1 (fresh draft in this test),
     // then continue back to step 2.
-    await tester.tap(find.byType(MxTappable).first);
+    await tester.tap(find.byType(MxSelectRow).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('English · English').last);
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(MxTappable).at(1));
+    await tester.tap(find.byType(MxSelectRow).at(1));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Tiếng Việt · Vietnamese').last);
     await tester.pumpAndSettle();

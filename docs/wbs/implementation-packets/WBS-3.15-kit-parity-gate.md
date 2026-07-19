@@ -56,6 +56,20 @@ colors and layout offsets of ≥2 logical px stay fully visible —
 `library--empty` still measures 9.33% under this metric, so the gate
 retains its sensitivity to real divergence.
 
+System fixes that came out of the step screens (kit-correct):
+
+- `MxTappable`'s focus ring now paints as `foregroundDecoration` — the
+  old layout border silently added 3 logical px around every
+  interactive surface, drifting every screen from the kit grid.
+- New shared `MxSelectRow` (kit `SelectRow`), `MxSectionLabel` (kit
+  `SectionLabel`: sm/bold/wide) and `MxLink` (kit link: bold accent on
+  a compact-centered 48px target).
+- `MxTextField` gained the kit `Field` surface (`boxed`) and its
+  labels now use the section-label treatment.
+- Step screens mount the shared step bar (`MxContextualAppBar` with a
+  step caption) and the kit copy ("Set up your learning", "What are
+  you learning? *", plain language names in select values/summary).
+
 Fixes that came out of the first screen (system-wide, kit-correct):
 
 - `AppTextStyles.display/headline` now carry the kit's tight tracking
@@ -73,7 +87,9 @@ Fixes that came out of the first screen (system-wide, kit-correct):
 | `create-deck-firstrun--landing--dark` | **Enforced** | <3% (asserted) |
 | `library--empty--light` | **Enforced** (`library_empty_parity_test.dart`) | 1.10% |
 | `library--empty--dark` | **Enforced** | <3% (asserted) |
-| remaining shipped states (step1/step2, library loaded, empty-deck, subdeck list, create-deck dialog) | pending | — |
+| `create-deck-firstrun--step1--light/dark` | **Enforced** (`first_run_step1_parity_test.dart`) | <3% |
+| `create-deck-firstrun--step2--light/dark` | **Enforced** (`first_run_step2_parity_test.dart`) | <3% |
+| remaining shipped states (library loaded/dense, empty-deck, subdeck list, create-deck dialog, validation/error variants) | pending | — |
 
 Viewport model (frozen with the library screen): the harness simulates
 the kit's status-bar inset (`--memox-safe-area-top` = 24 logical) via

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/core/theme/tokens/app_border_radii.dart';
 import 'package:memox_v6/core/theme/tokens/app_opacities.dart';
+import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 import 'package:memox_v6/core/theme/tokens/app_strokes.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
@@ -50,6 +51,7 @@ class MxTextField extends StatefulWidget {
     this.label,
     this.helper,
     this.errorText,
+    this.boxed = false,
     this.requiredField = false,
     this.placeholder,
     this.enabled = true,
@@ -70,6 +72,12 @@ class MxTextField extends StatefulWidget {
   final String? label;
   final String? helper;
   final String? errorText;
+
+  /// Renders the kit `Field` surface box (touch-height white surface
+  /// with hairline border; error swaps to the emphasis error border).
+  /// Default false: the surrounding container owns the visible box.
+  final bool boxed;
+
   final bool requiredField;
   final String? placeholder;
   final bool enabled;
@@ -160,6 +168,26 @@ class _MxTextFieldState extends State<MxTextField> {
       ),
     );
 
+    if (widget.boxed) {
+      input = Container(
+        alignment: Alignment.centerLeft,
+        constraints: const BoxConstraints(minHeight: AppSpacing.touchMin),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.space2,
+          horizontal: AppSpacing.space4,
+        ),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: AppBorderRadii.control,
+          border: Border.all(
+            color: hasError ? colors.error : colors.divider,
+            width: hasError ? AppStrokes.emphasis : AppStrokes.hairline,
+          ),
+        ),
+        child: input,
+      );
+    }
+
     final label = widget.label;
     if (label == null &&
         widget.helper == null &&
@@ -187,17 +215,25 @@ class _MxTextFieldState extends State<MxTextField> {
 
     final children = <Widget>[
       if (label != null) ...[
-        Text.rich(
-          TextSpan(
-            text: label,
-            style: styles.fieldLabel.copyWith(color: colors.textSecondary),
-            children: [
-              if (widget.requiredField)
-                TextSpan(
-                  text: ' *',
-                  style: styles.fieldLabel.copyWith(color: colors.error),
-                ),
-            ],
+        Padding(
+          // Kit `SectionLabel` nudge (s1 top/left) — field labels share
+          // the section-label treatment in the kit Field helper.
+          padding: const EdgeInsets.only(
+            top: AppSpacing.space1,
+            left: AppSpacing.space1,
+          ),
+          child: Text.rich(
+            TextSpan(
+              text: label,
+              style: styles.sectionLabel.copyWith(color: colors.textSecondary),
+              children: [
+                if (widget.requiredField)
+                  TextSpan(
+                    text: ' *',
+                    style: styles.sectionLabel.copyWith(color: colors.error),
+                  ),
+              ],
+            ),
           ),
         ),
         const MxGap.s2(),

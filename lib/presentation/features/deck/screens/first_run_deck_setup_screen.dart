@@ -16,10 +16,11 @@ import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_section_label.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// Step 2 of the first-run setup (WBS 5.2.3B; `create-deck.md` §6):
@@ -30,7 +31,20 @@ class FirstRunDeckSetupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MxScaffold(scrollable: true, body: _FirstRunDeckSetupBody());
+    final l10n = AppLocalizations.of(context);
+
+    return MxScaffold(
+      appBar: MxContextualAppBar(
+        title: '',
+        onBack: () => context.goFirstRunLanguage(),
+        backLabel: l10n.backLabel,
+        actions: [
+          MxText(l10n.stepIndicatorLabel(2, 2), role: MxTextRole.caption),
+        ],
+      ),
+      scrollable: true,
+      body: const _FirstRunDeckSetupBody(),
+    );
   }
 }
 
@@ -58,24 +72,13 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
     final failure = MxActionErrors.failureOf(createState);
     final nameError = _nameErrorOf(failure, l10n);
 
+    // Kit step2 rhythm: s4 below the bar, s6 between body children.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const MxGap.s4(),
-        Row(
-          children: [
-            MxIconButton(
-              icon: Symbols.arrow_back,
-              semanticLabel: l10n.backLabel,
-              onPressed: () => context.goFirstRunLanguage(),
-            ),
-            const Spacer(),
-            MxText(l10n.stepTwoOfTwo, role: MxTextRole.caption),
-          ],
-        ),
-        const MxGap.s4(),
-        MxText(l10n.createFirstDeckLabel, role: MxTextRole.headline),
-        const MxGap.s4(),
+        MxText(l10n.createFirstDeckLabel, role: MxTextRole.title),
+        const MxGap.s6(),
         MxAsyncBuilder<LanguagePair?>(
           value: activePair,
           loadingLabel: l10n.loadingLabel,
@@ -83,14 +86,12 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
           data: (context, pair) => _PairSummaryRow(pair: pair),
         ),
         const MxGap.s6(),
-        MxText(
-          StringUtils.upperCased(l10n.requiredSectionTitle),
-          role: MxTextRole.overline,
-        ),
+        MxSectionLabel(text: StringUtils.upperCased(l10n.requiredSectionTitle)),
         const MxGap.s2(),
         MxTextField(
           controller: name.controller,
           label: l10n.deckNameLabel,
+          boxed: true,
           requiredField: true,
           errorText: nameError,
           enabled: !isSubmitting,
@@ -101,20 +102,13 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
         const MxGap.s6(),
         Row(
           children: [
-            MxText(
-              StringUtils.upperCased(l10n.optionalSectionTitle),
-              role: MxTextRole.overline,
+            MxSectionLabel(
+              text: StringUtils.upperCased(l10n.optionalSectionTitle),
             ),
             const Spacer(),
-            MxTappable(
-              semanticLabel: showOptional.value
-                  ? l10n.hideLabel
-                  : l10n.showLabel,
+            MxLink(
+              label: showOptional.value ? l10n.hideLabel : l10n.showLabel,
               onTap: () => showOptional.value = !showOptional.value,
-              child: MxText(
-                showOptional.value ? l10n.hideLabel : l10n.showLabel,
-                role: MxTextRole.subtitle,
-              ),
             ),
           ],
         ),
@@ -123,6 +117,7 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
           MxTextField(
             controller: description.controller,
             label: l10n.deckDescriptionLabel,
+            boxed: true,
             enabled: !isSubmitting,
             multiline: true,
             onChanged: (value) => ref
@@ -141,6 +136,7 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
         const MxGap.s6(),
         MxButton(
           label: l10n.createDeckLabel,
+          icon: Symbols.add_rounded,
           block: true,
           onPressed: name.canSubmit && !isSubmitting
               ? () => ref
@@ -176,25 +172,25 @@ class _PairSummaryRow extends StatelessWidget {
 
     return Row(
       children: [
-        Expanded(child: MxText(summary, role: MxTextRole.subtitle)),
-        MxTappable(
-          semanticLabel: l10n.changeLabel,
+        Expanded(child: MxText(summary, role: MxTextRole.body)),
+        MxLink(
+          label: l10n.changeLabel,
           onTap: () => context.goFirstRunLanguage(),
-          child: MxText(l10n.changeLabel, role: MxTextRole.subtitle),
         ),
       ],
     );
   }
 
+  // Kit step2 summary: plain language names with the arrow glyph.
   String _summaryOf(LanguagePair? pair) {
     if (pair == null) return '';
-    return '${_nativeNameOf(pair.learningLanguageCode)} → '
-        '${_nativeNameOf(pair.nativeLanguageCode)}';
+    return '${_englishNameOf(pair.learningLanguageCode)} → '
+        '${_englishNameOf(pair.nativeLanguageCode)}';
   }
 
-  String _nativeNameOf(String code) {
+  String _englishNameOf(String code) {
     for (final language in supportedLanguages) {
-      if (language.code == code) return language.nativeName;
+      if (language.code == code) return language.englishName;
     }
     return code;
   }

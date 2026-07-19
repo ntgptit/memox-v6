@@ -119,6 +119,17 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     ),
   );
 
+  /// Section/field caption role (kit `SectionLabel` helper:
+  /// sm/bold/wide; consumers apply the secondary color).
+  TextStyle get sectionLabel => _base.copyWith(
+    fontSize: AppTypography.fontSizeSm,
+    fontWeight: AppTypography.fontWeightBold,
+    letterSpacing: AppTypography.letterSpacingFor(
+      AppTypography.letterSpacingWideEm,
+      AppTypography.fontSizeSm,
+    ),
+  );
+
   /// Field-group label role (kit `.field-group__label`: sm/semibold).
   TextStyle get fieldLabel => _base.copyWith(
     fontSize: AppTypography.fontSizeSm,

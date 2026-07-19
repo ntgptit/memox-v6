@@ -10,6 +10,9 @@ extension AppNavigation on BuildContext {
   /// Returns to the learning entry (home) route.
   void goHome() => GoRouter.of(this).go(RoutePaths.home);
 
+  /// Returns to the first-run landing (from the wizard steps).
+  void goFirstRunLanding() => GoRouter.of(this).go(RoutePaths.firstRunLanding);
+
   /// Opens the first-run language step (step 1 of the setup).
   void goFirstRunLanguage() =>
       GoRouter.of(this).go(RoutePaths.firstRunLanguage);

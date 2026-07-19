@@ -134,8 +134,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Chọn ngôn ngữ của bạn'), findsOneWidget);
-      expect(find.text('Tôi đang học'), findsOneWidget);
+      expect(find.text('Thiết lập việc học của bạn'), findsOneWidget);
+      expect(find.text('Bạn đang học gì? *'), findsOneWidget);
       expect(find.text('Tiếp tục'), findsOneWidget);
     });
   });
