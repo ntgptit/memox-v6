@@ -27,13 +27,14 @@ Future<void> bootstrap({
   List<Override> overrides = const <Override>[],
   BootstrapErrorReporter? onError,
   BootstrapLifecycleObserver? onLifecycleStateChanged,
+  TransitionBuilder? appBuilder,
 }) async {
   final report = onError ?? reportToAppLogger;
   await runZonedGuarded<Future<void>>(() async {
     WidgetsFlutterBinding.ensureInitialized();
     installGlobalErrorHandlers(report);
     installLifecycleListener(onLifecycleStateChanged);
-    runApp(buildRoot(overrides: overrides));
+    runApp(buildRoot(overrides: overrides, appBuilder: appBuilder));
   }, (error, stackTrace) => report(detailsForUncaughtError(error, stackTrace)));
 }
 
@@ -70,8 +71,14 @@ AppLifecycleListener installLifecycleListener(
 
 /// Root composition: Riverpod scope around the app widget.
 @visibleForTesting
-Widget buildRoot({List<Override> overrides = const <Override>[]}) {
-  return ProviderScope(overrides: overrides, child: const MemoxApp());
+Widget buildRoot({
+  List<Override> overrides = const <Override>[],
+  TransitionBuilder? appBuilder,
+}) {
+  return ProviderScope(
+    overrides: overrides,
+    child: MemoxApp(builder: appBuilder),
+  );
 }
 
 /// Maps an uncaught non-framework error to reportable [FlutterErrorDetails].

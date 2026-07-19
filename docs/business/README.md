@@ -133,4 +133,15 @@ Nếu một capability về sau có lifecycle/persistence/permission độc lậ
 11. Acceptance criteria có thể kiểm chứng.
 12. Parity dưới 3% cho mọi canonical UI state × theme có reference.
 
+Mọi màn hình, dialog, bottom sheet hoặc trạng thái tương tác mới hay thay đổi
+phải có một **screen-delivery journey** trên Flutter Web + Playwright. Journey
+bắt đầu từ lúc mở app tại `/`, đi qua các flow tiền điều kiện và Master flow sở
+hữu bằng control hiển thị có thể hit-test, rồi tiếp tục qua node cần kiểm tra đến
+kết quả cuối có thể quan sát (success/recovery/cancel). Test phải assert kết quả
+render/persist cuối; fixture chỉ được tạo data precondition, không được đặt route,
+mở sẵn surface hoặc bỏ qua bước UI. Deep-link test và state-only parity capture
+chỉ là coverage bổ sung, không thay thế journey này. Mỗi screen task phải có một
+lệnh headed tái lập được để reviewer quan sát click/nhập liệu thật trước khi chạy
+parity light/dark và repository gate.
+
 Không tạo flow file rỗng. README của từng object là backlog/catalog; chỉ đổi trạng thái sang `Đã có` khi file đạt toàn bộ chuẩn trên.

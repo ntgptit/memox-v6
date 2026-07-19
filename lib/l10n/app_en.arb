@@ -310,6 +310,55 @@
   "@saveLabel": {
     "description": "Card Editor primary CTA (WBS 5.3.2)."
   },
+  "savingLabel": "Saving\u2026",
+  "@savingLabel": {
+    "description": "Card Editor submitting CTA (WBS 5.3.2B)."
+  },
+  "tryAgainLabel": "Try again",
+  "@tryAgainLabel": {
+    "description": "Card Editor submit-error retry (WBS 5.3.2B)."
+  },
+  "cardSaveFailedMessage": "Couldn\u2019t save the card. Your changes are still here.",
+  "@cardSaveFailedMessage": {
+    "description": "Card Editor submit-error banner (WBS 5.3.2B)."
+  },
+  "duplicateCardMessage": "A card \u201c{term}\u201d already exists in this deck.",
+  "@duplicateCardMessage": {
+    "description": "Card Editor duplicate banner (WBS 5.3.2B).",
+    "placeholders": {"term": {"type": "String"}}
+  },
+  "viewExistingLabel": "View existing",
+  "@viewExistingLabel": {
+    "description": "Card Editor duplicate banner action (WBS 5.3.2B)."
+  },
+  "addAnywayLabel": "Add anyway",
+  "@addAnywayLabel": {
+    "description": "Card Editor duplicate banner override (WBS 5.3.2B)."
+  },
+  "enterTermError": "Enter a term.",
+  "@enterTermError": {
+    "description": "Card Editor validation copy (WBS 5.3.2B)."
+  },
+  "enterMeaningError": "Enter a meaning.",
+  "@enterMeaningError": {
+    "description": "Card Editor validation copy (WBS 5.3.2B)."
+  },
+  "discardCardTitle": "Discard this card?",
+  "@discardCardTitle": {
+    "description": "Card Editor dirty-cancel confirm (WBS 5.3.2B)."
+  },
+  "discardCardBody": "Your changes will be lost.",
+  "@discardCardBody": {
+    "description": "Card Editor dirty-cancel confirm (WBS 5.3.2B)."
+  },
+  "discardLabel": "Discard",
+  "@discardLabel": {
+    "description": "Card Editor dirty-cancel confirm (WBS 5.3.2B)."
+  },
+  "keepEditingLabel": "Keep editing",
+  "@keepEditingLabel": {
+    "description": "Card Editor dirty-cancel confirm (WBS 5.3.2B)."
+  },
   "cancelLabel": "Cancel",
   "@cancelLabel": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."

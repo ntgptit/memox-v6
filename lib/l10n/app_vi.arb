@@ -301,6 +301,55 @@
   "@saveLabel": {
     "description": "Card Editor primary CTA (WBS 5.3.2)."
   },
+  "savingLabel": "\u0110ang l\u01b0u\u2026",
+  "@savingLabel": {
+    "description": "Card Editor submitting CTA (WBS 5.3.2B)."
+  },
+  "tryAgainLabel": "Th\u1eed l\u1ea1i",
+  "@tryAgainLabel": {
+    "description": "Card Editor submit-error retry (WBS 5.3.2B)."
+  },
+  "cardSaveFailedMessage": "Kh\u00f4ng l\u01b0u \u0111\u01b0\u1ee3c th\u1ebb. D\u1eef li\u1ec7u c\u1ee7a b\u1ea1n v\u1eabn c\u00f2n \u0111\u00e2y.",
+  "@cardSaveFailedMessage": {
+    "description": "Card Editor submit-error banner (WBS 5.3.2B)."
+  },
+  "duplicateCardMessage": "Th\u1ebb \u201c{term}\u201d \u0111\u00e3 t\u1ed3n t\u1ea1i trong deck n\u00e0y.",
+  "@duplicateCardMessage": {
+    "description": "Card Editor duplicate banner (WBS 5.3.2B).",
+    "placeholders": {"term": {"type": "String"}}
+  },
+  "viewExistingLabel": "Xem th\u1ebb c\u00f3 s\u1eb5n",
+  "@viewExistingLabel": {
+    "description": "Card Editor duplicate banner action (WBS 5.3.2B)."
+  },
+  "addAnywayLabel": "V\u1eabn th\u00eam",
+  "@addAnywayLabel": {
+    "description": "Card Editor duplicate banner override (WBS 5.3.2B)."
+  },
+  "enterTermError": "Nh\u1eadp thu\u1eadt ng\u1eef.",
+  "@enterTermError": {
+    "description": "Card Editor validation copy (WBS 5.3.2B)."
+  },
+  "enterMeaningError": "Nh\u1eadp ngh\u0129a.",
+  "@enterMeaningError": {
+    "description": "Card Editor validation copy (WBS 5.3.2B)."
+  },
+  "discardCardTitle": "B\u1ecf th\u1ebb n\u00e0y?",
+  "@discardCardTitle": {
+    "description": "Card Editor dirty-cancel confirm (WBS 5.3.2B)."
+  },
+  "discardCardBody": "Thay \u0111\u1ed5i c\u1ee7a b\u1ea1n s\u1ebd m\u1ea5t.",
+  "@discardCardBody": {
+    "description": "Card Editor dirty-cancel confirm (WBS 5.3.2B)."
+  },
+  "discardLabel": "B\u1ecf",
+  "@discardLabel": {
+    "description": "Card Editor dirty-cancel confirm (WBS 5.3.2B)."
+  },
+  "keepEditingLabel": "Ti\u1ebfp t\u1ee5c s\u1eeda",
+  "@keepEditingLabel": {
+    "description": "Card Editor dirty-cancel confirm (WBS 5.3.2B)."
+  },
   "cancelLabel": "Hủy",
   "@cancelLabel": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."

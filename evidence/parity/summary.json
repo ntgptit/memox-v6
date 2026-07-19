@@ -1,0 +1,113 @@
+{
+  "thresholdPercentage": 3,
+  "generatedAtUtc": "2026-07-19T15:51:03.831Z",
+  "measuredStateThemes": 4,
+  "passed": 4,
+  "failed": 0,
+  "results": [
+    {
+      "wbsId": "MX-VIS-001",
+      "screen": "First-run landing",
+      "state": "Default",
+      "masterFlow": "docs/business/deck/create-deck.md",
+      "flowNode": "C[\"First-use landing\"]",
+      "kitReference": "create-deck-firstrun--landing--dark.png",
+      "route": "/first-run",
+      "fixture": "MX-VIS-001",
+      "viewport": "390x780 @2x",
+      "theme": "dark",
+      "spec": "/tool/parity/specs/first-run.spec.ts",
+      "expected": "expected.png",
+      "actual": "actual.png",
+      "diff": "diff.png",
+      "differencePercentage": 1.84,
+      "result": "PASS",
+      "kitSize": {
+        "width": 780,
+        "height": 1560
+      },
+      "actualSize": {
+        "width": 780,
+        "height": 1560
+      }
+    },
+    {
+      "wbsId": "MX-VIS-001",
+      "screen": "First-run landing",
+      "state": "Default",
+      "masterFlow": "docs/business/deck/create-deck.md",
+      "flowNode": "C[\"First-use landing\"]",
+      "kitReference": "create-deck-firstrun--landing--light.png",
+      "route": "/first-run",
+      "fixture": "MX-VIS-001",
+      "viewport": "390x780 @2x",
+      "theme": "light",
+      "spec": "/tool/parity/specs/first-run.spec.ts",
+      "expected": "expected.png",
+      "actual": "actual.png",
+      "diff": "diff.png",
+      "differencePercentage": 1.71,
+      "result": "PASS",
+      "kitSize": {
+        "width": 780,
+        "height": 1560
+      },
+      "actualSize": {
+        "width": 780,
+        "height": 1560
+      }
+    },
+    {
+      "wbsId": "MX-VIS-049",
+      "screen": "Card Editor",
+      "state": "Create",
+      "masterFlow": "docs/business/flashcard/create-flashcard.md",
+      "flowNode": "A[\"Open Card Editor\"] → B[\"Load target + Language Pair\"] → C[\"Enter term / meaning / optional content\"]",
+      "kitReference": "flashcard-editor--create--dark.png",
+      "route": "/deck/parity-0002/new-card",
+      "fixture": "MX-VIS-049",
+      "viewport": "390x780 @2x",
+      "theme": "dark",
+      "spec": "/tool/parity/specs/flashcard-editor.spec.ts",
+      "expected": "expected.png",
+      "actual": "actual.png",
+      "diff": "diff.png",
+      "differencePercentage": 1.61,
+      "result": "PASS",
+      "kitSize": {
+        "width": 780,
+        "height": 1560
+      },
+      "actualSize": {
+        "width": 780,
+        "height": 1560
+      }
+    },
+    {
+      "wbsId": "MX-VIS-049",
+      "screen": "Card Editor",
+      "state": "Create",
+      "masterFlow": "docs/business/flashcard/create-flashcard.md",
+      "flowNode": "A[\"Open Card Editor\"] → B[\"Load target + Language Pair\"] → C[\"Enter term / meaning / optional content\"]",
+      "kitReference": "flashcard-editor--create--light.png",
+      "route": "/deck/parity-0002/new-card",
+      "fixture": "MX-VIS-049",
+      "viewport": "390x780 @2x",
+      "theme": "light",
+      "spec": "/tool/parity/specs/flashcard-editor.spec.ts",
+      "expected": "expected.png",
+      "actual": "actual.png",
+      "diff": "diff.png",
+      "differencePercentage": 1.29,
+      "result": "PASS",
+      "kitSize": {
+        "width": 780,
+        "height": 1560
+      },
+      "actualSize": {
+        "width": 780,
+        "height": 1560
+      }
+    }
+  ]
+}

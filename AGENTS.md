@@ -51,6 +51,37 @@ a state, a capability, naming, or scope — **do NOT proceed on assumption and d
 pick one side. Stop and ask the user to resolve the divergence first**, quoting the specific
 business point and the conflicting kit point. Only develop once the user has decided.
 
+## Mandatory screen-delivery journey
+
+Every new or materially changed screen, dialog, bottom sheet, or interactive UI
+state must have a complete Flutter Web + Playwright journey before the work may
+be called Done:
+
+- Start from a fresh app launch at `/`, never from the target route or capture
+  state. Traverse the navigation/first-use prerequisites and every owning
+  business Master flow through visible, hit-testable controls.
+- Use real browser pointer and keyboard input through Flutter's accessibility
+  and native-editing bridge. Never call callbacks, providers, repositories, or
+  mutate persisted state to skip UI steps.
+- Fixtures may establish deterministic data preconditions only. They must not
+  establish the current route, open surface, completed prerequisite step, or
+  result that the journey exists to prove.
+- Do not stop at the screenshot node. Continue through validation and mutation
+  to an observable terminal outcome such as persisted success, recovery, or
+  cancel, and assert the rendered result.
+- Every spec names the owning `docs/business/**` Master flow plus every
+  prerequisite flow/node used to reach it. A deep-link test is supplementary
+  navigation coverage and never replaces this app-launch journey.
+- CI may run headless, but every screen task must expose and successfully run a
+  reproducible headed command so reviewers can observe the real clicks and text
+  entry. Slow motion and a final hold are allowed for review.
+- Required closeout order: headed full journey, deterministic light/dark parity
+  for every referenced state, then `node tool/verify/run.mjs`.
+
+A state-only widget/golden/parity capture is insufficient. If the complete path
+or its terminal outcome is not implemented, or a business↔design conflict is
+unresolved, keep the UI work In Progress/Blocked.
+
 ## Code standard — main guard
 
 All code is verified by **code-verification-guard** (git submodule at

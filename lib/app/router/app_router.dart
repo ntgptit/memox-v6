@@ -13,6 +13,10 @@ import 'package:memox_v6/presentation/features/language_pair/routes/language_pai
 /// composed here as their owning features land; this file never imports
 /// feature screens directly.
 GoRouter createAppRouter({Future<bool> Function()? needsFirstRun}) {
+  // Tier-1 Web requires every canonical destination to keep a refresh-safe
+  // URL. Our imperative pushes target declared, deep-linkable GoRoutes, so the
+  // browser must reflect the top route instead of retaining its parent URL.
+  GoRouter.optionURLReflectsImperativeAPIs = true;
   return GoRouter(
     initialLocation: RoutePaths.home,
     // First-run gate (navigation README: fresh install goes to the

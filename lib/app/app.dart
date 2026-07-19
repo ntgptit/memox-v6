@@ -10,7 +10,14 @@ import 'package:memox_v6/l10n/generated/app_localizations.dart';
 /// wiring, router wiring). Theme mode follows the system until the
 /// appearance preference (WBS 8.1) persists a user choice.
 class MemoxApp extends ConsumerWidget {
-  const MemoxApp({super.key});
+  const MemoxApp({super.key, this.builder});
+
+  /// Optional wrapper inserted between `MaterialApp` and the routed
+  /// content. Production passes nothing; the visual-parity harness
+  /// (`lib/app/dev/parity_main.dart`) uses it to inject the device
+  /// safe-area inset the browser does not report, so a Flutter Web
+  /// capture lines up with the Design Kit shot.
+  final TransitionBuilder? builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,6 +29,7 @@ class MemoxApp extends ConsumerWidget {
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
       routerConfig: ref.watch(appRouterInstanceProvider),
+      builder: builder,
     );
   }
 }

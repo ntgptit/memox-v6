@@ -149,4 +149,99 @@ void main() {
 
     await disposeAndFlushStreams(tester);
   });
+
+  testWidgets('a duplicate pauses for review; Add anyway keeps both', (
+    tester,
+  ) async {
+    await database.flashcardDao.insertFlashcard(
+      'c0',
+      'd1',
+      '안녕',
+      '안녕',
+      'hi',
+      0,
+      0,
+    );
+
+    await tester.pumpWidget(app());
+    await pumpEditor(tester);
+
+    await tester.enterText(find.byType(TextField).at(0), '안녕');
+    await tester.enterText(find.byType(TextField).at(1), 'hello');
+    await tester.pump();
+    await tester.tap(find.text('Save'));
+    await pumpEditor(tester);
+
+    // Review banner up, nothing committed yet.
+    expect(find.textContaining('already exists'), findsOneWidget);
+    var cards = await database.flashcardDao
+        .pageFlashcardsByDeck('d1', 50, 0)
+        .get();
+    expect(cards, hasLength(1));
+
+    await tester.tap(find.text('Add anyway'));
+    await pumpEditor(tester);
+
+    cards = await database.flashcardDao.pageFlashcardsByDeck('d1', 50, 0).get();
+    expect(cards, hasLength(2));
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  testWidgets('a save failure keeps the draft and offers Try again', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await pumpEditor(tester);
+
+    await tester.enterText(find.byType(TextField).at(0), '안녕');
+    await tester.enterText(find.byType(TextField).at(1), 'hello');
+    await tester.pump();
+
+    await database.customStatement('DROP TABLE learning_progress');
+    await tester.tap(find.text('Save'));
+    await pumpEditor(tester);
+
+    expect(find.textContaining('Couldn’t save the card'), findsOneWidget);
+    expect(find.text('Try again'), findsOneWidget);
+    final termField = tester.widget<TextField>(find.byType(TextField).at(0));
+    expect(termField.controller?.text, '안녕');
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  testWidgets('clearing a touched required field shows the kit error', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await pumpEditor(tester);
+
+    await tester.enterText(find.byType(TextField).at(0), '안녕');
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).at(0), '');
+    await tester.pump();
+
+    expect(find.text('Enter a term.'), findsOneWidget);
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  testWidgets('a dirty close asks before discarding', (tester) async {
+    await tester.pumpWidget(app());
+    await pumpEditor(tester);
+
+    await tester.enterText(find.byType(TextField).at(0), '안녕');
+    await tester.pump();
+
+    await tester.tap(find.bySemanticsLabel('Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Discard this card?'), findsOneWidget);
+
+    await tester.tap(find.text('Keep editing'));
+    await tester.pumpAndSettle();
+    expect(find.text('New card'), findsOneWidget);
+
+    await disposeAndFlushStreams(tester);
+  });
 }

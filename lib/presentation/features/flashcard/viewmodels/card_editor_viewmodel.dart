@@ -1,7 +1,7 @@
 import 'package:memox_v6/app/di/usecase_providers.dart';
-import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/flashcard/create_flashcard_result.dart';
+import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/domain/language_pair/language_pair.dart';
 import 'package:memox_v6/domain/language_pair/supported_languages.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -78,16 +78,50 @@ class CardEditorSaveViewmodel extends _$CardEditorSaveViewmodel {
             allowDuplicate: allowDuplicate,
             tagIds: tagIds,
           );
-      // Duplicate review UI is child B scope; until it lands the
-      // candidates surface as a typed conflict for the error banner.
+      // Candidates are a review decision, not an error: the banner
+      // surface owns them (resolve-duplicate-flashcard.md).
       if (result is DuplicateCandidatesFound) {
-        throw ConflictFailure(
-          entity: 'flashcards',
-          code: 'duplicate-review-pending',
-        );
+        ref
+            .read(cardEditorDuplicatesViewmodelProvider.notifier)
+            .show(result.candidates);
+        return;
       }
+      ref.read(cardEditorDuplicatesViewmodelProvider.notifier).clear();
+      ref.read(cardEditorSavedTickViewmodelProvider.notifier).bump();
     });
   }
 
   void reset() => state = const AsyncData(null);
+}
+
+/// Duplicate candidates awaiting the user's review decision; null when
+/// no review is pending (kit DupBanner entry point).
+@riverpod
+class CardEditorDuplicatesViewmodel extends _$CardEditorDuplicatesViewmodel {
+  @override
+  List<Flashcard>? build() => null;
+
+  void show(List<Flashcard> candidates) => state = candidates;
+
+  void clear() => state = null;
+}
+
+/// Increments once per committed save so the screen can distinguish a
+/// real success from a duplicate-review pause (both settle AsyncData).
+@riverpod
+class CardEditorSavedTickViewmodel extends _$CardEditorSavedTickViewmodel {
+  @override
+  int build() => 0;
+
+  void bump() => state = state + 1;
+}
+
+/// Whether the editor draft diverged from blank (dirty-cancel guard:
+/// kit KIT-25-06 — Cancel/back confirm before discarding a dirty draft).
+@riverpod
+class CardEditorDirtyViewmodel extends _$CardEditorDirtyViewmodel {
+  @override
+  bool build() => false;
+
+  void set({required bool dirty}) => state = dirty;
 }

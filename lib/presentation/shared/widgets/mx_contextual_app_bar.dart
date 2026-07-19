@@ -110,52 +110,49 @@ class MxContextualAppBar extends StatelessWidget
       ],
     );
 
-    return Semantics(
-      header: true,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isModal ? colors.surface : colors.bg,
-          border: isModal
-              ? Border(
-                  bottom: BorderSide(
-                    color: colors.divider,
-                    width: AppStrokes.hairline,
-                  ),
-                )
-              : null,
-        ),
-        padding: EdgeInsets.only(
-          top: MediaQuery.paddingOf(context).top,
-          left: context.spacing.gutter,
-          right: context.spacing.gutter,
-        ),
-        height: preferredSize.height + MediaQuery.paddingOf(context).top,
-        child: Row(
-          children: [
-            if (onBack != null && backLabel != null) ...[
-              MxIconButton.toolbar(
-                icon: Symbols.arrow_back,
-                onPressed: onBack,
-                semanticLabel: backLabel,
-              ),
-              const MxGap.s2(),
-            ],
-            if (onClose != null && closeLabel != null) ...[
-              MxIconButton.toolbar(
-                icon: Symbols.close,
-                onPressed: onClose,
-                semanticLabel: closeLabel,
-              ),
-              const MxGap.s2(),
-            ],
-            Expanded(child: titleBlock),
-            // A modal bar balances its leading glyph so the centered
-            // title stays optically centered.
-            if (isModal) const MxGap.s10(),
-            ...actions,
-            if (avatar != null) ...[const MxGap.s2(), avatar],
+    return Container(
+      decoration: BoxDecoration(
+        color: isModal ? colors.surface : colors.bg,
+        border: isModal
+            ? Border(
+                bottom: BorderSide(
+                  color: colors.divider,
+                  width: AppStrokes.hairline,
+                ),
+              )
+            : null,
+      ),
+      padding: EdgeInsets.only(
+        top: MediaQuery.paddingOf(context).top,
+        left: context.spacing.gutter,
+        right: context.spacing.gutter,
+      ),
+      height: preferredSize.height + MediaQuery.paddingOf(context).top,
+      child: Row(
+        children: [
+          if (onBack != null && backLabel != null) ...[
+            MxIconButton.toolbar(
+              icon: Symbols.arrow_back,
+              onPressed: onBack,
+              semanticLabel: backLabel,
+            ),
+            const MxGap.s2(),
           ],
-        ),
+          if (onClose != null && closeLabel != null) ...[
+            MxIconButton.toolbar(
+              icon: Symbols.close,
+              onPressed: onClose,
+              semanticLabel: closeLabel,
+            ),
+            const MxGap.s2(),
+          ],
+          Expanded(child: Semantics(header: true, child: titleBlock)),
+          // A modal bar balances its leading glyph so the centered
+          // title stays optically centered.
+          if (isModal) const MxGap.s10(),
+          ...actions,
+          if (avatar != null) ...[const MxGap.s2(), avatar],
+        ],
       ),
     );
   }
