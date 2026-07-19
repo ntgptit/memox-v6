@@ -15,7 +15,8 @@ import 'package:flutter/material.dart';
 /// display
 ///
 /// Public API:
-/// - `const MxDivider()` — theme-driven, no per-call styling.
+/// - key: the only parameter; appearance is fully theme-driven with no
+///   per-call styling.
 class MxDivider extends StatelessWidget {
   const MxDivider({super.key});
 
