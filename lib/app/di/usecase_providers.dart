@@ -1,5 +1,6 @@
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
+import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/create_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/remove_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
@@ -35,5 +36,15 @@ RemoveLanguagePairUseCase removeLanguagePairUseCase(Ref ref) {
     pairs: ref.watch(languagePairRepositoryProvider),
     decks: ref.watch(deckRepositoryProvider),
     preferences: ref.watch(preferenceRepositoryProvider),
+  );
+}
+
+@riverpod
+CreateDeckUseCase createDeckUseCase(Ref ref) {
+  return CreateDeckUseCase(
+    decks: ref.watch(deckRepositoryProvider),
+    pairs: ref.watch(languagePairRepositoryProvider),
+    idGenerator: ref.watch(idGeneratorProvider),
+    clock: ref.watch(appClockProvider),
   );
 }
