@@ -5,13 +5,31 @@ import { dirname, extname, join, relative, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import process from 'node:process';
 
+import { selectScopeFromGit } from './ci_scope.mjs';
+
 const repoRoot = resolve(import.meta.dirname, '..', '..');
 const args = process.argv.slice(2);
 const docsOnly = args.includes('--docs');
 const quick = args.includes('--quick');
+const flutterFast = args.includes('--flutter-fast');
+const warmCache = args.includes('--warm-cache');
 const updateGoldens = args.includes('--update-goldens');
 const testTargets = [];
 
+function optionValue(name) {
+  const index = args.indexOf(name);
+  if (index === -1) return null;
+  const value = args[index + 1];
+  if (!value || value.startsWith('--')) throw new Error(`${name} requires a value.`);
+  return value;
+}
+
+const baseRevision = optionValue('--base');
+const headRevision = optionValue('--head');
+
+if ([docsOnly, quick, flutterFast, warmCache].filter(Boolean).length > 1) {
+  throw new Error('--docs, --quick, --flutter-fast and --warm-cache are mutually exclusive.');
+}
 for (let index = 0; index < args.length; index += 1) {
   if (args[index] !== '--test') continue;
   const target = args[index + 1];
@@ -20,6 +38,10 @@ for (let index = 0; index < args.length; index += 1) {
   }
   testTargets.push(target);
   index += 1;
+}
+
+if (flutterFast && (!baseRevision || !headRevision) && testTargets.length === 0) {
+  throw new Error('--flutter-fast requires --base and --head unless --test is provided.');
 }
 
 const results = [];
@@ -248,37 +270,44 @@ function writePassMarker(mode) {
 }
 
 try {
-  checkDocumentation();
-  command(
-    'design checklist structure',
-    'python',
-    ['docs/design/mobile-design-kit-audit-v5/scripts/validate.py'],
-  );
-  command(
-    'design token manifest',
-    'node',
-    ['tool/design/token_manifest.mjs', '--check'],
-  );
-
-  const guardRoot = join(repoRoot, 'tools', 'code-verification-guard');
-  const guardTests = [
-    'tests/test_memox_architecture_guard_rules.py',
-    'tests/test_memox_v6_ruleset_contract.py',
-  ];
-  if (guardTests.every((path) => existsSync(join(guardRoot, path)))) {
+  if (!flutterFast && !warmCache) {
+    checkDocumentation();
     command(
-      'guard ruleset regression tests',
-      'pytest',
-      ['-q', ...guardTests],
-      { cwd: guardRoot },
+      'design checklist structure',
+      'python',
+      ['docs/design/mobile-design-kit-audit-v5/scripts/validate.py'],
+    );
+    command(
+      'design token manifest',
+      'node',
+      ['tool/design/token_manifest.mjs', '--check'],
+    );
+    command(
+      'CI scope regression tests',
+      'node',
+      ['--test', 'tool/verify/ci_scope.test.mjs'],
+    );
+
+    const guardRoot = join(repoRoot, 'tools', 'code-verification-guard');
+    const guardTests = [
+      'tests/test_memox_architecture_guard_rules.py',
+      'tests/test_memox_v6_ruleset_contract.py',
+    ];
+    if (guardTests.every((path) => existsSync(join(guardRoot, path)))) {
+      command(
+        'guard ruleset regression tests',
+        'pytest',
+        ['-q', ...guardTests],
+        { cwd: guardRoot },
+      );
+    }
+
+    command(
+      'code verification guard',
+      'python',
+      ['tools/code-verification-guard/guard/run.py', 'check', '--project', '.', '--ruleset', 'memox', '--profile', 'local'],
     );
   }
-
-  command(
-    'code verification guard',
-    'python',
-    ['tools/code-verification-guard/guard/run.py', 'check', '--project', '.', '--ruleset', 'memox', '--profile', 'local'],
-  );
 
   if (!docsOnly) {
     if (!quick) {
@@ -288,6 +317,12 @@ try {
       const pubspec = readFileSync(join(repoRoot, 'pubspec.yaml'), 'utf8');
       if (/^\s*build_runner\s*:/m.test(pubspec)) {
         command('build_runner', 'dart', ['run', 'build_runner', 'build']);
+      }
+
+      if (warmCache) {
+        process.stdout.write('\nFast-gate build cache refreshed; no verification marker written.\n');
+        for (const result of results) process.stdout.write(`- ${result.name}: ${result.status}\n`);
+        process.exit(0);
       }
 
       const dartFiles = output('git', ['ls-files', '*.dart']).split(/\r?\n/).filter(Boolean);
@@ -305,10 +340,26 @@ try {
     }
 
     command('flutter analyze', 'flutter', ['analyze']);
+    let resolvedTestTargets = testTargets;
+    if (flutterFast && resolvedTestTargets.length === 0) {
+      const scope = selectScopeFromGit(baseRevision, headRevision);
+      if (scope.docsOnly) {
+        throw new Error('documentation-only changes must use --docs, not --flutter-fast');
+      }
+      resolvedTestTargets = scope.testTargets;
+      process.stdout.write(
+        `Fast Flutter scope: ${scope.kind}; ${resolvedTestTargets.length} non-visual test file(s).\n`,
+      );
+      for (const reason of scope.reasons) process.stdout.write(`- ${reason}\n`);
+      if (scope.visualChanges) {
+        process.stdout.write('- visual changes remain covered by the Windows full-canonical gate\n');
+      }
+    }
+
     command('flutter test', 'flutter', [
       'test',
       ...(updateGoldens ? ['--update-goldens'] : []),
-      ...testTargets,
+      ...resolvedTestTargets,
     ]);
   }
 
@@ -319,7 +370,7 @@ try {
     process.exit(0);
   }
 
-  const mode = docsOnly ? 'docs' : quick ? 'quick' : 'full';
+  const mode = docsOnly ? 'docs' : quick ? 'quick' : flutterFast ? 'flutter-fast' : 'full';
   writePassMarker(mode);
   process.stdout.write(`\nMemoX verification passed (${mode}).\n`);
   for (const result of results) process.stdout.write(`- ${result.name}: ${result.status}\n`);
