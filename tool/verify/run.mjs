@@ -9,6 +9,7 @@ const repoRoot = resolve(import.meta.dirname, '..', '..');
 const args = process.argv.slice(2);
 const docsOnly = args.includes('--docs');
 const quick = args.includes('--quick');
+const updateGoldens = args.includes('--update-goldens');
 const testTargets = [];
 
 for (let index = 0; index < args.length; index += 1) {
@@ -304,7 +305,18 @@ try {
     }
 
     command('flutter analyze', 'flutter', ['analyze']);
-    command('flutter test', 'flutter', ['test', ...testTargets]);
+    command('flutter test', 'flutter', [
+      'test',
+      ...(updateGoldens ? ['--update-goldens'] : []),
+      ...testTargets,
+    ]);
+  }
+
+  if (updateGoldens) {
+    // A baseline-regeneration run is not verification evidence: goldens
+    // were rewritten, not compared. Re-run without the flag for a marker.
+    process.stdout.write('\nGoldens updated; pass marker not written — re-run without --update-goldens.\n');
+    process.exit(0);
   }
 
   const mode = docsOnly ? 'docs' : quick ? 'quick' : 'full';
