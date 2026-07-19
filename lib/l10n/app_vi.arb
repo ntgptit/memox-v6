@@ -3,6 +3,10 @@
   "appTitle": "MemoX",
   "homeTitle": "Trang chủ MemoX",
   "routeNotFoundMessage": "Trang này không tồn tại.",
+  "dataCorruptionMessage": "Một phần dữ liệu đã lưu không đọc được.",
+  "@dataCorruptionMessage": {
+    "description": "Shown when persisted data fails to map (DataCorruptionFailure)."
+  },
   "somethingWentWrongMessage": "Đã có lỗi xảy ra.",
   "cardCountLabel": "{count, plural, other{{count} thẻ}}"
 }
