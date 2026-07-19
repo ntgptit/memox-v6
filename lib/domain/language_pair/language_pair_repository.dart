@@ -13,4 +13,6 @@ abstract interface class LanguagePairRepository {
   Future<LanguagePair?> findByNormalizedKey(String normalizedPairKey);
 
   Stream<List<LanguagePair>> watchAll();
+
+  Future<void> deleteById(String id);
 }

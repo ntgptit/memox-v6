@@ -23,5 +23,6 @@ abstract final class MxActionErrors {
         UnexpectedFailure() => l10n.somethingWentWrongMessage,
         DataCorruptionFailure() => l10n.dataCorruptionMessage,
         ConflictFailure() => l10n.conflictMessage,
+        ValidationFailure() => l10n.validationMessage,
       };
 }

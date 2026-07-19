@@ -94,6 +94,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `4.8` | [App DI graph](./WBS-4.8-di-graph.md) | Done (2026-07-19) |
 | `4.9` | [Performance baseline](./WBS-4.9-performance-baseline.md) | Done (2026-07-19) |
 | `4.10` | [Foundation gate](./WBS-4.10-foundation-gate.md) | Done — gate PASSED (2026-07-19) |
+| `5.1.1` | [Language Pair domain/data](./WBS-5.1.1-language-pair-domain.md) | Done (2026-07-19) |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.

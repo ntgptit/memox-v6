@@ -41,6 +41,13 @@ class DriftLanguagePairRepository implements LanguagePairRepository {
   }
 
   @override
+  Future<void> deleteById(String id) {
+    return mapSqliteConflicts(entity: 'language_pairs', () async {
+      await _database.languagePairDao.deleteLanguagePair(id);
+    });
+  }
+
+  @override
   Stream<List<LanguagePair>> watchAll() {
     return _database.languagePairDao.watchAllLanguagePairs().watch().map(
       (rows) => rows.map((row) => row.toDomain()).toList(),
