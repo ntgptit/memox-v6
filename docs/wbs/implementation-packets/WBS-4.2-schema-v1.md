@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — child A Done (2026-07-19); B, C pending |
+| Status | **In progress** — children A, B Done (2026-07-19); C pending |
 | Owner/domain | Data / Persistence |
 | Depends on | `4.1` — Done (PR #41) |
 | Decision gates | DG-06 (ADR-004) |
@@ -61,6 +61,27 @@ Shared rules for every child:
   enforcement, root/child sibling-name collisions (and the allowed
   same-name-under-different-parent case), translation order uniqueness,
   tag-join cascade on card delete.
+
+## Child B — progress and rhythm tables (Done, 2026-07-19)
+
+- `lib/data/database/tables/progress.drift` — `study_attempts`
+  (unique idempotency key, append-only evidence; `session_id` stays a
+  plain column until child C creates `study_sessions`, when the FK is
+  added); `learning_progress` (one row per card via unique FK, `box`
+  0..8 with the accepted box/due shape as a CHECK — Box 0/8 null,
+  1..7 due-dated — baseline `leitner-8-box-v1` policy identity,
+  revision/counters, last terminal attempt reference); `preferences`
+  as the versioned typed key/value shape schema-v1 left open (JSON value
+  + explicit schema version; invalid fallback is mapper-layer read
+  behavior); `daily_goals` + `goal_day_progress` (per-local-day bucket,
+  unique `local_date`, timezone + target snapshots; contribution
+  idempotency rides the session-finalize exactly-once contract, atomic
+  operation 5); `streak_days` (unique local date, qualified
+  source/version).
+- `test/data/database/progress_schema_test.dart` — 7 DDL contract tests:
+  table presence, one-progress-per-card, box range + box/due shape,
+  baseline policy defaults, attempt idempotency-key uniqueness, unique
+  local dates for goal buckets and streak days, card-delete cascade.
 
 ## Acceptance and test procedure
 
