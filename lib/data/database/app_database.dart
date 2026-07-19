@@ -56,6 +56,12 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 1;
 
+  /// Cheap connectivity probe for startup warm-up (WBS 4.8): forces the
+  /// lazy executor open so open/migration failures surface immediately.
+  Future<void> probeConnection() async {
+    await customSelect('SELECT 1').getSingle();
+  }
+
   @override
   MigrationStrategy get migration => buildAppMigration(this);
 }
