@@ -151,4 +151,45 @@ void main() {
     expect(border.top.color, AppColors.light.focusRing);
     expect(tester.getSize(find.byType(TextField)), before);
   });
+
+  testWidgets('boxed field focuses with one ring on its own surface', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _host(const MxTextField(label: 'Term', boxed: true)),
+    );
+
+    Container box() => tester.widget<Container>(
+      find
+          .ancestor(
+            of: find.byType(TextField),
+            matching: find.byType(Container),
+          )
+          .first,
+    );
+
+    // At rest: no visible ring over the surface.
+    final resting = (box().foregroundDecoration! as BoxDecoration).border!;
+    expect(resting.top.color.a, 0);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    // Focused: the ring paints on the box edge itself...
+    final focused = (box().foregroundDecoration! as BoxDecoration).border!;
+    expect(focused.top.color, AppColors.light.focusRing);
+
+    // ...and exactly one focus-colored ring exists (no nested second
+    // outline around the bare input).
+    final rings = find.byWidgetPredicate(
+      (widget) =>
+          widget is DecoratedBox &&
+          switch (widget.decoration) {
+            final BoxDecoration decoration =>
+              decoration.border?.top.color == AppColors.light.focusRing,
+            _ => false,
+          },
+    );
+    expect(rings, findsOneWidget);
+  });
 }
