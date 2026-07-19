@@ -9,6 +9,14 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    # Generated output is regenerated locally and never hand-edited; the
+    # code-verification guard excludes it the same way.
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - lib/l10n/generated/**
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`
