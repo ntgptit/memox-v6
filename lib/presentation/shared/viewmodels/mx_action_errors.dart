@@ -21,5 +21,6 @@ abstract final class MxActionErrors {
   static String messageOf(AppFailure failure, AppLocalizations l10n) =>
       switch (failure) {
         UnexpectedFailure() => l10n.somethingWentWrongMessage,
+        DataCorruptionFailure() => l10n.dataCorruptionMessage,
       };
 }

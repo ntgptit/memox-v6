@@ -31,3 +31,27 @@ final class UnexpectedFailure extends AppFailure {
   const UnexpectedFailure({required Object cause, super.stackTrace})
     : super(message: 'Unexpected failure', cause: cause);
 }
+
+/// Persisted data failed to map into its domain shape — an unknown enum
+/// value, an invalid JSON payload or an impossible combination (WBS 4.5).
+///
+/// Repositories decide per call site whether this aborts the read or
+/// falls back to a safe default; mappers never guess silently.
+final class DataCorruptionFailure extends AppFailure {
+  DataCorruptionFailure({
+    required this.entity,
+    required this.field,
+    this.value,
+    super.cause,
+    super.stackTrace,
+  }) : super(message: 'Corrupted persisted data: $entity.$field');
+
+  /// Table or aggregate whose stored value failed to map.
+  final String entity;
+
+  /// Column or payload key that held the unmappable value.
+  final String field;
+
+  /// The offending stored value, when it is safe to carry.
+  final Object? value;
+}

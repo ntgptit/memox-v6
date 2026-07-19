@@ -12,6 +12,10 @@
   "@routeNotFoundMessage": {
     "description": "Body message of the screen shown for unknown routes."
   },
+  "dataCorruptionMessage": "Some saved data could not be read.",
+  "@dataCorruptionMessage": {
+    "description": "Shown when persisted data fails to map (DataCorruptionFailure)."
+  },
   "somethingWentWrongMessage": "Something went wrong.",
   "@somethingWentWrongMessage": {
     "description": "User-safe message shown when a screen fails to render."
