@@ -71,3 +71,6 @@ docs/design/**/evidence/*.png
 
 # design-sync helper output (regenerated diff/push batches)
 tools/design-sync/out/
+
+# transient golden-failure dumps
+test/**/failures/

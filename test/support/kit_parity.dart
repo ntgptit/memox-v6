@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -23,6 +24,36 @@ Future<void> loadAppFonts() async {
   final loader = FontLoader('Plus Jakarta Sans')
     ..addFont(Future.value(ByteData.view(data.buffer)));
   await loader.load();
+  await _loadMaterialSymbols();
+}
+
+/// Registers the Material Symbols icon font (a package font, which the
+/// test binding does not load) so kit icons render as glyphs, not boxes.
+Future<void> _loadMaterialSymbols() async {
+  final config =
+      jsonDecode(File('.dart_tool/package_config.json').readAsStringSync())
+          as Map<String, dynamic>;
+  final packages = config['packages'] as List<dynamic>;
+  final entry = packages.cast<Map<String, dynamic>>().firstWhere(
+    (p) => p['name'] == 'material_symbols_icons',
+  );
+  // rootUri may be absolute (pub cache) or relative to .dart_tool/,
+  // and needs a trailing slash so resolve() keeps its last segment.
+  final rootUri = entry['rootUri'] as String;
+  final root = Directory(
+    '.dart_tool',
+  ).uri.resolveUri(Uri.parse(rootUri.endsWith('/') ? rootUri : '$rootUri/'));
+  // Package fonts resolve under a `packages/<pkg>/` family prefix. The
+  // kit renders icons with the Rounded family (`material-symbols-rounded`
+  // in `MxButton.jsx`); Outlined stays loaded for legacy call sites.
+  for (final family in ['MaterialSymbolsOutlined', 'MaterialSymbolsRounded']) {
+    final data = File.fromUri(
+      root.resolve('lib/fonts/$family.ttf'),
+    ).readAsBytesSync();
+    final loader = FontLoader('packages/material_symbols_icons/$family')
+      ..addFont(Future.value(ByteData.view(data.buffer)));
+    await loader.load();
+  }
 }
 
 /// Result of one comparison; [ratio] is the differing-pixel share.
@@ -43,9 +74,12 @@ class KitParityResult {
 /// Sizes the test view to the kit shot (2× DPR), captures [finder]'s
 /// render and diffs it against `shots/<shotName>.png`.
 ///
-/// Per-channel tolerance absorbs cross-engine anti-aliasing; the
-/// returned ratio is the share of pixels beyond it over the compared
-/// intersection.
+/// Per-channel tolerance absorbs anti-aliasing blend differences, and a
+/// ±1-logical-px spatial slack (pixelmatch-style) absorbs the sub-pixel
+/// glyph-advance drift between the kit's browser rasterizer and
+/// Flutter's — a pixel counts as differing only when nothing within a
+/// 2-physical-px radius of the kit image matches it. Wrong colors and
+/// layout offsets of 2+ logical px stay fully visible to the gate.
 Future<KitParityResult> compareWithKitShot(
   WidgetTester tester,
   Finder finder, {
@@ -76,21 +110,36 @@ Future<KitParityResult> compareWithKitShot(
   final height = kitImage.height < captured.height
       ? kitImage.height
       : captured.height;
+  // ±1 logical px (2 physical at the 2× shot scale).
+  const slack = 2;
+
+  bool matchesNear(int x, int y) {
+    final renderOffset = (y * captured.width + x) * 4;
+    for (var dy = -slack; dy <= slack; dy++) {
+      final ky = y + dy;
+      if (ky < 0 || ky >= height) continue;
+      for (var dx = -slack; dx <= slack; dx++) {
+        final kx = x + dx;
+        if (kx < 0 || kx >= width) continue;
+        final kitOffset = (ky * kitImage.width + kx) * 4;
+        var maxDelta = 0;
+        for (var channel = 0; channel < 3; channel++) {
+          final delta =
+              (kitData.getUint8(kitOffset + channel) -
+                      renderData.getUint8(renderOffset + channel))
+                  .abs();
+          if (delta > maxDelta) maxDelta = delta;
+        }
+        if (maxDelta <= channelTolerance) return true;
+      }
+    }
+    return false;
+  }
 
   var differing = 0;
   for (var y = 0; y < height; y++) {
     for (var x = 0; x < width; x++) {
-      final kitOffset = (y * kitImage.width + x) * 4;
-      final renderOffset = (y * captured.width + x) * 4;
-      var maxDelta = 0;
-      for (var channel = 0; channel < 3; channel++) {
-        final delta =
-            (kitData.getUint8(kitOffset + channel) -
-                    renderData.getUint8(renderOffset + channel))
-                .abs();
-        if (delta > maxDelta) maxDelta = delta;
-      }
-      if (maxDelta > channelTolerance) differing++;
+      if (!matchesNear(x, y)) differing++;
     }
   }
 
