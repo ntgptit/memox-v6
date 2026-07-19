@@ -290,8 +290,16 @@ try {
       }
 
       const dartFiles = output('git', ['ls-files', '*.dart']).split(/\r?\n/).filter(Boolean);
-      if (dartFiles.length) {
-        command('dart format check', 'dart', ['format', '--output=none', '--set-exit-if-changed', ...dartFiles]);
+      // Windows caps the command line around 32k characters; batch the
+      // file list so the format check keeps working as the tree grows.
+      const FORMAT_BATCH = 80;
+      const batchCount = Math.ceil(dartFiles.length / FORMAT_BATCH);
+      for (let start = 0; start < dartFiles.length; start += FORMAT_BATCH) {
+        const batch = dartFiles.slice(start, start + FORMAT_BATCH);
+        const label = batchCount > 1
+          ? `dart format check (${start / FORMAT_BATCH + 1}/${batchCount})`
+          : 'dart format check';
+        command(label, 'dart', ['format', '--output=none', '--set-exit-if-changed', ...batch]);
       }
     }
 

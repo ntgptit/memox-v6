@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — children A, B Done (2026-07-19); C pending |
+| Status | **Done** (2026-07-19) — children A, B, C shipped one PR each |
 | Owner/domain | Data + Domain / Persistence boundary |
 | Depends on | `4.4`, `4.5` — Done (PRs #47–#50) |
 | Decision gates | DG-06 (ADR-004), ADR-005 failure taxonomy |
@@ -77,6 +77,29 @@ Shared rules:
   after conflict), reset semantics, due paging/count, preference
   corruption fallback, goal/streak port round-trips.
 
+## Child C — study-session repository (Done, 2026-07-19)
+
+- Port `StudySessionRepository` + `DriftStudySessionRepository`,
+  owner of the three session operations:
+  - **Op 2** `startSession`: session row + card snapshots + initial
+    round order in one transaction; the session id is the idempotency
+    key; a competing active session aborts on the single-active index
+    (`ConflictFailure('duplicate')`) and rolls the snapshots back.
+  - **Op 3** `saveAttemptWithCheckpoint`: attempt evidence and the
+    resumable checkpoint persist together before presentation
+    advances; the attempt idempotency key absorbs replays without
+    overwriting the stored checkpoint.
+  - **Op 5** `finalizeSession`: terminal state transition + goal/streak
+    contribution events in one transaction behind the revision guard;
+    a replay that finds the session already in the requested terminal
+    state returns success (contributions committed with the original),
+    any other stale write raises `ConflictFailure('revision')`.
+- Relearn queue rides the port with injected `recordedAt`.
+- `test/data/repositories/session_repository_test.dart` — atomic +
+  idempotent start, competing-session rollback, attempt/checkpoint
+  replay absorption, exactly-once finalize with contributions,
+  stale-revision conflict, relearn dedup.
+
 ## Acceptance and test procedure
 
 `AC-WBS-4.6-01`: every aggregate exposes a domain port whose
@@ -90,6 +113,5 @@ Run once through `node tool/verify/run.mjs`.
 
 ## Failure and completion
 
-- Success per child: PR merged with the canonical gate green; register
-  updated. 4.6 flips Done when C merges, unblocking 4.7 migrations and
-  the 4.8 DI graph.
+- Completed 2026-07-19: A (#51), B (#52), C closed the packet —
+  `4.7` (migration system) and `4.8` (DI graph) are unblocked.
