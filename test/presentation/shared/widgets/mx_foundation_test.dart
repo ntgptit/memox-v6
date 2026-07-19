@@ -123,7 +123,7 @@ void main() {
       final container = tester.widget<AnimatedContainer>(
         find.byType(AnimatedContainer).first,
       );
-      final border = (container.decoration! as BoxDecoration).border!;
+      final border = (container.foregroundDecoration! as BoxDecoration).border!;
       expect(border.top.color, AppColors.light.focusRing);
     });
 

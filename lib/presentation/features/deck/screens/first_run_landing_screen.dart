@@ -9,7 +9,7 @@ import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// First-use landing (WBS 5.2.3A; `create-deck.md` §4): a focused
@@ -83,18 +83,13 @@ class _FirstRunLandingBody extends ConsumerWidget {
         ),
         const Spacer(flex: 185),
         Center(
-          child: MxTappable(
-            semanticLabel: l10n.notNowLabel,
+          child: MxLink(
+            label: l10n.notNowLabel,
             onTap: isDismissing
                 ? null
                 : () => ref
                       .read(dismissFirstRunViewmodelProvider.notifier)
                       .dismissFirstRunLanding(),
-            child: MxText(
-              l10n.notNowLabel,
-              role: MxTextRole.body,
-              color: context.colors.accent,
-            ),
           ),
         ),
         const Spacer(flex: 128),

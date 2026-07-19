@@ -15,7 +15,7 @@
   "@validationMessage": {
     "description": "Generic inline-validation fallback (ValidationFailure)."
   },
-  "firstRunLanguageTitle": "Chọn ngôn ngữ của bạn",
+  "firstRunLanguageTitle": "Thiết lập việc học của bạn",
   "@firstRunLanguageTitle": {
     "description": "First-run language screen title."
   },
@@ -23,13 +23,25 @@
   "@firstRunLanguageSubtitle": {
     "description": "First-run language screen subtitle."
   },
-  "learningLanguageLabel": "Tôi đang học",
+  "learningLanguageLabel": "Bạn đang học gì? *",
   "@learningLanguageLabel": {
     "description": "Label + sheet title for the learning-language selector."
   },
-  "meaningLanguageLabel": "Nghĩa hiển thị bằng",
+  "meaningLanguageLabel": "Hiển thị nghĩa bằng *",
   "@meaningLanguageLabel": {
     "description": "Label + sheet title for the meaning-language selector."
+  },
+  "languagePairsHelperText": "Bạn có thể thêm cặp ngôn ngữ khác sau.",
+  "@languagePairsHelperText": {
+    "description": "First-run language step helper (kit step1)."
+  },
+  "stepIndicatorLabel": "Bước {current}/{total}",
+  "@stepIndicatorLabel": {
+    "description": "Wizard progress caption in the step app bar (kit stepBar).",
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
   },
   "selectLanguagePlaceholder": "Chọn một ngôn ngữ",
   "@selectLanguagePlaceholder": {

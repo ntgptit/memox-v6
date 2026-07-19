@@ -96,7 +96,9 @@ class _MxTappableState extends State<MxTappable> {
     surface = AnimatedContainer(
       duration: AppMotion.durationFast,
       curve: AppMotion.easeStandard,
-      decoration: BoxDecoration(
+      // The ring paints over the child (kit: an outline ring), so it
+      // never takes layout space around the interactive surface.
+      foregroundDecoration: BoxDecoration(
         borderRadius: radius,
         border: Border.all(
           color: _focused ? colors.focusRing : colors.focusRing.withAlpha(0),
