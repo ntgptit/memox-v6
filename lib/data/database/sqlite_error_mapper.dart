@@ -26,6 +26,7 @@ Future<T> mapSqliteConflicts<T>(
 String _conflictCode(String message) {
   if (message.contains('deck-mixed-content')) return 'deck-mixed-content';
   if (message.contains('deck-cycle')) return 'deck-cycle';
+  if (message.contains('deck-pair-mismatch')) return 'deck-pair-mismatch';
   if (message.contains('UNIQUE constraint failed')) return 'duplicate';
   if (message.contains('FOREIGN KEY constraint failed')) {
     return 'missing-reference';

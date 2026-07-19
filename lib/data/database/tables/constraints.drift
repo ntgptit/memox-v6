@@ -83,3 +83,27 @@ WHEN NEW.parent_id IS NOT NULL AND NEW.parent_id IS NOT OLD.parent_id AND (
 BEGIN
   SELECT RAISE(ABORT, 'deck-cycle');
 END;
+
+-- A deck tree never crosses language pairs (move-deck.md): a child's
+-- pair must equal its parent's, on insert and on every reparent.
+CREATE TRIGGER trg_decks_insert_same_pair
+BEFORE INSERT ON decks
+WHEN NEW.parent_id IS NOT NULL
+  AND EXISTS (SELECT 1 FROM decks WHERE id = NEW.parent_id)
+  AND (
+    SELECT language_pair_id FROM decks WHERE id = NEW.parent_id
+  ) IS NOT NEW.language_pair_id
+BEGIN
+  SELECT RAISE(ABORT, 'deck-pair-mismatch');
+END;
+
+CREATE TRIGGER trg_decks_move_same_pair
+BEFORE UPDATE OF parent_id ON decks
+WHEN NEW.parent_id IS NOT NULL
+  AND NEW.parent_id IS NOT OLD.parent_id
+  AND (
+    SELECT language_pair_id FROM decks WHERE id = NEW.parent_id
+  ) IS NOT NEW.language_pair_id
+BEGIN
+  SELECT RAISE(ABORT, 'deck-pair-mismatch');
+END;

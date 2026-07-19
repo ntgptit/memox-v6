@@ -1,4 +1,5 @@
 import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/deck/deck_content_state.dart';
 
 /// Deck repository port (WBS 4.6A).
 ///
@@ -30,6 +31,10 @@ abstract interface class DeckRepository {
   });
 
   Future<void> delete(String deckId);
+
+  /// Direct child-deck and active-card counts for state derivation
+  /// (`deriveDeckContentState`).
+  Future<DeckContentCounts> contentCounts(String deckId);
 
   /// Number of decks (any depth) owned by [languagePairId]; the
   /// language-pair removal guard reads this.

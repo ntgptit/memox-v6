@@ -2,6 +2,7 @@ import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/data/database/sqlite_error_mapper.dart';
 import 'package:memox_v6/data/mappers/content_mapper.dart';
 import 'package:memox_v6/domain/deck/deck.dart' as domain;
+import 'package:memox_v6/domain/deck/deck_content_state.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
 
 /// Drift-backed [DeckRepository] (WBS 4.6A). Every write runs through
@@ -79,6 +80,20 @@ class DriftDeckRepository implements DeckRepository {
         deckId,
       );
     });
+  }
+
+  @override
+  Future<DeckContentCounts> contentCounts(String deckId) async {
+    final childDecks = await _database.deckDao
+        .countChildDecks(deckId)
+        .getSingle();
+    final activeCards = await _database.flashcardDao
+        .countActiveFlashcardsInDeck(deckId)
+        .getSingle();
+    return DeckContentCounts(
+      childDeckCount: childDecks,
+      activeCardCount: activeCards,
+    );
   }
 
   @override
