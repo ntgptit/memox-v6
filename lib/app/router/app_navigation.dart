@@ -21,7 +21,22 @@ extension AppNavigation on BuildContext {
   /// Opens the Library root.
   void goLibrary() => GoRouter.of(this).go(RoutePaths.library);
 
-  /// Opens one deck's detail.
+  /// Opens one deck's detail (replacing the current location).
   void goDeckDetail(String deckId) =>
       GoRouter.of(this).go(RoutePaths.deckDetail(deckId));
+
+  /// Pushes a nested deck onto the browse stack (browse-nested-decks:
+  /// Back walks up one level).
+  void pushDeckDetail(String deckId) =>
+      GoRouter.of(this).push(RoutePaths.deckDetail(deckId));
+
+  /// Pops one level, falling back to the Library root.
+  void backFromDeck() {
+    final router = GoRouter.of(this);
+    if (router.canPop()) {
+      router.pop();
+      return;
+    }
+    router.go(RoutePaths.library);
+  }
 }

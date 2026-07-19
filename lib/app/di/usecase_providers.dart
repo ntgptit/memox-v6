@@ -1,6 +1,7 @@
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/open_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/watch_library_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/create_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/onboarding/dismiss_first_run_usecase.dart';
@@ -62,4 +63,12 @@ DismissFirstRunUseCase dismissFirstRunUseCase(Ref ref) {
 @riverpod
 WatchLibraryUseCase watchLibraryUseCase(Ref ref) {
   return WatchLibraryUseCase(decks: ref.watch(deckRepositoryProvider));
+}
+
+@riverpod
+OpenDeckUseCase openDeckUseCase(Ref ref) {
+  return OpenDeckUseCase(
+    decks: ref.watch(deckRepositoryProvider),
+    cards: ref.watch(flashcardRepositoryProvider),
+  );
 }

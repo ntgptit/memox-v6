@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — child A Done (2026-07-19); B, C pending |
+| Status | **In progress** — children A, B Done (2026-07-19); C pending |
 | Owner/domain | Deck / Presentation |
 | Depends on | `5.2.2` — Done; owns the transferred 5.2.3 success callout |
 | Decision gates | DG-01 |
@@ -46,6 +46,30 @@
 Recorded boundaries: bottom navigation appears at Library root per the
 kit — the app-shell bottom-nav wiring stays with the Today owner
 (5.7); sort/search/dense/deep states are child C scope.
+
+## Child B — Open Deck branching (Done, 2026-07-19)
+
+- `OpenDeckUseCase` + providers: the deck row plus **two reactive
+  content streams** (children, active direct cards) — the screen
+  derives Empty/Leaf/Parent from them per §5, so §7 transitions
+  (first card → Leaf, content-based) update in place with no stored
+  mode and no route duplication.
+- `DeckDetailScreen` (real body replacing the A placeholder):
+  - **Empty**: title/body + `Add card` and `Create nested deck` CTAs
+    (activation owned by 5.2.5/5.3 and the C dialog — recorded);
+  - **Leaf**: card-count summary + card rows (term + meaning), no
+    nested-create anywhere;
+  - **Parent**: nested-deck count + child rows **pushing** deeper
+    (`pushDeckDetail`; `backFromDeck` pops one level, falling back to
+    the Library) + `Create deck` CTA (C dialog);
+  - **Not found**: message + Back to Library.
+- 5 widget tests: all three branches, in-place Empty→Leaf transition
+  driven by a live insert, nested browse down + back up, not-found.
+
+Boundaries recorded: Search/More app-bar actions, skeleton loading and
+the consistency-error surface land with child C's states pass;
+aggregate card counts for Parent summaries need a subtree count query
+(C).
 
 ## Acceptance and test procedure
 

@@ -127,8 +127,8 @@ void main() {
     await tester.tap(find.text('Open deck'));
     await pumpLibrary(tester);
 
-    // Open clears the callout and navigates to the deck route.
-    expect(find.text('d1'), findsOneWidget);
+    // Open clears the callout and opens the (empty) new deck.
+    expect(find.text('This deck is empty'), findsOneWidget);
     expect(container.read(firstDeckCalloutViewmodelProvider), isNull);
 
     await disposeAndFlushStreams(tester);
