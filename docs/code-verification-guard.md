@@ -42,7 +42,7 @@ with the other required gates and emits the verification pass marker.
 | Surface           | Config                       | Profile | Behavior                                        |
 | ----------------- | ---------------------------- | ------- | ----------------------------------------------- |
 | Git pre-commit    | `.githooks/pre-commit`       | `local` | Blocks the commit on errors. Bypass: `--no-verify` |
-| CI (GitHub)       | `.github/workflows/ci.yml`   | `local` | Fails the `guard` job on errors                 |
+| CI (GitHub)       | `.github/workflows/ci.yml`   | `local` | Fails `Contracts and architecture` on errors    |
 | Claude Code agent | `.claude/settings.json` (Stop hook) | `local` | Blocks turn completion on errors, feeds back violations |
 
 ### Profiles

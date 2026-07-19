@@ -115,3 +115,9 @@ The verifier owns documentation/link/ID checks, design-audit validation, the
 MemoX guard, code generation when required, formatting, analyze and tests. Do
 not replace the final gate with loose commands because only the canonical entry
 emits `.dart_tool/memox_verify_pass.json`.
+
+Pull-request CI uses the two-tier policy in `docs/ci.md`: parallel contracts and
+affected non-visual Flutter checks report the required `CI Gate`, while the full
+Windows canonical gate runs nightly, manually, or when the PR has `full-ci`.
+This optimization does not weaken the local completion rule above: code and UI
+work still requires the full canonical verifier before handoff.
