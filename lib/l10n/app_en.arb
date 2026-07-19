@@ -164,10 +164,6 @@
   "@libraryEmptyBody": {
     "description": "Library empty state (kit LIB-04, WBS 3.15B)."
   },
-  "importCardsLabel": "Import cards",
-  "@importCardsLabel": {
-    "description": "Library empty state (kit LIB-04, WBS 3.15B)."
-  },
   "navTodayLabel": "Today",
   "@navTodayLabel": {
     "description": "Bottom navigation labels (kit shell NAV)."
@@ -213,7 +209,7 @@
   "@emptyDeckTitle": {
     "description": "Open-deck (WBS 5.2.4B) copy."
   },
-  "emptyDeckBody": "Add cards directly, or create its first nested deck.",
+  "emptyDeckBody": "Add cards directly, or organise this deck into smaller decks.",
   "@emptyDeckBody": {
     "description": "Open-deck (WBS 5.2.4B) copy."
   },

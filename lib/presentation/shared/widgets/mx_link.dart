@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 
 /// Inline text action (kit `MxLink`): bold accent copy on a full
@@ -24,23 +26,29 @@ import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 /// - label: the link copy (localized by the caller).
 /// - onTap: the action; null renders the disabled state.
 /// - small: kit `size="sm"` (13) — default; false uses base (15).
+/// - icon: optional leading glyph (kit `.link` icon at font-size-md).
 class MxLink extends StatelessWidget {
   const MxLink({
     super.key,
     required this.label,
     required this.onTap,
     this.small = true,
+    this.icon,
   });
 
   final String label;
   final VoidCallback? onTap;
   final bool small;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final styles = context.textStyles;
     final base = small ? styles.caption : styles.body;
+    final icon = this.icon;
+    // Kit `.link` icon rides at font-size-md (the bodyLarge size).
+    final iconSize = styles.bodyLarge.fontSize;
 
     return MxTappable(
       onTap: onTap,
@@ -51,12 +59,21 @@ class MxLink extends StatelessWidget {
         widthFactor: 1,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.space1),
-          child: Text(
-            label,
-            style: base.copyWith(
-              fontWeight: styles.boldWeight,
-              color: colors.accent,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null && iconSize != null) ...[
+                MxIcon(icon: icon, size: iconSize, color: colors.accent),
+                const MxGap.s1(),
+              ],
+              Text(
+                label,
+                style: base.copyWith(
+                  fontWeight: styles.boldWeight,
+                  color: colors.accent,
+                ),
+              ),
+            ],
           ),
         ),
       ),
