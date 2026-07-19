@@ -50,7 +50,7 @@ dependencies:
   go_router: ^17.3.0
 
   # Local persistence: one shared Drift schema; platform openers owned by WBS 4.1.
-  drift: ^2.34.2
+  drift: 2.34.0
   drift_flutter: ^0.3.1
 
   # Immutable models / JSON codecs (generators are dev dependencies below).

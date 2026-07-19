@@ -26,6 +26,16 @@ is `leitner-8-box-v1`. A future policy change requires:
 - deterministic clock fixtures;
 - rollback/repair and statistics-projection reconciliation tests.
 
+## Repository wiring (v1)
+
+Snapshots live under `drift_schemas/` (`drift_schema_v1.json`); the
+generated verification helpers live in
+`test/data/database/generated_migrations/`. Regenerate both with
+`dart run drift_dev schema dump` / `schema generate` whenever a new
+schema version is released. The guided upgrade structure and the
+post-upgrade integrity gate live in
+`lib/data/database/migrations/app_migrations.dart`.
+
 ## Fixtures and evidence
 
 Version-control schema snapshots and small non-sensitive fixture databases for

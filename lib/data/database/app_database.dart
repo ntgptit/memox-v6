@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:memox_v6/core/database/database_opener.dart';
+import 'package:memox_v6/data/database/migrations/app_migrations.dart';
 import 'package:memox_v6/data/database/daos/deck_dao.dart';
 import 'package:memox_v6/data/database/daos/flashcard_dao.dart';
 import 'package:memox_v6/data/database/daos/language_pair_dao.dart';
@@ -56,11 +57,5 @@ class AppDatabase extends _$AppDatabase {
   int get schemaVersion => 1;
 
   @override
-  MigrationStrategy get migration => MigrationStrategy(
-    beforeOpen: (details) async {
-      // FK contracts in schema v1 are load-bearing; SQLite leaves them
-      // off per connection unless asked.
-      await customStatement('PRAGMA foreign_keys = ON');
-    },
-  );
+  MigrationStrategy get migration => buildAppMigration(this);
 }
