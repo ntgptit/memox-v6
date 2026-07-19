@@ -26,7 +26,15 @@ void main() {
       0,
       0,
     );
-    await database.flashcardDao.insertFlashcard('c1', 'd1', 't', 'm', 0, 0);
+    await database.flashcardDao.insertFlashcard(
+      'c1',
+      'd1',
+      't',
+      't',
+      'm',
+      0,
+      0,
+    );
     await database.studySessionDao.insertSession(
       's1',
       'newLearning',
@@ -87,7 +95,15 @@ void main() {
 
   group('SessionSnapshotDao', () {
     test('lists the card snapshot in display order', () async {
-      await database.flashcardDao.insertFlashcard('c2', 'd1', 't2', 'm2', 0, 0);
+      await database.flashcardDao.insertFlashcard(
+        'c2',
+        'd1',
+        't2',
+        't2',
+        'm2',
+        0,
+        0,
+      );
       await database.sessionSnapshotDao.insertSessionCard(
         'sc2',
         's1',

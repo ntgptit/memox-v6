@@ -103,6 +103,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `5.2.4` | [Library/open Deck (XL)](./WBS-5.2.4-library-open-deck.md) | Done (2026-07-19) |
 | `5.2.5` | [Empty Deck content choice](./WBS-5.2.5-content-choice.md) | Done (2026-07-19) |
 | `5.2.6` | [Deck evidence](./WBS-5.2.6-deck-evidence.md) | Done (2026-07-19) |
+| `5.3.1` | [Flashcard domain (XL)](./WBS-5.3.1-flashcard-domain.md) | In progress — child A Done (2026-07-19) |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.

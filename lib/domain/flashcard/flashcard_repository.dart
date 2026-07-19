@@ -12,6 +12,13 @@ import 'package:memox_v6/domain/flashcard/new_card_content.dart';
 abstract interface class FlashcardRepository {
   Future<void> createCard(NewCardContent content);
 
+  /// Active cards across the pair whose normalized term matches —
+  /// the duplicate-candidate set (`resolve-duplicate-flashcard.md`).
+  Future<List<Flashcard>> duplicateCandidates({
+    required String languagePairId,
+    required String normalizedTerm,
+  });
+
   Future<Flashcard?> findById(String id);
 
   Future<List<Flashcard>> pageByDeck(

@@ -39,8 +39,8 @@ void main() {
         "VALUES ('d1', 'lp1', NULL, 'a', 'a', 0, 0)",
       );
       await database.customStatement(
-        'INSERT INTO flashcards (id, deck_id, term, primary_meaning, '
-        "created_at, updated_at) VALUES ('c1', 'd1', 't', 'm', 0, 0)",
+        'INSERT INTO flashcards (id, deck_id, term, normalized_term, primary_meaning, '
+        "created_at, updated_at) VALUES ('c1', 'd1', 't', 't', 'm', 0, 0)",
       );
 
       final fkViolations = await database

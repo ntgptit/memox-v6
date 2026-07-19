@@ -220,6 +220,14 @@ class Flashcards extends Table with TableInfo {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
+  late final GeneratedColumn<String> normalizedTerm = GeneratedColumn<String>(
+    'normalized_term',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> primaryMeaning = GeneratedColumn<String>(
     'primary_meaning',
     aliasedName,
@@ -275,6 +283,7 @@ class Flashcards extends Table with TableInfo {
     id,
     deckId,
     term,
+    normalizedTerm,
     primaryMeaning,
     contentVersion,
     isHidden,
@@ -1878,6 +1887,10 @@ class DatabaseAtV1 extends GeneratedDatabase {
     'idx_flashcards_deck',
     'CREATE INDEX idx_flashcards_deck ON flashcards (deck_id)',
   );
+  late final Index idxFlashcardsNormalizedTerm = Index(
+    'idx_flashcards_normalized_term',
+    'CREATE INDEX idx_flashcards_normalized_term ON flashcards (normalized_term)',
+  );
   late final FlashcardTranslations flashcardTranslations =
       FlashcardTranslations(this);
   late final Tags tags = Tags(this);
@@ -1921,6 +1934,7 @@ class DatabaseAtV1 extends GeneratedDatabase {
     idxDecksRootSiblingName,
     idxDecksChildSiblingName,
     idxFlashcardsDeck,
+    idxFlashcardsNormalizedTerm,
     flashcardTranslations,
     tags,
     flashcardTags,

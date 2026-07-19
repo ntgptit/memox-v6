@@ -7,9 +7,11 @@ import '../tables/content.drift';
 
 insertFlashcard:
 INSERT INTO flashcards (
-  id, deck_id, term, primary_meaning, created_at, updated_at
+  id, deck_id, term, normalized_term, primary_meaning, created_at,
+  updated_at
 ) VALUES (
-  :id, :deckId, :term, :primaryMeaning, :createdAt, :updatedAt
+  :id, :deckId, :term, :normalizedTerm, :primaryMeaning, :createdAt,
+  :updatedAt
 );
 
 findFlashcardById:
@@ -47,9 +49,18 @@ UPDATE flashcards SET deck_id = :deckId, updated_at = :updatedAt
 WHERE id = :id;
 
 updateFlashcardContent:
-UPDATE flashcards SET term = :term, primary_meaning = :primaryMeaning,
+UPDATE flashcards SET term = :term, normalized_term = :normalizedTerm,
+  primary_meaning = :primaryMeaning,
   content_version = content_version + 1, updated_at = :updatedAt
 WHERE id = :id;
+
+findDuplicateCandidates:
+SELECT flashcards.* FROM flashcards
+INNER JOIN decks ON decks.id = flashcards.deck_id
+WHERE decks.language_pair_id = :languagePairId
+  AND flashcards.normalized_term = :normalizedTerm
+  AND flashcards.deleted_at IS NULL
+ORDER BY flashcards.created_at, flashcards.id;
 
 insertTranslation:
 INSERT INTO flashcard_translations (
