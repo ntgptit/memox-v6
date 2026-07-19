@@ -5,9 +5,12 @@ import 'package:memox_v6/data/database/daos/flashcard_dao.dart';
 import 'package:memox_v6/data/database/daos/language_pair_dao.dart';
 import 'package:memox_v6/data/database/daos/learning_progress_dao.dart';
 import 'package:memox_v6/data/database/daos/preference_dao.dart';
+import 'package:memox_v6/data/database/daos/session_checkpoint_dao.dart';
+import 'package:memox_v6/data/database/daos/session_snapshot_dao.dart';
 import 'package:memox_v6/data/database/daos/streak_dao.dart';
 import 'package:memox_v6/data/database/daos/study_attempt_dao.dart';
 import 'package:memox_v6/data/database/daos/study_goal_dao.dart';
+import 'package:memox_v6/data/database/daos/study_session_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -36,6 +39,9 @@ const String appDatabaseName = 'memox';
     PreferenceDao,
     StudyGoalDao,
     StreakDao,
+    StudySessionDao,
+    SessionSnapshotDao,
+    SessionCheckpointDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {

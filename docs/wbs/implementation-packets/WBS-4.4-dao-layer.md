@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — children A, B Done (2026-07-19); C pending |
+| Status | **Done** (2026-07-19) — children A, B, C shipped one PR each |
 | Owner/domain | Data / Persistence |
 | Depends on | `4.2`, `4.3` — Done (PRs #42–#46) |
 | Decision gates | DG-06 (ADR-004) |
@@ -76,6 +76,21 @@ Shared rules for every child:
   upsert overwrite-in-place, day-bucket met state, streak idempotency
   and range order.
 
+## Child C — study-session DAOs (Done, 2026-07-19)
+
+- `queries/{study_sessions,session_snapshots,session_checkpoints}.drift`
+  — named queries: session insert/find, active-session watch,
+  revision-guarded state transition setting `finalized_at`;
+  start-of-session card snapshot listed by display order with counts;
+  per-round order insert/find; checkpoint upsert-in-place (one per
+  session); relearn-queue add (`ON CONFLICT DO NOTHING` dedup), retry
+  bump, list, remove.
+- `daos/{study_session,session_snapshot,session_checkpoint}_dao.dart`
+  — `@DriftAccessor` shells registered in `@DriftDatabase(daos: …)`.
+- `test/data/database/session_daos_test.dart` — active watch, guarded
+  transition clearing active, snapshot order + counts, round lookup,
+  checkpoint overwrite-in-place, relearn dedup/bump/clear.
+
 ## Acceptance and test procedure
 
 `AC-WBS-4.4-01`: every aggregate has exactly one DAO; all SQL lives in
@@ -88,6 +103,5 @@ domain rules.
 
 ## Failure and completion
 
-- Success per child: PR merged with the canonical gate green; register
-  updated. 4.4 flips Done when C merges; 4.5 (mappers) may proceed in
-  parallel once A exists.
+- Completed 2026-07-19: A (#47), B (#48), C closed the packet — `4.5`
+  (mappers) and `4.6` (repository contracts) are next.

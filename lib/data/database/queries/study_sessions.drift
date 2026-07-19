@@ -1,0 +1,32 @@
+import '../tables/sessions.drift';
+import '../tables/content.drift';
+
+-- Study Session lifecycle queries (WBS 4.4C). State values are the
+-- schema CHECK set; the single-active partial index guards inserts and
+-- the revision guard makes state transitions optimistic-concurrent.
+
+insertSession:
+INSERT INTO study_sessions (
+  id, session_type, deck_id, scope, state, schedule_srs, started_at,
+  created_at, updated_at
+) VALUES (
+  :id, :sessionType, :deckId, :scope, :state, :scheduleSrs, :startedAt,
+  :createdAt, :updatedAt
+);
+
+findSessionById:
+SELECT * FROM study_sessions WHERE id = :id;
+
+watchActiveSession:
+SELECT * FROM study_sessions WHERE state = 'active' LIMIT 1;
+
+updateSessionStateGuarded:
+UPDATE study_sessions SET
+  state = :state,
+  revision = revision + 1,
+  finalized_at = :finalizedAt,
+  updated_at = :updatedAt
+WHERE id = :id AND revision = :expectedRevision;
+
+deleteSession:
+DELETE FROM study_sessions WHERE id = :id;
