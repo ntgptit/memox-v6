@@ -91,6 +91,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `4.6` | [Repositories (XL)](./WBS-4.6-repositories.md) | Done (2026-07-19) |
 | `4.7` | [Migration system](./WBS-4.7-migrations.md) | Done (2026-07-19) |
 | `4.8` | [App DI graph](./WBS-4.8-di-graph.md) | Done (2026-07-19) |
+| `4.9` | [Performance baseline](./WBS-4.9-performance-baseline.md) | Done (2026-07-19) |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.
