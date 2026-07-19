@@ -123,12 +123,23 @@ export async function fillField(
   const semanticField = page.getByRole('textbox', { name }).first();
   await expect(semanticField).toHaveCount(1);
   await expect(semanticField).toBeVisible();
-  await semanticField.click();
 
-  // CanvasKit exposes a labelled accessibility input and a separate,
+  // CanvasKit exposes a labelled accessibility proxy and a separate,
   // unlabelled engine editor. Product focus starts through semantics;
-  // trusted key events must then target the editor hosted here so Flutter's
-  // TextEditingController receives them and rebuilds form state.
+  // trusted key events must then target the editor, which is what Flutter's
+  // TextEditingController actually listens to.
+  //
+  // The click has to be forced: for a multiline field the engine editor is a
+  // `textarea` covering the proxy exactly, so Playwright sees the proxy as
+  // obscured and would time out. Forcing dispatches a real pointer event at
+  // the field's own coordinates and the browser routes it to whichever node
+  // is on top — the proxy for a single-line field, the textarea for a
+  // multiline one. Either way the product field receives a genuine click.
+  //
+  // This must happen before the editor is located: Flutter only mounts the
+  // editor once the field takes focus, so searching first finds nothing.
+  await semanticField.click({ force: true });
+
   const fieldBox = await semanticField.boundingBox();
   expect(fieldBox, 'Flutter text field must have a hit-testable box').not.toBeNull();
   const candidates = page.locator(
@@ -145,9 +156,14 @@ export async function fillField(
         centerX <= target.x + target.width &&
         centerY >= target.y &&
         centerY <= target.y + target.height;
-      const isInnerEditor =
+      // Two independent ways to tell the editor from the proxy, because
+      // neither holds on its own: a single-line editor is inset within its
+      // proxy but can still carry a label, while a multiline editor
+      // matches its proxy's box exactly but is never labelled. The proxy
+      // satisfies neither, so it is never selected.
+      const isInset =
         rect.width < target.width || rect.height < target.height;
-      return inside && isInnerEditor;
+      return inside && (isInset || !node.hasAttribute('aria-label'));
     });
   }, fieldBox!);
   expect(

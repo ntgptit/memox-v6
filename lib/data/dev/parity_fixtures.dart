@@ -26,6 +26,8 @@ class ParityFixtures {
   /// entrypoint reads from `?fixture=`.
   static const List<String> ids = <String>[
     'MX-VIS-001',
+    'MX-VIS-004',
+    'MX-VIS-009',
     'MX-VIS-018',
     'MX-VIS-049',
   ];
@@ -37,7 +39,12 @@ class ParityFixtures {
   Future<void> seed(String id) async {
     await _reset();
     switch (id) {
+      // Every first-run wizard state starts from a true fresh install; the
+      // Playwright spec walks the wizard itself to reach the step under
+      // test, so these need no seed beyond the reset above.
       case 'MX-VIS-001':
+      case 'MX-VIS-004':
+      case 'MX-VIS-009':
         return;
       case 'MX-VIS-018':
         await _seedActivePair();
