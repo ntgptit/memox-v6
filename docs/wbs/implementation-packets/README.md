@@ -79,6 +79,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `3.7` | [First-learning feedback primitives](./WBS-3.7-feedback-primitives.md) | Done (2026-07-19) |
 | `3.9` | [Async/action infrastructure](./WBS-3.9-async-infrastructure.md) | Done (2026-07-19) |
 | `3.10` | [First-learning shared composites](./WBS-3.10-shared-composites.md) | Done (2026-07-19) |
+| `4.1` | [Database runtime](./WBS-4.1-database-runtime.md) | Done (2026-07-19) |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.
