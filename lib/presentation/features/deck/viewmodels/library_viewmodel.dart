@@ -1,5 +1,5 @@
 import 'package:memox_v6/app/di/usecase_providers.dart';
-import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'library_viewmodel.g.dart';
@@ -10,13 +10,13 @@ part 'library_viewmodel.g.dart';
 /// moves re-emit through the repository stream. No active pair yields
 /// an empty library.
 @riverpod
-Stream<List<Deck>> libraryRootDecks(Ref ref) async* {
+Stream<List<DeckSummary>> libraryRootDecks(Ref ref) async* {
   final pair = await ref.watch(selectLanguagePairUseCaseProvider).activePair();
   if (pair == null) {
-    yield const <Deck>[];
+    yield const <DeckSummary>[];
     return;
   }
-  yield* ref.watch(watchLibraryUseCaseProvider).rootsOf(pair.id);
+  yield* ref.watch(watchLibraryUseCaseProvider).rootSummariesOf(pair.id);
 }
 
 /// The transferred first-run success callout (`create-deck.md` §7):

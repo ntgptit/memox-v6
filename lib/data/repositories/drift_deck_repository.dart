@@ -2,6 +2,7 @@ import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/data/database/sqlite_error_mapper.dart';
 import 'package:memox_v6/data/mappers/content_mapper.dart';
 import 'package:memox_v6/domain/deck/deck.dart' as domain;
+import 'package:memox_v6/domain/deck/deck_summary.dart' as domain;
 import 'package:memox_v6/domain/deck/deck_content_state.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
 
@@ -48,6 +49,14 @@ class DriftDeckRepository implements DeckRepository {
   Stream<List<domain.Deck>> watchRoots(String languagePairId) {
     return _database.deckDao
         .watchRootDecks(languagePairId)
+        .watch()
+        .map((rows) => rows.map((row) => row.toDomain()).toList());
+  }
+
+  @override
+  Stream<List<domain.DeckSummary>> watchRootSummaries(String languagePairId) {
+    return _database.deckDao
+        .watchRootDeckSummaries(languagePairId)
         .watch()
         .map((rows) => rows.map((row) => row.toDomain()).toList());
   }

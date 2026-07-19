@@ -21,6 +21,17 @@ SELECT * FROM decks
 WHERE language_pair_id = :languagePairId AND parent_id IS NULL
 ORDER BY normalized_name, id;
 
+-- Root decks with their direct card count (kit deck-card meta line).
+-- Counts exclude soft-deleted cards; nested-deck totals arrive with the
+-- deck-detail scope (subtree counts stay one-shot via countSubtreeCards).
+watchRootDeckSummaries:
+SELECT d.*,
+  (SELECT COUNT(*) FROM flashcards f
+   WHERE f.deck_id = d.id AND f.deleted_at IS NULL) AS card_count
+FROM decks d
+WHERE d.language_pair_id = :languagePairId AND d.parent_id IS NULL
+ORDER BY d.normalized_name, d.id;
+
 watchChildDecks:
 SELECT * FROM decks WHERE parent_id = :parentId
 ORDER BY normalized_name, id;

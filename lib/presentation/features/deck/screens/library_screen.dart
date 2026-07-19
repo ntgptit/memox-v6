@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/app/router/route_names.dart';
-import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
@@ -11,11 +11,12 @@ import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_bottom_nav.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_badge.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_deck_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
@@ -79,23 +80,28 @@ class _LibraryBody extends ConsumerWidget {
     final roots = ref.watch(libraryRootDecksProvider);
     final calloutDeckId = ref.watch(firstDeckCalloutViewmodelProvider);
 
-    return MxAsyncBuilder<List<Deck>>(
+    return MxAsyncBuilder<List<DeckSummary>>(
       value: roots,
       loadingLabel: l10n.loadingLabel,
       errorTitle: l10n.somethingWentWrongMessage,
-      data: (context, decks) => decks.isEmpty
+      data: (context, summaries) => summaries.isEmpty
           ? const _LibraryEmptyState()
           : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const MxGap.s4(),
-                  if (calloutDeckId != null) ...[
-                    _FirstDeckCallout(deckId: calloutDeckId),
-                    const MxGap.s4(),
+                  for (final summary in summaries) ...[
+                    _DeckRow(
+                      summary: summary,
+                      isNew: summary.deck.id == calloutDeckId,
+                    ),
+                    const MxGap.s3(),
                   ],
-                  for (final deck in decks)
-                    _DeckRow(deck: deck, highlighted: deck.id == calloutDeckId),
+                  if (calloutDeckId != null) ...[
+                    const MxGap.s2(),
+                    _FirstDeckCallout(deckId: calloutDeckId),
+                  ],
                   const MxGap.s6(),
                   MxButton(
                     label: l10n.createDeckLabel,
@@ -190,42 +196,23 @@ class _FirstDeckCallout extends ConsumerWidget {
 }
 
 class _DeckRow extends StatelessWidget {
-  const _DeckRow({required this.deck, required this.highlighted});
+  const _DeckRow({required this.summary, required this.isNew});
 
-  final Deck deck;
-  final bool highlighted;
+  final DeckSummary summary;
+  final bool isNew;
 
   @override
   Widget build(BuildContext context) {
-    final description = deck.description;
+    final l10n = AppLocalizations.of(context);
 
-    return MxTappable(
-      semanticLabel: deck.name,
-      onTap: () => context.goDeckDetail(deck.id),
-      child: Row(
-        children: [
-          const MxGap.s3(),
-          MxIcon(icon: highlighted ? Symbols.new_releases : Symbols.folder),
-          const MxGap.s3(),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                MxText(deck.name, role: MxTextRole.subtitle),
-                if (description != null)
-                  MxText(
-                    description,
-                    role: MxTextRole.caption,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-              ],
-            ),
-          ),
-          const MxIcon(icon: Symbols.chevron_right),
-          const MxGap.s3(),
-        ],
-      ),
+    // Kit shared DeckCard: default deck glyph `style`, accent tile,
+    // "N cards" meta, soft "New" badge on the just-created deck.
+    return MxDeckCard(
+      icon: Symbols.style_rounded,
+      title: summary.deck.name,
+      meta: l10n.cardsCountLabel(summary.cardCount),
+      trailing: isNew ? MxBadge(label: l10n.newBadgeLabel, soft: true) : null,
+      onTap: () => context.goDeckDetail(summary.deck.id),
     );
   }
 }
