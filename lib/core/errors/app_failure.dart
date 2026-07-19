@@ -32,6 +32,27 @@ final class UnexpectedFailure extends AppFailure {
     : super(message: 'Unexpected failure', cause: cause);
 }
 
+/// A write conflicted with a persistence invariant or a concurrent
+/// update (WBS 4.6): uniqueness collisions, Deck exclusivity/cycle
+/// trigger aborts, or a stale expected revision.
+///
+/// `code` is a stable machine tag ('duplicate', 'deck-mixed-content',
+/// 'deck-cycle', 'revision') that flows decide recovery from.
+final class ConflictFailure extends AppFailure {
+  ConflictFailure({
+    required this.code,
+    required this.entity,
+    super.cause,
+    super.stackTrace,
+  }) : super(message: 'Conflict [$code] on $entity');
+
+  /// Stable conflict tag for typed recovery decisions.
+  final String code;
+
+  /// Aggregate the conflicting write targeted.
+  final String entity;
+}
+
 /// Persisted data failed to map into its domain shape — an unknown enum
 /// value, an invalid JSON payload or an impossible combination (WBS 4.5).
 ///

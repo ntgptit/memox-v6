@@ -16,6 +16,10 @@
   "@dataCorruptionMessage": {
     "description": "Shown when persisted data fails to map (DataCorruptionFailure)."
   },
+  "conflictMessage": "That change conflicts with existing data.",
+  "@conflictMessage": {
+    "description": "Shown when a write conflicts with existing data (ConflictFailure)."
+  },
   "somethingWentWrongMessage": "Something went wrong.",
   "@somethingWentWrongMessage": {
     "description": "User-safe message shown when a screen fails to render."

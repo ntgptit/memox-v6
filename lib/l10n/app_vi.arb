@@ -7,6 +7,10 @@
   "@dataCorruptionMessage": {
     "description": "Shown when persisted data fails to map (DataCorruptionFailure)."
   },
+  "conflictMessage": "Thay đổi này xung đột với dữ liệu hiện có.",
+  "@conflictMessage": {
+    "description": "Shown when a write conflicts with existing data (ConflictFailure)."
+  },
   "somethingWentWrongMessage": "Đã có lỗi xảy ra.",
   "cardCountLabel": "{count, plural, other{{count} thẻ}}"
 }

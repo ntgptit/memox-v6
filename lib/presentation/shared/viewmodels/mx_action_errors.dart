@@ -22,5 +22,6 @@ abstract final class MxActionErrors {
       switch (failure) {
         UnexpectedFailure() => l10n.somethingWentWrongMessage,
         DataCorruptionFailure() => l10n.dataCorruptionMessage,
+        ConflictFailure() => l10n.conflictMessage,
       };
 }
