@@ -39,7 +39,7 @@ class _FirstRunLanguageBody extends ConsumerWidget {
     listenMxAction(
       ref,
       saveLanguagePairViewmodelProvider,
-      onSuccess: () => context.goHome(),
+      onSuccess: () => context.goFirstRunDeckSetup(),
     );
 
     final isComplete = draft.learningCode != null && draft.nativeCode != null;

@@ -7,10 +7,11 @@ part 'first_run_language_viewmodel.g.dart';
 /// First-run language selection state and command (WBS 5.1.2).
 
 /// The two-selection draft. Held in provider state so a failed save
-/// keeps both selections (`create-language-pair.md` draft rule).
+/// keeps both selections, and keep-alive so "Change" from step 2 comes
+/// back to the previous selections (`create-deck.md` draft rule).
 typedef FirstRunLanguageDraft = ({String? learningCode, String? nativeCode});
 
-@riverpod
+@Riverpod(keepAlive: true)
 class FirstRunLanguageDraftViewmodel extends _$FirstRunLanguageDraftViewmodel {
   @override
   FirstRunLanguageDraft build() {

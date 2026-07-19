@@ -75,6 +75,62 @@
   "@notNowLabel": {
     "description": "Tertiary link dismissing the landing."
   },
+  "stepOneOfTwo": "Bước 1/2",
+  "@stepOneOfTwo": {
+    "description": "Step indicator on the first-run language step."
+  },
+  "stepTwoOfTwo": "Bước 2/2",
+  "@stepTwoOfTwo": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "changeLabel": "Đổi",
+  "@changeLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "requiredSectionTitle": "Bắt buộc",
+  "@requiredSectionTitle": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "optionalSectionTitle": "Tùy chọn",
+  "@optionalSectionTitle": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "showLabel": "Hiện",
+  "@showLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "hideLabel": "Ẩn",
+  "@hideLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "deckNameLabel": "Tên deck",
+  "@deckNameLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "deckDescriptionLabel": "Mô tả",
+  "@deckDescriptionLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "createDeckLabel": "Tạo deck",
+  "@createDeckLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "deckNameRequiredMessage": "Hãy nhập tên deck.",
+  "@deckNameRequiredMessage": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "deckNameDuplicateMessage": "Đã có deck trùng tên ở đây.",
+  "@deckNameDuplicateMessage": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "backLabel": "Quay lại",
+  "@backLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "loadingLabel": "Đang tải…",
+  "@loadingLabel": {
+    "description": "Generic loading indicator label."
+  },
   "somethingWentWrongMessage": "Đã có lỗi xảy ra.",
   "cardCountLabel": "{count, plural, other{{count} thẻ}}"
 }
