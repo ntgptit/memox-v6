@@ -38,6 +38,10 @@ class SelectLanguagePairUseCase {
     );
   }
 
+  /// Resolves one pair by stable id (deck-driven surfaces such as the
+  /// Card Editor read their language labels from the owning pair).
+  Future<LanguagePair?> pairById(String pairId) => _pairs.findById(pairId);
+
   /// The currently selected pair, or null when none is selected or the
   /// stored id no longer resolves (removed pair, corrupt preference).
   Future<LanguagePair?> activePair() async {

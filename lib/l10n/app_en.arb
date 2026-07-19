@@ -264,6 +264,52 @@
       }
     }
   },
+  "newCardTitle": "New card",
+  "@newCardTitle": {
+    "description": "Card Editor (kit flashcard-editor, WBS 5.3.2)."
+  },
+  "deckContextLabel": "Deck",
+  "@deckContextLabel": {
+    "description": "Card Editor deck-context pill (WBS 5.3.2)."
+  },
+  "termFieldLabel": "Term \u00b7 {language}",
+  "@termFieldLabel": {
+    "description": "Card Editor field label (WBS 5.3.2).",
+    "placeholders": {"language": {"type": "String"}}
+  },
+  "meaningFieldLabel": "Meaning \u00b7 {language}",
+  "@meaningFieldLabel": {
+    "description": "Card Editor field label (WBS 5.3.2).",
+    "placeholders": {"language": {"type": "String"}}
+  },
+  "enterTermPlaceholder": "Enter a term",
+  "@enterTermPlaceholder": {
+    "description": "Card Editor placeholder (WBS 5.3.2)."
+  },
+  "enterMeaningPlaceholder": "Enter the meaning",
+  "@enterMeaningPlaceholder": {
+    "description": "Card Editor placeholder (WBS 5.3.2)."
+  },
+  "tagsSectionLabel": "Tags",
+  "@tagsSectionLabel": {
+    "description": "Card Editor tags section (WBS 5.3.2)."
+  },
+  "addTagsPlaceholder": "Add tags \u2014 e.g. #TOPIK_I, #\ub3d9\uc0ac",
+  "@addTagsPlaceholder": {
+    "description": "Card Editor tags placeholder (WBS 5.3.2)."
+  },
+  "moreOptionsLabel": "More options",
+  "@moreOptionsLabel": {
+    "description": "Card Editor progressive disclosure (WBS 5.3.2)."
+  },
+  "createAnotherLabel": "Create another card after saving",
+  "@createAnotherLabel": {
+    "description": "Card Editor sticky footer toggle (WBS 5.3.2)."
+  },
+  "saveLabel": "Save",
+  "@saveLabel": {
+    "description": "Card Editor primary CTA (WBS 5.3.2)."
+  },
   "cancelLabel": "Cancel",
   "@cancelLabel": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."

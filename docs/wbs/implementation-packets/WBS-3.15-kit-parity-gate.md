@@ -1,8 +1,17 @@
-# WBS 3.15 — Kit visual parity gate packet
+# WBS 3.15 — Kit visual parity gate packet (inner-loop layer)
+
+> **Re-scoped 2026-07-19.** The owner directive makes a Flutter Web + Playwright
+> comparison the merge gate; see
+> [WBS P0 — Historical Visual Parity Audit](./WBS-P0-visual-parity-audit.md) and
+> WBS §6.4–6.5. This packet's `flutter_test` harness stays as the sub-second
+> pre-push check. It is **not** sufficient to close a UI task on its own. When
+> the two layers disagree, Phase 0 is authoritative and this harness's tolerance
+> is re-derived from it. The states enforced below migrate into the `MX-VIS-*`
+> register.
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — child A Done (2026-07-19); B pending |
+| Status | **In progress** — child A Done (2026-07-19); B pending; merge-gate role transferred to `P0` |
 | Owner/domain | Design system / QA |
 | Depends on | `3.12` — Done |
 | Decision gates | Owner rule (2026-07-19): screen-changing PRs merge only with parity evidence **<3%** |
@@ -89,6 +98,8 @@ Fixes that came out of the first screen (system-wide, kit-correct):
 | `library--empty--dark` | **Enforced** | <3% (asserted) |
 | `create-deck-firstrun--step1--light/dark` | **Enforced** (`first_run_step1_parity_test.dart`) | <3% |
 | `create-deck-firstrun--step2--light/dark` | **Enforced** (`first_run_step2_parity_test.dart`) | <3% |
+| `empty-deck--default--light/dark` | **Enforced** (`empty_deck_parity_test.dart`, unblocked by 5.3.2A) | <3% |
+| `flashcard-editor--create--light/dark` | **Enforced** (`card_editor_parity_test.dart`) | <3% |
 | remaining shipped states (library loaded/dense, empty-deck, subdeck list, create-deck dialog, validation/error variants) | pending | — |
 
 Empty-deck groundwork (2026-07-19): the deck screen mounts the kit

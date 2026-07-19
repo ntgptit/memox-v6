@@ -100,7 +100,11 @@ ManageCardTranslationsUseCase manageCardTranslationsUseCase(Ref ref) {
 
 @riverpod
 ManageCardTagsUseCase manageCardTagsUseCase(Ref ref) {
-  return ManageCardTagsUseCase(cards: ref.watch(flashcardRepositoryProvider));
+  return ManageCardTagsUseCase(
+    cards: ref.watch(flashcardRepositoryProvider),
+    idGenerator: ref.watch(idGeneratorProvider),
+    clock: ref.watch(appClockProvider),
+  );
 }
 
 @riverpod

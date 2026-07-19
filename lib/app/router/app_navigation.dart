@@ -39,6 +39,10 @@ extension AppNavigation on BuildContext {
   void pushDeckDetail(String deckId) =>
       GoRouter.of(this).push(RoutePaths.deckDetail(deckId));
 
+  /// Pushes the Card Editor for creating a card in [deckId].
+  void pushNewCard(String deckId) =>
+      GoRouter.of(this).push(RoutePaths.newCard(deckId));
+
   /// Pops one level, falling back to the Library root.
   void backFromDeck() {
     final router = GoRouter.of(this);

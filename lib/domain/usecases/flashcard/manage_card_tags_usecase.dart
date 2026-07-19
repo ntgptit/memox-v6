@@ -1,3 +1,5 @@
+import 'package:memox_v6/core/ids/id_generator.dart';
+import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/domain/flashcard/card_tag.dart';
 import 'package:memox_v6/domain/flashcard/flashcard_repository.dart';
 import 'package:memox_v6/domain/flashcard/tag_label.dart';
@@ -10,10 +12,17 @@ import 'package:memox_v6/domain/flashcard/tag_label.dart';
 /// tag, attach is idempotent, and removing/deleting tags never mutates
 /// card content beyond the version bump.
 class ManageCardTagsUseCase {
-  const ManageCardTagsUseCase({required FlashcardRepository cards})
-    : _cards = cards;
+  const ManageCardTagsUseCase({
+    required FlashcardRepository cards,
+    required IdGenerator idGenerator,
+    required AppClock clock,
+  }) : _cards = cards,
+       _idGenerator = idGenerator,
+       _clock = clock;
 
   final FlashcardRepository _cards;
+  final IdGenerator _idGenerator;
+  final AppClock _clock;
 
   Future<List<CardTag>> tagsOf(String cardId) => _cards.tagsOf(cardId);
 
@@ -34,6 +43,25 @@ class ManageCardTagsUseCase {
     );
     await _cards.attachCardTag(cardId, tagId: tag.id, now: now);
     return tag;
+  }
+
+  /// Validates and resolves labels to their owning tags (creating new
+  /// ones) without attaching — create flows collect tag ids first so
+  /// the card commit stays one atomic operation. Duplicate labels in
+  /// the input resolve once.
+  Future<List<String>> resolveTagIds(List<String> rawLabels) async {
+    final ids = <String>[];
+    for (final raw in rawLabels) {
+      final display = validateTagLabel(raw);
+      final tag = await _cards.resolveTagByLabel(
+        displayName: display,
+        normalizedName: normalizeTagLabel(display),
+        newTagId: _idGenerator.newId(),
+        now: _clock.nowUtc(),
+      );
+      if (!ids.contains(tag.id)) ids.add(tag.id);
+    }
+    return ids;
   }
 
   /// Removes one association (TAG-005: the card and its progress are

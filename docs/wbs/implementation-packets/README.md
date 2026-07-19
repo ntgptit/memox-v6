@@ -49,11 +49,13 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | Shared `Mx*` | `lib/presentation/shared/**` | `test/presentation/shared/**`, design evidence register |
 | Feature UI/providers | `lib/presentation/features/<feature>/**` | `test/presentation/features/<feature>/**` |
 | Localization | `lib/l10n/app_en.arb`, `lib/l10n/app_vi.arb` | localized widget/E2E tests |
+| Kit visual parity (merge gate) | `tool/parity/**`, `lib/app/dev/parity_entrypoint.dart` | `tool/parity/specs/**`, `evidence/parity/**` |
 
 ## Active packet index
 
 | WBS | Packet | Current status |
 | --- | --- | --- |
+| `P0` | [Historical Visual Parity Audit (XL)](./WBS-P0-visual-parity-audit.md) | **Ready — active workstream** (2026-07-19); children A–F; blocks all remaining UI items until `P0.6` |
 | `1.1` | [Dependency baseline](./WBS-1.1-dependency-baseline.md) | Done (2026-07-19) |
 | `1.3` | [App bootstrap](./WBS-1.3-app-bootstrap.md) | Done (2026-07-19) |
 | `1.4` | [Router skeleton](./WBS-1.4-router-skeleton.md) | Done (2026-07-19) |
@@ -84,7 +86,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `3.9` | [Async/action infrastructure](./WBS-3.9-async-infrastructure.md) | Done (2026-07-19) |
 | `3.10` | [First-learning shared composites](./WBS-3.10-shared-composites.md) | Done (2026-07-19) |
 | `3.12` | [Minimal Mx gate](./WBS-3.12-minimal-mx-gate.md) | Done — gate PASSED (2026-07-19) |
-| `3.15` | [Kit visual parity gate](./WBS-3.15-kit-parity-gate.md) | In progress — A Done; B: landing, library-empty, step1, step2 enforced light+dark (2026-07-19) |
+| `3.15` | [Kit visual parity gate — inner loop](./WBS-3.15-kit-parity-gate.md) | In progress — A Done; B: landing, library-empty, step1, step2 enforced light+dark. Merge-gate authority moved to `P0` (2026-07-19) |
 | `4.1` | [Database runtime](./WBS-4.1-database-runtime.md) | Done (2026-07-19) |
 | `4.2` | [Schema v1 (XL)](./WBS-4.2-schema-v1.md) | Done (2026-07-19) |
 | `4.3` | [Schema constraints](./WBS-4.3-schema-constraints.md) | Done (2026-07-19) |
@@ -105,6 +107,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `5.2.5` | [Empty Deck content choice](./WBS-5.2.5-content-choice.md) | Done (2026-07-19) |
 | `5.2.6` | [Deck evidence](./WBS-5.2.6-deck-evidence.md) | Done (2026-07-19) |
 | `5.3.1` | [Flashcard domain (XL)](./WBS-5.3.1-flashcard-domain.md) | Done (2026-07-19) |
+| `5.3.2` | [Card Editor (XL)](./WBS-5.3.2-card-editor.md) | In progress — A Done (2026-07-19) |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.

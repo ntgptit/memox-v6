@@ -255,6 +255,52 @@
       }
     }
   },
+  "newCardTitle": "Th\u1ebb m\u1edbi",
+  "@newCardTitle": {
+    "description": "Card Editor (kit flashcard-editor, WBS 5.3.2)."
+  },
+  "deckContextLabel": "Deck",
+  "@deckContextLabel": {
+    "description": "Card Editor deck-context pill (WBS 5.3.2)."
+  },
+  "termFieldLabel": "Thu\u1eadt ng\u1eef \u00b7 {language}",
+  "@termFieldLabel": {
+    "description": "Card Editor field label (WBS 5.3.2).",
+    "placeholders": {"language": {"type": "String"}}
+  },
+  "meaningFieldLabel": "Ngh\u0129a \u00b7 {language}",
+  "@meaningFieldLabel": {
+    "description": "Card Editor field label (WBS 5.3.2).",
+    "placeholders": {"language": {"type": "String"}}
+  },
+  "enterTermPlaceholder": "Nh\u1eadp thu\u1eadt ng\u1eef",
+  "@enterTermPlaceholder": {
+    "description": "Card Editor placeholder (WBS 5.3.2)."
+  },
+  "enterMeaningPlaceholder": "Nh\u1eadp ngh\u0129a",
+  "@enterMeaningPlaceholder": {
+    "description": "Card Editor placeholder (WBS 5.3.2)."
+  },
+  "tagsSectionLabel": "Th\u1ebb ph\u00e2n lo\u1ea1i",
+  "@tagsSectionLabel": {
+    "description": "Card Editor tags section (WBS 5.3.2)."
+  },
+  "addTagsPlaceholder": "Th\u00eam tag \u2014 v\u00ed d\u1ee5 #TOPIK_I, #\ub3d9\uc0ac",
+  "@addTagsPlaceholder": {
+    "description": "Card Editor tags placeholder (WBS 5.3.2)."
+  },
+  "moreOptionsLabel": "T\u00f9y ch\u1ecdn kh\u00e1c",
+  "@moreOptionsLabel": {
+    "description": "Card Editor progressive disclosure (WBS 5.3.2)."
+  },
+  "createAnotherLabel": "T\u1ea1o ti\u1ebfp th\u1ebb kh\u00e1c sau khi l\u01b0u",
+  "@createAnotherLabel": {
+    "description": "Card Editor sticky footer toggle (WBS 5.3.2)."
+  },
+  "saveLabel": "L\u01b0u",
+  "@saveLabel": {
+    "description": "Card Editor primary CTA (WBS 5.3.2)."
+  },
   "cancelLabel": "Hủy",
   "@cancelLabel": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
