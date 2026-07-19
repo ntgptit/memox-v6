@@ -24,6 +24,46 @@
   "@validationMessage": {
     "description": "Generic inline-validation fallback (ValidationFailure)."
   },
+  "firstRunLanguageTitle": "Choose your languages",
+  "@firstRunLanguageTitle": {
+    "description": "First-run language screen title."
+  },
+  "firstRunLanguageSubtitle": "Pick what you are learning and the language your meanings appear in. You can add more pairs later.",
+  "@firstRunLanguageSubtitle": {
+    "description": "First-run language screen subtitle."
+  },
+  "learningLanguageLabel": "I am learning",
+  "@learningLanguageLabel": {
+    "description": "Label + sheet title for the learning-language selector."
+  },
+  "meaningLanguageLabel": "Meanings in",
+  "@meaningLanguageLabel": {
+    "description": "Label + sheet title for the meaning-language selector."
+  },
+  "selectLanguagePlaceholder": "Select a language",
+  "@selectLanguagePlaceholder": {
+    "description": "Selector placeholder before a language is chosen."
+  },
+  "searchLanguagesHint": "Search languages",
+  "@searchLanguagesHint": {
+    "description": "Placeholder of the language search field."
+  },
+  "searchClearLabel": "Clear search",
+  "@searchClearLabel": {
+    "description": "Accessibility label of the search clear button."
+  },
+  "noLanguagesFoundMessage": "No languages match your search.",
+  "@noLanguagesFoundMessage": {
+    "description": "Empty state of the language search."
+  },
+  "continueLabel": "Continue",
+  "@continueLabel": {
+    "description": "Primary action finishing first-run language selection."
+  },
+  "saveFailedTitle": "Could not save",
+  "@saveFailedTitle": {
+    "description": "Banner title when saving the language pair fails."
+  },
   "somethingWentWrongMessage": "Something went wrong.",
   "@somethingWentWrongMessage": {
     "description": "User-safe message shown when a screen fails to render."

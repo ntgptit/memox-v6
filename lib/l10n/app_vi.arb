@@ -15,6 +15,46 @@
   "@validationMessage": {
     "description": "Generic inline-validation fallback (ValidationFailure)."
   },
+  "firstRunLanguageTitle": "Chọn ngôn ngữ của bạn",
+  "@firstRunLanguageTitle": {
+    "description": "First-run language screen title."
+  },
+  "firstRunLanguageSubtitle": "Chọn ngôn ngữ bạn đang học và ngôn ngữ hiển thị nghĩa. Bạn có thể thêm cặp khác sau.",
+  "@firstRunLanguageSubtitle": {
+    "description": "First-run language screen subtitle."
+  },
+  "learningLanguageLabel": "Tôi đang học",
+  "@learningLanguageLabel": {
+    "description": "Label + sheet title for the learning-language selector."
+  },
+  "meaningLanguageLabel": "Nghĩa hiển thị bằng",
+  "@meaningLanguageLabel": {
+    "description": "Label + sheet title for the meaning-language selector."
+  },
+  "selectLanguagePlaceholder": "Chọn một ngôn ngữ",
+  "@selectLanguagePlaceholder": {
+    "description": "Selector placeholder before a language is chosen."
+  },
+  "searchLanguagesHint": "Tìm ngôn ngữ",
+  "@searchLanguagesHint": {
+    "description": "Placeholder of the language search field."
+  },
+  "searchClearLabel": "Xóa tìm kiếm",
+  "@searchClearLabel": {
+    "description": "Accessibility label of the search clear button."
+  },
+  "noLanguagesFoundMessage": "Không có ngôn ngữ nào khớp tìm kiếm.",
+  "@noLanguagesFoundMessage": {
+    "description": "Empty state of the language search."
+  },
+  "continueLabel": "Tiếp tục",
+  "@continueLabel": {
+    "description": "Primary action finishing first-run language selection."
+  },
+  "saveFailedTitle": "Chưa lưu được",
+  "@saveFailedTitle": {
+    "description": "Banner title when saving the language pair fails."
+  },
   "somethingWentWrongMessage": "Đã có lỗi xảy ra.",
   "cardCountLabel": "{count, plural, other{{count} thẻ}}"
 }
