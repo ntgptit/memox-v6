@@ -55,6 +55,26 @@
   "@saveFailedTitle": {
     "description": "Banner title when saving the language pair fails."
   },
+  "firstRunLandingTitle": "Xây dựng thư viện học của bạn",
+  "@firstRunLandingTitle": {
+    "description": "First-use landing headline."
+  },
+  "firstRunLandingBody": "Tạo deck đầu tiên và thêm nội dung bất cứ khi nào bạn sẵn sàng. MemoX sẽ xếp lịch ôn tập sau khi bạn bắt đầu học.",
+  "@firstRunLandingBody": {
+    "description": "First-use landing supporting copy."
+  },
+  "createFirstDeckLabel": "Tạo deck đầu tiên",
+  "@createFirstDeckLabel": {
+    "description": "Primary CTA on the first-use landing."
+  },
+  "importExistingCardsLabel": "Nhập thẻ có sẵn",
+  "@importExistingCardsLabel": {
+    "description": "Secondary CTA opening the first-run import flow."
+  },
+  "notNowLabel": "Để sau",
+  "@notNowLabel": {
+    "description": "Tertiary link dismissing the landing."
+  },
   "somethingWentWrongMessage": "Đã có lỗi xảy ra.",
   "cardCountLabel": "{count, plural, other{{count} thẻ}}"
 }

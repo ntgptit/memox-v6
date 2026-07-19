@@ -16,15 +16,25 @@ class DriftDeckRepository implements DeckRepository {
   @override
   Future<void> createDeck(domain.Deck deck) {
     return mapSqliteConflicts(entity: 'decks', () async {
-      await _database.deckDao.insertDeck(
-        deck.id,
-        deck.languagePairId,
-        deck.parentId,
-        deck.name,
-        deck.normalizedName,
-        deck.createdAt.millisecondsSinceEpoch,
-        deck.updatedAt.millisecondsSinceEpoch,
-      );
+      await _database.transaction(() async {
+        await _database.deckDao.insertDeck(
+          deck.id,
+          deck.languagePairId,
+          deck.parentId,
+          deck.name,
+          deck.normalizedName,
+          deck.createdAt.millisecondsSinceEpoch,
+          deck.updatedAt.millisecondsSinceEpoch,
+        );
+        final description = deck.description;
+        if (description != null) {
+          await _database.deckDao.updateDeckDescription(
+            description,
+            deck.updatedAt.millisecondsSinceEpoch,
+            deck.id,
+          );
+        }
+      });
     });
   }
 

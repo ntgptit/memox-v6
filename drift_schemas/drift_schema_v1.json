@@ -160,6 +160,16 @@
             "dsl_features": []
           },
           {
+            "name": "description",
+            "getter_name": "description",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
             "name": "created_at",
             "getter_name": "createdAt",
             "moor_type": "int",
@@ -319,7 +329,7 @@
           2
         ],
         "name": "trg_decks_insert_no_mixed_content",
-        "sql": "CREATE TRIGGER trg_decks_insert_no_mixed_content\r\nBEFORE INSERT ON decks\r\nWHEN NEW.parent_id IS NOT NULL AND EXISTS (\r\n  SELECT 1 FROM flashcards\r\n  WHERE deck_id = NEW.parent_id AND deleted_at IS NULL\r\n)\r\nBEGIN\r\n  SELECT RAISE(ABORT, 'deck-mixed-content');\r\nEND;"
+        "sql": "CREATE TRIGGER trg_decks_insert_no_mixed_content\nBEFORE INSERT ON decks\nWHEN NEW.parent_id IS NOT NULL AND EXISTS (\n  SELECT 1 FROM flashcards\n  WHERE deck_id = NEW.parent_id AND deleted_at IS NULL\n)\nBEGIN\n  SELECT RAISE(ABORT, 'deck-mixed-content');\nEND;"
       }
     },
     {
@@ -336,7 +346,7 @@
           2
         ],
         "name": "trg_decks_move_no_mixed_content",
-        "sql": "CREATE TRIGGER trg_decks_move_no_mixed_content\r\nBEFORE UPDATE OF parent_id ON decks\r\nWHEN NEW.parent_id IS NOT NULL\r\n  AND NEW.parent_id IS NOT OLD.parent_id\r\n  AND EXISTS (\r\n    SELECT 1 FROM flashcards\r\n    WHERE deck_id = NEW.parent_id AND deleted_at IS NULL\r\n  )\r\nBEGIN\r\n  SELECT RAISE(ABORT, 'deck-mixed-content');\r\nEND;"
+        "sql": "CREATE TRIGGER trg_decks_move_no_mixed_content\nBEFORE UPDATE OF parent_id ON decks\nWHEN NEW.parent_id IS NOT NULL\n  AND NEW.parent_id IS NOT OLD.parent_id\n  AND EXISTS (\n    SELECT 1 FROM flashcards\n    WHERE deck_id = NEW.parent_id AND deleted_at IS NULL\n  )\nBEGIN\n  SELECT RAISE(ABORT, 'deck-mixed-content');\nEND;"
       }
     },
     {
@@ -353,7 +363,7 @@
           1
         ],
         "name": "trg_flashcards_insert_no_mixed_content",
-        "sql": "CREATE TRIGGER trg_flashcards_insert_no_mixed_content\r\nBEFORE INSERT ON flashcards\r\nWHEN EXISTS (SELECT 1 FROM decks WHERE parent_id = NEW.deck_id)\r\nBEGIN\r\n  SELECT RAISE(ABORT, 'deck-mixed-content');\r\nEND;"
+        "sql": "CREATE TRIGGER trg_flashcards_insert_no_mixed_content\nBEFORE INSERT ON flashcards\nWHEN EXISTS (SELECT 1 FROM decks WHERE parent_id = NEW.deck_id)\nBEGIN\n  SELECT RAISE(ABORT, 'deck-mixed-content');\nEND;"
       }
     },
     {
@@ -370,7 +380,7 @@
           1
         ],
         "name": "trg_flashcards_move_no_mixed_content",
-        "sql": "CREATE TRIGGER trg_flashcards_move_no_mixed_content\r\nBEFORE UPDATE OF deck_id ON flashcards\r\nWHEN NEW.deck_id IS NOT OLD.deck_id\r\n  AND EXISTS (SELECT 1 FROM decks WHERE parent_id = NEW.deck_id)\r\nBEGIN\r\n  SELECT RAISE(ABORT, 'deck-mixed-content');\r\nEND;"
+        "sql": "CREATE TRIGGER trg_flashcards_move_no_mixed_content\nBEFORE UPDATE OF deck_id ON flashcards\nWHEN NEW.deck_id IS NOT OLD.deck_id\n  AND EXISTS (SELECT 1 FROM decks WHERE parent_id = NEW.deck_id)\nBEGIN\n  SELECT RAISE(ABORT, 'deck-mixed-content');\nEND;"
       }
     },
     {
@@ -387,7 +397,7 @@
           1
         ],
         "name": "trg_flashcards_restore_no_mixed_content",
-        "sql": "CREATE TRIGGER trg_flashcards_restore_no_mixed_content\r\nBEFORE UPDATE OF deleted_at ON flashcards\r\nWHEN NEW.deleted_at IS NULL AND OLD.deleted_at IS NOT NULL\r\n  AND EXISTS (SELECT 1 FROM decks WHERE parent_id = NEW.deck_id)\r\nBEGIN\r\n  SELECT RAISE(ABORT, 'deck-mixed-content');\r\nEND;"
+        "sql": "CREATE TRIGGER trg_flashcards_restore_no_mixed_content\nBEFORE UPDATE OF deleted_at ON flashcards\nWHEN NEW.deleted_at IS NULL AND OLD.deleted_at IS NOT NULL\n  AND EXISTS (SELECT 1 FROM decks WHERE parent_id = NEW.deck_id)\nBEGIN\n  SELECT RAISE(ABORT, 'deck-mixed-content');\nEND;"
       }
     },
     {
@@ -402,7 +412,7 @@
           1
         ],
         "name": "trg_decks_insert_no_self_parent",
-        "sql": "CREATE TRIGGER trg_decks_insert_no_self_parent\r\nBEFORE INSERT ON decks\r\nWHEN NEW.parent_id IS NOT NULL AND NEW.parent_id = NEW.id\r\nBEGIN\r\n  SELECT RAISE(ABORT, 'deck-cycle');\r\nEND;"
+        "sql": "CREATE TRIGGER trg_decks_insert_no_self_parent\nBEFORE INSERT ON decks\nWHEN NEW.parent_id IS NOT NULL AND NEW.parent_id = NEW.id\nBEGIN\n  SELECT RAISE(ABORT, 'deck-cycle');\nEND;"
       }
     },
     {
@@ -417,7 +427,7 @@
           1
         ],
         "name": "trg_decks_move_no_cycle",
-        "sql": "CREATE TRIGGER trg_decks_move_no_cycle\r\nBEFORE UPDATE OF parent_id ON decks\r\nWHEN NEW.parent_id IS NOT NULL AND NEW.parent_id IS NOT OLD.parent_id AND (\r\n  NEW.parent_id = NEW.id OR EXISTS (\r\n    WITH RECURSIVE descendants (id) AS (\r\n      SELECT id FROM decks WHERE parent_id = NEW.id\r\n      UNION ALL\r\n      SELECT d.id FROM decks d\r\n        INNER JOIN descendants s ON d.parent_id = s.id\r\n    )\r\n    SELECT 1 FROM descendants WHERE id = NEW.parent_id\r\n  )\r\n)\r\nBEGIN\r\n  SELECT RAISE(ABORT, 'deck-cycle');\r\nEND;"
+        "sql": "CREATE TRIGGER trg_decks_move_no_cycle\nBEFORE UPDATE OF parent_id ON decks\nWHEN NEW.parent_id IS NOT NULL AND NEW.parent_id IS NOT OLD.parent_id AND (\n  NEW.parent_id = NEW.id OR EXISTS (\n    WITH RECURSIVE descendants (id) AS (\n      SELECT id FROM decks WHERE parent_id = NEW.id\n      UNION ALL\n      SELECT d.id FROM decks d\n        INNER JOIN descendants s ON d.parent_id = s.id\n    )\n    SELECT 1 FROM descendants WHERE id = NEW.parent_id\n  )\n)\nBEGIN\n  SELECT RAISE(ABORT, 'deck-cycle');\nEND;"
       }
     },
     {
@@ -432,7 +442,7 @@
           1
         ],
         "name": "trg_decks_insert_same_pair",
-        "sql": "CREATE TRIGGER trg_decks_insert_same_pair\r\nBEFORE INSERT ON decks\r\nWHEN NEW.parent_id IS NOT NULL\r\n  AND EXISTS (SELECT 1 FROM decks WHERE id = NEW.parent_id)\r\n  AND (\r\n    SELECT language_pair_id FROM decks WHERE id = NEW.parent_id\r\n  ) IS NOT NEW.language_pair_id\r\nBEGIN\r\n  SELECT RAISE(ABORT, 'deck-pair-mismatch');\r\nEND;"
+        "sql": "CREATE TRIGGER trg_decks_insert_same_pair\nBEFORE INSERT ON decks\nWHEN NEW.parent_id IS NOT NULL\n  AND EXISTS (SELECT 1 FROM decks WHERE id = NEW.parent_id)\n  AND (\n    SELECT language_pair_id FROM decks WHERE id = NEW.parent_id\n  ) IS NOT NEW.language_pair_id\nBEGIN\n  SELECT RAISE(ABORT, 'deck-pair-mismatch');\nEND;"
       }
     },
     {
@@ -447,7 +457,7 @@
           1
         ],
         "name": "trg_decks_move_same_pair",
-        "sql": "CREATE TRIGGER trg_decks_move_same_pair\r\nBEFORE UPDATE OF parent_id ON decks\r\nWHEN NEW.parent_id IS NOT NULL\r\n  AND NEW.parent_id IS NOT OLD.parent_id\r\n  AND (\r\n    SELECT language_pair_id FROM decks WHERE id = NEW.parent_id\r\n  ) IS NOT NEW.language_pair_id\r\nBEGIN\r\n  SELECT RAISE(ABORT, 'deck-pair-mismatch');\r\nEND;"
+        "sql": "CREATE TRIGGER trg_decks_move_same_pair\nBEFORE UPDATE OF parent_id ON decks\nWHEN NEW.parent_id IS NOT NULL\n  AND NEW.parent_id IS NOT OLD.parent_id\n  AND (\n    SELECT language_pair_id FROM decks WHERE id = NEW.parent_id\n  ) IS NOT NEW.language_pair_id\nBEGIN\n  SELECT RAISE(ABORT, 'deck-pair-mismatch');\nEND;"
       }
     },
     {
@@ -1770,7 +1780,7 @@
       "data": {
         "on": 1,
         "name": "idx_decks_root_sibling_name",
-        "sql": "CREATE UNIQUE INDEX idx_decks_root_sibling_name ON decks (\n  language_pair_id,\n  normalized_name\n) WHERE parent_id IS NULL;",
+        "sql": "CREATE UNIQUE INDEX idx_decks_root_sibling_name ON decks (\r\n  language_pair_id,\r\n  normalized_name\r\n) WHERE parent_id IS NULL;",
         "unique": true,
         "columns": []
       }
@@ -1784,7 +1794,7 @@
       "data": {
         "on": 1,
         "name": "idx_decks_child_sibling_name",
-        "sql": "CREATE UNIQUE INDEX idx_decks_child_sibling_name ON decks (\n  parent_id,\n  normalized_name\n) WHERE parent_id IS NOT NULL;",
+        "sql": "CREATE UNIQUE INDEX idx_decks_child_sibling_name ON decks (\r\n  parent_id,\r\n  normalized_name\r\n) WHERE parent_id IS NOT NULL;",
         "unique": true,
         "columns": []
       }
@@ -2187,7 +2197,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"decks\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"language_pair_id\" TEXT NOT NULL REFERENCES language_pairs(id), \"parent_id\" TEXT REFERENCES decks(id), \"name\" TEXT NOT NULL, \"normalized_name\" TEXT NOT NULL, \"created_at\" INTEGER NOT NULL, \"updated_at\" INTEGER NOT NULL);"
+          "sql": "CREATE TABLE IF NOT EXISTS \"decks\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"language_pair_id\" TEXT NOT NULL REFERENCES language_pairs(id), \"parent_id\" TEXT REFERENCES decks(id), \"name\" TEXT NOT NULL, \"normalized_name\" TEXT NOT NULL, \"description\" TEXT, \"created_at\" INTEGER NOT NULL, \"updated_at\" INTEGER NOT NULL);"
         }
       ]
     },

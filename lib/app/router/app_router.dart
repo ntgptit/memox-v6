@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:memox_v6/app/router/route_names.dart';
 import 'package:memox_v6/app/router/route_paths.dart';
 import 'package:memox_v6/app/router/route_placeholder.dart';
+import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
 import 'package:memox_v6/presentation/features/language_pair/routes/language_pair_routes.dart';
 
 /// Builds a fresh router; production uses the shared [appRouter] instance,
@@ -20,6 +21,7 @@ GoRouter createAppRouter() {
         builder: (context, state) => const HomePlaceholderScreen(),
       ),
       ...languagePairRoutes(),
+      ...deckRoutes(),
     ],
     errorBuilder: (context, state) => const RouteNotFoundScreen(),
   );
