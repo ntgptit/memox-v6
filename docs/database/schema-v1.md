@@ -5,6 +5,12 @@
 - Owner: Data
 - Architecture: [ADR-004](../architecture/adr/ADR-004-local-persistence-platforms.md)
 
+## Column conventions
+
+Timestamp columns are named `*_at` (no unit/timezone suffix) and store UTC
+epoch milliseconds; each `.drift` file documents this in a header comment.
+Local-day business rules use explicit `local_date` + `timezone_id` columns.
+
 ## Tables and ownership
 
 | Table | Owner | Required keys and invariants |
@@ -15,7 +21,7 @@
 | `flashcard_translations` | Flashcard | Stable ID; card FK; language/order uniqueness |
 | `tags`, `flashcard_tags` | Flashcard | Stable IDs; normalized tag uniqueness; FK cleanup policy |
 | `card_audio_refs` | Flashcard | Stable ID; card FK; asset/provider metadata; no player state |
-| `learning_progress` | Learning Progress | One row/card; Box 0..8; `due_at_utc`; policy ID/version; revision |
+| `learning_progress` | Learning Progress | One row/card; Box 0..8; `due_at`; policy ID/version; revision |
 | `study_attempts` | Study Session / Progress handoff | Stable attempt and idempotency keys; evidence/outcome; created UTC |
 | `study_sessions` | Study Session | One active-session constraint per selected scope policy; state/revision; snapshot version |
 | `study_session_cards` | Study Session | Session/card snapshot; content/progress versions; stable order |
@@ -39,12 +45,12 @@ behavior is one contract and must have concurrent-writer tests.
 
 - `card_id` unique FK.
 - `box` in 0..8.
-- `due_at_utc` nullable; null is required for Box 0 and Box 8.
+- `due_at` nullable; null is required for Box 0 and Box 8.
 - `policy_id = 'leitner-8-box-v1'` for the baseline policy.
 - `policy_version`, `revision`, repetition/lapse counters, and last terminal
   attempt reference.
 
-Eligibility is `due_at_utc <= nowUtc`. Data code persists the result returned by
+Eligibility is `due_at <= nowUtc`. Data code persists the result returned by
 `lib/domain/learning_progress/srs_8_box_policy.dart`; SQL/DAO/repository code must
 not reimplement interval or transition rules.
 

@@ -12,17 +12,17 @@ void main() {
 
     await database.customStatement(
       'INSERT INTO language_pairs (id, learning_language_code, '
-      'native_language_code, normalized_pair_key, created_at_utc, '
-      "updated_at_utc) VALUES ('lp1', 'en', 'vi', 'en|vi', 0, 0)",
+      'native_language_code, normalized_pair_key, created_at, '
+      "updated_at) VALUES ('lp1', 'en', 'vi', 'en|vi', 0, 0)",
     );
     await database.customStatement(
       'INSERT INTO decks (id, language_pair_id, parent_id, name, '
-      'normalized_name, created_at_utc, updated_at_utc) '
+      'normalized_name, created_at, updated_at) '
       "VALUES ('d1', 'lp1', NULL, 'a', 'a', 0, 0)",
     );
     await database.customStatement(
       'INSERT INTO flashcards (id, deck_id, term, primary_meaning, '
-      "created_at_utc, updated_at_utc) VALUES ('c1', 'd1', 't', 'm', 0, 0)",
+      "created_at, updated_at) VALUES ('c1', 'd1', 't', 'm', 0, 0)",
     );
   });
 
@@ -37,8 +37,8 @@ void main() {
     int? dueAtUtc,
   }) {
     return database.customStatement(
-      'INSERT INTO learning_progress (id, card_id, box, due_at_utc, '
-      'created_at_utc, updated_at_utc) VALUES (?, ?, ?, ?, 0, 0)',
+      'INSERT INTO learning_progress (id, card_id, box, due_at, '
+      'created_at, updated_at) VALUES (?, ?, ?, ?, 0, 0)',
       [id, cardId, box, dueAtUtc],
     );
   }
@@ -104,7 +104,7 @@ void main() {
       Future<void> insertAttempt(String id) {
         return database.customStatement(
           'INSERT INTO study_attempts (id, idempotency_key, card_id, '
-          'mode_id, outcome, evidence_json, created_at_utc) '
+          'mode_id, outcome, evidence_json, created_at) '
           "VALUES (?, 'key-1', 'c1', 'guess', 'correct', '{}', 0)",
           [id],
         );
@@ -118,15 +118,15 @@ void main() {
     test('local dates are unique for goal buckets and streak days', () async {
       await database.customStatement(
         'INSERT INTO daily_goals (id, target_card_count, '
-        'effective_from_local_date, timezone_id, created_at_utc, '
-        "updated_at_utc) VALUES ('g1', 10, '2026-07-19', 'Asia/Ho_Chi_Minh', "
+        'effective_from_local_date, timezone_id, created_at, '
+        "updated_at) VALUES ('g1', 10, '2026-07-19', 'Asia/Ho_Chi_Minh', "
         '0, 0)',
       );
 
       Future<void> insertBucket(String id) {
         return database.customStatement(
           'INSERT INTO goal_day_progress (id, local_date, timezone_id, '
-          'goal_id, target_snapshot, created_at_utc, updated_at_utc) '
+          'goal_id, target_snapshot, created_at, updated_at) '
           "VALUES (?, '2026-07-19', 'Asia/Ho_Chi_Minh', 'g1', 10, 0, 0)",
           [id],
         );
@@ -135,7 +135,7 @@ void main() {
       Future<void> insertStreakDay(String id) {
         return database.customStatement(
           'INSERT INTO streak_days (id, local_date, timezone_id, '
-          'qualified_source, created_at_utc) '
+          'qualified_source, created_at) '
           "VALUES (?, '2026-07-19', 'Asia/Ho_Chi_Minh', 'metrics-v1', 0)",
           [id],
         );

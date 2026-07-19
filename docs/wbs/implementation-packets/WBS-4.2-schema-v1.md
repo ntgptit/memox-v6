@@ -33,7 +33,8 @@ Shared rules for every child:
 - SQL DDL in `lib/data/database/tables/<group>.drift`, included from
   `AppDatabase`; drift_dev generates row/companion classes.
 - IDs are `TEXT` stable UUIDs; timestamps are `INTEGER` UTC epoch
-  milliseconds named `*_utc`; booleans are `INTEGER` with `CHECK (x IN
+  milliseconds named `*_at` — no unit suffix; the UTC convention is a
+  header comment in each `.drift` file (owner directive, 2026-07-19); booleans are `INTEGER` with `CHECK (x IN
   (0, 1))`.
 - Uniqueness invariants become UNIQUE constraints/indexes; nullable-parent
   sibling uniqueness uses a partial-index pair (`WHERE parent_id IS
