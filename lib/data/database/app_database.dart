@@ -12,7 +12,7 @@ const String appDatabaseName = 'memox';
 /// `.drift` files under `tables/` — never as Dart `Table` classes — so
 /// the DDL stays reviewable against the accepted design. Web and Android
 /// share this schema through the platform openers in `core/database`.
-@DriftDatabase(include: {'tables/content.drift'})
+@DriftDatabase(include: {'tables/content.drift', 'tables/progress.drift'})
 class AppDatabase extends _$AppDatabase {
   /// Opens the production database through the platform opener.
   AppDatabase.open() : super(openAppDatabaseExecutor(name: appDatabaseName));
