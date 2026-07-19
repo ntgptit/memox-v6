@@ -1,10 +1,11 @@
-import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+export 'golden_test_harness.dart' show loadAppFonts;
 
 /// Kit visual-parity harness (WBS 3.15).
 ///
@@ -12,50 +13,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// screenshot (`ui_kits/memox-app/shots/*.png`, 390 logical px at 2×)
 /// and fails when more than [threshold] of pixels differ — the
 /// pre-merge parity rule is **< 3%** per screen state, light and dark.
+/// The shared font loader lives in `golden_test_harness.dart`.
 
 const String kitShotsRoot =
     'docs/design/MemoX Design System_v4/ui_kits/memox-app/shots';
-
-/// Loads the real app font so parity renders match the kit's text
-/// instead of the test framework's block glyphs. Call once per suite.
-Future<void> loadAppFonts() async {
-  final data = File(
-    'assets/fonts/PlusJakartaSans-Variable.ttf',
-  ).readAsBytesSync();
-  final loader = FontLoader('Plus Jakarta Sans')
-    ..addFont(Future.value(ByteData.view(data.buffer)));
-  await loader.load();
-  await _loadMaterialSymbols();
-}
-
-/// Registers the Material Symbols icon font (a package font, which the
-/// test binding does not load) so kit icons render as glyphs, not boxes.
-Future<void> _loadMaterialSymbols() async {
-  final config =
-      jsonDecode(File('.dart_tool/package_config.json').readAsStringSync())
-          as Map<String, dynamic>;
-  final packages = config['packages'] as List<dynamic>;
-  final entry = packages.cast<Map<String, dynamic>>().firstWhere(
-    (p) => p['name'] == 'material_symbols_icons',
-  );
-  // rootUri may be absolute (pub cache) or relative to .dart_tool/,
-  // and needs a trailing slash so resolve() keeps its last segment.
-  final rootUri = entry['rootUri'] as String;
-  final root = Directory(
-    '.dart_tool',
-  ).uri.resolveUri(Uri.parse(rootUri.endsWith('/') ? rootUri : '$rootUri/'));
-  // Package fonts resolve under a `packages/<pkg>/` family prefix. The
-  // kit renders icons with the Rounded family (`material-symbols-rounded`
-  // in `MxButton.jsx`); Outlined stays loaded for legacy call sites.
-  for (final family in ['MaterialSymbolsOutlined', 'MaterialSymbolsRounded']) {
-    final data = File.fromUri(
-      root.resolve('lib/fonts/$family.ttf'),
-    ).readAsBytesSync();
-    final loader = FontLoader('packages/material_symbols_icons/$family')
-      ..addFont(Future.value(ByteData.view(data.buffer)));
-    await loader.load();
-  }
-}
 
 /// The status-bar inset the kit reserves above every app bar
 /// (`--memox-safe-area-top`: max(env, 24px) — 24 logical in shots).

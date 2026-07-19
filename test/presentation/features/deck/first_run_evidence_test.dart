@@ -12,10 +12,14 @@ import 'package:memox_v6/presentation/features/deck/screens/first_run_deck_setup
 import 'package:memox_v6/presentation/features/deck/screens/first_run_landing_screen.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 
+import '../../../support/golden_test_harness.dart';
+
 /// First-run setup evidence (WBS 5.2.3C): landing→deck E2E over the
 /// real router, vi locale renders and light/dark + adaptive goldens.
 void main() {
   late db.AppDatabase database;
+
+  setUpAll(loadAppFonts);
 
   setUp(() {
     database = db.AppDatabase.forTesting(NativeDatabase.memory());

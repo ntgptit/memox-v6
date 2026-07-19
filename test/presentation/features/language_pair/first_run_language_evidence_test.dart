@@ -13,12 +13,15 @@ import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/language_pair/screens/first_run_language_screen.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 
+import '../../../support/golden_test_harness.dart';
 import '../../../support/test_container.dart';
 
 /// Language Pair evidence suite (WBS 5.1.3): provider graph, full-router
 /// E2E, vi locale and light/dark + adaptive goldens.
 void main() {
   late db.AppDatabase database;
+
+  setUpAll(loadAppFonts);
 
   setUp(() {
     database = db.AppDatabase.forTesting(NativeDatabase.memory());

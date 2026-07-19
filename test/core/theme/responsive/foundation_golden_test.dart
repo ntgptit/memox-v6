@@ -4,11 +4,15 @@ import 'package:memox_v6/app/router/router_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/app/bootstrap/app_bootstrap.dart';
 
+import '../../../support/golden_test_harness.dart';
+
 /// Foundation responsive snapshots (WBS 2.10): the themed app root at a
 /// representative width of every §5.3 class, light and dark. These lock
 /// the token→theme→responsive composition; `Mx*` component goldens are
 /// owned by WBS 3.11/3.12.
 void main() {
+  setUpAll(loadAppFonts);
+
   const widths = <String, Size>{
     'compact-mobile-390': Size(390, 780),
     'compact-599': Size(599, 900),

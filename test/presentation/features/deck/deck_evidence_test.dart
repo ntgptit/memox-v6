@@ -14,12 +14,15 @@ import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
 
+import '../../../support/golden_test_harness.dart';
 import '../../../support/test_container.dart';
 
 /// Deck block evidence (WBS 5.2.6): provider graph, a property-style
 /// normalization sweep, vi locale renders and light/dark goldens.
 void main() {
   late db.AppDatabase database;
+
+  setUpAll(loadAppFonts);
 
   setUp(() async {
     database = db.AppDatabase.forTesting(NativeDatabase.memory());
