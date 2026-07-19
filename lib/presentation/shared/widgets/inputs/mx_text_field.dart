@@ -148,24 +148,28 @@ class _MxTextFieldState extends State<MxTextField> {
       ),
     );
 
-    // Bare-field branded focus ring (kit `.field:focus-visible`), space
-    // reserved so focusing never shifts layout.
+    // Branded focus ring (kit `.field:focus-visible`). ONE ring only:
+    // a boxed field draws it over its own surface edge, a bare field
+    // around the input — never nested, never taking layout space.
+    final showRing = _focused && widget.enabled;
     input = Focus(
       canRequestFocus: false,
       skipTraversal: true,
       onFocusChange: (focused) => setState(() => _focused = focused),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: AppBorderRadii.xs,
-          border: Border.all(
-            color: _focused && widget.enabled
-                ? colors.focusRing
-                : colors.focusRing.withAlpha(0),
-            width: AppStrokes.focus,
-          ),
-        ),
-        child: input,
-      ),
+      child: widget.boxed
+          ? input
+          : DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: AppBorderRadii.xs,
+                border: Border.all(
+                  color: showRing
+                      ? colors.focusRing
+                      : colors.focusRing.withAlpha(0),
+                  width: AppStrokes.focus,
+                ),
+              ),
+              child: input,
+            ),
     );
 
     if (widget.boxed) {
@@ -182,6 +186,15 @@ class _MxTextFieldState extends State<MxTextField> {
           border: Border.all(
             color: hasError ? colors.error : colors.divider,
             width: hasError ? AppStrokes.emphasis : AppStrokes.hairline,
+          ),
+        ),
+        // The ring paints over the surface edge on focus, replacing the
+        // resting hairline instead of nesting a second outline inside.
+        foregroundDecoration: BoxDecoration(
+          borderRadius: AppBorderRadii.control,
+          border: Border.all(
+            color: showRing ? colors.focusRing : colors.focusRing.withAlpha(0),
+            width: AppStrokes.focus,
           ),
         ),
         child: input,
