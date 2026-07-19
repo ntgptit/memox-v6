@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — children A, B Done (2026-07-19); C pending |
+| Status | **Done** (2026-07-19) — children A, B, C merged |
 | Owner/domain | Flashcard / Domain |
 | Depends on | `5.2.6` — Done (Deck block complete) |
 | Decision gates | DG-01 |
@@ -70,6 +70,25 @@
   permutation validation, tag NFC/case resolution keeping the first
   display spelling, idempotent attach, TAG-005/006, concurrent
   same-label winner, audio add/remove + typed validation.
+
+## Child C — lifecycle use cases (Done, 2026-07-19)
+
+- Repository: `editCardContent` (content-version-guarded rewrite —
+  a stale expected version fails typed as `stale-version`, never
+  silent last-write-wins) and `deleteCardCascade` (children + current
+  scheduling state + tombstone in one transaction; finalized session
+  history untouched).
+- Use cases: `EditFlashcardUseCase` (required/VAL-001 revalidation,
+  duplicate candidates across the pair excluding self, sealed
+  `EditFlashcardResult`, keep-both retry), `HideFlashcardUseCase`
+  (content/progress untouched; idempotent), `DeleteFlashcardUseCase`
+  (idempotent tombstone command; confirmation is UI scope),
+  `MoveFlashcardUseCase` (source/Parent/cross-pair rejected — Parent
+  via the 4.3 exclusivity triggers; id/content/children/progress
+  preserved).
+- 14 tests map the four specs' acceptance criteria, including the
+  stale-version guard, review-then-keep-both editing, Leaf→Empty
+  derivation after the last delete and atomic move preservation.
 
 ## Acceptance and test procedure
 

@@ -48,6 +48,23 @@ abstract interface class FlashcardRepository {
     required DateTime updatedAt,
   });
 
+  /// Rewrites the card's own content, guarded by the expected content
+  /// version so a concurrent edit never last-write-wins silently
+  /// (edit-flashcard.md); the stored version increments on success.
+  Future<Flashcard> editCardContent(
+    String cardId, {
+    required String term,
+    required String normalizedTerm,
+    required String primaryMeaning,
+    required int expectedContentVersion,
+    required DateTime now,
+  });
+
+  /// Deletes child content and current scheduling state and tombstones
+  /// the card row atomically (delete-flashcard.md); finalized session
+  /// history is untouched.
+  Future<void> deleteCardCascade(String cardId, {required DateTime now});
+
   // --- Additional translations (5.3.1B) -------------------------------
   // Every child mutation commits atomically together with the owning
   // card's content-version bump (manage-card-translations.md).
