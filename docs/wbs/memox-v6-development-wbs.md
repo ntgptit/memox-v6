@@ -215,7 +215,7 @@ whose dependencies are not Done.
 | Status | WBS | Reason / next action |
 | --- | --- | --- |
 | Done | `0.1–0.6`, `1.1–1.6`, `1.9`, `2.1–2.10`, `3.1–3.7`, `3.9–3.10`, `4.1` | Durable evidence is in the work-item register. Wave 2 (token→theme→responsive) is closed. |
-| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Foundation gate 4.10 PASSED (2026-07-19) — feature UI unlocked. Next promotion candidate once packeted: `3.12` (minimal Mx gate), then the wave-5 critical path from `5.1` in dependency order. |
+| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Gates 4.10 and 3.12 PASSED (2026-07-19). Next promotion candidate once packeted: `5.1` (Language Pair feature) and the wave-5 critical path in dependency order. |
 
 Sequencing note (2026-07-19): `1.7` (developer fixtures) and `1.10` (shared
 test infrastructure) declare only wave-1 dependencies, but their deliverables

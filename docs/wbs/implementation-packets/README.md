@@ -83,6 +83,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `3.7` | [First-learning feedback primitives](./WBS-3.7-feedback-primitives.md) | Done (2026-07-19) |
 | `3.9` | [Async/action infrastructure](./WBS-3.9-async-infrastructure.md) | Done (2026-07-19) |
 | `3.10` | [First-learning shared composites](./WBS-3.10-shared-composites.md) | Done (2026-07-19) |
+| `3.12` | [Minimal Mx gate](./WBS-3.12-minimal-mx-gate.md) | Done — gate PASSED (2026-07-19) |
 | `4.1` | [Database runtime](./WBS-4.1-database-runtime.md) | Done (2026-07-19) |
 | `4.2` | [Schema v1 (XL)](./WBS-4.2-schema-v1.md) | Done (2026-07-19) |
 | `4.3` | [Schema constraints](./WBS-4.3-schema-constraints.md) | Done (2026-07-19) |
