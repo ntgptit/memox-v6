@@ -76,6 +76,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `3.4` | [`MxCard`, list and surface primitives (XL)](./WBS-3.4-card-list-surfaces.md) | Done (2026-07-19) — children A–C |
 | `3.5` | [`MxScaffold` and content shells (XL)](./WBS-3.5-scaffold-shells.md) | Done (2026-07-19) — children A–C |
 | `3.6` | [Navigation primitives](./WBS-3.6-navigation-primitives.md) | Done (2026-07-19) |
+| `3.7` | [First-learning feedback primitives](./WBS-3.7-feedback-primitives.md) | Done (2026-07-19) |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.
