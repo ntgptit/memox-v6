@@ -1,4 +1,5 @@
 import 'content.drift';
+import 'sessions.drift';
 
 -- Schema v1 — progress and rhythm table group (WBS 4.2 child B).
 -- Contract: docs/database/schema-v1.md. SQL-first by owner directive.
@@ -7,13 +8,12 @@ import 'content.drift';
 -- timestamp (see content.drift). Local-day business rules keep
 -- explicit local_date + timezone_id snapshot columns by design.
 
--- Attempt evidence is append-only; the session FK lands with child C
--- (study_sessions), so session_id is a plain column until then.
+-- Attempt evidence is append-only.
 CREATE TABLE study_attempts (
   id TEXT NOT NULL PRIMARY KEY,
   idempotency_key TEXT NOT NULL UNIQUE,
   card_id TEXT NOT NULL REFERENCES flashcards (id),
-  session_id TEXT,
+  session_id TEXT REFERENCES study_sessions (id),
   mode_id TEXT NOT NULL,
   outcome TEXT NOT NULL,
   evidence_json TEXT NOT NULL,
