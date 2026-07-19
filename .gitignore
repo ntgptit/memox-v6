@@ -72,6 +72,20 @@ docs/design/**/shots/*.png
 docs/design/**/_sheets/*.png
 docs/design/**/evidence/*.png
 
+# Canonical Design Kit shots consumed by the enforced Flutter parity suite.
+!docs/design/MemoX Design System_v4/ui_kits/memox-app/shots/flashcard-editor--create--light.png
+!docs/design/MemoX Design System_v4/ui_kits/memox-app/shots/flashcard-editor--create--dark.png
+!docs/design/MemoX Design System_v4/ui_kits/memox-app/shots/empty-deck--default--light.png
+!docs/design/MemoX Design System_v4/ui_kits/memox-app/shots/empty-deck--default--dark.png
+!docs/design/MemoX Design System_v4/ui_kits/memox-app/shots/create-deck-firstrun--landing--light.png
+!docs/design/MemoX Design System_v4/ui_kits/memox-app/shots/create-deck-firstrun--landing--dark.png
+!docs/design/MemoX Design System_v4/ui_kits/memox-app/shots/create-deck-firstrun--step1--light.png
+!docs/design/MemoX Design System_v4/ui_kits/memox-app/shots/create-deck-firstrun--step1--dark.png
+!docs/design/MemoX Design System_v4/ui_kits/memox-app/shots/create-deck-firstrun--step2--light.png
+!docs/design/MemoX Design System_v4/ui_kits/memox-app/shots/create-deck-firstrun--step2--dark.png
+!docs/design/MemoX Design System_v4/ui_kits/memox-app/shots/library--empty--light.png
+!docs/design/MemoX Design System_v4/ui_kits/memox-app/shots/library--empty--dark.png
+
 # design-sync helper output (regenerated diff/push batches)
 tools/design-sync/out/
 
