@@ -32,6 +32,19 @@ final class UnexpectedFailure extends AppFailure {
     : super(message: 'Unexpected failure', cause: cause);
 }
 
+/// Domain input rejected before any write (WBS 5.1.1): a missing,
+/// unsupported or self-referencing selection, an empty required field.
+///
+/// `field` names the offending input; `code` is a stable tag flows map
+/// to inline guidance ('required', 'unsupported', 'not-distinct').
+final class ValidationFailure extends AppFailure {
+  ValidationFailure({required this.field, required this.code})
+    : super(message: 'Invalid $field [$code]');
+
+  final String field;
+  final String code;
+}
+
 /// A write conflicted with a persistence invariant or a concurrent
 /// update (WBS 4.6): uniqueness collisions, Deck exclusivity/cycle
 /// trigger aborts, or a stale expected revision.

@@ -20,6 +20,10 @@
   "@conflictMessage": {
     "description": "Shown when a write conflicts with existing data (ConflictFailure)."
   },
+  "validationMessage": "Please check your selections and try again.",
+  "@validationMessage": {
+    "description": "Generic inline-validation fallback (ValidationFailure)."
+  },
   "somethingWentWrongMessage": "Something went wrong.",
   "@somethingWentWrongMessage": {
     "description": "User-safe message shown when a screen fails to render."

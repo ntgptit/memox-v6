@@ -30,4 +30,8 @@ abstract interface class DeckRepository {
   });
 
   Future<void> delete(String deckId);
+
+  /// Number of decks (any depth) owned by [languagePairId]; the
+  /// language-pair removal guard reads this.
+  Future<int> countForLanguagePair(String languagePairId);
 }

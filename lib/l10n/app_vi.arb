@@ -11,6 +11,10 @@
   "@conflictMessage": {
     "description": "Shown when a write conflicts with existing data (ConflictFailure)."
   },
+  "validationMessage": "Vui lòng kiểm tra lại lựa chọn và thử lại.",
+  "@validationMessage": {
+    "description": "Generic inline-validation fallback (ValidationFailure)."
+  },
   "somethingWentWrongMessage": "Đã có lỗi xảy ra.",
   "cardCountLabel": "{count, plural, other{{count} thẻ}}"
 }

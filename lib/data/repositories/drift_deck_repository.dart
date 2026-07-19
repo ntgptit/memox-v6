@@ -82,6 +82,13 @@ class DriftDeckRepository implements DeckRepository {
   }
 
   @override
+  Future<int> countForLanguagePair(String languagePairId) {
+    return _database.deckDao
+        .countDecksForLanguagePair(languagePairId)
+        .getSingle();
+  }
+
+  @override
   Future<void> delete(String deckId) {
     return mapSqliteConflicts(entity: 'decks', () async {
       await _database.deckDao.deleteDeck(deckId);
