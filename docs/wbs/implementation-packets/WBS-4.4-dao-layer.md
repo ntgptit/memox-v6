@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — child A Done (2026-07-19); B, C pending |
+| Status | **In progress** — children A, B Done (2026-07-19); C pending |
 | Owner/domain | Data / Persistence |
 | Depends on | `4.2`, `4.3` — Done (PRs #42–#46) |
 | Decision gates | DG-06 (ADR-004) |
@@ -57,6 +57,24 @@ Shared rules for every child:
   insert/find round-trips, watch streams emitting on change, page
   boundaries, soft-delete exclusion + restore, child-content
   attach/list/detach, move guarded by the 4.3 triggers.
+
+## Child B — progress and rhythm DAOs (Done, 2026-07-19)
+
+- `queries/{learning_progress,study_attempts,preferences,study_goals,streaks}.drift`
+  — named queries: progress insert/find plus `updateProgressGuarded`
+  (optimistic revision guard; the policy decides values, the DAO only
+  writes them); due paging/count joining flashcards to exclude future,
+  hidden and soft-deleted cards; append-only attempt evidence (no
+  UPDATE/DELETE defined) with idempotency-key lookup and newest-first
+  paging; preference upsert (`ON CONFLICT DO UPDATE`); goal config +
+  per-local-day bucket upsert; idempotent streak-day recording
+  (`ON CONFLICT DO NOTHING`) with range/paged listings.
+- `daos/{learning_progress,study_attempt,preference,study_goal,streak}_dao.dart`
+  — `@DriftAccessor` shells registered in `@DriftDatabase(daos: …)`.
+- `test/data/database/progress_daos_test.dart` — revision-guard
+  accept/reject, due-queue exclusions, idempotency lookup + paging,
+  upsert overwrite-in-place, day-bucket met state, streak idempotency
+  and range order.
 
 ## Acceptance and test procedure
 

@@ -1,0 +1,27 @@
+import '../tables/progress.drift';
+import '../tables/content.drift';
+import '../tables/sessions.drift';
+
+-- Study Attempt evidence queries (WBS 4.4B). Append-only: no UPDATE or
+-- DELETE statements exist by design.
+
+insertAttempt:
+INSERT INTO study_attempts (
+  id, idempotency_key, card_id, session_id, mode_id, outcome,
+  evidence_json, is_terminal, created_at
+) VALUES (
+  :id, :idempotencyKey, :cardId, :sessionId, :modeId, :outcome,
+  :evidenceJson, :isTerminal, :createdAt
+);
+
+findAttemptByIdempotencyKey:
+SELECT * FROM study_attempts WHERE idempotency_key = :idempotencyKey;
+
+pageAttemptsForCard:
+SELECT * FROM study_attempts WHERE card_id = :cardId
+ORDER BY created_at DESC, id DESC
+LIMIT :limit OFFSET :offset;
+
+listAttemptsForSession:
+SELECT * FROM study_attempts WHERE session_id = :sessionId
+ORDER BY created_at, id;
