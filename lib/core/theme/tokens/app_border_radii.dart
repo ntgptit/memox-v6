@@ -46,4 +46,9 @@ abstract final class AppBorderRadii {
   static const BorderRadius full = BorderRadius.all(
     Radius.circular(AppRadii.radiusFull),
   );
+
+  /// Sheet top corners (kit `.sheet` top radius = 2xl).
+  static const BorderRadius sheetTop = BorderRadius.vertical(
+    top: Radius.circular(AppRadii.radius2xl),
+  );
 }
