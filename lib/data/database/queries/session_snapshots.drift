@@ -1,0 +1,36 @@
+import '../tables/sessions.drift';
+import '../tables/content.drift';
+
+-- Session snapshot queries (WBS 4.4C): the per-session card snapshot
+-- and the deterministic per-round presentation order. Snapshots are
+-- written once at session start and replayed on resume.
+
+insertSessionCard:
+INSERT INTO study_session_cards (
+  id, session_id, card_id, display_order, term_snapshot,
+  meaning_snapshot, content_version, progress_box_snapshot,
+  progress_revision, created_at
+) VALUES (
+  :id, :sessionId, :cardId, :displayOrder, :termSnapshot,
+  :meaningSnapshot, :contentVersion, :progressBoxSnapshot,
+  :progressRevision, :createdAt
+);
+
+listSessionCards:
+SELECT * FROM study_session_cards WHERE session_id = :sessionId
+ORDER BY display_order;
+
+countSessionCards:
+SELECT COUNT(*) AS card_count FROM study_session_cards
+WHERE session_id = :sessionId;
+
+insertRoundOrder:
+INSERT INTO study_round_orders (
+  id, session_id, round_index, seed, card_order_json, created_at
+) VALUES (
+  :id, :sessionId, :roundIndex, :seed, :cardOrderJson, :createdAt
+);
+
+findRoundOrder:
+SELECT * FROM study_round_orders
+WHERE session_id = :sessionId AND round_index = :roundIndex;

@@ -1,0 +1,47 @@
+import '../tables/sessions.drift';
+import '../tables/content.drift';
+
+-- Session checkpoint and relearn-queue queries (WBS 4.4C). One
+-- resumable checkpoint per session (upsert-in-place); relearn items
+-- deduplicate failed cards per session, and retry_count is the
+-- learning retry namespace, not persistence retry.
+
+upsertCheckpoint:
+INSERT INTO study_checkpoints (
+  id, session_id, stage_index, round_index, card_position,
+  failed_set_json, timer_state_json, state_version, updated_at
+) VALUES (
+  :id, :sessionId, :stageIndex, :roundIndex, :cardPosition,
+  :failedSetJson, :timerStateJson, :stateVersion, :updatedAt
+)
+ON CONFLICT (session_id) DO UPDATE SET
+  stage_index = excluded.stage_index,
+  round_index = excluded.round_index,
+  card_position = excluded.card_position,
+  failed_set_json = excluded.failed_set_json,
+  timer_state_json = excluded.timer_state_json,
+  state_version = excluded.state_version,
+  updated_at = excluded.updated_at;
+
+findCheckpoint:
+SELECT * FROM study_checkpoints WHERE session_id = :sessionId;
+
+addRelearnItem:
+INSERT INTO session_relearn_items (
+  id, session_id, card_id, created_at
+) VALUES (
+  :id, :sessionId, :cardId, :createdAt
+)
+ON CONFLICT (session_id, card_id) DO NOTHING;
+
+bumpRelearnRetry:
+UPDATE session_relearn_items SET retry_count = retry_count + 1
+WHERE session_id = :sessionId AND card_id = :cardId;
+
+listRelearnItems:
+SELECT * FROM session_relearn_items WHERE session_id = :sessionId
+ORDER BY created_at, id;
+
+removeRelearnItem:
+DELETE FROM session_relearn_items
+WHERE session_id = :sessionId AND card_id = :cardId;
