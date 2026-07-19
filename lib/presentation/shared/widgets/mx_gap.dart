@@ -14,8 +14,8 @@ import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 /// utility
 ///
 /// Public API:
-/// - s05…s12: const gap constructors, each a square [SizedBox] of the
-///   matching `AppSpacing` step.
+/// - constructors: `s05` through `s12`, each a const square [SizedBox]
+///   of the matching `AppSpacing` step.
 class MxGap extends StatelessWidget {
   const MxGap._(this._size);
 
