@@ -1,0 +1,49 @@
+import '../tables/progress.drift';
+import '../tables/content.drift';
+
+-- Learning Progress aggregate queries (WBS 4.4B). The DAO stays
+-- mechanical: box/interval decisions come from
+-- lib/domain/learning_progress policies via the repository layer; the
+-- revision guard here only enforces optimistic concurrency.
+
+insertProgress:
+INSERT INTO learning_progress (
+  id, card_id, box, due_at, created_at, updated_at
+) VALUES (
+  :id, :cardId, :box, :dueAt, :createdAt, :updatedAt
+);
+
+findProgressByCard:
+SELECT * FROM learning_progress WHERE card_id = :cardId;
+
+updateProgressGuarded:
+UPDATE learning_progress SET
+  box = :box,
+  due_at = :dueAt,
+  revision = revision + 1,
+  repetition_count = :repetitionCount,
+  lapse_count = :lapseCount,
+  last_terminal_attempt_id = :lastTerminalAttemptId,
+  updated_at = :updatedAt
+WHERE card_id = :cardId AND revision = :expectedRevision;
+
+pageDueProgress:
+SELECT learning_progress.* FROM learning_progress
+INNER JOIN flashcards ON flashcards.id = learning_progress.card_id
+WHERE learning_progress.due_at IS NOT NULL
+  AND learning_progress.due_at <= :nowUtc
+  AND flashcards.deleted_at IS NULL
+  AND flashcards.is_hidden = 0
+ORDER BY learning_progress.due_at, learning_progress.id
+LIMIT :limit OFFSET :offset;
+
+countDueProgress:
+SELECT COUNT(*) AS due_count FROM learning_progress
+INNER JOIN flashcards ON flashcards.id = learning_progress.card_id
+WHERE learning_progress.due_at IS NOT NULL
+  AND learning_progress.due_at <= :nowUtc
+  AND flashcards.deleted_at IS NULL
+  AND flashcards.is_hidden = 0;
+
+deleteProgressByCard:
+DELETE FROM learning_progress WHERE card_id = :cardId;

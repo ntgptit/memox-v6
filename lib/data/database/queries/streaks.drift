@@ -1,0 +1,28 @@
+import '../tables/progress.drift';
+
+-- Study Streak queries (WBS 4.4B). Recording a day is idempotent by
+-- design: the unique local_date absorbs duplicate qualified events.
+
+recordStreakDay:
+INSERT INTO streak_days (
+  id, local_date, timezone_id, qualified_source, created_at
+) VALUES (
+  :id, :localDate, :timezoneId, :qualifiedSource, :createdAt
+)
+ON CONFLICT (local_date) DO NOTHING;
+
+listStreakDaysBetween:
+SELECT * FROM streak_days
+WHERE local_date >= :fromLocalDate AND local_date <= :toLocalDate
+ORDER BY local_date;
+
+pageRecentStreakDays:
+SELECT * FROM streak_days
+ORDER BY local_date DESC
+LIMIT :limit OFFSET :offset;
+
+countStreakDays:
+SELECT COUNT(*) AS day_count FROM streak_days;
+
+deleteStreakDay:
+DELETE FROM streak_days WHERE local_date = :localDate;

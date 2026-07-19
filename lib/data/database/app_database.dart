@@ -3,6 +3,11 @@ import 'package:memox_v6/core/database/database_opener.dart';
 import 'package:memox_v6/data/database/daos/deck_dao.dart';
 import 'package:memox_v6/data/database/daos/flashcard_dao.dart';
 import 'package:memox_v6/data/database/daos/language_pair_dao.dart';
+import 'package:memox_v6/data/database/daos/learning_progress_dao.dart';
+import 'package:memox_v6/data/database/daos/preference_dao.dart';
+import 'package:memox_v6/data/database/daos/streak_dao.dart';
+import 'package:memox_v6/data/database/daos/study_attempt_dao.dart';
+import 'package:memox_v6/data/database/daos/study_goal_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -22,7 +27,16 @@ const String appDatabaseName = 'memox';
     'tables/sessions.drift',
     'tables/constraints.drift',
   },
-  daos: [LanguagePairDao, DeckDao, FlashcardDao],
+  daos: [
+    LanguagePairDao,
+    DeckDao,
+    FlashcardDao,
+    LearningProgressDao,
+    StudyAttemptDao,
+    PreferenceDao,
+    StudyGoalDao,
+    StreakDao,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   /// Opens the production database through the platform opener.
