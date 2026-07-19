@@ -62,9 +62,8 @@ class AppTabShell extends StatelessWidget {
               ),
           ],
           value: _RootDestination.values[navigationShell.currentIndex].id,
-          onChanged: (id) => _goBranch(
-            _RootDestination.values.indexWhere((d) => d.id == id),
-          ),
+          onChanged: (id) =>
+              _goBranch(_RootDestination.values.indexWhere((d) => d.id == id)),
         ),
       ),
     );
