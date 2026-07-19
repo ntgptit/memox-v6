@@ -1,4 +1,5 @@
 import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/domain/deck/deck_content_state.dart';
 
 /// Deck repository port (WBS 4.6A).
@@ -14,6 +15,9 @@ abstract interface class DeckRepository {
   Future<Deck?> findById(String id);
 
   Stream<List<Deck>> watchRoots(String languagePairId);
+
+  /// Root decks with their list-surface counters (library rows).
+  Stream<List<DeckSummary>> watchRootSummaries(String languagePairId);
 
   Stream<List<Deck>> watchChildren(String parentId);
 

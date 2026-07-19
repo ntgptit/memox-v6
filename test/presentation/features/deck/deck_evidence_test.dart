@@ -86,7 +86,7 @@ void main() {
       container.listen(deckSubtreeCardsProvider(deckId: 'root'), (_, _) {});
 
       final roots = await container.read(libraryRootDecksProvider.future);
-      expect(roots.single.name, 'Travel');
+      expect(roots.single.deck.name, 'Travel');
 
       final children = await container.read(
         deckChildrenProvider(deckId: 'root').future,

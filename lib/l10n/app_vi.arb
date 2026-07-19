@@ -171,6 +171,15 @@
   "@navProfileLabel": {
     "description": "Bottom navigation labels (kit shell NAV)."
   },
+  "cardsCountLabel": "{count, plural, other{{count} thẻ}}",
+  "@cardsCountLabel": {
+    "description": "Deck-card meta line (kit DeckCard).",
+    "placeholders": {"count": {"type": "num"}}
+  },
+  "newBadgeLabel": "Mới",
+  "@newBadgeLabel": {
+    "description": "Just-created deck badge (kit DeckCard newBadge)."
+  },
   "emptyLibraryMessage": "Tạo một deck để bắt đầu xây thư viện của bạn.",
   "@emptyLibraryMessage": {
     "description": "Library / first-deck callout copy (WBS 5.2.4A)."

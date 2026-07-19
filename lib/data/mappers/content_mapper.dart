@@ -1,6 +1,8 @@
 import 'package:memox_v6/data/database/app_database.dart' as db;
+import 'package:memox_v6/data/database/daos/deck_dao.dart' as db;
 import 'package:memox_v6/data/mappers/primitive_mapper.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/domain/flashcard/card_audio_ref.dart';
 import 'package:memox_v6/domain/flashcard/card_tag.dart';
 import 'package:memox_v6/domain/flashcard/card_translation.dart';
@@ -31,6 +33,22 @@ extension DeckRowMapper on db.Deck {
     description: description,
     createdAt: utcDateTime(createdAt),
     updatedAt: utcDateTime(updatedAt),
+  );
+}
+
+extension DeckSummaryRowMapper on db.WatchRootDeckSummariesResult {
+  DeckSummary toDomain() => DeckSummary(
+    deck: Deck(
+      id: id,
+      languagePairId: languagePairId,
+      parentId: parentId,
+      name: name,
+      normalizedName: normalizedName,
+      description: description,
+      createdAt: utcDateTime(createdAt),
+      updatedAt: utcDateTime(updatedAt),
+    ),
+    cardCount: cardCount,
   );
 }
 

@@ -91,6 +91,15 @@ Fixes that came out of the first screen (system-wide, kit-correct):
 | `create-deck-firstrun--step2--light/dark` | **Enforced** (`first_run_step2_parity_test.dart`) | <3% |
 | remaining shipped states (library loaded/dense, empty-deck, subdeck list, create-deck dialog, validation/error variants) | pending | — |
 
+Loaded-library groundwork (this iteration): shared `MxDeckCard` (kit
+`DeckCard`) + `MxBadge` (kit `.badge`), and library rows now render the
+kit deck-card with a REAL "N cards" meta (new reactive
+`watchRootDeckSummaries` query → `DeckSummary` domain rows). The
+`library--loaded`/`first-deck-created` shots additionally require the
+FilterRow (LIB-05 filters/sort) and SRS due/new counters — parity
+enforcement for them lands with those features, recorded here as the
+dependency instead of rendering dead chrome.
+
 Viewport model (frozen with the library screen): the harness simulates
 the kit's status-bar inset (`--memox-safe-area-top` = 24 logical) via
 `applyKitViewport`, matching what a device gives the shell; the kit's

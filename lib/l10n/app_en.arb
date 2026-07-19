@@ -180,6 +180,15 @@
   "@navProfileLabel": {
     "description": "Bottom navigation labels (kit shell NAV)."
   },
+  "cardsCountLabel": "{count, plural, =1{1 card} other{{count} cards}}",
+  "@cardsCountLabel": {
+    "description": "Deck-card meta line (kit DeckCard).",
+    "placeholders": {"count": {"type": "num"}}
+  },
+  "newBadgeLabel": "New",
+  "@newBadgeLabel": {
+    "description": "Just-created deck badge (kit DeckCard newBadge)."
+  },
   "emptyLibraryMessage": "Create a deck to start building your library.",
   "@emptyLibraryMessage": {
     "description": "Library / first-deck callout copy (WBS 5.2.4A)."
