@@ -215,7 +215,7 @@ whose dependencies are not Done.
 | Status | WBS | Reason / next action |
 | --- | --- | --- |
 | Done | `0.1–0.6`, `1.1–1.6`, `1.9`, `2.1–2.10`, `3.1–3.7`, `3.9–3.10`, `4.1` | Durable evidence is in the work-item register. Wave 2 (token→theme→responsive) is closed. |
-| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Gates 4.10 and 3.12 PASSED (2026-07-19). 5.1 block complete (2026-07-19). 5.2 Deck block complete (2026-07-19). Next promotion candidate once packeted: `5.3.1` children B/C (child content, lifecycle/evidence). |
+| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Gates 4.10 and 3.12 PASSED (2026-07-19). 5.1 block complete (2026-07-19). 5.2 Deck block complete (2026-07-19). PROCESS RULE (owner, 2026-07-19): no screen-changing PR merges without kit-parity evidence <3% (item `3.15`). Next: `3.15` retro coverage, then `5.3.1` children B/C. |
 
 Sequencing note (2026-07-19): `1.7` (developer fixtures) and `1.10` (shared
 test infrastructure) declare only wave-1 dependencies, but their deliverables
@@ -323,6 +323,7 @@ Build components in dependency order. Each public shared type has guard-required
 | 3.12 CP | Minimal `Mx*` first-learning gate | L | 3.1–3.10, 4.10 | Only APIs/states used by Language Pair→Deck→Card→Picker→five stages→Result are documented and pass widget/golden/a11y tests; later catalog variants do not block this gate. |
 | 3.13 | Feedback expansion | L | 3.7 | Snackbar service, skeleton, generic empty states and menu variants not required by the first-learning gate. |
 | 3.14 | Shared composite expansion | L | 3.10 | StatusCardRow and post-first-learning composites with feature-free APIs. |
+| 3.15 CP | Kit visual parity gate | L | 3.12 | Pre-merge rule: every changed screen state compares against its kit shot (390, light+dark) with <3% pixel diff; retro coverage of shipped screens. |
 
 Relevant audit groups: KIT-15–22, KIT-28–31, KIT-40–43, KIT-47–48.
 
