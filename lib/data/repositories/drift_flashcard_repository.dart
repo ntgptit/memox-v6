@@ -1,3 +1,4 @@
+import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/data/database/sqlite_error_mapper.dart';
 import 'package:memox_v6/data/mappers/content_mapper.dart';
@@ -414,6 +415,56 @@ class DriftFlashcardRepository implements FlashcardRepository {
       await _database.transaction(() async {
         await _database.flashcardDao.deleteAudioRef(refId);
         await _database.flashcardDao.touchFlashcardVersion(epoch, cardId);
+      });
+    });
+  }
+
+  @override
+  Future<domain.Flashcard> editCardContent(
+    String cardId, {
+    required String term,
+    required String normalizedTerm,
+    required String primaryMeaning,
+    required int expectedContentVersion,
+    required DateTime now,
+  }) {
+    final epoch = now.millisecondsSinceEpoch;
+    return mapSqliteConflicts(entity: 'flashcards', () async {
+      return _database.transaction(() async {
+        final row = await _database.flashcardDao
+            .findFlashcardById(cardId)
+            .getSingleOrNull();
+        if (row == null) {
+          throw ValidationFailure(field: 'cardId', code: 'not-found');
+        }
+        if (row.contentVersion != expectedContentVersion) {
+          throw ConflictFailure(entity: 'flashcards', code: 'stale-version');
+        }
+        await _database.flashcardDao.updateFlashcardContent(
+          term,
+          normalizedTerm,
+          primaryMeaning,
+          epoch,
+          cardId,
+        );
+        final updated = await _database.flashcardDao
+            .findFlashcardById(cardId)
+            .getSingle();
+        return updated.toDomain();
+      });
+    });
+  }
+
+  @override
+  Future<void> deleteCardCascade(String cardId, {required DateTime now}) {
+    final epoch = now.millisecondsSinceEpoch;
+    return mapSqliteConflicts(entity: 'flashcards', () async {
+      await _database.transaction(() async {
+        await _database.flashcardDao.deleteTranslationsForCard(cardId);
+        await _database.flashcardDao.deleteTagAssociationsForCard(cardId);
+        await _database.flashcardDao.deleteAudioRefsForCard(cardId);
+        await _database.learningProgressDao.deleteProgressByCard(cardId);
+        await _database.flashcardDao.softDeleteFlashcard(epoch, epoch, cardId);
       });
     });
   }

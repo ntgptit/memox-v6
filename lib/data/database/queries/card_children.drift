@@ -33,3 +33,18 @@ DELETE FROM tags WHERE id = :id;
 -- Content-version bump shared by every child mutation.
 touchFlashcardVersion:
 UPDATE flashcards SET updated_at = :updatedAt WHERE id = :id;
+
+-- ---------------------------------------------------------------
+-- Delete cascade (delete-flashcard.md): child content and current
+-- scheduling state go in the same transaction as the card tombstone;
+-- finalized session history is never rewritten.
+-- ---------------------------------------------------------------
+
+deleteTranslationsForCard:
+DELETE FROM flashcard_translations WHERE card_id = :cardId;
+
+deleteTagAssociationsForCard:
+DELETE FROM flashcard_tags WHERE card_id = :cardId;
+
+deleteAudioRefsForCard:
+DELETE FROM card_audio_refs WHERE card_id = :cardId;
