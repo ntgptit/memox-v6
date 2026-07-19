@@ -22,9 +22,15 @@ import 'package:memox_v6/core/theme/tokens/app_typography.dart';
 final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   const AppTextStyles();
 
+  // The kit `.app` shell sets the inherited defaults (line-height
+  // normal, letter-spacing 0). They are EXPLICIT here because merged
+  // Material defaults (bodyMedium: +0.25 tracking, 1.43 height) would
+  // otherwise leak into every role field the kit leaves at default.
   static const TextStyle _base = TextStyle(
     fontFamily: AppTypography.fontFamily,
     fontFamilyFallback: AppTypography.fontFamilyFallback,
+    letterSpacing: AppTypography.letterSpacingNormalEm,
+    height: AppTypography.lineHeightNormal,
   );
 
   // Display and headline carry the kit's tight tracking
