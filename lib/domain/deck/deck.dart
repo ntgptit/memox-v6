@@ -7,6 +7,7 @@ class Deck {
     required this.parentId,
     required this.name,
     required this.normalizedName,
+    this.description,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -16,6 +17,7 @@ class Deck {
   final String? parentId;
   final String name;
   final String normalizedName;
+  final String? description;
   final DateTime createdAt;
   final DateTime updatedAt;
 

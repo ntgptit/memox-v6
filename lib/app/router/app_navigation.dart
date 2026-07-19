@@ -9,4 +9,8 @@ import 'package:memox_v6/app/router/route_paths.dart';
 extension AppNavigation on BuildContext {
   /// Returns to the learning entry (home) route.
   void goHome() => GoRouter.of(this).go(RoutePaths.home);
+
+  /// Opens the first-run language step (step 1 of the setup).
+  void goFirstRunLanguage() =>
+      GoRouter.of(this).go(RoutePaths.firstRunLanguage);
 }

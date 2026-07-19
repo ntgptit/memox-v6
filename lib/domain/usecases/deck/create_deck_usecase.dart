@@ -1,6 +1,7 @@
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/ids/id_generator.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
+import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/deck/deck_name.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
@@ -39,8 +40,12 @@ class CreateDeckUseCase {
     required String languagePairId,
     String? parentId,
     String? retryDeckId,
+    String? description,
   }) async {
     final displayName = validateDeckName(name);
+    final trimmedDescription = description == null
+        ? null
+        : StringUtils.trimmed(description);
     final normalizedName = normalizeDeckName(name);
 
     if (retryDeckId != null) {
@@ -66,6 +71,9 @@ class CreateDeckUseCase {
       parentId: parentId,
       name: displayName,
       normalizedName: normalizedName,
+      description: trimmedDescription?.isEmpty ?? true
+          ? null
+          : trimmedDescription,
       createdAt: now,
       updatedAt: now,
     );

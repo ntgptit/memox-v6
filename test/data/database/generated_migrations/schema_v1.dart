@@ -135,6 +135,14 @@ class Decks extends Table with TableInfo {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
     'created_at',
     aliasedName,
@@ -158,6 +166,7 @@ class Decks extends Table with TableInfo {
     parentId,
     name,
     normalizedName,
+    description,
     createdAt,
     updatedAt,
   ];

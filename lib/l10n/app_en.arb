@@ -64,6 +64,26 @@
   "@saveFailedTitle": {
     "description": "Banner title when saving the language pair fails."
   },
+  "firstRunLandingTitle": "Build your learning library",
+  "@firstRunLandingTitle": {
+    "description": "First-use landing headline."
+  },
+  "firstRunLandingBody": "Create your first deck and add content whenever you're ready. MemoX will schedule reviews after you start studying.",
+  "@firstRunLandingBody": {
+    "description": "First-use landing supporting copy."
+  },
+  "createFirstDeckLabel": "Create your first deck",
+  "@createFirstDeckLabel": {
+    "description": "Primary CTA on the first-use landing."
+  },
+  "importExistingCardsLabel": "Import existing cards",
+  "@importExistingCardsLabel": {
+    "description": "Secondary CTA opening the first-run import flow."
+  },
+  "notNowLabel": "Not now",
+  "@notNowLabel": {
+    "description": "Tertiary link dismissing the landing."
+  },
   "somethingWentWrongMessage": "Something went wrong.",
   "@somethingWentWrongMessage": {
     "description": "User-safe message shown when a screen fails to render."

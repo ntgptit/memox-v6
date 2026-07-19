@@ -40,6 +40,10 @@ DELETE FROM decks WHERE id = :id;
 countChildDecks:
 SELECT COUNT(*) AS child_count FROM decks WHERE parent_id = :parentId;
 
+updateDeckDescription:
+UPDATE decks SET description = :description, updated_at = :updatedAt
+WHERE id = :id;
+
 countDecksForLanguagePair:
 SELECT COUNT(*) AS deck_count FROM decks
 WHERE language_pair_id = :languagePairId;

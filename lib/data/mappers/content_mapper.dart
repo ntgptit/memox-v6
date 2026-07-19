@@ -28,6 +28,7 @@ extension DeckRowMapper on db.Deck {
     parentId: parentId,
     name: name,
     normalizedName: normalizedName,
+    description: description,
     createdAt: utcDateTime(createdAt),
     updatedAt: utcDateTime(updatedAt),
   );
