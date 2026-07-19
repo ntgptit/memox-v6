@@ -1,0 +1,85 @@
+import 'content.drift';
+
+-- Schema v1 — study-session runtime table group (WBS 4.2 child C).
+-- Contract: docs/database/schema-v1.md. SQL-first by owner directive.
+-- Convention: every *_at column stores a UTC epoch-millisecond
+-- timestamp (see content.drift).
+
+-- The selected v1 active-session policy is one active session app-wide
+-- (start-study-session.md: never two active sessions; a compatible one
+-- resumes or starts over). The partial unique index enforces it.
+CREATE TABLE study_sessions (
+  id TEXT NOT NULL PRIMARY KEY,
+  session_type TEXT NOT NULL
+    CHECK (session_type IN ('newLearning', 'dueReview', 'relearn', 'practice')),
+  deck_id TEXT NOT NULL REFERENCES decks (id),
+  scope TEXT NOT NULL CHECK (scope IN ('leaf', 'subtree')),
+  state TEXT NOT NULL
+    CHECK (state IN ('active', 'completed', 'abandoned')),
+  revision INTEGER NOT NULL DEFAULT 0,
+  snapshot_version INTEGER NOT NULL DEFAULT 1,
+  schedule_srs INTEGER NOT NULL DEFAULT 1 CHECK (schedule_srs IN (0, 1)),
+  started_at INTEGER NOT NULL,
+  finalized_at INTEGER,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_study_sessions_single_active ON study_sessions (state)
+  WHERE state = 'active';
+
+-- Card snapshot taken at session start; content and progress versions
+-- pin what the learner actually saw.
+CREATE TABLE study_session_cards (
+  id TEXT NOT NULL PRIMARY KEY,
+  session_id TEXT NOT NULL REFERENCES study_sessions (id) ON DELETE CASCADE,
+  card_id TEXT NOT NULL REFERENCES flashcards (id),
+  display_order INTEGER NOT NULL,
+  term_snapshot TEXT NOT NULL,
+  meaning_snapshot TEXT NOT NULL,
+  content_version INTEGER NOT NULL,
+  progress_box_snapshot INTEGER NOT NULL,
+  progress_revision INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  UNIQUE (session_id, card_id),
+  UNIQUE (session_id, display_order)
+);
+
+-- One resumable position per session: stage/round/card plus failed-set
+-- and timer state, versioned for forward compatibility.
+CREATE TABLE study_checkpoints (
+  id TEXT NOT NULL PRIMARY KEY,
+  session_id TEXT NOT NULL UNIQUE
+    REFERENCES study_sessions (id) ON DELETE CASCADE,
+  stage_index INTEGER NOT NULL DEFAULT 0,
+  round_index INTEGER NOT NULL DEFAULT 0,
+  card_position INTEGER NOT NULL DEFAULT 0,
+  failed_set_json TEXT NOT NULL DEFAULT '[]',
+  timer_state_json TEXT NOT NULL DEFAULT '{}',
+  state_version INTEGER NOT NULL DEFAULT 1,
+  updated_at INTEGER NOT NULL
+);
+
+-- Deterministic per-round presentation order: the seed reproduces the
+-- shuffle, the persisted order is what resume replays.
+CREATE TABLE study_round_orders (
+  id TEXT NOT NULL PRIMARY KEY,
+  session_id TEXT NOT NULL REFERENCES study_sessions (id) ON DELETE CASCADE,
+  round_index INTEGER NOT NULL,
+  seed INTEGER NOT NULL,
+  card_order_json TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  UNIQUE (session_id, round_index)
+);
+
+-- Failed cards queued for in-session relearn, deduplicated per session.
+-- retry_count is the learning retry namespace, distinct from any
+-- persistence-level retry.
+CREATE TABLE session_relearn_items (
+  id TEXT NOT NULL PRIMARY KEY,
+  session_id TEXT NOT NULL REFERENCES study_sessions (id) ON DELETE CASCADE,
+  card_id TEXT NOT NULL REFERENCES flashcards (id),
+  retry_count INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  UNIQUE (session_id, card_id)
+);

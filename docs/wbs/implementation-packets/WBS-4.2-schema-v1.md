@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — children A, B Done (2026-07-19); C pending |
+| Status | **Done** (2026-07-19) — children A, B, C shipped one PR each |
 | Owner/domain | Data / Persistence |
 | Depends on | `4.1` — Done (PR #41) |
 | Decision gates | DG-06 (ADR-004) |
@@ -84,6 +84,24 @@ Shared rules for every child:
   baseline policy defaults, attempt idempotency-key uniqueness, unique
   local dates for goal buckets and streak days, card-delete cascade.
 
+## Child C — study-session runtime tables (Done, 2026-07-19)
+
+- `lib/data/database/tables/sessions.drift` — `study_sessions` (typed
+  session_type/scope/state CHECKs; the selected v1 active-session policy
+  is one active session app-wide, enforced by a partial unique index on
+  `state = 'active'`; revision + snapshot version; `schedule_srs` flag);
+  `study_session_cards` (start-of-session content/progress snapshot,
+  unique per card and per order slot); `study_checkpoints` (one
+  resumable position per session with failed-set/timer state, versioned);
+  `study_round_orders` (deterministic seed + persisted order, unique per
+  session/round); `session_relearn_items` (failed card deduplicated per
+  session; learning retry namespace distinct from persistence retry).
+- `study_attempts.session_id` gains its deferred FK to `study_sessions`.
+- `test/data/database/sessions_schema_test.dart` — 8 DDL contract tests:
+  table presence, single-active enforcement, type/scope/state CHECKs,
+  session-card uniqueness both ways, checkpoint/round-order uniqueness,
+  relearn dedup, the new attempts FK, session-delete cascade.
+
 ## Acceptance and test procedure
 
 `AC-WBS-4.2-01`: every `schema-v1.md` table exists in a `.drift` file with
@@ -98,8 +116,7 @@ gate. Run once through `node tool/verify/run.mjs`.
 
 ## Failure and completion
 
-- Success per child: PR merged with the canonical gate green; register
-  evidence updated. 4.2 flips Done when C merges, unblocking 4.3
-  (constraints) and 4.4 (DAOs).
+- Completed 2026-07-19: A (#42), B (#43), naming follow-up (#44), C
+  closed the packet — 4.3 (constraints) and 4.4 (DAOs) are unblocked.
 - If drift_dev rejects a DDL construct, prefer the nearest supported SQL
   form and record the deviation here — never move schema back into Dart.
