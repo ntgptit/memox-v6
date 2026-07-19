@@ -1,0 +1,102 @@
+import '../tables/content.drift';
+
+-- Flashcard aggregate queries (WBS 4.4A): cards plus their owned child
+-- content (translations, tags, audio refs) per the business ownership
+-- map. Listings exclude soft-deleted cards; lifecycle transitions are
+-- explicit UPDATEs so the 4.3 triggers guard them.
+
+insertFlashcard:
+INSERT INTO flashcards (
+  id, deck_id, term, primary_meaning, created_at, updated_at
+) VALUES (
+  :id, :deckId, :term, :primaryMeaning, :createdAt, :updatedAt
+);
+
+findFlashcardById:
+SELECT * FROM flashcards WHERE id = :id;
+
+pageFlashcardsByDeck:
+SELECT * FROM flashcards
+WHERE deck_id = :deckId AND deleted_at IS NULL
+ORDER BY created_at, id
+LIMIT :limit OFFSET :offset;
+
+watchFlashcardsByDeck:
+SELECT * FROM flashcards
+WHERE deck_id = :deckId AND deleted_at IS NULL
+ORDER BY created_at, id;
+
+countActiveFlashcardsInDeck:
+SELECT COUNT(*) AS card_count FROM flashcards
+WHERE deck_id = :deckId AND deleted_at IS NULL;
+
+setFlashcardHidden:
+UPDATE flashcards SET is_hidden = :isHidden, updated_at = :updatedAt
+WHERE id = :id;
+
+softDeleteFlashcard:
+UPDATE flashcards SET deleted_at = :deletedAt, updated_at = :updatedAt
+WHERE id = :id;
+
+restoreFlashcard:
+UPDATE flashcards SET deleted_at = NULL, updated_at = :updatedAt
+WHERE id = :id;
+
+moveFlashcard:
+UPDATE flashcards SET deck_id = :deckId, updated_at = :updatedAt
+WHERE id = :id;
+
+updateFlashcardContent:
+UPDATE flashcards SET term = :term, primary_meaning = :primaryMeaning,
+  content_version = content_version + 1, updated_at = :updatedAt
+WHERE id = :id;
+
+insertTranslation:
+INSERT INTO flashcard_translations (
+  id, card_id, language_code, translation_text, display_order,
+  created_at, updated_at
+) VALUES (
+  :id, :cardId, :languageCode, :translationText, :displayOrder,
+  :createdAt, :updatedAt
+);
+
+listTranslationsForCard:
+SELECT * FROM flashcard_translations WHERE card_id = :cardId
+ORDER BY language_code, display_order;
+
+deleteTranslation:
+DELETE FROM flashcard_translations WHERE id = :id;
+
+findTagByNormalizedName:
+SELECT * FROM tags WHERE normalized_name = :normalizedName;
+
+insertTag:
+INSERT INTO tags (id, name, normalized_name, created_at, updated_at)
+VALUES (:id, :name, :normalizedName, :createdAt, :updatedAt);
+
+attachTag:
+INSERT INTO flashcard_tags (card_id, tag_id, created_at)
+VALUES (:cardId, :tagId, :createdAt);
+
+detachTag:
+DELETE FROM flashcard_tags WHERE card_id = :cardId AND tag_id = :tagId;
+
+listTagsForCard:
+SELECT tags.* FROM tags
+INNER JOIN flashcard_tags ON flashcard_tags.tag_id = tags.id
+WHERE flashcard_tags.card_id = :cardId
+ORDER BY tags.normalized_name;
+
+insertAudioRef:
+INSERT INTO card_audio_refs (
+  id, card_id, language_code, asset_id, provider, created_at, updated_at
+) VALUES (
+  :id, :cardId, :languageCode, :assetId, :provider, :createdAt, :updatedAt
+);
+
+listAudioRefsForCard:
+SELECT * FROM card_audio_refs WHERE card_id = :cardId
+ORDER BY language_code, id;
+
+deleteAudioRef:
+DELETE FROM card_audio_refs WHERE id = :id;

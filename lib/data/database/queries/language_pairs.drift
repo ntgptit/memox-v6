@@ -1,0 +1,25 @@
+import '../tables/content.drift';
+
+-- Language Pair aggregate queries (WBS 4.4A). SQL-first: the DAO shell
+-- in daos/language_pair_dao.dart only exposes what drift generates.
+
+insertLanguagePair:
+INSERT INTO language_pairs (
+  id, learning_language_code, native_language_code, normalized_pair_key,
+  created_at, updated_at
+) VALUES (
+  :id, :learningLanguageCode, :nativeLanguageCode, :normalizedPairKey,
+  :createdAt, :updatedAt
+);
+
+findLanguagePairById:
+SELECT * FROM language_pairs WHERE id = :id;
+
+findLanguagePairByKey:
+SELECT * FROM language_pairs WHERE normalized_pair_key = :normalizedPairKey;
+
+watchAllLanguagePairs:
+SELECT * FROM language_pairs ORDER BY created_at, id;
+
+deleteLanguagePair:
+DELETE FROM language_pairs WHERE id = :id;
