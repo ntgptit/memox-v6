@@ -182,6 +182,14 @@ class _EmptyBranch extends StatelessWidget {
             parentDeckName: deck.name,
           ),
         ),
+        const MxGap.s3(),
+        // Import activates with the content-transfer flow (WBS 8.x).
+        MxButton(
+          label: l10n.importCardsLabel,
+          variant: MxButtonVariant.ghost,
+          block: true,
+          onPressed: null,
+        ),
       ],
     );
   }

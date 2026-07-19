@@ -101,6 +101,7 @@ generator tạo; generated `*.g.dart`, `*.freezed.dart`, Drift output và
 | `5.2.2` | [Create Deck transaction](./WBS-5.2.2-create-deck.md) | Done (2026-07-19) |
 | `5.2.3` | [First-run landing/setup (XL)](./WBS-5.2.3-first-run-setup.md) | Done (2026-07-19) |
 | `5.2.4` | [Library/open Deck (XL)](./WBS-5.2.4-library-open-deck.md) | Done (2026-07-19) |
+| `5.2.5` | [Empty Deck content choice](./WBS-5.2.5-content-choice.md) | Done (2026-07-19) |
 
 Packets cho các item kế tiếp được tạo just-in-time theo dependency order. Không
 đánh dấu trước chúng là Ready.
