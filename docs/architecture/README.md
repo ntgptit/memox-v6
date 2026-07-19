@@ -41,3 +41,4 @@ Flutter UI / route
 The repository keeps app-wide `domain` and `data` roots and feature-owned
 presentation roots. The mandatory Study Mode Factory from ADR-003 is the only
 feature factory currently required; no unrelated compatibility/factory layer is implied.
+- [Riverpod foundation contract](./riverpod-foundation.md) — provider lifecycle, command/effect and invalidation rules (WBS 1.11).
