@@ -144,7 +144,7 @@ void main() {
     await pumpLibrary(tester);
 
     // Success lands in the Library with the first-deck callout.
-    expect(find.text('Library'), findsOneWidget);
+    expect(find.text('Library'), findsWidgets);
     expect(find.text('Your first deck is ready'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);

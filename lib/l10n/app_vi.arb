@@ -135,6 +135,30 @@
   "@libraryTitle": {
     "description": "Library / first-deck callout copy (WBS 5.2.4A)."
   },
+  "libraryEmptyTitle": "Xây dựng thư viện học của bạn",
+  "@libraryEmptyTitle": {
+    "description": "Library empty state (kit LIB-04, WBS 3.15B)."
+  },
+  "libraryEmptyBody": "Tạo một deck hoặc import thẻ để bắt đầu.",
+  "@libraryEmptyBody": {
+    "description": "Library empty state (kit LIB-04, WBS 3.15B)."
+  },
+  "importCardsLabel": "Import thẻ",
+  "@importCardsLabel": {
+    "description": "Library empty state (kit LIB-04, WBS 3.15B)."
+  },
+  "navTodayLabel": "Hôm nay",
+  "@navTodayLabel": {
+    "description": "Bottom navigation labels (kit shell NAV)."
+  },
+  "navStatsLabel": "Thống kê",
+  "@navStatsLabel": {
+    "description": "Bottom navigation labels (kit shell NAV)."
+  },
+  "navProfileLabel": "Hồ sơ",
+  "@navProfileLabel": {
+    "description": "Bottom navigation labels (kit shell NAV)."
+  },
   "emptyLibraryMessage": "Tạo một deck để bắt đầu xây thư viện của bạn.",
   "@emptyLibraryMessage": {
     "description": "Library / first-deck callout copy (WBS 5.2.4A)."

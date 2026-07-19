@@ -156,9 +156,9 @@ void main() {
       await tester.pumpWidget(app(RoutePaths.library));
       await pumpStreams(tester);
 
-      expect(find.text('Thư viện'), findsOneWidget);
+      expect(find.text('Thư viện'), findsWidgets);
       expect(
-        find.text('Tạo một deck để bắt đầu xây thư viện của bạn.'),
+        find.text('Tạo một deck hoặc import thẻ để bắt đầu.'),
         findsOneWidget,
       );
       expect(find.text('Tạo deck'), findsOneWidget);

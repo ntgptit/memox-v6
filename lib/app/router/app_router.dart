@@ -28,6 +28,16 @@ GoRouter createAppRouter({Future<bool> Function()? needsFirstRun}) {
         name: RouteNames.home,
         builder: (context, state) => const HomePlaceholderScreen(),
       ),
+      GoRoute(
+        path: RoutePaths.stats,
+        name: RouteNames.stats,
+        builder: (context, state) => const StatsPlaceholderScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.profile,
+        name: RouteNames.profile,
+        builder: (context, state) => const ProfilePlaceholderScreen(),
+      ),
       ...languagePairRoutes(),
       ...deckRoutes(),
     ],

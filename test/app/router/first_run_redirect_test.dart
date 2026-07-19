@@ -89,7 +89,7 @@ void main() {
     await pumpApp(tester);
 
     expect(
-      find.text('Create a deck to start building your library.'),
+      find.text('Create a deck or import cards to get started.'),
       findsOneWidget,
     );
 

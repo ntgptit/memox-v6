@@ -7,6 +7,8 @@ abstract final class RoutePaths {
   static const String firstRunLanguage = '/first-run/language';
   static const String firstRunDeckSetup = '/first-run/deck';
   static const String library = '/library';
+  static const String stats = '/stats';
+  static const String profile = '/profile';
 
   /// Deck detail path template; build concrete paths with [deckDetail].
   static const String deckDetailPattern = '/deck/:${RouteParams.deckId}';

@@ -102,7 +102,7 @@ void main() {
       await pumpLibrary(tester);
 
       // Landed in the Library with the pair and deck persisted.
-      expect(find.text('Library'), findsOneWidget);
+      expect(find.text('Library'), findsWidgets);
 
       await disposeAndFlushStreams(tester);
       final deck = await database

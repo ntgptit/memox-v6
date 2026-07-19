@@ -71,7 +71,14 @@ class MxBottomNav extends StatelessWidget {
       child: SizedBox(
         height: AppSpacing.bottomNavHeight,
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.space2),
+          // Kit `.bottom-nav`: s2 sides/top, s2 + the fixed nav safe pad
+          // below (the kit folds the device inset into this minimum).
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.space2,
+            AppSpacing.space2,
+            AppSpacing.space2,
+            AppSpacing.space2 + AppComponentDimensions.navSafePad,
+          ),
           child: Row(
             children: [
               for (final item in items)
