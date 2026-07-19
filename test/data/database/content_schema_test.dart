@@ -18,8 +18,8 @@ void main() {
   Future<void> insertPair(String id, String key) {
     return database.customStatement(
       'INSERT INTO language_pairs (id, learning_language_code, '
-      'native_language_code, normalized_pair_key, created_at_utc, '
-      'updated_at_utc) VALUES (?, ?, ?, ?, 0, 0)',
+      'native_language_code, normalized_pair_key, created_at, '
+      'updated_at) VALUES (?, ?, ?, ?, 0, 0)',
       [id, 'en', 'vi', key],
     );
   }
@@ -27,7 +27,7 @@ void main() {
   Future<void> insertDeck(String id, {String? parentId, String name = 'a'}) {
     return database.customStatement(
       'INSERT INTO decks (id, language_pair_id, parent_id, name, '
-      'normalized_name, created_at_utc, updated_at_utc) '
+      'normalized_name, created_at, updated_at) '
       'VALUES (?, ?, ?, ?, ?, 0, 0)',
       [id, 'lp1', parentId, name, name],
     );
@@ -36,7 +36,7 @@ void main() {
   Future<void> insertCard(String id, {String deckId = 'd1'}) {
     return database.customStatement(
       'INSERT INTO flashcards (id, deck_id, term, primary_meaning, '
-      'created_at_utc, updated_at_utc) VALUES (?, ?, ?, ?, 0, 0)',
+      'created_at, updated_at) VALUES (?, ?, ?, ?, 0, 0)',
       [id, deckId, 'term', 'meaning'],
     );
   }
@@ -95,7 +95,7 @@ void main() {
       Future<void> insertTranslation(String id) {
         return database.customStatement(
           'INSERT INTO flashcard_translations (id, card_id, language_code, '
-          'translation_text, display_order, created_at_utc, updated_at_utc) '
+          'translation_text, display_order, created_at, updated_at) '
           "VALUES (?, 'c1', 'vi', 'nghĩa', 0, 0, 0)",
           [id],
         );
@@ -111,16 +111,16 @@ void main() {
       await insertDeck('d1');
       await insertCard('c1');
       await database.customStatement(
-        "INSERT INTO tags (id, name, normalized_name, created_at_utc, "
-        "updated_at_utc) VALUES ('tag1', 'Verbs', 'verbs', 0, 0)",
+        "INSERT INTO tags (id, name, normalized_name, created_at, "
+        "updated_at) VALUES ('tag1', 'Verbs', 'verbs', 0, 0)",
       );
       await database.customStatement(
-        "INSERT INTO flashcard_tags (card_id, tag_id, created_at_utc) "
+        "INSERT INTO flashcard_tags (card_id, tag_id, created_at) "
         "VALUES ('c1', 'tag1', 0)",
       );
       await database.customStatement(
         "INSERT INTO card_audio_refs (id, card_id, language_code, asset_id, "
-        "provider, created_at_utc, updated_at_utc) "
+        "provider, created_at, updated_at) "
         "VALUES ('a1', 'c1', 'en', 'asset-1', 'tts-v1', 0, 0)",
       );
 

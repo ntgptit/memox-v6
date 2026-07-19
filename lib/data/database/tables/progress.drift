@@ -3,6 +3,10 @@ import 'content.drift';
 -- Schema v1 — progress and rhythm table group (WBS 4.2 child B).
 -- Contract: docs/database/schema-v1.md. SQL-first by owner directive.
 
+-- Convention: every *_at column stores a UTC epoch-millisecond
+-- timestamp (see content.drift). Local-day business rules keep
+-- explicit local_date + timezone_id snapshot columns by design.
+
 -- Attempt evidence is append-only; the session FK lands with child C
 -- (study_sessions), so session_id is a plain column until then.
 CREATE TABLE study_attempts (
@@ -14,7 +18,7 @@ CREATE TABLE study_attempts (
   outcome TEXT NOT NULL,
   evidence_json TEXT NOT NULL,
   is_terminal INTEGER NOT NULL DEFAULT 0 CHECK (is_terminal IN (0, 1)),
-  created_at_utc INTEGER NOT NULL
+  created_at INTEGER NOT NULL
 );
 
 CREATE INDEX idx_study_attempts_card ON study_attempts (card_id);
@@ -27,22 +31,22 @@ CREATE TABLE learning_progress (
   id TEXT NOT NULL PRIMARY KEY,
   card_id TEXT NOT NULL UNIQUE REFERENCES flashcards (id) ON DELETE CASCADE,
   box INTEGER NOT NULL CHECK (box BETWEEN 0 AND 8),
-  due_at_utc INTEGER,
+  due_at INTEGER,
   policy_id TEXT NOT NULL DEFAULT 'leitner-8-box-v1',
   policy_version INTEGER NOT NULL DEFAULT 1,
   revision INTEGER NOT NULL DEFAULT 0,
   repetition_count INTEGER NOT NULL DEFAULT 0,
   lapse_count INTEGER NOT NULL DEFAULT 0,
   last_terminal_attempt_id TEXT REFERENCES study_attempts (id),
-  created_at_utc INTEGER NOT NULL,
-  updated_at_utc INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
   CHECK (
-    (box IN (0, 8) AND due_at_utc IS NULL)
-    OR (box BETWEEN 1 AND 7 AND due_at_utc IS NOT NULL)
+    (box IN (0, 8) AND due_at IS NULL)
+    OR (box BETWEEN 1 AND 7 AND due_at IS NOT NULL)
   )
 );
 
-CREATE INDEX idx_learning_progress_due ON learning_progress (due_at_utc);
+CREATE INDEX idx_learning_progress_due ON learning_progress (due_at);
 
 -- Versioned typed key/value store (the shape schema-v1.md left open):
 -- values are JSON with an explicit schema version; invalid payloads fall
@@ -51,7 +55,7 @@ CREATE TABLE preferences (
   pref_key TEXT NOT NULL PRIMARY KEY,
   value_json TEXT NOT NULL,
   value_schema_version INTEGER NOT NULL,
-  updated_at_utc INTEGER NOT NULL
+  updated_at INTEGER NOT NULL
 );
 
 CREATE TABLE daily_goals (
@@ -60,8 +64,8 @@ CREATE TABLE daily_goals (
   target_card_count INTEGER NOT NULL CHECK (target_card_count > 0),
   effective_from_local_date TEXT NOT NULL,
   timezone_id TEXT NOT NULL,
-  created_at_utc INTEGER NOT NULL,
-  updated_at_utc INTEGER NOT NULL
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
 );
 
 -- One bucket per local day. Contribution idempotency rides on the
@@ -76,8 +80,8 @@ CREATE TABLE goal_day_progress (
     CHECK (qualified_card_count >= 0),
   target_snapshot INTEGER NOT NULL,
   is_met INTEGER NOT NULL DEFAULT 0 CHECK (is_met IN (0, 1)),
-  created_at_utc INTEGER NOT NULL,
-  updated_at_utc INTEGER NOT NULL
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
 );
 
 CREATE TABLE streak_days (
@@ -86,5 +90,5 @@ CREATE TABLE streak_days (
   timezone_id TEXT NOT NULL,
   qualified_source TEXT NOT NULL,
   source_version INTEGER NOT NULL DEFAULT 1,
-  created_at_utc INTEGER NOT NULL
+  created_at INTEGER NOT NULL
 );
