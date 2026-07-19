@@ -14,4 +14,9 @@ abstract final class RoutePaths {
   static const String deckDetailPattern = '/deck/:${RouteParams.deckId}';
 
   static String deckDetail(String deckId) => '/deck/$deckId';
+
+  /// Card Editor path template for creating in a deck.
+  static const String newCardPattern = '/deck/:${RouteParams.deckId}/new-card';
+
+  static String newCard(String deckId) => '/deck/$deckId/new-card';
 }

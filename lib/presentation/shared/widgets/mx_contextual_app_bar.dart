@@ -3,6 +3,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/core/theme/responsive/app_adaptive_values.dart';
 import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
+import 'package:memox_v6/core/theme/tokens/app_strokes.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
@@ -30,6 +31,9 @@ import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 ///   screen, WBS 5.7).
 /// - onBack + backLabel: child-screen variant leading with the quiet
 ///   toolbar Back action (both required together).
+/// - onClose + closeLabel: modal-form variant (kit `.cappbar--modal`):
+///   close glyph leading, centered title on a surface bar with a
+///   bottom hairline (both required together; exclusive with onBack).
 /// - actions: trailing `MxIconButton.toolbar` actions (guard rule).
 /// - avatar: optional trailing avatar slot.
 ///
@@ -44,17 +48,29 @@ class MxContextualAppBar extends StatelessWidget
     this.contextLine,
     this.onBack,
     this.backLabel,
+    this.onClose,
+    this.closeLabel,
     this.actions = const <Widget>[],
     this.avatar,
   }) : assert(
          (onBack == null) == (backLabel == null),
          'onBack and backLabel come together',
+       ),
+       assert(
+         (onClose == null) == (closeLabel == null),
+         'onClose and closeLabel come together',
+       ),
+       assert(
+         onBack == null || onClose == null,
+         'back and close variants are exclusive',
        );
 
   final String title;
   final String? contextLine;
   final VoidCallback? onBack;
   final String? backLabel;
+  final VoidCallback? onClose;
+  final String? closeLabel;
   final List<Widget> actions;
   final Widget? avatar;
 
@@ -70,10 +86,15 @@ class MxContextualAppBar extends StatelessWidget
     final contextLine = this.contextLine;
     final onBack = this.onBack;
     final backLabel = this.backLabel;
+    final onClose = this.onClose;
+    final closeLabel = this.closeLabel;
     final avatar = this.avatar;
+    final isModal = onClose != null;
 
     final titleBlock = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: isModal
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (contextLine != null) ...[
@@ -92,7 +113,17 @@ class MxContextualAppBar extends StatelessWidget
     return Semantics(
       header: true,
       child: Container(
-        color: colors.bg,
+        decoration: BoxDecoration(
+          color: isModal ? colors.surface : colors.bg,
+          border: isModal
+              ? Border(
+                  bottom: BorderSide(
+                    color: colors.divider,
+                    width: AppStrokes.hairline,
+                  ),
+                )
+              : null,
+        ),
         padding: EdgeInsets.only(
           top: MediaQuery.paddingOf(context).top,
           left: context.spacing.gutter,
@@ -109,7 +140,18 @@ class MxContextualAppBar extends StatelessWidget
               ),
               const MxGap.s2(),
             ],
+            if (onClose != null && closeLabel != null) ...[
+              MxIconButton.toolbar(
+                icon: Symbols.close,
+                onPressed: onClose,
+                semanticLabel: closeLabel,
+              ),
+              const MxGap.s2(),
+            ],
             Expanded(child: titleBlock),
+            // A modal bar balances its leading glyph so the centered
+            // title stays optically centered.
+            if (isModal) const MxGap.s10(),
             ...actions,
             if (avatar != null) ...[const MxGap.s2(), avatar],
           ],

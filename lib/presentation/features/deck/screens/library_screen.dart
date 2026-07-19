@@ -127,6 +127,7 @@ class _LibraryEmptyState extends StatelessWidget {
 
     return MxEmptyState(
       icon: Symbols.style_rounded,
+      reserveNavZone: false,
       title: l10n.libraryEmptyTitle,
       body: l10n.libraryEmptyBody,
       action: Column(

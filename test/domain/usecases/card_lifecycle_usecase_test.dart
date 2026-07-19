@@ -248,7 +248,11 @@ void main() {
       () async {
         final cardId = await createCard();
         final translations = ManageCardTranslationsUseCase(cards: cards);
-        final tags = ManageCardTagsUseCase(cards: cards);
+        final tags = ManageCardTagsUseCase(
+          cards: cards,
+          idGenerator: SequentialIdGenerator(prefix: 'tag'),
+          clock: clock,
+        );
         await translations.addTranslation(
           translationId: 'tr1',
           cardId: cardId,

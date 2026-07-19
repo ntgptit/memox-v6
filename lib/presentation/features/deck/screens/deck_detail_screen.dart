@@ -180,12 +180,11 @@ class _EmptyBranch extends StatelessWidget {
       action: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Add card activates with the 5.3 flashcard flow.
           MxButton(
             label: l10n.addCardLabel,
             icon: Symbols.add_rounded,
             block: true,
-            onPressed: null,
+            onPressed: () => context.pushNewCard(deck.id),
           ),
           const MxGap.s3(),
           MxButton(

@@ -206,6 +206,10 @@ A work package may move to `Ready` only when all conditions are true:
 8. Every implementation item links a conforming
    [implementation packet](./implementation-packets/README.md) with exact
    create/modify files, symbols, test files, evidence and out-of-scope.
+9. A UI item lists the `MX-VIS-*` state IDs it will produce or change, names the
+   kit shot for each, and names the fixture that reproduces each state. A UI item
+   whose states have no kit reference is not Ready until the Design Kit owner
+   publishes the shot or records the state as intentionally unspecified.
 
 ### 6.2 Current implementation readiness
 
@@ -215,7 +219,9 @@ whose dependencies are not Done.
 | Status | WBS | Reason / next action |
 | --- | --- | --- |
 | Done | `0.1–0.6`, `1.1–1.6`, `1.9`, `2.1–2.10`, `3.1–3.7`, `3.9–3.10`, `4.1` | Durable evidence is in the work-item register. Wave 2 (token→theme→responsive) is closed. |
-| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Gates 4.10 and 3.12 PASSED (2026-07-19). 5.1 block complete (2026-07-19). 5.2 Deck block complete (2026-07-19). PROCESS RULE (owner, 2026-07-19): no screen-changing PR merges without kit-parity evidence <3% (item `3.15`). Next: `5.3.2` (create-card UI); 3.15 remaining states unblock with their features (packet records dependencies). |
+| **Ready** | `P0.1` | **Active workstream.** Phase 0 — Historical Visual Parity Audit (§7 Phase 0). Owner directive 2026-07-19. |
+| **Halted** | All UI rows of `5.3.2+`, `5.6.*`, `5.7.*`, `6.*`–`16.*` | **STOP RULE (owner, 2026-07-19):** no new UI/screen work package is promoted to `Ready` until Phase 0 exits (`P0.6`). Non-UI rows (domain, data, policy) may proceed. `5.3.2` (Card Editor) is explicitly halted at Phase 0. |
+| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Gates 4.10 and 3.12 PASSED (2026-07-19). 5.1 block complete (2026-07-19). 5.2 Deck block complete (2026-07-19). |
 
 Sequencing note (2026-07-19): `1.7` (developer fixtures) and `1.10` (shared
 test infrastructure) declare only wave-1 dependencies, but their deliverables
@@ -246,7 +252,7 @@ Every feature work package follows FD-01 through FD-16. A PR may complete one or
 | FD-10 | Implement shared gap first | Reuse existing `Mx*`; add a shared variant only when the kit contract supports it; document any new shared API. |
 | FD-11 | Implement feature UI | Compose from shared widgets; no raw visual values or business logic; all copy through ARB. |
 | FD-12 | Verify interaction/accessibility | Focus order, semantics, 48px target baseline, non-color cues, keyboard/back/dismiss, reduced motion and announcements. |
-| FD-13 | Verify responsive/visual parity | Canonical 390×780 light/dark golden under 3% where a reference exists; adaptive review at the window matrix. |
+| FD-13 | Verify responsive/visual parity | **Execute VP-01–VP-08 below for every changed screen, dialog, sheet and UI state.** No UI item exits FD-13 on widget/golden tests alone. |
 | FD-14 | Run automated tests | Domain, repository, provider, widget and targeted integration tests; row-to-test parity for each decision table. |
 | FD-15 | Run repository gate | One consolidated verifier should run format, l10n, codegen, guard, analyze and targeted/full tests; no relevant warning or failure is ignored. |
 | FD-16 | Close documentation | Update business/navigation/schema/migration/decision-table/WBS traceability docs and attach KIT evidence; no open P0/P1. |
@@ -255,9 +261,255 @@ The deterministic acceptance and test IDs, prefix owners and source inheritance
 rules are defined in `docs/traceability/work-item-schema.md`. No item is Done
 without updating its register evidence.
 
+### 6.4 Visual parity procedure (VP-01–VP-08)
+
+FD-13 expands into these mandatory steps. They run per **state**, not per
+screen. A UI work package is not Done until every state in its scope has a
+recorded PASS.
+
+| ID | Step | Required output |
+| --- | --- | --- |
+| VP-01 | Render the surface in Flutter Web | The state is reachable in a `flutter build web --wasm=false` (CanvasKit) build served by the parity harness. |
+| VP-02 | Load the state fixture | The exact fixture that reproduces the Design Kit data for this state (§6.5); no manually staged data, no live clock. |
+| VP-03 | Set the viewport | Canonical comparison viewport `390×780` @ DPR 2 (§6.5). Responsive viewports run as separate non-comparison checks. |
+| VP-04 | Drive the flow with Playwright | Playwright reaches the state **by traversing the owning business Master flow** (§6.6), from that flow's entry node, through its real user actions — never by deep-linking to a route or mutating state directly to shortcut the path. |
+| VP-05 | Capture the screenshot | Deterministic capture after animations are disabled and fonts/images are settled (§6.5). |
+| VP-06 | Compare against the kit shot | Pixel diff against `ui_kits/memox-app/shots/<screen>--<state>--<theme>.png`. |
+| VP-07 | Emit artifacts | `expected.png`, `actual.png`, `diff.png` and the difference percentage, written under the run's evidence directory. |
+| VP-08 | Evaluate the threshold | `diff ≤ 3%` → PASS. `diff > 3%` → FAIL; the task stays In Progress/Blocked. |
+
+The following are explicitly **not** sufficient to close a UI task:
+
+- all components implemented;
+- logic/unit tests green;
+- the screen looks close by eye;
+- no runtime errors or overflow warnings;
+- widget or golden tests pass without a Design Kit comparison.
+
+### 6.5 Merge gate — kit visual parity
+
+```text
+Implementation
+→ Unit/Widget test
+→ Playwright flow test
+→ Screenshot capture
+→ Design Kit comparison
+→ Difference ≤ 3%
+→ Merge allowed
+```
+
+Rules:
+
+- Any PR that adds or changes a screen, dialog, bottom sheet or UI state must
+  attach parity evidence for **every** affected state × theme.
+- If any state exceeds 3%: the PR does not merge, the task stays `In progress`
+  or `Blocked`, the actual/expected/diff images are committed to the evidence
+  path, the cause of divergence is written down, and the fix + re-run happen
+  before merge is reconsidered.
+- Manual bypass requires a recorded technical reason and a named approver in
+  `docs/design/MemoX Design System_v4/governance/exception-register.md`, with an
+  expiry. An undocumented bypass is a gate violation, not a judgement call.
+- Known-divergence entries (a kit shot showing a feature that has not shipped
+  yet) are only valid when they name the WBS item that will close them.
+
+#### Frozen test environment
+
+Every variable below is pinned; an unpinned variable makes the diff
+non-reproducible and invalidates the evidence.
+
+| Variable | Pinned value |
+| --- | --- |
+| Runtime | Flutter Web (CanvasKit), release build |
+| Driver | Playwright, Chromium (bundled version pinned in the lockfile) |
+| Host OS | Windows (CI and developer machines run the same pinned browser) |
+| Comparison viewport | `390×780`, device scale factor `2` |
+| Responsive viewports | `360×800`, `393×852`, `412×915` — overflow/reachability only, never the comparison source |
+| Fonts | Bundled Plus Jakarta Sans + Material Symbols Rounded; system font fallback disabled |
+| Locale | `en` |
+| Theme | Captured once per state in `light` and once in `dark` |
+| Animation | Disabled before capture (`prefers-reduced-motion` + animation clock frozen) |
+| Clock/IDs/random | Injected deterministic ports (WBS 1.6) |
+| Network | Offline; local-first data only |
+| Scroll position | Explicit per state, asserted before capture |
+| Capture moment | After fonts loaded, images decoded and one settled frame |
+
+Comparison metric: per-pixel diff on the physical 2× grid, per-channel
+tolerance 24, plus ±1 logical px spatial slack — frozen with WBS 3.15 to
+absorb cross-engine glyph advance drift while keeping wrong colours and
+≥2 logical px layout offsets fully visible.
+
+#### Required output per parity task
+
+Each parity task records exactly these fields:
+
+```text
+WBS ID
+Screen
+State
+Business master flow (doc + §3 node)
+Design Kit reference
+Flutter route
+Fixture
+Viewport
+Playwright test file
+Expected screenshot
+Actual screenshot
+Diff screenshot
+Difference percentage
+Result: PASS / FAIL
+Reason for remaining difference
+PR or commit reference
+```
+
+#### Definition of Done for a parity task
+
+All of the following, with no exception:
+
+1. Playwright opens the correct route.
+2. The user flow to reach the state runs successfully **and matches the owning Master flow node-for-node** (§6.6).
+3. The fixture reproduces the Design Kit state exactly.
+4. The screenshot is stable across three consecutive runs.
+5. No overflow or clipping.
+6. No element is obscured or unclickable.
+7. Difference ≤ 3%.
+8. Result and artifacts are stored at the evidence path.
+9. The merge gate passes.
+
+### 6.6 Master-flow conformance
+
+E2E parity flows are **derived from `docs/business/**`, not invented.** Each
+business use-case document owns a `# 3. Master flow` mermaid chart (37 documents
+at 2026-07-19) that defines the canonical node sequence, decision branches and
+recovery edges. Those charts are the specification for the Playwright script.
+
+Rules:
+
+- Every Playwright spec names its owning business document and the exact Master
+  flow node the capture corresponds to. A spec with no named node is not
+  reviewable and does not satisfy VP-04.
+- The flow is entered at the Master flow's own entry node and traversed through
+  real user actions. **Deep-linking straight to a route, or seeding the state a
+  screen is supposed to arrive at, is a bypass** — it hides broken navigation,
+  guards, redirects and handoffs, which is the class of defect an E2E flow
+  exists to catch. Fixtures set *data preconditions*; they never skip flow steps.
+- Decision branches in the chart (`Fresh install?`, `Kết quả: Lỗi/Thành công`,
+  content-kind branching) are each covered by their own `MX-VIS-*` state. A
+  branch with no covering state is a coverage gap recorded in the register, not
+  an omission.
+- Error and recovery edges are first-class: a chart edge returning to a previous
+  node (`Lỗi → Step 2`) is exercised, not assumed.
+- When the implemented navigation and the Master flow disagree, that is a
+  business↔implementation conflict — it stops the item under FD-01 and DoR 3. It
+  is never resolved by writing the Playwright script to match the code.
+- Cross-object handoffs (Deck → Card Editor, Library → Deck detail, Today →
+  Study) follow the navigation contract in `docs/business/navigation/README.md`,
+  including Web Back/Forward, refresh and deep-link semantics required by Tier 1.
+
+#### Screen → owning Master flow
+
+| Screen / surface | Owning business flow |
+| --- | --- |
+| First-run landing, step 1, step 2 | `docs/business/deck/create-deck.md` §3 |
+| Language selectors and select sheet | `docs/business/language-pair/create-language-pair.md`, `select-language-pair.md` §3 |
+| Library (root list, empty, callout, dense) | `docs/business/deck/open-deck.md`, `browse-nested-decks.md` §3 |
+| Create Deck dialog (root/nested) | `docs/business/deck/create-deck.md` §3 |
+| Deck detail — empty branch | `docs/business/deck/add-content-to-deck.md`, `organise-deck.md` §3 |
+| Deck detail — parent branch | `docs/business/deck/browse-nested-decks.md` §3 |
+| Deck detail — leaf branch | `docs/business/deck/open-deck.md`, `flashcard/view-card-detail.md` §3 |
+| Card Editor | `docs/business/flashcard/create-flashcard.md` §3 |
+| Today / dashboard (from 5.7) | `docs/business/today-dashboard/load-today-dashboard.md` §3 |
+| Study picker, session, result (from 5.6) | `docs/business/study-session/**` §3 |
+
+Cross-cutting entry/guard/back-stack behaviour: `docs/business/navigation/README.md`.
+
 ## 7. WBS chi tiết
 
 Sizing is relative (`S`, `M`, `L`, `XL`) and is not a calendar estimate. A work package is independently reviewable and testable. `CP` marks the critical path to the first complete learning release.
+
+### Phase 0 — Historical Visual Parity Audit
+
+**Precedence: Phase 0 runs before every remaining UI work package in this WBS.**
+Work packages shipped before 2026-07-19 were accepted without a Flutter Web ↔
+Design Kit comparison, so their UI coverage is not considered complete. Phase 0
+retro-covers them. Domain, data and policy rows (non-UI) are not halted.
+
+| WBS | Work package | Size | Depends on | Deliverable / Definition of Done |
+| --- | --- | --- | --- | --- |
+| P0.1 | Screen/state census | M | — | Every implemented screen, dialog, bottom sheet and UI state is enumerated and assigned an `MX-VIS-*` ID in the register below; each ID resolves to a kit shot or is explicitly marked *no kit reference*, **and to its owning Master flow node (§6.6)**. Master flow branches with no covering state are recorded as coverage gaps. |
+| P0.2 | Flutter Web parity harness | L | P0.1 | `tool/parity/**`: release web build, static server, Playwright project with the frozen environment (§6.5), pixel-diff comparator, artifact writer (`expected/actual/diff` + ratio), CI entry wired into `tool/verify/run.mjs`. |
+| P0.3 | State fixture layer | L | P0.2 | A deterministic fixture per `MX-VIS-*` state, addressable from the web build (`?fixture=<id>`), built on WBS 1.6 injected clock/IDs/random and WBS 1.7 dev fixtures; release builds never expose it. |
+| P0.4 | Playwright flows and capture | XL | P0.3 | One Playwright spec per screen covering its states, **each traversing its owning Master flow (§6.6) from that flow's entry node** — no deep-link shortcuts. Theme switch, viewport pin, stable capture. Every `MX-VIS-*` produces a measured ratio and names its business flow node. |
+| P0.5 | Remediation to ≤3% | XL | P0.4 | Every `MX-VIS-*` with a kit reference is fixed until `diff ≤ 3%`, or carries a recorded, approved, expiring exception. Fixes land in shared `Mx*`/token layers when the cause is systemic. |
+| P0.6 | Phase 0 exit gate | L | P0.5 | The parity suite runs in the consolidated verifier and fails the build on any regression; the merge gate (§6.5) is enforced; the census has no unmeasured state. **Only after P0.6 does new UI WBS work resume.** |
+
+#### Phase 0 state register (`MX-VIS-*`)
+
+One ID per screen + state. Light and dark are measured, stored and reported
+**separately** under the same ID (`--light` / `--dark`); the ID passes only when
+both themes pass. Status legend: `Enforced` = already asserted by the WBS 3.15
+in-test harness and pending migration to the Playwright gate; `Pending` = not
+yet measured under this gate.
+
+| ID | Screen | State | Kit reference | Status |
+| --- | --- | --- | --- | --- |
+| MX-VIS-001 | First-run landing | Default | `create-deck-firstrun--landing` | Enforced (1.42% light) |
+| MX-VIS-002 | First-run landing | Not-now dismissing | `create-deck-firstrun--not-now` | Pending |
+| MX-VIS-003 | First-run language (step 1) | Empty draft | *no kit reference* | Pending |
+| MX-VIS-004 | First-run language (step 1) | Complete selection | `create-deck-firstrun--step1` | Enforced |
+| MX-VIS-005 | First-run language (step 1) | Validation error | `create-deck-firstrun--step1-validation` | Pending |
+| MX-VIS-006 | Language select sheet | Unfiltered list | *no kit reference* (nearest `languages--list`) | Pending — kit decision needed |
+| MX-VIS-007 | Language select sheet | Search filtered | *no kit reference* | Pending — kit decision needed |
+| MX-VIS-008 | Language select sheet | No match | *no kit reference* | Pending — kit decision needed |
+| MX-VIS-009 | First-run deck setup (step 2) | Name filled | `create-deck-firstrun--step2` | Enforced |
+| MX-VIS-010 | First-run deck setup (step 2) | Optional section expanded | `create-deck-firstrun--step2-optional` | Pending |
+| MX-VIS-011 | First-run deck setup (step 2) | Submitting | `create-deck-firstrun--submitting` | Pending |
+| MX-VIS-012 | First-run deck setup (step 2) | Submit failure banner | `create-deck-firstrun--submit-failure` | Pending |
+| MX-VIS-013 | First-run deck setup (step 2) | Duplicate name conflict | `create-deck-firstrun--duplicate` | Pending |
+| MX-VIS-014 | First-run deck setup (step 2) | Name too long | `create-deck-firstrun--name-too-long` | Pending |
+| MX-VIS-015 | First-run deck setup (step 2) | Resume draft | `create-deck-firstrun--resume-draft` | Pending |
+| MX-VIS-016 | First-run deck setup (step 2) | Success handoff | `create-deck-firstrun--success` | Pending |
+| MX-VIS-017 | First-run | Import branch | `create-deck-firstrun--import-branch` | Blocked — import flow (13.1) |
+| MX-VIS-018 | Library | Empty | `library--empty` | Enforced (1.10% light) |
+| MX-VIS-019 | Library | Loading | `library--loading` | Pending |
+| MX-VIS-020 | Library | Loaded list | `library--loaded` | Blocked — FilterRow + SRS counters (10.2, 5.4.2) |
+| MX-VIS-021 | Library | First-deck callout | `library--first-deck-created` | Blocked — same as MX-VIS-020 |
+| MX-VIS-022 | Library | Callout dismissed | `library--first-deck-created-dismissed` | Blocked — same as MX-VIS-020 |
+| MX-VIS-023 | Library | Dense list | `library--dense` | Pending |
+| MX-VIS-024 | Library | Error | *no kit reference* (nearest `library--offline`) | Pending — kit decision needed |
+| MX-VIS-025 | Create Deck dialog | Root default | `create-deck-dialog--root-default` | Pending |
+| MX-VIS-026 | Create Deck dialog | Nested | `create-deck-dialog--nested` | Pending |
+| MX-VIS-027 | Create Deck dialog | Validation error | `create-deck-dialog--validation` | Pending |
+| MX-VIS-028 | Create Deck dialog | Duplicate sibling | `create-deck-dialog--duplicate-sibling` | Pending |
+| MX-VIS-029 | Create Deck dialog | Optional expanded | `create-deck-dialog--optional-expanded` | Pending |
+| MX-VIS-030 | Create Deck dialog | Submitting | `create-deck-dialog--submitting` | Pending |
+| MX-VIS-031 | Create Deck dialog | Submit failure | `create-deck-dialog--submit-failure` | Pending |
+| MX-VIS-032 | Create Deck dialog | Long name | `create-deck-dialog--long-name` | Pending |
+| MX-VIS-033 | Create Deck dialog | Keyboard open | `create-deck-dialog--keyboard-open` | Pending |
+| MX-VIS-034 | Deck detail — empty branch | Default | `empty-deck--default` | Blocked — add-card CTA enabled (5.3.2); measured 9.68% light / 13.58% dark |
+| MX-VIS-035 | Deck detail — empty branch | Create nested dialog | `empty-deck--create-nested-dialog` | Pending |
+| MX-VIS-036 | Deck detail — parent branch | Loaded | `subdeck-list--loaded` | Pending |
+| MX-VIS-037 | Deck detail — parent branch | Loading | `subdeck-list--loading` | Pending |
+| MX-VIS-038 | Deck detail — parent branch | Error | `subdeck-list--error` | Pending |
+| MX-VIS-039 | Deck detail — parent branch | Not found | `subdeck-list--not-found` | Pending |
+| MX-VIS-040 | Deck detail — parent branch | Dense | `subdeck-list--dense` | Pending |
+| MX-VIS-041 | Deck detail — parent branch | Deep hierarchy | `subdeck-list--deep` | Pending |
+| MX-VIS-042 | Deck detail — leaf branch | Loaded | `flashcard-list--loaded` | Pending |
+| MX-VIS-043 | Deck detail — leaf branch | Loading | `flashcard-list--loading` | Pending |
+| MX-VIS-044 | Deck detail — leaf branch | Error | `flashcard-list--error` | Pending |
+| MX-VIS-045 | Deck detail — leaf branch | Minimum data | `flashcard-list--minimum-data` | Pending |
+| MX-VIS-046 | Deck detail — leaf branch | Dense | `flashcard-list--dense` | Pending |
+| MX-VIS-047 | Deck detail — leaf branch | Long text | `flashcard-list--long-text` | Pending |
+| MX-VIS-048 | Home / Stats / Profile placeholders | Default | *no kit reference — placeholder chrome* | Out of scope until 5.7 / 11.2 replace them |
+| MX-VIS-049 | Card Editor | Create | `flashcard-editor--create` | **FAIL — 12.12% light / 12.61% dark** (unmerged 5.3.2 work in tree; must reach ≤3% before that PR merges) |
+
+Rows marked **Blocked** name the WBS item that unblocks them; they are not
+waivers. Rows marked *kit decision needed* require the Design Kit owner either
+to publish a shot or to record the state as intentionally unspecified before
+P0.6 can close.
+
+Responsive checks at `360×800`, `393×852` and `412×915` run for every ID as
+overflow/reachability assertions only — they never replace the `390×780`
+comparison.
 
 ### 0. Governance và đồng bộ contract
 
@@ -323,7 +575,7 @@ Build components in dependency order. Each public shared type has guard-required
 | 3.12 CP | Minimal `Mx*` first-learning gate | L | 3.1–3.10, 4.10 | Only APIs/states used by Language Pair→Deck→Card→Picker→five stages→Result are documented and pass widget/golden/a11y tests; later catalog variants do not block this gate. |
 | 3.13 | Feedback expansion | L | 3.7 | Snackbar service, skeleton, generic empty states and menu variants not required by the first-learning gate. |
 | 3.14 | Shared composite expansion | L | 3.10 | StatusCardRow and post-first-learning composites with feature-free APIs. |
-| 3.15 CP | Kit visual parity gate | L | 3.12 | Pre-merge rule: every changed screen state compares against its kit shot (390, light+dark) with <3% pixel diff; retro coverage of shipped screens. |
+| 3.15 CP | Kit visual parity gate (in-test harness) | L | 3.12 | Fast inner-loop check: `flutter_test` renders a state and pixel-diffs it against its kit shot (390, light+dark) at <3%. Superseded as the *merge gate* by Phase 0 (`P0.2`–`P0.6`), which compares the real Flutter Web build through Playwright; 3.15 remains the pre-push fast feedback layer and its enforced states migrate into the Phase 0 register. |
 
 Relevant audit groups: KIT-15–22, KIT-28–31, KIT-40–43, KIT-47–48.
 
@@ -559,7 +811,8 @@ This wave starts only after local workflows and migration/version contracts are 
 | Migration | Exported schema + generated migration tests | Every old schema to current, data preservation, corrupt/incompatible recovery. |
 | Riverpod | ProviderContainer tests | Loading/data/error, command retry, disposal, narrow invalidation, typed effects. |
 | Widget | State/action/accessibility tests | All canonical states, keyboard/back/dismiss, semantics/focus, 1.0/1.3/2.0 text. |
-| Golden | Visual parity/adaptive snapshots | 390×780 light/dark under 3% when reference exists; representative widths in each class. |
+| Golden | In-test visual snapshots | 390×780 light/dark under 3% when reference exists; representative widths in each class. Fast feedback only — not the merge gate. |
+| **Kit visual parity** | **Flutter Web + Playwright vs Design Kit** | **Every screen/dialog/sheet state at 390×780 light+dark, diff ≤3%, artifacts emitted (§6.4–6.5). This is the merge gate; the golden row does not substitute for it.** |
 | Integration | Critical user journeys | First learn, save failure retry, force-close/resume, offline, time rollover, stale writer. |
 | Platform | Real/simulated capability tests | File picker, notifications, audio focus, secure storage, database opener and app lifecycle. |
 | Performance | Repeatable benchmarks | Large Deck tree, 10k+ cards, dense attempts, index rebuild, session resume and cold startup. |
@@ -584,6 +837,7 @@ A feature is complete only when all items below are true:
 12. The consolidated repository verifier passes and no relevant warning is waived without owner/target.
 13. Relevant KIT groups are fully checked; no open P0/P1; evidence is reproducible.
 14. Navigation, schema, migration, business and WBS traceability docs are updated in the same change.
+15. Every affected screen, dialog, bottom sheet and UI state has an `MX-VIS-*` ID, a Playwright flow, and a Flutter Web ↔ Design Kit comparison at ≤3% in both themes, with `expected`/`actual`/`diff` artifacts stored (§6.4–6.5). The merge gate passed.
 
 ## 10. Các phần nên bổ sung ngoài danh sách ban đầu
 
@@ -603,8 +857,10 @@ A feature is complete only when all items below are true:
 
 ## 11. Nhịp triển khai đề xuất
 
+- **Phase 0 first.** No new UI work package starts until `P0.6` exits. Non-UI domain/data rows may proceed in parallel.
 - Keep one active vertical slice per integration stream. Avoid parallel writes to router, schema, theme, shared widgets or generated provider inputs.
-- Never start an implementation row without its reviewed packet; only `1.1` is Ready in the current baseline.
+- Never start an implementation row without its reviewed packet; only `P0.1` is Ready in the current baseline.
+- Treat a >3% parity result as a defect in the current PR, not as backlog. Fix it in the same change or the change does not merge.
 - Begin each slice with FD-01–FD-03 and finish with FD-13–FD-16; do not leave visual/a11y/docs cleanup for a separate indefinite phase.
 - Use small PR boundaries: contract/decision table, domain+data, presentation state, UI+evidence, then integration gate when separation improves reviewability.
 - Run the quick targeted verifier during the inner loop and the full verifier at the slice gate.

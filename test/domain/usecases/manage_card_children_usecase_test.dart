@@ -7,6 +7,9 @@ import 'package:memox_v6/domain/usecases/flashcard/manage_card_audio_usecase.dar
 import 'package:memox_v6/domain/usecases/flashcard/manage_card_tags_usecase.dart';
 import 'package:memox_v6/domain/usecases/flashcard/manage_card_translations_usecase.dart';
 
+import '../../support/fake_clock.dart';
+import '../../support/sequential_ids.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -16,6 +19,7 @@ void main() {
   late ManageCardTagsUseCase tags;
   late ManageCardAudioUseCase audio;
 
+  final clock = FakeClock(DateTime.utc(2026, 7, 19));
   final t0 = DateTime.utc(2026, 7, 19);
   final t1 = DateTime.utc(2026, 7, 19, 1);
 
@@ -30,7 +34,11 @@ void main() {
     database = db.AppDatabase.forTesting(NativeDatabase.memory());
     cards = DriftFlashcardRepository(database);
     translations = ManageCardTranslationsUseCase(cards: cards);
-    tags = ManageCardTagsUseCase(cards: cards);
+    tags = ManageCardTagsUseCase(
+      cards: cards,
+      idGenerator: SequentialIdGenerator(prefix: 'tag'),
+      clock: clock,
+    );
     audio = ManageCardAudioUseCase(cards: cards);
 
     await database.languagePairDao.insertLanguagePair(

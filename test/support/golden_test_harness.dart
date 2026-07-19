@@ -19,6 +19,14 @@ Future<void> loadAppFonts() async {
   ).readAsBytesSync();
   final loader = FontLoader('Plus Jakarta Sans')
     ..addFont(Future.value(ByteData.view(data.buffer)));
+  // Merge a Hangul-capable system face into the same family so
+  // deck-driven Korean labels render as glyphs instead of boxes
+  // (devices fall back through the platform; the test binding cannot).
+  final hangul = File(r'C:\Windows\Fonts\malgun.ttf');
+  if (hangul.existsSync()) {
+    final hangulData = hangul.readAsBytesSync();
+    loader.addFont(Future.value(ByteData.view(hangulData.buffer)));
+  }
   await loader.load();
   await _loadMaterialSymbols();
 }
