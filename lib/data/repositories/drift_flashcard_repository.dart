@@ -2,6 +2,7 @@ import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/data/database/sqlite_error_mapper.dart';
 import 'package:memox_v6/data/mappers/content_mapper.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart' as domain;
+import 'package:memox_v6/domain/flashcard/card_text.dart';
 import 'package:memox_v6/domain/flashcard/flashcard_repository.dart';
 import 'package:memox_v6/domain/flashcard/new_card_content.dart';
 
@@ -27,6 +28,7 @@ class DriftFlashcardRepository implements FlashcardRepository {
           card.id,
           card.deckId,
           card.term,
+          normalizeCardTerm(card.term),
           card.primaryMeaning,
           card.createdAt.millisecondsSinceEpoch,
           card.updatedAt.millisecondsSinceEpoch,
@@ -71,6 +73,17 @@ class DriftFlashcardRepository implements FlashcardRepository {
         );
       });
     });
+  }
+
+  @override
+  Future<List<domain.Flashcard>> duplicateCandidates({
+    required String languagePairId,
+    required String normalizedTerm,
+  }) async {
+    final rows = await _database.flashcardDao
+        .findDuplicateCandidates(languagePairId, normalizedTerm)
+        .get();
+    return rows.map((row) => row.toDomain()).toList();
   }
 
   @override

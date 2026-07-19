@@ -98,6 +98,7 @@ void main() {
           'c$index',
           'd1',
           'term-$index',
+          'term-$index',
           'meaning-$index',
           index,
           index,
@@ -143,6 +144,7 @@ void main() {
       await insertCards(1);
 
       await database.flashcardDao.updateFlashcardContent(
+        'term-x',
         'term-x',
         'meaning-x',
         7,

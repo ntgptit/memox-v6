@@ -85,6 +85,7 @@ void main() {
       'c1',
       'root',
       'hello',
+      'hello',
       'xin chào',
       0,
       0,
@@ -92,6 +93,7 @@ void main() {
     await database.flashcardDao.insertFlashcard(
       'c2',
       'root',
+      'bye',
       'bye',
       'tạm biệt',
       1,
@@ -124,6 +126,7 @@ void main() {
     await database.flashcardDao.insertFlashcard(
       'c1',
       'asia',
+      'hello',
       'hello',
       'xin chào',
       0,
@@ -159,6 +162,7 @@ void main() {
     await database.flashcardDao.insertFlashcard(
       'c1',
       'root',
+      'hello',
       'hello',
       'xin chào',
       0,

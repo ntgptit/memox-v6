@@ -35,9 +35,9 @@ void main() {
 
   Future<void> insertCard(String id, {String deckId = 'd1'}) {
     return database.customStatement(
-      'INSERT INTO flashcards (id, deck_id, term, primary_meaning, '
-      'created_at, updated_at) VALUES (?, ?, ?, ?, 0, 0)',
-      [id, deckId, 'term', 'meaning'],
+      'INSERT INTO flashcards (id, deck_id, term, normalized_term, '
+      'primary_meaning, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 0, 0)',
+      [id, deckId, 'term', 'term', 'meaning'],
     );
   }
 

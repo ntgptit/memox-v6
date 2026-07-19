@@ -63,7 +63,15 @@ void main() {
         0,
         0,
       );
-      await database.flashcardDao.insertFlashcard('c1', 'asia', 't', 'm', 0, 0);
+      await database.flashcardDao.insertFlashcard(
+        'c1',
+        'asia',
+        't',
+        't',
+        'm',
+        0,
+        0,
+      );
 
       final container = createTestContainer(
         overrides: [appDatabaseProvider.overrideWithValue(database)],

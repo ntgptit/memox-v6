@@ -90,7 +90,15 @@ void main() {
   });
 
   testWidgets('Leaf offers Add card only', (tester) async {
-    await database.flashcardDao.insertFlashcard('c1', 'root', 't', 'm', 0, 0);
+    await database.flashcardDao.insertFlashcard(
+      'c1',
+      'root',
+      't',
+      't',
+      'm',
+      0,
+      0,
+    );
 
     await tester.pumpWidget(app());
     await pumpStreams(tester);
@@ -126,7 +134,15 @@ void main() {
   testWidgets('back to Empty reopens every choice (no stale lock)', (
     tester,
   ) async {
-    await database.flashcardDao.insertFlashcard('c1', 'root', 't', 'm', 0, 0);
+    await database.flashcardDao.insertFlashcard(
+      'c1',
+      'root',
+      't',
+      't',
+      'm',
+      0,
+      0,
+    );
 
     await tester.pumpWidget(app());
     await pumpStreams(tester);
@@ -143,7 +159,15 @@ void main() {
   });
 
   test('the store backstop blocks a child under a Leaf', () async {
-    await database.flashcardDao.insertFlashcard('c1', 'root', 't', 'm', 0, 0);
+    await database.flashcardDao.insertFlashcard(
+      'c1',
+      'root',
+      't',
+      't',
+      'm',
+      0,
+      0,
+    );
     final createDeck = CreateDeckUseCase(
       decks: DriftDeckRepository(database),
       pairs: DriftLanguagePairRepository(database),

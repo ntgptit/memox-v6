@@ -112,6 +112,7 @@ class DevFixtures {
       'fix-card',
       'fix-deck',
       'hello',
+      'hello',
       'xin chào',
       _now,
       _now,
@@ -160,6 +161,7 @@ class DevFixtures {
         await _database.flashcardDao.insertFlashcard(
           cardId,
           deckId,
+          'term $cardIndex',
           'term $cardIndex',
           'meaning $cardIndex',
           _now + cardIndex,

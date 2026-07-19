@@ -58,7 +58,15 @@ void main() {
       0,
       0,
     );
-    await database.flashcardDao.insertFlashcard('c1', 'd1', 't', 'm', 0, 0);
+    await database.flashcardDao.insertFlashcard(
+      'c1',
+      'd1',
+      't',
+      't',
+      'm',
+      0,
+      0,
+    );
     await database.learningProgressDao.insertProgress(
       'p1',
       'c1',

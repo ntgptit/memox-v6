@@ -26,7 +26,15 @@ void main() {
       0,
       0,
     );
-    await database.flashcardDao.insertFlashcard('c1', 'd1', 't', 'm', 0, 0);
+    await database.flashcardDao.insertFlashcard(
+      'c1',
+      'd1',
+      't',
+      't',
+      'm',
+      0,
+      0,
+    );
   });
 
   tearDown(() async {
@@ -77,8 +85,24 @@ void main() {
     });
 
     test('due paging excludes future, hidden and deleted cards', () async {
-      await database.flashcardDao.insertFlashcard('c2', 'd1', 't2', 'm2', 0, 0);
-      await database.flashcardDao.insertFlashcard('c3', 'd1', 't3', 'm3', 0, 0);
+      await database.flashcardDao.insertFlashcard(
+        'c2',
+        'd1',
+        't2',
+        't2',
+        'm2',
+        0,
+        0,
+      );
+      await database.flashcardDao.insertFlashcard(
+        'c3',
+        'd1',
+        't3',
+        't3',
+        'm3',
+        0,
+        0,
+      );
       await database.learningProgressDao.insertProgress(
         'p1',
         'c1',
