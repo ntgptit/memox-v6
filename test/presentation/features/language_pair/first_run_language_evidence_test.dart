@@ -76,8 +76,19 @@ void main() {
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
 
-      // Landed on the real home route with the pair persisted.
+      // Step 2: name the first deck and create it.
+      expect(find.text('Step 2 of 2'), findsOneWidget);
+      await tester.enterText(find.byType(TextField).first, 'Korean TOPIK I');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Create deck'));
+      await tester.pumpAndSettle();
+
+      // Landed on the real home route with the pair and deck persisted.
       expect(find.text('MemoX'), findsOneWidget);
+      final deck = await database
+          .customSelect('SELECT COUNT(*) AS n FROM decks')
+          .getSingle();
+      expect(deck.read<int>('n'), 1);
       final stored = await database.languagePairDao
           .findLanguagePairByKey('en|vi')
           .getSingleOrNull();

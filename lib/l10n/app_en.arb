@@ -84,6 +84,62 @@
   "@notNowLabel": {
     "description": "Tertiary link dismissing the landing."
   },
+  "stepOneOfTwo": "Step 1 of 2",
+  "@stepOneOfTwo": {
+    "description": "Step indicator on the first-run language step."
+  },
+  "stepTwoOfTwo": "Step 2 of 2",
+  "@stepTwoOfTwo": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "changeLabel": "Change",
+  "@changeLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "requiredSectionTitle": "Required",
+  "@requiredSectionTitle": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "optionalSectionTitle": "Optional",
+  "@optionalSectionTitle": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "showLabel": "Show",
+  "@showLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "hideLabel": "Hide",
+  "@hideLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "deckNameLabel": "Deck name",
+  "@deckNameLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "deckDescriptionLabel": "Description",
+  "@deckDescriptionLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "createDeckLabel": "Create deck",
+  "@createDeckLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "deckNameRequiredMessage": "Add a deck name.",
+  "@deckNameRequiredMessage": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "deckNameDuplicateMessage": "A deck with this name already exists here.",
+  "@deckNameDuplicateMessage": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "backLabel": "Back",
+  "@backLabel": {
+    "description": "First-run deck setup (step 2) copy."
+  },
+  "loadingLabel": "Loading…",
+  "@loadingLabel": {
+    "description": "Generic loading indicator label."
+  },
   "somethingWentWrongMessage": "Something went wrong.",
   "@somethingWentWrongMessage": {
     "description": "User-safe message shown when a screen fails to render."

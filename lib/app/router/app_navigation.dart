@@ -13,4 +13,8 @@ extension AppNavigation on BuildContext {
   /// Opens the first-run language step (step 1 of the setup).
   void goFirstRunLanguage() =>
       GoRouter.of(this).go(RoutePaths.firstRunLanguage);
+
+  /// Opens the first-run deck step (step 2 of the setup).
+  void goFirstRunDeckSetup() =>
+      GoRouter.of(this).go(RoutePaths.firstRunDeckSetup);
 }

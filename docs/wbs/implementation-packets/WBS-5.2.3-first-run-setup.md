@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — child A Done (2026-07-19); B, C pending |
+| Status | **In progress** — children A, B Done (2026-07-19); C pending |
 | Owner/domain | Deck / Presentation |
 | Depends on | `3.12`, `5.1.2`, `5.2.2` — Done |
 | Decision gates | DG-01 |
@@ -45,6 +45,31 @@
   that flow lands (recorded handoff boundary).
 - 3 widget tests: CTA composition (import pending), primary → step 1,
   Not now persisting the flag and landing home.
+
+## Child B — two-step setup (Done, 2026-07-19)
+
+- Step 1 = the 5.1.2 language screen, now continuing to step 2 instead
+  of home; its selection draft turns keep-alive so "Change" returns to
+  the previous selections (`create-deck.md` draft rule).
+- `FirstRunDeckSetupScreen` (route `/first-run/deck`) — the §6
+  composition: back arrow + "Step 2 of 2", required auto-gating deck
+  name (create disabled until non-empty), the chosen-pair summary with
+  **Change** back to step 1, collapsed **Optional** description with
+  Show/Hide, and nothing else (no default view, no cards, no study
+  settings).
+- `first_run_deck_viewmodel.dart` — keep-alive deck draft
+  (name/description/`retryDeckId`) surviving Change/back and cleared on
+  success; `ensureRetryDeckId` gives the kept-id submit idempotency;
+  `CreateFirstDeckViewmodel.createDeck` resolves the active pair and
+  creates through `CreateDeckUseCase` (missing pair fails typed —
+  never guessed).
+- Failure surfaces per §7: `deckName` validation and sibling
+  duplicates inline under the field; other failures as the banner;
+  submitting disables fields and the CTA.
+- 4 widget tests (summary + name gating, draft across Change/back,
+  create persisting name+description then home, inline duplicate) and
+  the 5.1.3 E2E extended through step 2 to the real home with the deck
+  persisted.
 
 ## Acceptance and test procedure
 

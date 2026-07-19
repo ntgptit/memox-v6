@@ -32,6 +32,11 @@ void main() {
           path: RoutePaths.home,
           builder: (context, state) => const Scaffold(body: Text('home-stub')),
         ),
+        GoRoute(
+          path: RoutePaths.firstRunDeckSetup,
+          builder: (context, state) =>
+              const Scaffold(body: Text('deck-step-stub')),
+        ),
         ...languagePairRoutes(),
       ],
     );
@@ -95,7 +100,7 @@ void main() {
     expect(find.text('No languages match your search.'), findsOneWidget);
   });
 
-  testWidgets('saving persists the pair and selection then navigates home', (
+  testWidgets('saving persists the pair and selection then opens step 2', (
     tester,
   ) async {
     await tester.pumpWidget(app());
@@ -110,7 +115,7 @@ void main() {
     await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
 
-    expect(find.text('home-stub'), findsOneWidget);
+    expect(find.text('deck-step-stub'), findsOneWidget);
 
     final pair = await database.languagePairDao
         .findLanguagePairByKey('en|vi')
@@ -177,6 +182,6 @@ void main() {
     expect(find.text('Could not save'), findsOneWidget);
     expect(find.text('English · English'), findsOneWidget);
     expect(find.text('Tiếng Việt · Vietnamese'), findsOneWidget);
-    expect(find.text('home-stub'), findsNothing);
+    expect(find.text('deck-step-stub'), findsNothing);
   });
 }
