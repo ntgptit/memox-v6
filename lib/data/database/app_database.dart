@@ -6,13 +6,13 @@ part 'app_database.g.dart';
 /// Production database file name (without extension).
 const String appDatabaseName = 'memox';
 
-/// The one shared Drift database (WBS 4.1; ADR-004).
+/// The one shared Drift database (WBS 4.1/4.2; ADR-004).
 ///
-/// Schema v1 tables land with WBS 4.2 (`docs/database/schema-v1.md` is the
-/// accepted design); this runtime owns opening, versioning and lifecycle.
-/// Web and Android share this schema through the platform openers in
-/// `core/database`.
-@DriftDatabase(tables: [])
+/// Schema v1 (`docs/database/schema-v1.md`) is defined SQL-first in
+/// `.drift` files under `tables/` — never as Dart `Table` classes — so
+/// the DDL stays reviewable against the accepted design. Web and Android
+/// share this schema through the platform openers in `core/database`.
+@DriftDatabase(include: {'tables/content.drift'})
 class AppDatabase extends _$AppDatabase {
   /// Opens the production database through the platform opener.
   AppDatabase.open() : super(openAppDatabaseExecutor(name: appDatabaseName));
@@ -23,4 +23,13 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    beforeOpen: (details) async {
+      // FK contracts in schema v1 are load-bearing; SQLite leaves them
+      // off per connection unless asked.
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
 }
