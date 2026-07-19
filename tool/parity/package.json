@@ -1,0 +1,18 @@
+{
+  "name": "memox-parity",
+  "private": true,
+  "type": "module",
+  "description": "Flutter Web + Playwright kit visual parity gate (WBS P0)",
+  "scripts": {
+    "build": "node build_web.mjs",
+    "lint:flows": "node flow_lint.mjs",
+    "report": "node report.mjs",
+    "test": "playwright test",
+    "parity": "node run.mjs",
+    "demo:first-card": "node run.mjs --id MX-VIS-049 --theme light --headed --slow-mo 300 --hold 4000"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "pngjs": "7.0.0"
+  }
+}

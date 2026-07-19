@@ -272,7 +272,7 @@ recorded PASS.
 | VP-01 | Render the surface in Flutter Web | The state is reachable in a `flutter build web --wasm=false` (CanvasKit) build served by the parity harness. |
 | VP-02 | Load the state fixture | The exact fixture that reproduces the Design Kit data for this state (§6.5); no manually staged data, no live clock. |
 | VP-03 | Set the viewport | Canonical comparison viewport `390×780` @ DPR 2 (§6.5). Responsive viewports run as separate non-comparison checks. |
-| VP-04 | Drive the flow with Playwright | Playwright reaches the state **by traversing the owning business Master flow** (§6.6), from that flow's entry node, through its real user actions — never by deep-linking to a route or mutating state directly to shortcut the path. |
+| VP-04 | Drive the flow with Playwright | Playwright starts from a fresh app launch at `/`, traverses every prerequisite flow and the owning business Master flow (§6.6) through visible user actions, captures the target node, then continues to an observable terminal outcome — never by deep-linking to a target route or mutating state to shortcut the path. |
 | VP-05 | Capture the screenshot | Deterministic capture after animations are disabled and fonts/images are settled (§6.5). |
 | VP-06 | Compare against the kit shot | Pixel diff against `ui_kits/memox-app/shots/<screen>--<state>--<theme>.png`. |
 | VP-07 | Emit artifacts | `expected.png`, `actual.png`, `diff.png` and the difference percentage, written under the run's evidence directory. |
@@ -365,15 +365,20 @@ PR or commit reference
 
 All of the following, with no exception:
 
-1. Playwright opens the correct route.
-2. The user flow to reach the state runs successfully **and matches the owning Master flow node-for-node** (§6.6).
+1. Playwright starts from a fresh app launch at `/`; it does not open the target
+   route directly.
+2. The user flow reaches the state through visible controls and **matches every
+   prerequisite flow plus the owning Master flow node-for-node** (§6.6).
 3. The fixture reproduces the Design Kit state exactly.
 4. The screenshot is stable across three consecutive runs.
 5. No overflow or clipping.
 6. No element is obscured or unclickable.
 7. Difference ≤ 3%.
-8. Result and artifacts are stored at the evidence path.
-9. The merge gate passes.
+8. After capture, the journey continues to an observable terminal outcome and
+   asserts the final rendered/persisted result.
+9. A reproducible headed run demonstrates the same pointer and keyboard actions.
+10. Result and artifacts are stored at the evidence path.
+11. The merge gate passes.
 
 ### 6.6 Master-flow conformance
 
@@ -385,13 +390,25 @@ recovery edges. Those charts are the specification for the Playwright script.
 Rules:
 
 - Every Playwright spec names its owning business document and the exact Master
-  flow node the capture corresponds to. A spec with no named node is not
-  reviewable and does not satisfy VP-04.
-- The flow is entered at the Master flow's own entry node and traversed through
-  real user actions. **Deep-linking straight to a route, or seeding the state a
-  screen is supposed to arrive at, is a bypass** — it hides broken navigation,
-  guards, redirects and handoffs, which is the class of defect an E2E flow
-  exists to catch. Fixtures set *data preconditions*; they never skip flow steps.
+  flow node the capture corresponds to, plus every prerequisite flow/node from
+  app launch to that entry. A spec with no named nodes is not reviewable and
+  does not satisfy VP-04.
+- The mandatory screen-delivery journey starts from a fresh app launch at `/`,
+  traverses first-use/navigation prerequisites, enters the owning Master flow,
+  and uses only real, visible user actions. **Deep-linking straight to a route,
+  or seeding the state a screen is supposed to arrive at, is a bypass** — it
+  hides broken navigation, guards, redirects and handoffs, which is the class of
+  defect an E2E flow exists to catch. Fixtures set *data preconditions*; they
+  never skip flow steps.
+- The screenshot/capture node is not the end of the journey. Playwright
+  continues through validation/mutation to the applicable success, recovery, or
+  cancel terminal node and asserts the observable rendered or persisted result.
+- Browser deep-link, refresh, and restored-URL scenarios remain required where
+  the navigation contract names them, but they are additional specs and never
+  replace the app-launch screen-delivery journey.
+- CI may execute headless. Every screen work package also exposes and runs a
+  reproducible headed command so a reviewer can observe pointer/keyboard input;
+  slow motion and a final hold may be used for inspection.
 - Decision branches in the chart (`Fresh install?`, `Kết quả: Lỗi/Thành công`,
   content-kind branching) are each covered by their own `MX-VIS-*` state. A
   branch with no covering state is a coverage gap recorded in the register, not
@@ -422,6 +439,10 @@ Rules:
 
 Cross-cutting entry/guard/back-stack behaviour: `docs/business/navigation/README.md`.
 
+The app-launch journey is the mandatory delivery proof for every new or
+materially changed screen. Route-entry, widget, golden, and state-only parity
+tests are supporting evidence only; none can close the UI work package alone.
+
 ## 7. WBS chi tiết
 
 Sizing is relative (`S`, `M`, `L`, `XL`) and is not a calendar estimate. A work package is independently reviewable and testable. `CP` marks the critical path to the first complete learning release.
@@ -438,7 +459,7 @@ retro-covers them. Domain, data and policy rows (non-UI) are not halted.
 | P0.1 | Screen/state census | M | — | Every implemented screen, dialog, bottom sheet and UI state is enumerated and assigned an `MX-VIS-*` ID in the register below; each ID resolves to a kit shot or is explicitly marked *no kit reference*, **and to its owning Master flow node (§6.6)**. Master flow branches with no covering state are recorded as coverage gaps. |
 | P0.2 | Flutter Web parity harness | L | P0.1 | `tool/parity/**`: release web build, static server, Playwright project with the frozen environment (§6.5), pixel-diff comparator, artifact writer (`expected/actual/diff` + ratio), CI entry wired into `tool/verify/run.mjs`. |
 | P0.3 | State fixture layer | L | P0.2 | A deterministic fixture per `MX-VIS-*` state, addressable from the web build (`?fixture=<id>`), built on WBS 1.6 injected clock/IDs/random and WBS 1.7 dev fixtures; release builds never expose it. |
-| P0.4 | Playwright flows and capture | XL | P0.3 | One Playwright spec per screen covering its states, **each traversing its owning Master flow (§6.6) from that flow's entry node** — no deep-link shortcuts. Theme switch, viewport pin, stable capture. Every `MX-VIS-*` produces a measured ratio and names its business flow node. |
+| P0.4 | Playwright flows and capture | XL | P0.3 | One Playwright spec per screen covering its states, **each starting from app launch at `/`, traversing prerequisite flows and its owning Master flow (§6.6), then continuing from capture to a terminal outcome** — no deep-link shortcuts. Theme switch, viewport pin, stable capture, and a reproducible headed run. Every `MX-VIS-*` produces a measured ratio and names its business flow nodes. |
 | P0.5 | Remediation to ≤3% | XL | P0.4 | Every `MX-VIS-*` with a kit reference is fixed until `diff ≤ 3%`, or carries a recorded, approved, expiring exception. Fixes land in shared `Mx*`/token layers when the cause is systemic. |
 | P0.6 | Phase 0 exit gate | L | P0.5 | The parity suite runs in the consolidated verifier and fails the build on any regression; the merge gate (§6.5) is enforced; the census has no unmeasured state. **Only after P0.6 does new UI WBS work resume.** |
 
@@ -452,7 +473,7 @@ yet measured under this gate.
 
 | ID | Screen | State | Kit reference | Status |
 | --- | --- | --- | --- | --- |
-| MX-VIS-001 | First-run landing | Default | `create-deck-firstrun--landing` | Enforced (1.42% light) |
+| MX-VIS-001 | First-run landing | Default | `create-deck-firstrun--landing` | **Playwright PASS — 1.71% light / 1.84% dark** |
 | MX-VIS-002 | First-run landing | Not-now dismissing | `create-deck-firstrun--not-now` | Pending |
 | MX-VIS-003 | First-run language (step 1) | Empty draft | *no kit reference* | Pending |
 | MX-VIS-004 | First-run language (step 1) | Complete selection | `create-deck-firstrun--step1` | Enforced |
@@ -500,7 +521,7 @@ yet measured under this gate.
 | MX-VIS-046 | Deck detail — leaf branch | Dense | `flashcard-list--dense` | Pending |
 | MX-VIS-047 | Deck detail — leaf branch | Long text | `flashcard-list--long-text` | Pending |
 | MX-VIS-048 | Home / Stats / Profile placeholders | Default | *no kit reference — placeholder chrome* | Out of scope until 5.7 / 11.2 replace them |
-| MX-VIS-049 | Card Editor | Create | `flashcard-editor--create` | **FAIL — 12.12% light / 12.61% dark** (unmerged 5.3.2 work in tree; must reach ≤3% before that PR merges) |
+| MX-VIS-049 | Card Editor | Create | `flashcard-editor--create` | **Playwright PASS — 1.29% light / 1.61% dark** (fresh app launch → first-use Create Deck A→K → user opens Empty Deck → Create Flashcard A→J; capture at C, PASS only after Save returns to Leaf list with the committed Card visible) |
 
 Rows marked **Blocked** name the WBS item that unblocks them; they are not
 waivers. Rows marked *kit decision needed* require the Design Kit owner either

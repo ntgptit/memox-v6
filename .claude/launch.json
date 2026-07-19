@@ -1,0 +1,32 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web-release",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": [
+        "run",
+        "--release",
+        "-d",
+        "web-server",
+        "--web-port",
+        "3002",
+        "--cross-origin-isolation"
+      ],
+      "port": 3002
+    },
+    {
+      "name": "flutter-web",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": [
+        "run",
+        "-d",
+        "web-server",
+        "--web-port",
+        "3001",
+        "--cross-origin-isolation"
+      ],
+      "port": 3001
+    }
+  ]
+}

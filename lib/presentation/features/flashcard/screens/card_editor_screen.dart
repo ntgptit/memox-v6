@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
+import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
 import 'package:memox_v6/presentation/features/flashcard/viewmodels/card_editor_viewmodel.dart';
 import 'package:memox_v6/presentation/shared/hooks/mx_text_hooks.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_form_footer.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
-import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
@@ -25,19 +26,40 @@ import 'package:memox_v6/core/utils/string_utils.dart';
 /// `flashcard-editor--create`): one focused form, single sticky Save,
 /// deck-driven language labels and a deck-context pill. Duplicate
 /// review, edit mode and the advanced sections land with children B/C.
-class CardEditorScreen extends StatelessWidget {
+class CardEditorScreen extends ConsumerWidget {
   const CardEditorScreen({super.key, required this.deckId});
 
   final String deckId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // guard:allow-screen-watch -- reason: the modal bar's close action
+    // is the kit dirty-cancel guard over the draft state (KIT-25-06).
     final l10n = AppLocalizations.of(context);
+    final isDirty = ref.watch(cardEditorDirtyViewmodelProvider);
+
+    Future<void> close() async {
+      if (!isDirty) {
+        Navigator.of(context).pop();
+        return;
+      }
+      final discard = await showMxConfirmDialog(
+        context,
+        icon: Symbols.delete_rounded,
+        tone: MxConfirmTone.warning,
+        title: l10n.discardCardTitle,
+        text: l10n.discardCardBody,
+        confirmLabel: l10n.discardLabel,
+        cancelLabel: l10n.keepEditingLabel,
+        danger: true,
+      );
+      if (discard && context.mounted) Navigator.of(context).pop();
+    }
 
     return MxScaffold(
       appBar: MxContextualAppBar(
         title: l10n.newCardTitle,
-        onClose: () => Navigator.of(context).pop(),
+        onClose: close,
         closeLabel: l10n.cancelLabel,
       ),
       scrollable: false,
@@ -60,25 +82,52 @@ class _CardEditorBody extends HookConsumerWidget {
     final meaning = useMxTextSubmitState();
     final tagsInput = useMxTextValue();
     final createAnother = useState(false);
+    final termTouched = useState(false);
+    final meaningTouched = useState(false);
+
+    void syncDraftState() {
+      ref
+          .read(cardEditorDirtyViewmodelProvider.notifier)
+          .set(
+            dirty:
+                term.controller.text.isNotEmpty ||
+                meaning.controller.text.isNotEmpty ||
+                tagsInput.controller.text.isNotEmpty,
+          );
+      ref.read(cardEditorDuplicatesViewmodelProvider.notifier).clear();
+    }
+
     final saveState = ref.watch(cardEditorSaveViewmodelProvider);
 
-    listenMxAction(
-      ref,
-      cardEditorSaveViewmodelProvider,
-      onSuccess: () {
-        if (createAnother.value) {
-          term.controller.clear();
-          meaning.controller.clear();
-          tagsInput.controller.clear();
-          ref.read(cardEditorSaveViewmodelProvider.notifier).reset();
-          return;
-        }
-        Navigator.of(context).pop();
-      },
-    );
+    // Success is signalled by the saved tick, never by the action
+    // settling — a duplicate-review pause also settles without saving.
+    ref.listen(cardEditorSavedTickViewmodelProvider, (previous, next) {
+      if (previous == null || next <= previous) return;
+      if (createAnother.value) {
+        term.controller.clear();
+        meaning.controller.clear();
+        tagsInput.controller.clear();
+        ref.read(cardEditorSaveViewmodelProvider.notifier).reset();
+        return;
+      }
+      Navigator.of(context).pop();
+    });
 
+    final duplicates = ref.watch(cardEditorDuplicatesViewmodelProvider);
     final isSubmitting = saveState is AsyncLoading<void>;
     final failure = MxActionErrors.failureOf(saveState);
+
+    void submit({required bool allowDuplicate}) {
+      ref
+          .read(cardEditorSaveViewmodelProvider.notifier)
+          .createFlashcard(
+            deckId: deckId,
+            term: term.controller.text,
+            primaryMeaning: meaning.controller.text,
+            rawTagLabels: _tagLabelsOf(tagsInput.controller.text),
+            allowDuplicate: allowDuplicate,
+          );
+    }
 
     return MxAsyncBuilder<CardEditorContext?>(
       value: editorContext,
@@ -110,11 +159,46 @@ class _CardEditorBody extends HookConsumerWidget {
                     const MxGap.s4(),
                     _DeckContextPill(deckName: editor.deck.name),
                     const MxGap.s6(),
+                    if (duplicates != null && duplicates.isNotEmpty) ...[
+                      MxBanner(
+                        tone: MxBannerTone.warning,
+                        title: l10n.duplicateCardMessage(duplicates.first.term),
+                        action: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            MxButton(
+                              label: l10n.viewExistingLabel,
+                              variant: MxButtonVariant.secondary,
+                              size: MxButtonSize.sm,
+                              onPressed: () =>
+                                  context.goDeckDetail(duplicates.first.deckId),
+                            ),
+                            const MxGap.s2(),
+                            MxButton(
+                              label: l10n.addAnywayLabel,
+                              variant: MxButtonVariant.ghost,
+                              size: MxButtonSize.sm,
+                              onPressed: isSubmitting
+                                  ? null
+                                  : () => submit(allowDuplicate: true),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const MxGap.s6(),
+                    ],
                     if (failure != null) ...[
                       MxBanner(
                         tone: MxBannerTone.error,
-                        title: l10n.saveFailedTitle,
-                        body: MxActionErrors.messageOf(failure, l10n),
+                        title: l10n.cardSaveFailedMessage,
+                        action: MxButton(
+                          label: l10n.tryAgainLabel,
+                          variant: MxButtonVariant.secondary,
+                          size: MxButtonSize.sm,
+                          onPressed: isSubmitting
+                              ? null
+                              : () => submit(allowDuplicate: false),
+                        ),
                       ),
                       const MxGap.s6(),
                     ],
@@ -124,7 +208,14 @@ class _CardEditorBody extends HookConsumerWidget {
                       boxed: true,
                       requiredField: true,
                       placeholder: l10n.enterTermPlaceholder,
+                      errorText: termTouched.value && !term.canSubmit
+                          ? l10n.enterTermError
+                          : null,
                       enabled: !isSubmitting,
+                      onChanged: (_) {
+                        termTouched.value = true;
+                        syncDraftState();
+                      },
                     ),
                     const MxGap.s6(),
                     MxTextField(
@@ -133,7 +224,14 @@ class _CardEditorBody extends HookConsumerWidget {
                       boxed: true,
                       requiredField: true,
                       placeholder: l10n.enterMeaningPlaceholder,
+                      errorText: meaningTouched.value && !meaning.canSubmit
+                          ? l10n.enterMeaningError
+                          : null,
                       enabled: !isSubmitting,
+                      onChanged: (_) {
+                        meaningTouched.value = true;
+                        syncDraftState();
+                      },
                     ),
                     const MxGap.s6(),
                     MxTextField(
@@ -142,6 +240,7 @@ class _CardEditorBody extends HookConsumerWidget {
                       boxed: true,
                       placeholder: l10n.addTagsPlaceholder,
                       enabled: !isSubmitting,
+                      onChanged: (_) => syncDraftState(),
                     ),
                     const MxGap.s6(),
                   ],
@@ -158,19 +257,10 @@ class _CardEditorBody extends HookConsumerWidget {
                 ),
                 const MxGap.s4(),
                 MxButton(
-                  label: l10n.saveLabel,
+                  label: isSubmitting ? l10n.savingLabel : l10n.saveLabel,
                   block: true,
                   onPressed: canSave
-                      ? () => ref
-                            .read(cardEditorSaveViewmodelProvider.notifier)
-                            .createFlashcard(
-                              deckId: deckId,
-                              term: term.controller.text,
-                              primaryMeaning: meaning.controller.text,
-                              rawTagLabels: _tagLabelsOf(
-                                tagsInput.controller.text,
-                              ),
-                            )
+                      ? () => submit(allowDuplicate: false)
                       : null,
                 ),
               ],

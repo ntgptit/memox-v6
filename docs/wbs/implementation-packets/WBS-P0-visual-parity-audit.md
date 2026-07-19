@@ -44,7 +44,7 @@ disagree, Phase 0 wins and the 3.15 tolerance is re-derived from it.
 
 ## In scope
 
-- The 48 `MX-VIS-*` IDs in the WBS Phase 0 register, light and dark.
+- The 49 `MX-VIS-*` IDs in the WBS Phase 0 register, light and dark.
 - A Flutter Web parity harness and its CI wiring.
 - Fixture addressing for every registered state.
 - Remediation of every measurable state to ≤3%.
@@ -84,7 +84,7 @@ Create:
 | `tool/parity/flows.ts` | `enterFlow(<business-doc-id>)` — the Master flow entry/guard traversals from `docs/business/navigation/README.md`; the only sanctioned way a spec reaches a starting node. |
 | `tool/parity/flow_lint.mjs` | Asserts every spec header names a real `docs/business/**` doc with a `# 3. Master flow`, and flags undeclared `page.goto()` shortcuts. |
 | `tool/parity/specs/<screen>.spec.ts` | One spec per screen, one test per `MX-VIS-*` × theme; header binds it to its Master flow node. |
-| `lib/app/dev/parity_entrypoint.dart` | Reads `?fixture=<MX-VIS-id>&theme=<light\|dark>`, installs deterministic ports + fixture, mounts the route. Compiled out of release builds by an assert-gated guard, same policy as `dev_fixtures.dart`. |
+| `lib/app/dev/parity_entrypoint.dart` | Reads `?fixture=<MX-VIS-id>&theme=<light\|dark>`, installs deterministic ports + data preconditions, and mounts the app at `/`. Compiled out of release builds by an assert-gated guard, same policy as `dev_fixtures.dart`. |
 | `evidence/parity/<MX-VIS-id>--<theme>/{expected,actual,diff}.png` | Durable artifacts. |
 | `evidence/parity/summary.json` | Machine-readable results for the gate. |
 
@@ -103,8 +103,8 @@ Do not edit: generated Drift/Riverpod output, `lib/l10n/generated/**`, kit shots
 
 - One fixture per `MX-VIS-*` ID, keyed by that ID.
 - A fixture sets: database contents, active language pair, draft state, provider
-  overrides, injected clock instant, ID sequence, random seed, and the initial
-  route.
+  overrides, injected clock instant, ID sequence, and random seed. The browser
+  still launches the app at `/`; the fixture does not select a target route.
 - A fixture never reaches the network and never reads a real clock.
 - A state that needs a user action to reach (dialog open, field focused,
   submitting, keyboard visible) is produced by the Playwright flow, not by a
@@ -123,15 +123,24 @@ Each spec file carries a header block binding it to the business source:
 ```ts
 // MX-VIS-025 · Create Deck dialog · root default
 // Master flow: docs/business/deck/create-deck.md §3
-// Path: App launch → Dashboard/Library → "Create Deck dialog"
+// Prerequisite flow: docs/business/navigation/README.md · app launch guard
+// Path: App launch `/` → Dashboard/Library → "Create Deck dialog" → terminal outcome
 ```
 
-- `tool/parity/specs/**` traverses from the Master flow entry node. Helper
-  `enterFlow('deck/create-deck')` performs the launch + guard sequence from
-  `docs/business/navigation/README.md`; it does not `page.goto()` a deep route.
-- Reaching a state by `page.goto('/deck/<id>')` is allowed **only** for states
-  whose Master flow entry genuinely is a deep link (notification entry, Web
-  refresh, restored URL) and the spec says so.
+- `tool/parity/specs/**` starts from a fresh app launch at `/`, traverses the
+  launch/first-use/navigation prerequisites, and then follows the owning Master
+  flow with visible, hit-testable controls. It does not `page.goto()` a target
+  route, invoke app callbacks/providers/repositories, or mutate persistence to
+  move the journey forward.
+- Reaching a state by `page.goto('/deck/<id>')` is allowed only in a separate
+  navigation spec whose Master flow entry genuinely is a deep link
+  (notification entry, Web refresh, restored URL). That spec is supplementary
+  and does not satisfy the screen-delivery journey requirement.
+- Capturing the parity state is an intermediate assertion. The same journey
+  continues to its applicable terminal success/recovery/cancel node and asserts
+  the final rendered or persisted result.
+- Every screen group exposes a reproducible headed command for reviewer-visible
+  pointer and keyboard actions. The CI run may remain headless.
 - Branch coverage is asserted, not assumed: `P0.1` records, per business
   document, which chart nodes have a covering `MX-VIS-*` and which do not.
 - Web-specific Tier-1 behaviour on the traversed path — browser Back/Forward,
@@ -169,8 +178,10 @@ Per registered ID the spec asserts, before capture:
 - `AC-WBS-P0-03` — every registered ID has a fixture that reproduces its kit
   state deterministically.
 - `AC-WBS-P0-04` — every registered ID has a Playwright flow that traverses its
-  owning Master flow from the entry node and a measured ratio in `summary.json`;
-  no ID is unmeasured and no ID reaches its state by an undeclared deep link.
+  prerequisite flows from a fresh app launch, then its owning Master flow to an
+  observable terminal outcome, and has a measured ratio in `summary.json`; no ID
+  is unmeasured and no ID reaches its state by an undeclared deep link. Every
+  screen group also has a passing reproducible headed command.
 - `AC-WBS-P0-05` — every measurable ID is ≤3% in both themes, or carries an
   approved, expiring exception naming the blocking WBS item.
 - `AC-WBS-P0-06` — the verifier fails on regression; the merge gate is active;
@@ -187,6 +198,10 @@ Per registered ID the spec asserts, before capture:
 - `TEST-WBS-P0-04b` — flow-conformance lint: every spec header resolves to an
   existing `docs/business/**` document with a `# 3. Master flow` section, and any
   `page.goto()` outside `enterFlow` carries a declared deep-link justification.
+- `TEST-WBS-P0-04c` — full screen-delivery journey: fresh launch at `/` → named
+  prerequisite flows → owning Master-flow capture node → terminal outcome, using
+  browser pointer/keyboard input; the headed command runs the same path and the
+  terminal rendered/persisted result is asserted.
 - `TEST-WBS-P0-06` — verifier integration: an injected >3% regression fails the
   build.
 

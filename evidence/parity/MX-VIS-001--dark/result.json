@@ -1,0 +1,26 @@
+{
+  "wbsId": "MX-VIS-001",
+  "screen": "First-run landing",
+  "state": "Default",
+  "masterFlow": "docs/business/deck/create-deck.md",
+  "flowNode": "C[\"First-use landing\"]",
+  "kitReference": "create-deck-firstrun--landing--dark.png",
+  "route": "/first-run",
+  "fixture": "MX-VIS-001",
+  "viewport": "390x780 @2x",
+  "theme": "dark",
+  "spec": "/tool/parity/specs/first-run.spec.ts",
+  "expected": "expected.png",
+  "actual": "actual.png",
+  "diff": "diff.png",
+  "differencePercentage": 1.84,
+  "result": "PASS",
+  "kitSize": {
+    "width": 780,
+    "height": 1560
+  },
+  "actualSize": {
+    "width": 780,
+    "height": 1560
+  }
+}

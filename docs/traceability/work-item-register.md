@@ -10,6 +10,8 @@ These defaults cover every WBS item. Item-specific rows below override them.
 
 | Prefix | Owner | Domain | Canonical inputs | Default guard/test | Decision gate | Default status |
 | --- | --- | --- | --- | --- | --- | --- |
+| `P0.*` | Design System + QA + Flutter UI | Visual parity audit | Owner directive 2026-07-19, WBS §6.4–6.5 + Phase 0 register, kit shot matrix | Flutter Web + Playwright parity suite (≤3%) | Owner rule | Blocked |
+| `MX-VIS-*` | Design System + QA | Per-state parity | Kit shot `<screen>--<state>--<theme>.png`, state fixture | Playwright spec + pixel diff ≤3%, both themes | Owner rule | Pending |
 | `0.*` | Product + Architecture | Governance/decisions | `docs/architecture/**`, business/design owners | Docs links + decision/graph validation | Item override | Blocked |
 | `1.*` | Platform + QA | Bootstrap/tooling | ADR-002, ADR-005, ADR-007, guard docs, Tier-1 resource budgets | Consolidated verifier contract tests | DG-02 | Blocked |
 | `2.*` | Design System + Flutter UI | Theme/responsive | Design System v4 tokens, ADR-002 | Token/theme/responsive tests + design guard | DG-02, DG-05 | Blocked |
@@ -42,6 +44,12 @@ and item-specific, while Ready rows link exact execution packets.
 
 | WBS | Status | Decision gate | Exact inputs | Acceptance/test | Packet | Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
+| `P0.1` | **Ready** | Owner rule ≤3% | Implemented screens/dialogs/sheets in `lib/presentation/**`, kit shot matrix (480 PNGs) | `AC-WBS-P0-01`; `TEST-WBS-P0-01` | `docs/wbs/implementation-packets/WBS-P0-visual-parity-audit.md` | Census drafted as the WBS Phase 0 register: 49 `MX-VIS-*` IDs; `MX-VIS-001` and `MX-VIS-049` now Playwright-measured in both themes. `MX-VIS-049` was hardened on 2026-07-20 into a fresh-launch browser journey: create Language Pair + first Deck through visible UI, open Empty Deck, save the first Card, and verify the Leaf list; 5 IDs remain Blocked on named features and 4 need a kit-owner decision |
+| `P0.2` | Blocked | Owner rule ≤3% | WBS §6.5 frozen environment | `AC-WBS-P0-02`; `TEST-WBS-P0-02` | Same packet | Depends on `P0.1` |
+| `P0.3` | Blocked | Owner rule ≤3% | 1.6 deterministic ports, 1.7 dev fixtures | `AC-WBS-P0-03`; `TEST-WBS-P0-03` | Same packet | Depends on `P0.2` |
+| `P0.4` | Blocked | Owner rule ≤3% | Phase 0 register, fixture layer | `AC-WBS-P0-04`; `TEST-WBS-P0-04` | Same packet | Depends on `P0.3` |
+| `P0.5` | Blocked | Owner rule ≤3% | Measured ratios from `P0.4` | `AC-WBS-P0-05`; `TEST-WBS-P0-04` | Same packet | Depends on `P0.4` |
+| `P0.6` | Blocked | Owner rule ≤3% | All `P0.*` evidence, verifier contract | `AC-WBS-P0-06`; `TEST-WBS-P0-06` | Same packet | Depends on `P0.5`; **unblocks the halted UI rows** |
 | `0.1` | Done | DG-01 | ADR-001, Deck business/design owners, mixed-content rows | `AC-WBS-0.1-01`; `TEST-WBS-0.1-01` | Not applicable — governance | `docs/architecture/adr/ADR-001-deck-content-model.md`; `docs/decision-tables/deck-mixed-content.md` |
 | `0.2` | Done | DG-02, DG-05 | ADR-002, platform/localization matrices | `AC-WBS-0.2-01`; `TEST-WBS-0.2-01` | Not applicable — governance | `docs/architecture/adr/ADR-002-platform-and-adaptive-scope.md`; `docs/design/MemoX Design System_v4/SCOPE.md` |
 | `0.3` | Done | DG-03, DG-04 | ADR-003, SRS policy, SRS8-001..028 | `AC-WBS-0.3-01`; `TEST-WBS-0.3-01` | Not applicable — governance | `docs/business/learning-progress/srs-8-box-policy.md`; `docs/decision-tables/srs-8-box-v1.md` |
@@ -73,7 +81,7 @@ and item-specific, while Ready rows link exact execution packets.
 | `int-1` | Done | — | User request: make built flows reachable for incremental testing | — | (integration commit) | First-run redirect gate (pulled forward from the 5.7 navigation guard) + Library entry on the home placeholder + 3 redirect tests; foundation goldens regenerated (2026-07-19) |
 | `3.10` | Done | DG-02, DG-05 | Kit _shared ConfirmDialog/SelectSheet specs | `AC-WBS-3.10-01`; `TEST-WBS-3.10-01` | `docs/wbs/implementation-packets/WBS-3.10-shared-composites.md` | `mx_confirm_dialog.dart`, `mx_select_sheet.dart` + 4 tests (2026-07-19); callout/breadcrumb/study-prompt boundary recorded (land with first consumers); full-gate pass marker |
 | `3.12` | Done | Gate PASSED | WBS 3.12 minimal-journey scope; 3.x suites | `AC-WBS-3.12-01`; `TEST-WBS-3.12-01` | `docs/wbs/implementation-packets/WBS-3.12-minimal-mx-gate.md` | Journey→component matrix verified: docs contract, widget tests, kit-width goldens, semantics; 3.8 unused-by-journey exception recorded (2026-07-19) |
-| `3.15` | In progress (A Done) | Owner rule <3% | Kit shot matrix (219 states ×2 themes @390) | `AC-WBS-3.15-01`; `TEST-WBS-3.15-01` | `docs/wbs/implementation-packets/WBS-3.15-kit-parity-gate.md` | Harness (`test/support/kit_parity.dart`, real-font 2× pixel diff) + probes; baseline: landing 12.17%, library-empty 11.48% → fix backlog child B (2026-07-19) |
+| `3.15` | In progress (A Done) — **re-scoped to inner-loop layer** | Owner rule ≤3% | Kit shot matrix (240 states ×2 themes @390) | `AC-WBS-3.15-01`; `TEST-WBS-3.15-01` | `docs/wbs/implementation-packets/WBS-3.15-kit-parity-gate.md` | Harness (`test/support/kit_parity.dart`, real-font 2× pixel diff) + 4 enforced states (landing 1.42%, library-empty 1.10%, step1, step2). Merge-gate authority transferred to Phase 0 (Flutter Web + Playwright); 3.15 remains pre-push fast feedback and its enforced states migrate into the `MX-VIS-*` register (2026-07-19) |
 | `3.9` | Done | DG-02 | Guard-named async APIs, ADR-007, failure taxonomy | `AC-WBS-3.9-01`; `TEST-WBS-3.9-01` | `docs/wbs/implementation-packets/WBS-3.9-async-infrastructure.md` | `shared/viewmodels/{mx_async_draft,mx_action_runner,mx_action_errors,mx_async_builder}.dart` + 10 tests (2026-07-19); full-gate pass marker |
 | `3.7` | Done | DG-02, DG-05 | Kit feedback prompts + CSS | `AC-WBS-3.7-01`; `TEST-WBS-3.7-01` | `docs/wbs/implementation-packets/WBS-3.7-feedback-primitives.md` | `mx_progress`, `mx_banner`, `dialogs/mx_dialog`+helper, `bottom_sheets/mx_sheet`+helper, `sheetTop` radius + 8 tests (2026-07-19); full-gate pass marker |
 | `3.6` | Done | DG-02, DG-05 | Kit nav prompts + CSS, toolbar guard rule | `AC-WBS-3.6-01`; `TEST-WBS-3.6-01` | `docs/wbs/implementation-packets/WBS-3.6-navigation-primitives.md` | `mx_{icon_button,fab,bottom_nav,contextual_app_bar,search_dock}.dart` + navLabel role + 12 tests (2026-07-19); collapse/rail boundaries recorded; full-gate pass marker |
@@ -133,3 +141,10 @@ The item-specific table is authoritative for current Ready/Done status. Every ot
 item inherits `Blocked` from its longest matching prefix until an explicit Ready
 or Done override satisfies the schema. Accepted ADRs alone never promote status,
 and contradictory business/design prose must be reconciled before an override.
+
+**Phase 0 precedence (owner, 2026-07-19):** no UI work package is promoted to
+`Ready` while `P0.6` is open. This overrides dependency-order promotion — an item
+whose dependencies are all Done is still not Ready if it changes a screen,
+dialog, bottom sheet or UI state. Non-UI domain/data/policy rows are unaffected.
+A UI item is additionally not Done without the visual-parity evidence required by
+WBS §6.5 for every `MX-VIS-*` state it touches.
