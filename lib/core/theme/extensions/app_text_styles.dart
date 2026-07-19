@@ -99,6 +99,16 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   double get lineHeightNormal => AppTypography.lineHeightNormal;
   double get lineHeightRelaxed => AppTypography.lineHeightRelaxed;
 
+  /// Empty-state title role (kit `EmptyState` helper: lg/extrabold/tight).
+  TextStyle get emptyStateTitle => _base.copyWith(
+    fontSize: AppTypography.fontSizeLg,
+    fontWeight: AppTypography.fontWeightExtrabold,
+    letterSpacing: AppTypography.letterSpacingFor(
+      AppTypography.letterSpacingTightEm,
+      AppTypography.fontSizeLg,
+    ),
+  );
+
   /// Section-header title role (kit `.section-head__title`: md/bold/tight).
   TextStyle get sectionTitle => _base.copyWith(
     fontSize: AppTypography.fontSizeMd,

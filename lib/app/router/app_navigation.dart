@@ -21,6 +21,12 @@ extension AppNavigation on BuildContext {
   /// Opens the Library root.
   void goLibrary() => GoRouter.of(this).go(RoutePaths.library);
 
+  /// Opens the Stats root (placeholder until WBS 5.8 lands).
+  void goStats() => GoRouter.of(this).go(RoutePaths.stats);
+
+  /// Opens the Profile root (placeholder until account scope lands).
+  void goProfile() => GoRouter.of(this).go(RoutePaths.profile);
+
   /// Opens one deck's detail (replacing the current location).
   void goDeckDetail(String deckId) =>
       GoRouter.of(this).go(RoutePaths.deckDetail(deckId));

@@ -5,5 +5,7 @@ abstract final class RouteNames {
   static const String firstRunLanguage = 'firstRunLanguage';
   static const String firstRunDeckSetup = 'firstRunDeckSetup';
   static const String library = 'library';
+  static const String stats = 'stats';
+  static const String profile = 'profile';
   static const String deckDetail = 'deckDetail';
 }

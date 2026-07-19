@@ -31,6 +31,34 @@ class HomePlaceholderScreen extends StatelessWidget {
   }
 }
 
+/// Skeleton stats screen; replaced when the Stats feature lands.
+class StatsPlaceholderScreen extends StatelessWidget {
+  const StatsPlaceholderScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.navStatsLabel)),
+      body: Center(child: Text(l10n.appTitle)),
+    );
+  }
+}
+
+/// Skeleton profile screen; replaced when the account scope lands.
+class ProfilePlaceholderScreen extends StatelessWidget {
+  const ProfilePlaceholderScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.navProfileLabel)),
+      body: Center(child: Text(l10n.appTitle)),
+    );
+  }
+}
+
 /// Shown for unknown or stale locations (web deep links, old bookmarks).
 class RouteNotFoundScreen extends StatelessWidget {
   const RouteNotFoundScreen({super.key});

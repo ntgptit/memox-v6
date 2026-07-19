@@ -96,7 +96,7 @@ void main() {
       await tester.tap(find.text('Create deck'));
       await pumpLibrary(tester);
 
-      expect(find.text('Library'), findsOneWidget);
+      expect(find.text('Library'), findsWidgets);
       expect(find.text('Your first deck is ready'), findsOneWidget);
       expect(find.text('Korean TOPIK I'), findsOneWidget);
 

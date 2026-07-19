@@ -69,14 +69,27 @@ Fixes that came out of the first screen (system-wide, kit-correct):
 
 | Screen state | Status | Diff |
 | --- | --- | --- |
-| `create-deck-firstrun--landing--light` | **Enforced** (`first_run_landing_parity_test.dart`) | 1.28% |
+| `create-deck-firstrun--landing--light` | **Enforced** (`first_run_landing_parity_test.dart`) | 1.42% |
 | `create-deck-firstrun--landing--dark` | **Enforced** | <3% (asserted) |
-| `library--empty--light` | probe | 9.33% |
-| remaining shipped states | pending | — |
+| `library--empty--light` | **Enforced** (`library_empty_parity_test.dart`) | 1.10% |
+| `library--empty--dark` | **Enforced** | <3% (asserted) |
+| remaining shipped states (step1/step2, library loaded, empty-deck, subdeck list, create-deck dialog) | pending | — |
 
-Known divergence (documented, within threshold): the landing import
-CTA renders disabled until the first-run import flow ships (WBS 8.x);
-the kit shot shows it enabled.
+Viewport model (frozen with the library screen): the harness simulates
+the kit's status-bar inset (`--memox-safe-area-top` = 24 logical) via
+`applyKitViewport`, matching what a device gives the shell; the kit's
+bottom-nav safe pad (s2 + 4) is now in `MxBottomNav` itself. The
+library screen pulled the shared chrome forward: `MxContextualAppBar`,
+`MxBottomNav` (Today/Library/Stats/Profile over new placeholder
+routes), and the new shared `MxEmptyState` (kit `EmptyState` helper,
+title lg/extrabold/tight via `AppTextStyles.emptyStateTitle`).
+
+Known divergences (documented, within threshold):
+
+- the landing and library import CTAs render disabled until the import
+  flow ships (WBS 8.x); the kit shots show them enabled.
+- the library app bar omits the kit's search action and avatar until
+  search (5.x) and account (9.x) scopes land.
 
 - **Process rule live from this merge**: every future PR that adds or
   changes a screen must include its parity comparison and pass <3%

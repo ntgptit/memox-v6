@@ -48,7 +48,7 @@ class _FirstRunLandingBody extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Spacer(flex: 147),
+        const Spacer(flex: 128),
         MxText(
           l10n.appTitle,
           role: MxTextRole.subtitle,
@@ -81,7 +81,7 @@ class _FirstRunLandingBody extends ConsumerWidget {
           // when that flow lands.
           onPressed: null,
         ),
-        const Spacer(flex: 173),
+        const Spacer(flex: 185),
         Center(
           child: MxTappable(
             semanticLabel: l10n.notNowLabel,
@@ -97,7 +97,7 @@ class _FirstRunLandingBody extends ConsumerWidget {
             ),
           ),
         ),
-        const Spacer(flex: 121),
+        const Spacer(flex: 128),
       ],
     );
   }

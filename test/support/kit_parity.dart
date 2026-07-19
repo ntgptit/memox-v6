@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -54,6 +55,22 @@ Future<void> _loadMaterialSymbols() async {
       ..addFont(Future.value(ByteData.view(data.buffer)));
     await loader.load();
   }
+}
+
+/// The status-bar inset the kit reserves above every app bar
+/// (`--memox-safe-area-top`: max(env, 24px) — 24 logical in shots).
+const double kitStatusBarInset = 24;
+
+/// Sizes the test view to the kit shot (2× DPR) and simulates the
+/// kit's status-bar inset so chrome sits where a device would put it.
+void applyKitViewport(WidgetTester tester, String shotName) {
+  final shot = kitShotSize(shotName);
+  tester.view.devicePixelRatio = 2.0;
+  tester.view.physicalSize = shot;
+  tester.view.padding = FakeViewPadding(
+    top: kitStatusBarInset * tester.view.devicePixelRatio,
+  );
+  addTearDown(tester.view.reset);
 }
 
 /// Result of one comparison; [ratio] is the differing-pixel share.
@@ -153,6 +170,59 @@ Future<KitParityResult> compareWithKitShot(
       captured.height.toDouble(),
     ),
   );
+}
+
+/// The pre-merge parity threshold (owner rule, 2026-07-19): a screen
+/// state passes only under 3% differing pixels against its kit shot.
+const double kitParityThreshold = 0.03;
+
+/// Pumps [app], settles its streams and asserts the rendered screen
+/// stays under [kitParityThreshold] against `shots/<shotName>.png`.
+/// On failure the render is dumped to `build/parity/` for inspection.
+Future<void> expectKitParity(
+  WidgetTester tester, {
+  required Widget app,
+  required String shotName,
+}) async {
+  applyKitViewport(tester, shotName);
+
+  await tester.pumpWidget(app);
+  for (var i = 0; i < 10; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+  await tester.pump(const Duration(seconds: 1));
+
+  final result = await compareWithKitShot(
+    tester,
+    find.byType(MaterialApp),
+    shotName: shotName,
+  );
+
+  if (result.ratio >= kitParityThreshold) {
+    await tester.runAsync(() async {
+      final captured = await captureImage(
+        find.byType(MaterialApp).evaluate().single,
+      );
+      final png = await captured.toByteData(format: ui.ImageByteFormat.png);
+      Directory('build/parity').createSync(recursive: true);
+      File(
+        'build/parity/$shotName.rendered.png',
+      ).writeAsBytesSync(png!.buffer.asUint8List());
+    });
+  }
+
+  expect(
+    result.ratio,
+    lessThan(kitParityThreshold),
+    reason:
+        '$shotName differs by '
+        '${(result.ratio * 100).toStringAsFixed(2)}% (gate: <3%); '
+        'render dumped to build/parity/$shotName.rendered.png',
+  );
+
+  // Dispose, then let drift's stream-retention timer fire.
+  await tester.pumpWidget(const SizedBox.shrink());
+  await tester.pump(const Duration(seconds: 1));
 }
 
 /// Reads the kit shot's pixel size so the test view can match it.
