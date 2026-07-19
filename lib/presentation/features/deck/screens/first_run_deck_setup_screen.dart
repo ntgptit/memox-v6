@@ -51,7 +51,7 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
     listenMxAction(
       ref,
       createFirstDeckViewmodelProvider,
-      onSuccess: () => context.goHome(),
+      onSuccess: () => context.goLibrary(),
     );
 
     final isSubmitting = createState is AsyncLoading<void>;

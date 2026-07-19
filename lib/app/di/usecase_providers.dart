@@ -1,6 +1,7 @@
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/watch_library_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/create_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/onboarding/dismiss_first_run_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/remove_language_pair_usecase.dart';
@@ -56,4 +57,9 @@ DismissFirstRunUseCase dismissFirstRunUseCase(Ref ref) {
     preferences: ref.watch(preferenceRepositoryProvider),
     clock: ref.watch(appClockProvider),
   );
+}
+
+@riverpod
+WatchLibraryUseCase watchLibraryUseCase(Ref ref) {
+  return WatchLibraryUseCase(decks: ref.watch(deckRepositoryProvider));
 }

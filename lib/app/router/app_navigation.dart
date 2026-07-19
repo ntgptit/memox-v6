@@ -17,4 +17,11 @@ extension AppNavigation on BuildContext {
   /// Opens the first-run deck step (step 2 of the setup).
   void goFirstRunDeckSetup() =>
       GoRouter.of(this).go(RoutePaths.firstRunDeckSetup);
+
+  /// Opens the Library root.
+  void goLibrary() => GoRouter.of(this).go(RoutePaths.library);
+
+  /// Opens one deck's detail.
+  void goDeckDetail(String deckId) =>
+      GoRouter.of(this).go(RoutePaths.deckDetail(deckId));
 }

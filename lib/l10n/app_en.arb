@@ -140,6 +140,30 @@
   "@loadingLabel": {
     "description": "Generic loading indicator label."
   },
+  "libraryTitle": "Library",
+  "@libraryTitle": {
+    "description": "Library / first-deck callout copy (WBS 5.2.4A)."
+  },
+  "emptyLibraryMessage": "Create a deck to start building your library.",
+  "@emptyLibraryMessage": {
+    "description": "Library / first-deck callout copy (WBS 5.2.4A)."
+  },
+  "firstDeckReadyTitle": "Your first deck is ready",
+  "@firstDeckReadyTitle": {
+    "description": "Library / first-deck callout copy (WBS 5.2.4A)."
+  },
+  "firstDeckReadyBody": "Add cards or organise it into smaller decks whenever you're ready.",
+  "@firstDeckReadyBody": {
+    "description": "Library / first-deck callout copy (WBS 5.2.4A)."
+  },
+  "openDeckLabel": "Open deck",
+  "@openDeckLabel": {
+    "description": "Library / first-deck callout copy (WBS 5.2.4A)."
+  },
+  "dismissLabel": "Dismiss",
+  "@dismissLabel": {
+    "description": "Library / first-deck callout copy (WBS 5.2.4A)."
+  },
   "somethingWentWrongMessage": "Something went wrong.",
   "@somethingWentWrongMessage": {
     "description": "User-safe message shown when a screen fails to render."

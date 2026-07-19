@@ -1,6 +1,7 @@
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/domain/language_pair/language_pair.dart';
+import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -88,13 +89,16 @@ class CreateFirstDeckViewmodel extends _$CreateFirstDeckViewmodel {
         // there instead of guessing a pair.
         throw StateError('first-run deck setup without an active pair');
       }
-      await ref.read(createDeckUseCaseProvider)(
+      final deck = await ref.read(createDeckUseCaseProvider)(
         name: draft.name,
         languagePairId: pair.id,
         retryDeckId: retryDeckId,
         description: draft.description,
       );
       draftNotifier.clearDraft();
+      // Success lands in the Library with this deck highlighted and the
+      // contextual callout (create-deck.md §7).
+      ref.read(firstDeckCalloutViewmodelProvider.notifier).showForDeck(deck.id);
     });
   }
 }

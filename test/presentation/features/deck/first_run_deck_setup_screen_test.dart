@@ -61,6 +61,24 @@ void main() {
     );
   }
 
+  Future<void> disposeAndFlushStreams(WidgetTester tester) async {
+    // Dispose the tree first so drift's stream-retention timer gets
+    // scheduled, then advance time so it fires before the binding's
+    // pending-timer check.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
+  }
+
+  Future<void> pumpLibrary(WidgetTester tester) async {
+    // The Library renders a stream-fed list; bounded pumps let the first
+    // emission land without racing the loading spinner's animation.
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    // Let any just-scheduled stream fetch timer fire before teardown.
+    await tester.pump(const Duration(seconds: 1));
+  }
+
   testWidgets('renders the pair summary and gates create on the name', (
     tester,
   ) async {
@@ -123,9 +141,13 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Create deck'));
-    await tester.pumpAndSettle();
+    await pumpLibrary(tester);
 
-    expect(find.text('home-stub'), findsOneWidget);
+    // Success lands in the Library with the first-deck callout.
+    expect(find.text('Library'), findsOneWidget);
+    expect(find.text('Your first deck is ready'), findsOneWidget);
+
+    await disposeAndFlushStreams(tester);
 
     final row = await database
         .customSelect('SELECT name, description FROM decks')
@@ -159,6 +181,6 @@ void main() {
       find.text('A deck with this name already exists here.'),
       findsOneWidget,
     );
-    expect(find.text('home-stub'), findsNothing);
+    expect(find.text('Library'), findsNothing);
   });
 }
