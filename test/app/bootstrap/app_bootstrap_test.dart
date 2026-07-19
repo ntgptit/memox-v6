@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:memox_v6/app/router/app_router.dart';
+import 'package:memox_v6/app/router/router_providers.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -160,7 +162,13 @@ void main() {
   });
 
   testWidgets('buildRoot applies provider overrides', (tester) async {
-    await tester.pumpWidget(buildRoot());
+    await tester.pumpWidget(
+      buildRoot(
+        overrides: [
+          appRouterInstanceProvider.overrideWithValue(createAppRouter()),
+        ],
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('MemoX Home'), findsOneWidget);

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:memox_v6/app/router/app_router.dart';
+import 'package:memox_v6/app/router/router_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/app/bootstrap/app_bootstrap.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
@@ -73,7 +75,13 @@ void main() {
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
 
-    await tester.pumpWidget(buildRoot());
+    await tester.pumpWidget(
+      buildRoot(
+        overrides: [
+          appRouterInstanceProvider.overrideWithValue(createAppRouter()),
+        ],
+      ),
+    );
     await tester.pumpAndSettle();
 
     final context = tester.element(find.byType(Scaffold).first);

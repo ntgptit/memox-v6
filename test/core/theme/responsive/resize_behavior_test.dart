@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:memox_v6/app/router/app_router.dart';
+import 'package:memox_v6/app/router/router_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/app/bootstrap/app_bootstrap.dart';
 import 'package:memox_v6/app/router/route_placeholder.dart';
@@ -46,7 +48,13 @@ void main() {
     addTearDown(tester.view.reset);
 
     tester.view.physicalSize = const Size(390, 780);
-    await tester.pumpWidget(buildRoot());
+    await tester.pumpWidget(
+      buildRoot(
+        overrides: [
+          appRouterInstanceProvider.overrideWithValue(createAppRouter()),
+        ],
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(HomePlaceholderScreen), findsOneWidget);
 
