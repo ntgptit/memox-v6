@@ -474,52 +474,52 @@ yet measured under this gate.
 | ID | Screen | State | Kit reference | Status |
 | --- | --- | --- | --- | --- |
 | MX-VIS-001 | First-run landing | Default | `create-deck-firstrun--landing` | **Playwright PASS — 1.71% light / 1.84% dark** |
-| MX-VIS-002 | First-run landing | Not-now dismissing | `create-deck-firstrun--not-now` | Pending |
-| MX-VIS-003 | First-run language (step 1) | Empty draft | *no kit reference* | Pending |
+| MX-VIS-002 | First-run landing | Not-now dismissing | `create-deck-firstrun--not-now` | Blocked — the shot is the Today dashboard after dismissal, not a landing state (5.7; also search 5.x, avatar 9.x) |
+| MX-VIS-003 | First-run language (step 1) | Empty draft | *no kit reference* | Pending — kit decision needed |
 | MX-VIS-004 | First-run language (step 1) | Complete selection | `create-deck-firstrun--step1` | Enforced |
-| MX-VIS-005 | First-run language (step 1) | Validation error | `create-deck-firstrun--step1-validation` | Pending |
+| MX-VIS-005 | First-run language (step 1) | Validation error | `create-deck-firstrun--step1-validation` | Blocked — step-1 field validation + `MxSelectRow` error slot (5.1.2); Continue is disabled while incomplete, so the state is unreachable |
 | MX-VIS-006 | Language select sheet | Unfiltered list | *no kit reference* (nearest `languages--list`) | Pending — kit decision needed |
 | MX-VIS-007 | Language select sheet | Search filtered | *no kit reference* | Pending — kit decision needed |
 | MX-VIS-008 | Language select sheet | No match | *no kit reference* | Pending — kit decision needed |
 | MX-VIS-009 | First-run deck setup (step 2) | Name filled | `create-deck-firstrun--step2` | Enforced |
-| MX-VIS-010 | First-run deck setup (step 2) | Optional section expanded | `create-deck-firstrun--step2-optional` | Pending |
-| MX-VIS-011 | First-run deck setup (step 2) | Submitting | `create-deck-firstrun--submitting` | Pending |
-| MX-VIS-012 | First-run deck setup (step 2) | Submit failure banner | `create-deck-firstrun--submit-failure` | Pending |
-| MX-VIS-013 | First-run deck setup (step 2) | Duplicate name conflict | `create-deck-firstrun--duplicate` | Pending |
-| MX-VIS-014 | First-run deck setup (step 2) | Name too long | `create-deck-firstrun--name-too-long` | Pending |
-| MX-VIS-015 | First-run deck setup (step 2) | Resume draft | `create-deck-firstrun--resume-draft` | Pending |
-| MX-VIS-016 | First-run deck setup (step 2) | Success handoff | `create-deck-firstrun--success` | Pending |
+| MX-VIS-010 | First-run deck setup (step 2) | Optional section expanded | `create-deck-firstrun--step2-optional` | Pending — **actionable** |
+| MX-VIS-011 | First-run deck setup (step 2) | Submitting | `create-deck-firstrun--submitting` | Pending — **actionable** after a `Creating…` CTA label swap |
+| MX-VIS-012 | First-run deck setup (step 2) | Submit failure banner | `create-deck-firstrun--submit-failure` | Pending — **actionable** after moving the banner above the title and wiring `Try again` |
+| MX-VIS-013 | First-run deck setup (step 2) | Duplicate name conflict | `create-deck-firstrun--duplicate` | Pending — **actionable** |
+| MX-VIS-014 | First-run deck setup (step 2) | Name too long | `create-deck-firstrun--name-too-long` | Blocked — no deck-name length rule exists (5.2.1) |
+| MX-VIS-015 | First-run deck setup (step 2) | Resume draft | `create-deck-firstrun--resume-draft` | Blocked — draft-resume banner + `Start over` affordance (5.2.3B) |
+| MX-VIS-016 | First-run deck setup (step 2) | Success handoff | `create-deck-firstrun--success` | Blocked — the shot is Library loaded; same as MX-VIS-020 |
 | MX-VIS-017 | First-run | Import branch | `create-deck-firstrun--import-branch` | Blocked — import flow (13.1) |
 | MX-VIS-018 | Library | Empty | `library--empty` | **Playwright PASS — 1.43% light / 1.93% dark** (fresh launch → Today → tap Library tab → empty branch; capture at `Q`, PASS only after Create deck commits and the deck replaces the empty state) |
-| MX-VIS-019 | Library | Loading | `library--loading` | Pending |
+| MX-VIS-019 | Library | Loading | `library--loading` | Blocked — FilterRow skeleton + app-bar search/avatar (10.2, 5.x, 9.x) |
 | MX-VIS-020 | Library | Loaded list | `library--loaded` | Blocked — FilterRow + SRS counters (10.2, 5.4.2) |
 | MX-VIS-021 | Library | First-deck callout | `library--first-deck-created` | Blocked — same as MX-VIS-020 |
 | MX-VIS-022 | Library | Callout dismissed | `library--first-deck-created-dismissed` | Blocked — same as MX-VIS-020 |
-| MX-VIS-023 | Library | Dense list | `library--dense` | Pending |
+| MX-VIS-023 | Library | Dense list | `library--dense` | Blocked — same as MX-VIS-020 |
 | MX-VIS-024 | Library | Error | *no kit reference* (nearest `library--offline`) | Pending — kit decision needed |
-| MX-VIS-025 | Create Deck dialog | Root default | `create-deck-dialog--root-default` | Pending |
-| MX-VIS-026 | Create Deck dialog | Nested | `create-deck-dialog--nested` | Pending |
-| MX-VIS-027 | Create Deck dialog | Validation error | `create-deck-dialog--validation` | Pending |
-| MX-VIS-028 | Create Deck dialog | Duplicate sibling | `create-deck-dialog--duplicate-sibling` | Pending |
-| MX-VIS-029 | Create Deck dialog | Optional expanded | `create-deck-dialog--optional-expanded` | Pending |
-| MX-VIS-030 | Create Deck dialog | Submitting | `create-deck-dialog--submitting` | Pending |
-| MX-VIS-031 | Create Deck dialog | Submit failure | `create-deck-dialog--submit-failure` | Pending |
-| MX-VIS-032 | Create Deck dialog | Long name | `create-deck-dialog--long-name` | Pending |
-| MX-VIS-033 | Create Deck dialog | Keyboard open | `create-deck-dialog--keyboard-open` | Pending |
+| MX-VIS-025 | Create Deck dialog | Root default | `create-deck-dialog--root-default` | Blocked — dialog lacks the language-pair and description rows (5.2.4); backdrop needs 10.2 + 5.4.2 |
+| MX-VIS-026 | Create Deck dialog | Nested | `create-deck-dialog--nested` | Blocked — nested variant needs the inherited-pair row (5.2.4); backdrop needs 10.2 + 5.4.2 |
+| MX-VIS-027 | Create Deck dialog | Validation error | `create-deck-dialog--validation` | Blocked — structurally unreachable: submit is gated on a non-empty name, so the empty-name error can never render (5.2.4) |
+| MX-VIS-028 | Create Deck dialog | Duplicate sibling | `create-deck-dialog--duplicate-sibling` | Blocked — same nested layout as MX-VIS-026 |
+| MX-VIS-029 | Create Deck dialog | Optional expanded | `create-deck-dialog--optional-expanded` | Blocked — no description input on the dialog (5.2.4) |
+| MX-VIS-030 | Create Deck dialog | Submitting | `create-deck-dialog--submitting` | Blocked — kit relabels the CTA to `Creating…`; no such string or state (5.2.4) |
+| MX-VIS-031 | Create Deck dialog | Submit failure | `create-deck-dialog--submit-failure` | Blocked — kit shows an error banner above the form and a `Try again` CTA (5.2.4) |
+| MX-VIS-032 | Create Deck dialog | Long name | `create-deck-dialog--long-name` | Blocked — needs a name-length rule and a filled description (5.2.1, 5.2.4) |
+| MX-VIS-033 | Create Deck dialog | Keyboard open | `create-deck-dialog--keyboard-open` | Blocked — `MxDialog` has no `viewInsets` handling, and the shot draws a mock OS keyboard a browser run cannot reproduce; recommend retiring this ID |
 | MX-VIS-034 | Deck detail — empty branch | Default | `empty-deck--default` | Blocked — add-card CTA enabled (5.3.2); measured 9.68% light / 13.58% dark |
-| MX-VIS-035 | Deck detail — empty branch | Create nested dialog | `empty-deck--create-nested-dialog` | Pending |
-| MX-VIS-036 | Deck detail — parent branch | Loaded | `subdeck-list--loaded` | Pending |
-| MX-VIS-037 | Deck detail — parent branch | Loading | `subdeck-list--loading` | Pending |
-| MX-VIS-038 | Deck detail — parent branch | Error | `subdeck-list--error` | Pending |
-| MX-VIS-039 | Deck detail — parent branch | Not found | `subdeck-list--not-found` | Pending |
-| MX-VIS-040 | Deck detail — parent branch | Dense | `subdeck-list--dense` | Pending |
-| MX-VIS-041 | Deck detail — parent branch | Deep hierarchy | `subdeck-list--deep` | Pending |
-| MX-VIS-042 | Deck detail — leaf branch | Loaded | `flashcard-list--loaded` | Pending |
-| MX-VIS-043 | Deck detail — leaf branch | Loading | `flashcard-list--loading` | Pending |
-| MX-VIS-044 | Deck detail — leaf branch | Error | `flashcard-list--error` | Pending |
-| MX-VIS-045 | Deck detail — leaf branch | Minimum data | `flashcard-list--minimum-data` | Pending |
-| MX-VIS-046 | Deck detail — leaf branch | Dense | `flashcard-list--dense` | Pending |
-| MX-VIS-047 | Deck detail — leaf branch | Long text | `flashcard-list--long-text` | Pending |
+| MX-VIS-035 | Deck detail — empty branch | Create nested dialog | `empty-deck--create-nested-dialog` | Blocked — byte-identical to `create-deck-dialog--nested`; fold into MX-VIS-026 |
+| MX-VIS-036 | Deck detail — parent branch | Loaded | `subdeck-list--loaded` | Blocked — breadcrumb (6.2), SRS counters (5.4.2), play affordance, app-bar search (5.x) |
+| MX-VIS-037 | Deck detail — parent branch | Loading | `subdeck-list--loading` | Blocked — skeleton/shimmer primitive does not exist; plus breadcrumb (6.2) |
+| MX-VIS-038 | Deck detail — parent branch | Error | `subdeck-list--error` | Pending — **actionable**: only the app-bar search/overflow glyphs diverge |
+| MX-VIS-039 | Deck detail — parent branch | Not found | `subdeck-list--not-found` | Pending — **actionable**: no blockers; needs the kit icon-tile + title composition |
+| MX-VIS-040 | Deck detail — parent branch | Dense | `subdeck-list--dense` | Blocked — same as MX-VIS-036 |
+| MX-VIS-041 | Deck detail — parent branch | Deep hierarchy | `subdeck-list--deep` | Blocked — collapsed breadcrumb is the point of the shot (6.2); plus MX-VIS-036 set |
+| MX-VIS-042 | Deck detail — leaf branch | Loaded | `flashcard-list--loaded` | Blocked — filter chips (10.2), SRS counters/badges (5.4.2), breadcrumb (6.2) |
+| MX-VIS-043 | Deck detail — leaf branch | Loading | `flashcard-list--loading` | Pending — actionable once a skeleton/shimmer primitive exists |
+| MX-VIS-044 | Deck detail — leaf branch | Error | `flashcard-list--error` | Pending — **actionable**: needs the centered error composition instead of the inline banner |
+| MX-VIS-045 | Deck detail — leaf branch | Minimum data | `flashcard-list--minimum-data` | Blocked — same as MX-VIS-042 |
+| MX-VIS-046 | Deck detail — leaf branch | Dense | `flashcard-list--dense` | Blocked — same as MX-VIS-042; shot is near-identical to `--loaded`, consider merging |
+| MX-VIS-047 | Deck detail — leaf branch | Long text | `flashcard-list--long-text` | Blocked — same as MX-VIS-042; plus a `Show more` expand affordance |
 | MX-VIS-048 | Home / Stats / Profile placeholders | Default | *no kit reference — placeholder chrome* | Out of scope until 5.7 / 11.2 replace them |
 | MX-VIS-049 | Card Editor | Create | `flashcard-editor--create` | **Playwright PASS — 1.29% light / 1.61% dark** (fresh app launch → first-use Create Deck A→K → user opens Empty Deck → Create Flashcard A→J; capture at C, PASS only after Save returns to Leaf list with the committed Card visible) |
 
@@ -527,6 +527,42 @@ Rows marked **Blocked** name the WBS item that unblocks them; they are not
 waivers. Rows marked *kit decision needed* require the Design Kit owner either
 to publish a shot or to record the state as intentionally unspecified before
 P0.6 can close.
+
+#### Census audit, 2026-07-20 — statuses re-derived from the kit shots
+
+Every remaining row was re-checked by opening its kit PNG and comparing it
+against the shipped widget tree. 34 rows changed status. The census had been
+drafted from screen/state names rather than from the images, so a state was
+recorded as `Pending` whenever the *screen* existed, even when the *shot*
+showed chrome that no shipped code can render.
+
+Two structural findings came out of it.
+
+**The gate diffs the whole frame, so a backdrop blocks a foreground state.**
+Every `create-deck-dialog--*` shot shows the live Library behind a scrim. That
+backdrop carries the FilterRow and the SRS due/new counters, so all nine dialog
+rows are blocked on `10.2` and `5.4.2` no matter how correct the dialog itself
+becomes. The same applies to `empty-deck--create-nested-dialog`.
+
+**Phase 0 and the feature backlog are mutually blocking.** Roughly 25 of the 49
+rows need `10.2` (FilterRow/sort) or `5.4.2` (SRS counters) before they can
+reach ≤3%. Both are UI work packages, and the Phase 0 precedence rule in
+`docs/traceability/work-item-register.md` holds that no UI work package is
+promoted to `Ready` while `P0.6` is open. As written, `P0.6` waits on `10.2`
+and `5.4.2`, and `10.2` and `5.4.2` wait on `P0.6`.
+
+This packet already anticipates the shape of the escape hatch — states whose
+shot depends on unshipped features are "measured, but not required to pass
+before `P0.6`" — but it names only five IDs (`017`, `020`, `021`, `022`,
+`034`). The audit puts the real count near 25. **Closing `P0.6` therefore
+requires an owner decision**: either widen that exemption to every
+feature-blocked row, or carve `10.2` and `5.4.2` out of the precedence rule so
+they can ship first. Recorded here rather than resolved, because it changes the
+phase contract.
+
+Actionable without any further feature work, after this audit: `004`, `009`,
+`010`, `011`, `012`, `013`, `038`, `039`, `044`, and `043` once a
+skeleton/shimmer primitive exists.
 
 Responsive checks at `360×800`, `393×852` and `412×915` run for every ID as
 overflow/reachability assertions only — they never replace the `390×780`
