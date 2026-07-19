@@ -7,10 +7,13 @@ part 'flashcard_dao.g.dart';
 /// content (translations, tags, audio refs) per the business ownership
 /// map.
 ///
-/// All SQL lives in `queries/flashcards.drift`; listings exclude
+/// All SQL lives in `queries/flashcards.drift` and
+/// `queries/card_children.drift`; listings exclude
 /// soft-deleted cards and lifecycle transitions are explicit UPDATEs
 /// guarded by the 4.3 triggers.
-@DriftAccessor(include: {'../queries/flashcards.drift'})
+@DriftAccessor(
+  include: {'../queries/flashcards.drift', '../queries/card_children.drift'},
+)
 class FlashcardDao extends DatabaseAccessor<AppDatabase>
     with _$FlashcardDaoMixin {
   FlashcardDao(super.attachedDatabase);

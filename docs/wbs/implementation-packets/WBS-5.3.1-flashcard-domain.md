@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | **In progress** — child A Done (2026-07-19); B, C pending |
+| Status | **In progress** — children A, B Done (2026-07-19); C pending |
 | Owner/domain | Flashcard / Domain |
 | Depends on | `5.2.6` — Done (Deck block complete) |
 | Decision gates | DG-01 |
@@ -43,6 +43,33 @@
 - 7 tests: atomic create + Box 0, typed required validation,
   cross-deck candidate with nothing committed, keep-both second card,
   soft-deleted exclusion, kept-id retry, mixed-content rejection.
+
+## Child B — child-content management (Done, 2026-07-19)
+
+- **Normalization foundation**: `StringUtils.nfc` (unorm_dart) +
+  `caseFolded`; `validateCardText`/`normalizeCardTerm` now apply
+  VAL-001 NFC, so composed/decomposed Vietnamese resolves one identity.
+- `tag_label.dart` — TAG-001..003: NFC outer-trimmed display label,
+  case-folded normalized uniqueness key.
+- Queries (`card_children.drift` + create-flow reuse): translation
+  edit/park+set order (two-phase permutation under the uniqueness
+  constraint), tag usage count/delete, and the shared
+  `touchFlashcardVersion` bump; `attachTag` is now INSERT OR IGNORE
+  (TAG-004).
+- Repository: every child mutation commits with the card version bump
+  in one transaction; `resolveTagByLabel` resolves concurrent
+  same-label creation through the unique constraint to the winner;
+  `deleteTagIfUnused` is transactional (TAG-006); translation removal
+  resequences survivors contiguously.
+- Use cases: `ManageCardTranslationsUseCase` (add/edit/remove/reorder,
+  normalized-duplicate block vs primary + siblings, complete-permutation
+  validation), `ManageCardTagsUseCase` (attach-by-label idempotent,
+  detach, delete-unused), `ManageCardAudioUseCase` (metadata add/remove).
+- 16 tests: ordering/version bumps, blank/duplicate blocks (incl.
+  composed-vs-decomposed collisions), contiguous re-sequencing,
+  permutation validation, tag NFC/case resolution keeping the first
+  display spelling, idempotent attach, TAG-005/006, concurrent
+  same-label winner, audio add/remove + typed validation.
 
 ## Acceptance and test procedure
 

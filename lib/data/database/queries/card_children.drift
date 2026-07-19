@@ -1,0 +1,35 @@
+import '../tables/content.drift';
+
+-- Card child-content management queries (WBS 5.3.1B) — the deltas the
+-- 4.4A create-flow queries in `flashcards.drift` do not cover:
+-- translation edit/reorder (manage-card-translations.md), tag cleanup
+-- (TAG-006) and the shared Card content-version bump. Every child
+-- mutation commits with that bump in one repository transaction.
+
+updateCardTranslationText:
+UPDATE flashcard_translations
+SET translation_text = :translationText, updated_at = :updatedAt
+WHERE id = :id;
+
+-- Reorder phase 1: park an entry on a negative slot so the
+-- (card_id, language_code, display_order) uniqueness never collides
+-- mid-permutation; phase 2 assigns the final contiguous positions.
+parkCardTranslationOrder:
+UPDATE flashcard_translations
+SET display_order = -:slot, updated_at = :updatedAt
+WHERE id = :id;
+
+setCardTranslationOrder:
+UPDATE flashcard_translations
+SET display_order = :displayOrder, updated_at = :updatedAt
+WHERE id = :id;
+
+countTagAssociations:
+SELECT COUNT(*) AS usage_count FROM flashcard_tags WHERE tag_id = :tagId;
+
+deleteTag:
+DELETE FROM tags WHERE id = :id;
+
+-- Content-version bump shared by every child mutation.
+touchFlashcardVersion:
+UPDATE flashcards SET updated_at = :updatedAt WHERE id = :id;

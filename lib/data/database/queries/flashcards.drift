@@ -85,8 +85,9 @@ insertTag:
 INSERT INTO tags (id, name, normalized_name, created_at, updated_at)
 VALUES (:id, :name, :normalizedName, :createdAt, :updatedAt);
 
+-- Idempotent attach (TAG-004): re-attaching is a no-op.
 attachTag:
-INSERT INTO flashcard_tags (card_id, tag_id, created_at)
+INSERT OR IGNORE INTO flashcard_tags (card_id, tag_id, created_at)
 VALUES (:cardId, :tagId, :createdAt);
 
 detachTag:

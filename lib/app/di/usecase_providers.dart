@@ -4,6 +4,9 @@ import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/open_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/watch_library_usecase.dart';
 import 'package:memox_v6/domain/usecases/flashcard/create_flashcard_usecase.dart';
+import 'package:memox_v6/domain/usecases/flashcard/manage_card_audio_usecase.dart';
+import 'package:memox_v6/domain/usecases/flashcard/manage_card_tags_usecase.dart';
+import 'package:memox_v6/domain/usecases/flashcard/manage_card_translations_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/create_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/onboarding/dismiss_first_run_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/remove_language_pair_usecase.dart';
@@ -82,4 +85,21 @@ CreateFlashcardUseCase createFlashcardUseCase(Ref ref) {
     idGenerator: ref.watch(idGeneratorProvider),
     clock: ref.watch(appClockProvider),
   );
+}
+
+@riverpod
+ManageCardTranslationsUseCase manageCardTranslationsUseCase(Ref ref) {
+  return ManageCardTranslationsUseCase(
+    cards: ref.watch(flashcardRepositoryProvider),
+  );
+}
+
+@riverpod
+ManageCardTagsUseCase manageCardTagsUseCase(Ref ref) {
+  return ManageCardTagsUseCase(cards: ref.watch(flashcardRepositoryProvider));
+}
+
+@riverpod
+ManageCardAudioUseCase manageCardAudioUseCase(Ref ref) {
+  return ManageCardAudioUseCase(cards: ref.watch(flashcardRepositoryProvider));
 }

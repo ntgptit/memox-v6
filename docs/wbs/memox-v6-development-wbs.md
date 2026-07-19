@@ -215,7 +215,7 @@ whose dependencies are not Done.
 | Status | WBS | Reason / next action |
 | --- | --- | --- |
 | Done | `0.1–0.6`, `1.1–1.6`, `1.9`, `2.1–2.10`, `3.1–3.7`, `3.9–3.10`, `4.1` | Durable evidence is in the work-item register. Wave 2 (token→theme→responsive) is closed. |
-| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Gates 4.10 and 3.12 PASSED (2026-07-19). 5.1 block complete (2026-07-19). 5.2 Deck block complete (2026-07-19). PROCESS RULE (owner, 2026-07-19): no screen-changing PR merges without kit-parity evidence <3% (item `3.15`). Next: `3.15` retro coverage (landing, library-empty, step1, step2 enforced 2026-07-19; library loaded + empty-deck + subdeck + dialog states next), then `5.3.1` children B/C. |
+| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Gates 4.10 and 3.12 PASSED (2026-07-19). 5.1 block complete (2026-07-19). 5.2 Deck block complete (2026-07-19). PROCESS RULE (owner, 2026-07-19): no screen-changing PR merges without kit-parity evidence <3% (item `3.15`). Next: `5.3.1` child C (edit/hide/delete/move + evidence); 3.15 remaining states unblock with their features (packet records dependencies). |
 
 Sequencing note (2026-07-19): `1.7` (developer fixtures) and `1.10` (shared
 test infrastructure) declare only wave-1 dependencies, but their deliverables
