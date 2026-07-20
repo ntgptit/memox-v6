@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
@@ -21,6 +23,16 @@ import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
 /// gate exists to check.
 List<Override> parityOverridesFor(String fixtureId) {
   return switch (fixtureId) {
+    'MX-VIS-011' => <Override>[
+      createDeckUseCaseProvider.overrideWith(
+        (ref) => _HangingCreateDeckUseCase(
+          decks: ref.watch(deckRepositoryProvider),
+          pairs: ref.watch(languagePairRepositoryProvider),
+          idGenerator: ref.watch(idGeneratorProvider),
+          clock: ref.watch(appClockProvider),
+        ),
+      ),
+    ],
     'MX-VIS-012' => <Override>[
       createDeckUseCaseProvider.overrideWith(
         (ref) => _FailingCreateDeckUseCase(
@@ -33,6 +45,31 @@ List<Override> parityOverridesFor(String fixtureId) {
     ],
     _ => const <Override>[],
   };
+}
+
+/// A create path that never completes, for the submitting state.
+///
+/// The P0.3 fixture contract asks in-flight states to pin the command on
+/// a completer nothing ever resolves, so the capture is a still frame
+/// rather than a race against the real write finishing.
+class _HangingCreateDeckUseCase extends CreateDeckUseCase {
+  const _HangingCreateDeckUseCase({
+    required super.decks,
+    required super.pairs,
+    required super.idGenerator,
+    required super.clock,
+  });
+
+  @override
+  Future<Deck> call({
+    required String name,
+    required String languagePairId,
+    String? parentId,
+    String? retryDeckId,
+    String? description,
+  }) {
+    return Completer<Deck>().future;
+  }
 }
 
 /// A create path that always fails, for the submit-failure state.

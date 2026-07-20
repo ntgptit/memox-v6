@@ -136,9 +136,17 @@
   "@createDeckLabel": {
     "description": "First-run deck setup (step 2) copy."
   },
+  "deckCreatingLabel": "Creating…",
+  "@deckCreatingLabel": {
+    "description": "First-run step 2 CTA while the deck is being created (create-deck.md §7 Submitting)."
+  },
   "deckNameRequiredMessage": "Add a deck name.",
   "@deckNameRequiredMessage": {
     "description": "First-run deck setup (step 2) copy."
+  },
+  "deckNameDuplicateRootMessage": "A deck with this name already exists in your Library.",
+  "@deckNameDuplicateRootMessage": {
+    "description": "Duplicate name against a root deck (create-deck.md §9)."
   },
   "deckNameDuplicateMessage": "A deck with this name already exists here.",
   "@deckNameDuplicateMessage": {

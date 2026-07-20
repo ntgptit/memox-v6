@@ -156,7 +156,7 @@ void main() {
     expect(row.read<String>('description'), 'Vocabulary for TOPIK I');
   });
 
-  testWidgets('a sibling duplicate shows the inline name error', (
+  testWidgets('a duplicate root deck shows the Library-scoped inline error', (
     tester,
   ) async {
     await database.deckDao.insertDeck(
@@ -177,8 +177,10 @@ void main() {
     await tester.tap(find.text('Create deck'));
     await tester.pumpAndSettle();
 
+    // First-run always creates a root deck, so the clash is with the
+    // Library, never with a sibling (`create-deck.md` §19).
     expect(
-      find.text('A deck with this name already exists here.'),
+      find.text('A deck with this name already exists in your Library.'),
       findsOneWidget,
     );
     expect(find.text('Library'), findsNothing);

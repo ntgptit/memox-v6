@@ -1,8 +1,8 @@
 {
   "thresholdPercentage": 3,
-  "generatedAtUtc": "2026-07-20T00:08:53.471Z",
-  "measuredStateThemes": 12,
-  "passed": 12,
+  "generatedAtUtc": "2026-07-20T00:32:33.119Z",
+  "measuredStateThemes": 14,
+  "passed": 14,
   "failed": 0,
   "results": [
     {
@@ -203,6 +203,58 @@
       "actual": "actual.png",
       "diff": "diff.png",
       "differencePercentage": 0.86,
+      "result": "PASS",
+      "kitSize": {
+        "width": 780,
+        "height": 1560
+      },
+      "actualSize": {
+        "width": 780,
+        "height": 1560
+      }
+    },
+    {
+      "wbsId": "MX-VIS-011",
+      "screen": "First-run deck setup (step 2)",
+      "state": "Submitting",
+      "masterFlow": "docs/business/deck/create-deck.md",
+      "flowNode": "I[\"Creating…\"]",
+      "kitReference": "create-deck-firstrun--submitting--dark.png",
+      "route": "/first-run/deck",
+      "fixture": "MX-VIS-011",
+      "viewport": "390x780 @2x",
+      "theme": "dark",
+      "spec": "/tool/parity/specs/first-run-steps.spec.ts",
+      "expected": "expected.png",
+      "actual": "actual.png",
+      "diff": "diff.png",
+      "differencePercentage": 0.9,
+      "result": "PASS",
+      "kitSize": {
+        "width": 780,
+        "height": 1560
+      },
+      "actualSize": {
+        "width": 780,
+        "height": 1560
+      }
+    },
+    {
+      "wbsId": "MX-VIS-011",
+      "screen": "First-run deck setup (step 2)",
+      "state": "Submitting",
+      "masterFlow": "docs/business/deck/create-deck.md",
+      "flowNode": "I[\"Creating…\"]",
+      "kitReference": "create-deck-firstrun--submitting--light.png",
+      "route": "/first-run/deck",
+      "fixture": "MX-VIS-011",
+      "viewport": "390x780 @2x",
+      "theme": "light",
+      "spec": "/tool/parity/specs/first-run-steps.spec.ts",
+      "expected": "expected.png",
+      "actual": "actual.png",
+      "diff": "diff.png",
+      "differencePercentage": 0.83,
       "result": "PASS",
       "kitSize": {
         "width": 780,

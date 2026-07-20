@@ -142,12 +142,16 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
         ],
         const MxGap.s6(),
         MxButton(
-          // After a failure the CTA names the retry rather than repeating
-          // the original action.
-          label: failure != null && nameError == null
-              ? l10n.tryAgainLabel
-              : l10n.createDeckLabel,
-          icon: Symbols.add_rounded,
+          // The CTA names what is happening: the work in flight while
+          // submitting, the retry after a failure, the action otherwise
+          // (`create-deck.md` §7). The `+` belongs to the action only —
+          // it would read as "add" against progress copy.
+          label: switch ((isSubmitting, failure != null && nameError == null)) {
+            (true, _) => l10n.deckCreatingLabel,
+            (false, true) => l10n.tryAgainLabel,
+            (false, false) => l10n.createDeckLabel,
+          },
+          icon: isSubmitting ? null : Symbols.add_rounded,
           block: true,
           onPressed: name.canSubmit && !isSubmitting
               ? () => ref
@@ -165,7 +169,9 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
       return l10n.deckNameRequiredMessage;
     }
     if (failure is ConflictFailure && failure.code == 'duplicate') {
-      return l10n.deckNameDuplicateMessage;
+      // First-run always creates a root deck, so the clash is with the
+      // Library, never with a sibling (`create-deck.md` §9).
+      return l10n.deckNameDuplicateRootMessage;
     }
     return null;
   }

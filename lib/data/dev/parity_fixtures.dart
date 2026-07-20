@@ -29,6 +29,7 @@ class ParityFixtures {
     'MX-VIS-004',
     'MX-VIS-009',
     'MX-VIS-010',
+    'MX-VIS-011',
     'MX-VIS-012',
     'MX-VIS-018',
     'MX-VIS-049',
@@ -51,6 +52,7 @@ class ParityFixtures {
       case 'MX-VIS-004':
       case 'MX-VIS-009':
       case 'MX-VIS-010':
+      case 'MX-VIS-011':
       case 'MX-VIS-012':
         return;
       case 'MX-VIS-018':

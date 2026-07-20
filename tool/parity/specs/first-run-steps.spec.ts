@@ -174,3 +174,47 @@ test('MX-VIS-010 expands the optional section in step 2', async ({
 // line-height tokens do not explain, so it needs measuring rather than
 // guessing. The fixture, the overrides and the remediated screen are all
 // in place; only the enforcing test is held back so the suite stays green.
+
+// MX-VIS-011 · First-run deck setup (step 2) · Submitting
+// Master flow: docs/business/deck/create-deck.md §3
+// Flow node: H["Step 2 · First Deck setup"] → I["Creating…"]
+test('MX-VIS-011 holds the submitting state while the deck is created', async ({
+  page,
+}, testInfo) => {
+  // The fixture pins the create command on a completer nothing resolves,
+  // so node I is a still frame instead of a race against the real write.
+  await enterFlow(page, {
+    masterFlow: 'docs/business/deck/create-deck.md',
+    fixture: 'MX-VIS-011',
+  });
+
+  await reachStepOne(page);
+  await selectKitLanguagePair(page);
+  await reachStepTwo(page);
+  await fillField(page, /Deck name/i, KIT_DECK_NAME, { blur: false });
+
+  await tapControl(page, 'Create deck');
+
+  // The CTA naming the work in flight is what proves node I was entered.
+  await expect(
+    page.getByRole('button', { name: 'Creating…' }),
+  ).toBeVisible();
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-011',
+    shot: 'create-deck-firstrun--submitting',
+    screen: 'First-run deck setup (step 2)',
+    state: 'Submitting',
+    masterFlow: 'docs/business/deck/create-deck.md',
+    flowNode: 'I["Creating…"]',
+    fixture: 'MX-VIS-011',
+    route: '/first-run/deck',
+  });
+
+  // §7 Submitting: the whole form is inert, and a second press cannot
+  // start a second write.
+  await expect(page.getByRole('textbox', { name: /Deck name/i })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Creating…' })).toBeDisabled();
+  await holdDemoFrame(page);
+});

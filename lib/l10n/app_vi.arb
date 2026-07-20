@@ -127,10 +127,12 @@
   "@createDeckLabel": {
     "description": "First-run deck setup (step 2) copy."
   },
+  "deckCreatingLabel": "Đang tạo…",
   "deckNameRequiredMessage": "Hãy nhập tên deck.",
   "@deckNameRequiredMessage": {
     "description": "First-run deck setup (step 2) copy."
   },
+  "deckNameDuplicateRootMessage": "Đã có deck trùng tên trong Thư viện của bạn.",
   "deckNameDuplicateMessage": "Đã có deck trùng tên ở đây.",
   "@deckNameDuplicateMessage": {
     "description": "First-run deck setup (step 2) copy."
