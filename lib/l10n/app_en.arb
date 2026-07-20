@@ -68,6 +68,14 @@
   "@noLanguagesFoundMessage": {
     "description": "Empty state of the language search."
   },
+  "learningLanguageRequiredMessage": "Choose a language to learn.",
+  "@learningLanguageRequiredMessage": {
+    "description": "Step 1 inline error under an empty learning-language selector (copy from create-deck-firstrun--step1-validation)."
+  },
+  "meaningLanguageRequiredMessage": "Choose a language for meanings.",
+  "@meaningLanguageRequiredMessage": {
+    "description": "Step 1 inline error under an empty meaning-language selector. MIRRORED from the learning-language copy — the kit shot only specifies the learning field; needs kit-owner confirmation."
+  },
   "continueLabel": "Continue",
   "@continueLabel": {
     "description": "Primary action finishing first-run language selection."

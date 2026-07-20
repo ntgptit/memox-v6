@@ -218,3 +218,54 @@ test('MX-VIS-011 holds the submitting state while the deck is created', async ({
   await expect(page.getByRole('button', { name: 'Creating…' })).toBeDisabled();
   await holdDemoFrame(page);
 });
+
+// MX-VIS-005 · First-run language (step 1) · Validation error
+// Master flow: docs/business/deck/create-deck.md §3
+// Flow node: E["Step 1 · Learning setup"]
+test('MX-VIS-005 flags a required language the user left empty', async ({
+  page,
+}, testInfo) => {
+  await enterFlow(page, {
+    masterFlow: 'docs/business/deck/create-deck.md',
+    fixture: 'MX-VIS-005',
+  });
+
+  await reachStepOne(page);
+
+  // Opening the picker and leaving without a choice is the only way a
+  // required selector ends up visibly empty, so that is what the kit
+  // draws an error for. The sheet dismisses on Escape (its barrier's
+  // keyboard equivalent), which is a real key event, not an app call.
+  await tapControl(page, 'What are you learning?');
+  await page.keyboard.press('Escape');
+  // The live-region wrapper and its text both carry the message, so the
+  // match is intentionally the first of the two.
+  const learningError = page.getByText('Choose a language to learn.').first();
+  await expect(learningError).toBeVisible();
+
+  // The second field is filled, matching the shot — the error belongs to
+  // the empty field alone, not to the step.
+  await tapControl(page, 'Show meanings in');
+  await tapControl(page, 'Vietnamese');
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-005',
+    shot: 'create-deck-firstrun--step1-validation',
+    screen: 'First-run language (step 1)',
+    state: 'Validation error',
+    masterFlow: 'docs/business/deck/create-deck.md',
+    flowNode: 'E["Step 1 · Learning setup"]',
+    fixture: 'MX-VIS-005',
+    route: '/first-run/language',
+  });
+
+  // The step cannot advance while a required field is empty, and it
+  // recovers as soon as the user chooses.
+  await expect(page.getByRole('button', { name: 'Continue' })).toBeDisabled();
+  await tapControl(page, 'What are you learning?');
+  await tapControl(page, 'Korean');
+  await expect(learningError).toBeHidden();
+  await reachStepTwo(page);
+  await holdDemoFrame(page);
+});

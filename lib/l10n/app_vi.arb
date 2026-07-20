@@ -59,6 +59,8 @@
   "@noLanguagesFoundMessage": {
     "description": "Empty state of the language search."
   },
+  "learningLanguageRequiredMessage": "Hãy chọn ngôn ngữ bạn muốn học.",
+  "meaningLanguageRequiredMessage": "Hãy chọn ngôn ngữ hiển thị nghĩa.",
   "continueLabel": "Tiếp tục",
   "@continueLabel": {
     "description": "Primary action finishing first-run language selection."

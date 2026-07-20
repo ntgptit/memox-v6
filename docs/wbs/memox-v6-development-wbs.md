@@ -477,7 +477,7 @@ yet measured under this gate.
 | MX-VIS-002 | First-run landing | Not-now dismissing | `create-deck-firstrun--not-now` | Blocked — the shot is the Today dashboard after dismissal, not a landing state (5.7; also search 5.x, avatar 9.x) |
 | MX-VIS-003 | First-run language (step 1) | Empty draft | *no kit reference* | Pending — kit decision needed |
 | MX-VIS-004 | First-run language (step 1) | Complete selection | `create-deck-firstrun--step1` | **Playwright PASS — 1.37% light / 1.38% dark** (fresh launch → Create first deck → select Korean→Vietnamese; capture at `E`, journey continues to a created deck in Library) |
-| MX-VIS-005 | First-run language (step 1) | Validation error | `create-deck-firstrun--step1-validation` | Blocked — step-1 field validation + `MxSelectRow` error slot (5.1.2); Continue is disabled while incomplete, so the state is unreachable |
+| MX-VIS-005 | First-run language (step 1) | Validation error | `create-deck-firstrun--step1-validation` | **Playwright PASS — 1.73% light / 1.72% dark** (open the learning picker, dismiss it with Escape, then fill the second field; capture at `E`, then recovery asserted). Closed the `5.1.2` gap: step 1 had no per-field validation at all |
 | MX-VIS-006 | Language select sheet | Unfiltered list | *no kit reference* (nearest `languages--list`) | Pending — kit decision needed |
 | MX-VIS-007 | Language select sheet | Search filtered | *no kit reference* | Pending — kit decision needed |
 | MX-VIS-008 | Language select sheet | No match | *no kit reference* | Pending — kit decision needed |

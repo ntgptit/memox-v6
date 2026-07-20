@@ -27,6 +27,7 @@ class ParityFixtures {
   static const List<String> ids = <String>[
     'MX-VIS-001',
     'MX-VIS-004',
+    'MX-VIS-005',
     'MX-VIS-009',
     'MX-VIS-010',
     'MX-VIS-011',
@@ -50,6 +51,7 @@ class ParityFixtures {
       // test, so these need no seed beyond the reset above.
       case 'MX-VIS-001':
       case 'MX-VIS-004':
+      case 'MX-VIS-005':
       case 'MX-VIS-009':
       case 'MX-VIS-010':
       case 'MX-VIS-011':
