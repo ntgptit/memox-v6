@@ -554,11 +554,38 @@ and `5.4.2`, and `10.2` and `5.4.2` wait on `P0.6`.
 This packet already anticipates the shape of the escape hatch — states whose
 shot depends on unshipped features are "measured, but not required to pass
 before `P0.6`" — but it names only five IDs (`017`, `020`, `021`, `022`,
-`034`). The audit puts the real count near 25. **Closing `P0.6` therefore
-requires an owner decision**: either widen that exemption to every
-feature-blocked row, or carve `10.2` and `5.4.2` out of the precedence rule so
-they can ship first. Recorded here rather than resolved, because it changes the
-phase contract.
+`034`). The audit puts the real count near 25.
+
+#### Owner decision, 2026-07-20 — `P0.6` closes per vertical slice
+
+Neither of the two obvious escapes was taken (widening the exemption to ~25
+rows, or carving `10.2`/`5.4.2` out of the precedence rule). Instead:
+
+**A slice is done when every state on that user flow measures ≤3%. A state
+owned by a feature that has not shipped defers *with that feature*, not as a
+waiver.** `P0.6` is the sum of closed slices rather than a single 49-state
+gate.
+
+This dissolves the deadlock without loosening anything: `MX-VIS-002` defers
+with `5.7` (Today dashboard), `016` with `10.2` + `5.4.2` (FilterRow, SRS
+counters), `017` with `13.1` (import). Each is still measured and still
+recorded — it simply belongs to its owner's slice.
+
+The working order that follows from it is **outside-in**: take one user flow
+end to end, close every branch of it — including the error and edge branches
+the kit specifies — and only then start the next flow. Layer-first closure is
+what let the gaps below through: an item goes Done when the happy path works,
+while the branches the kit draws are never built.
+
+**First slice: onboarding** (`001`–`018`). Closing it properly reopens three
+items that are currently marked Done but cannot render a state the kit
+specifies:
+
+| State | Kit requires | Ships today | Item marked Done |
+| --- | --- | --- | --- |
+| `MX-VIS-005` | Inline error under the language select | `MxSelectRow` has no error slot | `5.1.2` |
+| `MX-VIS-014` | Deck-name-too-long guidance | No name-length rule anywhere | `5.2.1` |
+| `MX-VIS-015` | "We kept your draft" banner + `Start over` | Draft persists, but no resume affordance | `5.2.3B` |
 
 Actionable without any further feature work, after this audit: `004`, `009`,
 `010`, `011`, `012`, `013`, `038`, `039`, `044`, and `043` once a
