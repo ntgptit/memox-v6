@@ -16,6 +16,7 @@ import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_area.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_action_callout.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
@@ -63,6 +64,13 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
     final description = useMxTextValue(initial: draft.description);
     final showOptional = useState(draft.description.isNotEmpty);
 
+    // Whether this screen was entered on top of work the user already did.
+    // Captured once at mount: the draft survives Change/back, so arriving
+    // with content in it means it was restored, not typed just now.
+    final resumedDraft = useState(
+      draft.name.isNotEmpty || draft.description.isNotEmpty,
+    );
+
     listenMxAction(
       ref,
       createFirstDeckViewmodelProvider,
@@ -82,9 +90,29 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
         // thing read after a failed attempt is why it failed and that the
         // draft survived (`create-deck.md` §9).
         if (failure != null && nameError == null) ...[
-          MxBanner(
+          MxActionCallout(
             tone: MxBannerTone.error,
-            body: l10n.deckCreateFailedMessage,
+            text: l10n.deckCreateFailedMessage,
+          ),
+          const MxGap.s6(),
+        ],
+        if (resumedDraft.value) ...[
+          MxActionCallout(
+            tone: MxBannerTone.info,
+            icon: Symbols.history_rounded,
+            text: l10n.draftKeptMessage,
+            action: MxLink(
+              label: l10n.startOverLabel,
+              onTap: () {
+                ref
+                    .read(firstRunDeckDraftViewmodelProvider.notifier)
+                    .clearDraft();
+                name.controller.clear();
+                description.controller.clear();
+                showOptional.value = false;
+                resumedDraft.value = false;
+              },
+            ),
           ),
           const MxGap.s6(),
         ],
@@ -166,7 +194,12 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
 
   String? _nameErrorOf(AppFailure? failure, AppLocalizations l10n) {
     if (failure is ValidationFailure && failure.field == 'deckName') {
-      return l10n.deckNameRequiredMessage;
+      // The field has more than one way to be invalid, so the code — not
+      // the field — picks the guidance (`create-deck.md` §19).
+      return switch (failure.code) {
+        'too-long' => l10n.deckNameTooLongMessage,
+        _ => l10n.deckNameRequiredMessage,
+      };
     }
     if (failure is ConflictFailure && failure.code == 'duplicate') {
       // First-run always creates a root deck, so the clash is with the

@@ -1,0 +1,26 @@
+{
+  "wbsId": "MX-VIS-014",
+  "screen": "First-run deck setup (step 2)",
+  "state": "Name too long",
+  "masterFlow": "docs/business/deck/create-deck.md",
+  "flowNode": "J{\"Kết quả\"} -- \"Lỗi\" --> H[\"Step 2 · First Deck setup\"]",
+  "kitReference": "create-deck-firstrun--name-too-long--dark.png",
+  "route": "/first-run/deck",
+  "fixture": "MX-VIS-014",
+  "viewport": "390x780 @2x",
+  "theme": "dark",
+  "spec": "/tool/parity/specs/first-run-steps.spec.ts",
+  "expected": "expected.png",
+  "actual": "actual.png",
+  "diff": "diff.png",
+  "differencePercentage": 1.07,
+  "result": "PASS",
+  "kitSize": {
+    "width": 780,
+    "height": 1560
+  },
+  "actualSize": {
+    "width": 780,
+    "height": 1560
+  }
+}

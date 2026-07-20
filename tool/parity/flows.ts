@@ -102,7 +102,21 @@ export async function tapControl(page: Page, name: string | RegExp): Promise<voi
   const control = page.getByRole('button', { name });
   await expect(control.first()).toBeVisible();
   await control.first().click();
+  await releasePointer(page);
   await settle(page);
+}
+
+/**
+ * Parks the pointer away from whatever was just pressed.
+ *
+ * A browser leaves the cursor where it clicked, so Flutter keeps painting
+ * that control's hover overlay — a real finger does not linger, and the
+ * kit shots are all resting states. Left in place it darkens a primary
+ * CTA from `rgb(75,58,140)` to `rgb(59,45,114)`, which on a block button
+ * is most of a frame's diff.
+ */
+export async function releasePointer(page: Page): Promise<void> {
+  await page.mouse.move(0, 0);
 }
 
 /** Clicks any semantics node carrying [name], for non-button surfaces. */

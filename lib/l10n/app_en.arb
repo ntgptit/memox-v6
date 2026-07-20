@@ -144,6 +144,14 @@
   "@createDeckLabel": {
     "description": "First-run deck setup (step 2) copy."
   },
+  "draftKeptMessage": "We kept your draft.",
+  "@draftKeptMessage": {
+    "description": "First-run step 2 callout when a draft is restored (create-deck.md §18)."
+  },
+  "startOverLabel": "Start over",
+  "@startOverLabel": {
+    "description": "Discards the restored first-run draft."
+  },
   "deckCreatingLabel": "Creating…",
   "@deckCreatingLabel": {
     "description": "First-run step 2 CTA while the deck is being created (create-deck.md §7 Submitting)."
@@ -151,6 +159,10 @@
   "deckNameRequiredMessage": "Add a deck name.",
   "@deckNameRequiredMessage": {
     "description": "First-run deck setup (step 2) copy."
+  },
+  "deckNameTooLongMessage": "Use a shorter deck name.",
+  "@deckNameTooLongMessage": {
+    "description": "Deck name past deckNameMaxLength (create-deck.md §19)."
   },
   "deckNameDuplicateRootMessage": "A deck with this name already exists in your Library.",
   "@deckNameDuplicateRootMessage": {

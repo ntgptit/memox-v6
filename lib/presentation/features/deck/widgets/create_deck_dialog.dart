@@ -121,7 +121,12 @@ class _CreateDeckForm extends HookConsumerWidget {
 
   String? _nameErrorOf(AppFailure? failure, AppLocalizations l10n) {
     if (failure is ValidationFailure && failure.field == 'deckName') {
-      return l10n.deckNameRequiredMessage;
+      // The field has more than one way to be invalid, so the code — not
+      // the field — picks the guidance (`create-deck.md` §19).
+      return switch (failure.code) {
+        'too-long' => l10n.deckNameTooLongMessage,
+        _ => l10n.deckNameRequiredMessage,
+      };
     }
     if (failure is ConflictFailure && failure.code == 'duplicate') {
       return l10n.deckNameDuplicateMessage;

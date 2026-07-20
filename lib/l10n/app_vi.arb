@@ -129,11 +129,14 @@
   "@createDeckLabel": {
     "description": "First-run deck setup (step 2) copy."
   },
+  "draftKeptMessage": "Bản nháp của bạn vẫn được giữ.",
+  "startOverLabel": "Làm lại từ đầu",
   "deckCreatingLabel": "Đang tạo…",
   "deckNameRequiredMessage": "Hãy nhập tên deck.",
   "@deckNameRequiredMessage": {
     "description": "First-run deck setup (step 2) copy."
   },
+  "deckNameTooLongMessage": "Hãy dùng tên deck ngắn hơn.",
   "deckNameDuplicateRootMessage": "Đã có deck trùng tên trong Thư viện của bạn.",
   "deckNameDuplicateMessage": "Đã có deck trùng tên ở đây.",
   "@deckNameDuplicateMessage": {
