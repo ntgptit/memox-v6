@@ -39,13 +39,19 @@ class MxBanner extends StatelessWidget {
   const MxBanner({
     super.key,
     required this.tone,
-    required this.title,
+    this.title,
     this.body,
     this.action,
-  });
+  }) : assert(
+         title != null || body != null,
+         'MxBanner needs a title, a body, or both',
+       );
 
   final MxBannerTone tone;
-  final String title;
+
+  /// Optional, as in the kit: a banner carrying one short sentence uses
+  /// [body] alone rather than shouting it in the title role.
+  final String? title;
   final String? body;
   final Widget? action;
 
@@ -71,6 +77,7 @@ class MxBanner extends StatelessWidget {
         Symbols.error,
       ),
     };
+    final title = this.title;
     final body = this.body;
 
     return Container(
@@ -86,9 +93,10 @@ class MxBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(title, style: styles.button.copyWith(color: fg)),
+                if (title != null)
+                  Text(title, style: styles.button.copyWith(color: fg)),
                 if (body != null) ...[
-                  const MxGap.s1(),
+                  if (title != null) const MxGap.s1(),
                   MxText(body, role: MxTextRole.caption, color: fg),
                 ],
               ],

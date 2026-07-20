@@ -7,6 +7,7 @@ import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/core/ids/id_generator.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/data/database/app_database.dart';
+import 'package:memox_v6/app/dev/parity_overrides.dart';
 import 'package:memox_v6/data/dev/parity_fixtures.dart';
 
 /// Flutter Web entry point for the kit visual-parity gate (WBS P0.2).
@@ -56,6 +57,9 @@ Future<void> main() async {
       appDatabaseProvider.overrideWithValue(database),
       appClockProvider.overrideWithValue(const _FixedParityClock()),
       idGeneratorProvider.overrideWithValue(_SequentialParityIds()),
+      // Fixture-specific preconditions, e.g. a write path that fails so
+      // the spec can press the real button and land on the real error.
+      ...parityOverridesFor(fixtureId),
     ],
     appBuilder: _applyKitViewportInsets,
   );

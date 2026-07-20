@@ -78,6 +78,16 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const MxGap.s4(),
+        // A submit failure announces itself above the title, so the first
+        // thing read after a failed attempt is why it failed and that the
+        // draft survived (`create-deck.md` §9).
+        if (failure != null && nameError == null) ...[
+          MxBanner(
+            tone: MxBannerTone.error,
+            body: l10n.deckCreateFailedMessage,
+          ),
+          const MxGap.s6(),
+        ],
         MxText(l10n.createFirstDeckLabel, role: MxTextRole.title),
         const MxGap.s6(),
         MxAsyncBuilder<LanguagePair?>(
@@ -130,17 +140,13 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
                 .setDeckDescription(value),
           ),
         ],
-        if (failure != null && nameError == null) ...[
-          const MxGap.s4(),
-          MxBanner(
-            tone: MxBannerTone.error,
-            title: l10n.saveFailedTitle,
-            body: MxActionErrors.messageOf(failure, l10n),
-          ),
-        ],
         const MxGap.s6(),
         MxButton(
-          label: l10n.createDeckLabel,
+          // After a failure the CTA names the retry rather than repeating
+          // the original action.
+          label: failure != null && nameError == null
+              ? l10n.tryAgainLabel
+              : l10n.createDeckLabel,
           icon: Symbols.add_rounded,
           block: true,
           onPressed: name.canSubmit && !isSubmitting

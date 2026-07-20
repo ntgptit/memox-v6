@@ -213,10 +213,7 @@ class _MxFieldScaffoldState extends State<MxFieldScaffold> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        if (label != null) ...[
-          _buildLabel(context, label),
-          const MxGap.s2(),
-        ],
+        if (label != null) ...[_buildLabel(context, label), const MxGap.s2()],
         input,
         if (support != null) ...[const MxGap.s2(), support],
       ],
@@ -269,20 +266,12 @@ class _MxFieldScaffoldState extends State<MxFieldScaffold> {
     if (errorText != null) {
       return Semantics(
         liveRegion: true,
-        child: MxText(
-          errorText,
-          role: MxTextRole.caption,
-          color: colors.error,
-        ),
+        child: MxText(errorText, role: MxTextRole.caption, color: colors.error),
       );
     }
 
     final helper = widget.helper;
     if (helper == null) return null;
-    return MxText(
-      helper,
-      role: MxTextRole.caption,
-      color: colors.textTertiary,
-    );
+    return MxText(helper, role: MxTextRole.caption, color: colors.textTertiary);
   }
 }

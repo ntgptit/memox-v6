@@ -29,11 +29,15 @@ class ParityFixtures {
     'MX-VIS-004',
     'MX-VIS-009',
     'MX-VIS-010',
+    'MX-VIS-012',
     'MX-VIS-018',
     'MX-VIS-049',
   ];
 
   /// Seeds [id] over a reset database.
+  ///
+  /// Data only. States that also need a failing dependency get it from
+  /// `app/dev/parity_overrides.dart`, which is where providers live.
   ///
   /// Throws [ArgumentError] on an unknown id so a typo in a spec fails
   /// the run loudly instead of silently rendering the wrong state.
@@ -47,6 +51,7 @@ class ParityFixtures {
       case 'MX-VIS-004':
       case 'MX-VIS-009':
       case 'MX-VIS-010':
+      case 'MX-VIS-012':
         return;
       case 'MX-VIS-018':
         await _seedActivePair();

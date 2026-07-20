@@ -309,6 +309,7 @@
   "@tryAgainLabel": {
     "description": "Card Editor submit-error retry (WBS 5.3.2B)."
   },
+  "deckCreateFailedMessage": "Kh\u00f4ng t\u1ea1o \u0111\u01b0\u1ee3c b\u1ed9 th\u1ebb. Th\u00f4ng tin c\u1ee7a b\u1ea1n v\u1eabn c\u00f2n \u0111\u00e2y.",
   "cardSaveFailedMessage": "Kh\u00f4ng l\u01b0u \u0111\u01b0\u1ee3c th\u1ebb. D\u1eef li\u1ec7u c\u1ee7a b\u1ea1n v\u1eabn c\u00f2n \u0111\u00e2y.",
   "@cardSaveFailedMessage": {
     "description": "Card Editor submit-error banner (WBS 5.3.2B)."
