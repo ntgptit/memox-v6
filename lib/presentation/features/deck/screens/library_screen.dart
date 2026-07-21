@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/domain/deck/deck_summary.dart';
+import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
@@ -13,6 +14,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_deck_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_list.dart';
 
 /// Library root (WBS 5.2.4A, kit shell per 3.15B): the reactive
@@ -27,11 +29,32 @@ class LibraryScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     // No `bottomNav` here: Library is a branch of `AppTabShell`, which
-    // owns the persistent tab bar for every root destination.
+    // owns the persistent tab bar for every root destination. The FAB is
+    // its own consumer so the shell stays template-only.
     return MxScaffold(
       appBar: MxContextualAppBar(title: l10n.libraryTitle),
       scrollable: false,
+      fab: const _LibraryFab(),
       body: const _LibraryBody(),
+    );
+  }
+}
+
+/// Create FAB, shown only once the library has decks — the empty state
+/// carries its own create/import buttons instead (kit `library--loaded`).
+class _LibraryFab extends ConsumerWidget {
+  const _LibraryFab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final hasDecks =
+        ref.watch(libraryRootDecksProvider).asData?.value.isNotEmpty ?? false;
+    if (!hasDecks) return const SizedBox.shrink();
+    return MxFab(
+      icon: Symbols.add_rounded,
+      semanticLabel: l10n.createDeckLabel,
+      onPressed: () => showCreateDeckDialog(context),
     );
   }
 }
@@ -48,33 +71,31 @@ class _LibraryBody extends ConsumerWidget {
       value: roots,
       loadingLabel: l10n.loadingLabel,
       errorTitle: l10n.somethingWentWrongMessage,
-      data: (context, summaries) => summaries.isEmpty
-          ? const _LibraryEmptyState()
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+      data: (context, summaries) {
+        if (summaries.isEmpty) return const _LibraryEmptyState();
+        // Kit default order is A–Z by name; creation lives on the FAB now,
+        // so the list owns the whole body.
+        final sorted = [...summaries]
+          ..sort(
+            (a, b) => StringUtils.lowerCased(
+              a.deck.name,
+            ).compareTo(StringUtils.lowerCased(b.deck.name)),
+          );
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const MxGap.s4(),
+              MxList(
                 children: [
-                  const MxGap.s4(),
-                  // Shared inter-item gap contract (kit `MxList`, space-3
-                  // between rows); the trailing gap separates the list from
-                  // the create action.
-                  MxList(
-                    children: [
-                      for (final summary in summaries)
-                        _DeckRow(summary: summary),
-                    ],
-                  ),
-                  const MxGap.s3(),
-                  const MxGap.s6(),
-                  MxButton(
-                    label: l10n.createDeckLabel,
-                    block: true,
-                    onPressed: () => showCreateDeckDialog(context),
-                  ),
-                  const MxGap.s6(),
+                  for (final summary in sorted) _DeckRow(summary: summary),
                 ],
               ),
-            ),
+              const MxGap.s6(),
+            ],
+          ),
+        );
+      },
     );
   }
 }
