@@ -613,7 +613,7 @@ comparison.
 | 1.1 CP | Dependency baseline | M | 0.4 | Execute [WBS-1.1 packet](./implementation-packets/WBS-1.1-dependency-baseline.md): approved direct manifest in `pubspec.yaml`, reproducible `pubspec.lock`, no disallowed dependency source, full verifier pass. |
 | 1.2 CP | Consolidated verifier | L | 0.4 | `tool/verify/run.mjs` or equivalent owns pub-get/l10n/codegen/format/guard/analyze/tests and emits a pass marker; CI/hooks call the same entry. |
 | 1.3 CP | App bootstrap | M | 1.1 | `main.dart` contains only bootstrap; ProviderScope, error zones, lifecycle and app widget are wired. |
-| 1.4 CP | Router skeleton | L | 1.1 | RouteNames/RoutePaths, navigation extension, app router, feature route registries and empty shell routes; no raw route strings. |
+| 1.4 CP | Router skeleton | L | 1.1 | RouteNames/RoutePaths, navigation extension, app router, feature route registries and empty shell routes; no raw route strings. The `errorBuilder` not-found surface carries an in-app typed recovery action (per `docs/business/navigation` missing/invalid contract), so a stale/unknown URL never strands the user with only browser/system Back. |
 | 1.5 CP | Error and observability pipeline | L | 1.3 | Typed AppFailure mapping, redacted logger, Flutter/platform async error capture and user-safe error presentation. |
 | 1.6 CP | Deterministic infrastructure | M | 1.3 | Clock/timezone, ID/idempotency and deterministic random/shuffle ports with test fakes. |
 | 1.7 | Developer fixtures | M | 1.3 | Seed/reset commands for empty, minimum, dense, error, paused-session and due-card states; never shipped in release mode. |
@@ -643,6 +643,18 @@ Relevant audit groups: KIT-02–13, KIT-32–39, KIT-42, KIT-48.
 
 Build components in dependency order. Each public shared type has guard-required documentation: summary, purpose, use-when, do-not-use-when, category, public API, variants and states.
 
+> **DoD — integration reachability (global, applies to every component and screen task).**
+> A component or screen task is **not Done** until the deliverable is *reachable from an
+> app launch at `/`* and exercised by a flow that enters through the app-launch node
+> (`tool/parity/flows.ts` `enterFlow`), **or** it is explicitly listed as inventory with the
+> WBS id of the screen that will wire it. Rationale: a widget can pass every widget/golden/a11y
+> test in isolation while being unreachable or stranding the user — component existence is not
+> integration. This clause exists because the app-shell composition (persistent bottom nav /
+> rail) was handed from `1.4` to `3.5`/`3.6` but written into no DoD, so `MxBottomNav` shipped
+> with no shell wiring it in, leaving Today/Stats/Profile as dead ends behind a green build.
+> The audit backing this clause also found orphaned primitives — a shared type with **zero
+> production consumers** is inventory, not Done, and must name its pending consumer here.
+
 | WBS | Work package | Size | Depends on | Deliverable / Definition of Done |
 | --- | --- | --- | --- | --- |
 | 3.1 CP | Shared text/icon/tappable foundation | L | 2.10 | `MxText`, icon adapter, shaped/focused tappable semantics and spacing helpers. |
@@ -650,7 +662,7 @@ Build components in dependency order. Each public shared type has guard-required
 | 3.3 CP | `MxTextField` and form foundation | XL | 3.1 | Label/help/error, validation, controller/focus hooks, keyboard/autofill, multiline and long-text states. |
 | 3.4 CP | `MxCard`, list and surface primitives | XL | 3.1 | Card variants, list rows, icon tiles, section headers, dividers and semantic tap behavior. |
 | 3.5 CP | `MxScaffold` and content shells | XL | 2.10, 3.1 | App bar/body/nav/FAB slots, safe areas, retained composition, constrained study/form/detail layouts. |
-| 3.6 CP | Navigation primitives | L | 3.2, 3.5 | Contextual app bar, bottom nav, rail adaptation, FAB, icon buttons and search dock. |
+| 3.6 CP | Navigation primitives | L | 3.2, 3.5 | Contextual app bar, bottom nav, rail adaptation, FAB, icon buttons and search dock — **each wired into the app-shell composition (`StatefulShellRoute` + `AppTabShell`) so it is reachable from `/`, not only present as an isolated widget.** Owns the persistent root-destination shell handed over by `1.4`. Open sub-items (not Done): **rail adaptation** — `usesNavigationRail` has no rail widget and no production consumer, so medium+ still shows the bottom bar; **search dock** — inventory until the Search feature lands (name its consumer per the reachability clause). |
 | 3.7 CP | First-learning feedback primitives | L | 3.2–3.5 | Progress, banner, loading/error/offline, dialog and sheet states required by create/start/study/retry. |
 | 3.8 | Selection/control primitives | L | 3.1–3.4 | Chip, segmented control, switch, badge, avatar and link with full state matrices. |
 | 3.9 CP | Async/action infrastructure | L | 3.7 | `AppAsyncBuilder`, action runner, typed effect listener, `MxAsyncDraft` and retry surfaces aligned with guard rules. |

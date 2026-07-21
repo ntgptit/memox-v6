@@ -3,6 +3,7 @@
   "appTitle": "MemoX",
   "homeTitle": "Trang chủ MemoX",
   "routeNotFoundMessage": "Trang này không tồn tại.",
+  "routeNotFoundRecoveryLabel": "Về trang chủ",
   "dataCorruptionMessage": "Một phần dữ liệu đã lưu không đọc được.",
   "@dataCorruptionMessage": {
     "description": "Shown when persisted data fails to map (DataCorruptionFailure)."
@@ -61,6 +62,7 @@
   },
   "learningLanguageRequiredMessage": "Hãy chọn ngôn ngữ bạn muốn học.",
   "meaningLanguageRequiredMessage": "Hãy chọn ngôn ngữ hiển thị nghĩa.",
+  "meaningLanguageDistinctMessage": "Hãy chọn ngôn ngữ nghĩa khác với ngôn ngữ học.",
   "continueLabel": "Tiếp tục",
   "@continueLabel": {
     "description": "Primary action finishing first-run language selection."

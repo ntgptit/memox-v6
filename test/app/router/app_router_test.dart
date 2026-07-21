@@ -49,6 +49,27 @@ void main() {
     expect(find.text("This page doesn't exist."), findsOneWidget);
   });
 
+  testWidgets('not-found offers an in-app recovery back to home', (
+    tester,
+  ) async {
+    // A stale/unknown URL must never strand the user: the contract
+    // (navigation README) requires a typed recovery destination, not
+    // reliance on browser/system Back.
+    final router = createAppRouter();
+    await tester.pumpWidget(_appWithRouter(router));
+    await tester.pumpAndSettle();
+
+    router.go('/definitely-not-a-route');
+    await tester.pumpAndSettle();
+    expect(find.byType(RouteNotFoundScreen), findsOneWidget);
+
+    await tester.tap(find.text('Back to home'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(RouteNotFoundScreen), findsNothing);
+    expect(find.byType(HomePlaceholderScreen), findsOneWidget);
+  });
+
   testWidgets('goHome extension returns to the home placeholder', (
     tester,
   ) async {

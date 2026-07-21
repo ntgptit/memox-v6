@@ -18,13 +18,13 @@ import 'package:memox_v6/core/theme/tokens/app_strokes.dart';
 import 'package:memox_v6/core/theme/tokens/app_typography.dart';
 
 void main() {
-  test('token coverage matches the 207-token manifest exactly', () {
-    // 64 themed colors ×2 themes share names; palette 6; opacity 5;
+  test('token coverage matches the 208-token manifest exactly', () {
+    // 65 themed colors ×2 themes share names; palette 6; opacity 5;
     // typography 27; spacing 31; size 11; radius 13; stroke 5;
     // component 25; motion 10; icon 4; elevation 6 (structural, held as
-    // BoxShadow lists). 64+6+5+27+31+11+13+5+25+10+4+6 = 207.
-    expect(AppColors.light.byToken, hasLength(64));
-    expect(AppColors.dark.byToken, hasLength(64));
+    // BoxShadow lists). 65+6+5+27+31+11+13+5+25+10+4+6 = 208.
+    expect(AppColors.light.byToken, hasLength(65));
+    expect(AppColors.dark.byToken, hasLength(65));
     expect(AppColors.paletteByToken, hasLength(6));
     expect(AppOpacities.byToken, hasLength(5));
     expect(

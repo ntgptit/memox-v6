@@ -8,7 +8,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// Tones of the kit `.banner` contract.
-enum MxBannerTone { info, success, warning, error }
+enum MxBannerTone { info, success, warning, error, accent }
 
 /// The one inline tone banner (kit `MxBanner`).
 ///
@@ -75,6 +75,13 @@ class MxBanner extends StatelessWidget {
         colors.errorSoft,
         colors.onErrorSoft,
         Symbols.error,
+      ),
+      // The celebratory brand tone the kit uses on the first-deck
+      // ActionCallout; MxBanner shares the scale (kit tone contract).
+      MxBannerTone.accent => (
+        colors.accentSoft,
+        colors.onAccentSoft,
+        Symbols.celebration,
       ),
     };
     final title = this.title;

@@ -7,50 +7,68 @@ import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart'
     show MxBannerTone;
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
-/// A one-line tinted notice with an optional action (kit `ActionCallout`).
+/// A soft-tinted in-flow notice with an optional action (kit `ActionCallout`).
 ///
 /// Purpose:
-/// The compact in-flow notice screens actually use: a tone tile, one short
-/// sentence and, when there is something to do about it, a single inline
-/// action. Tighter than [MxBanner] and vertically centred, because it
-/// carries a sentence rather than a titled block.
+/// The compact tonal notice screens actually use: a tone tile, a short
+/// message and, when there is something to do about it, an action. Two kit
+/// shapes: a centred single row for a one-line notice, and — when [title]
+/// is set — a titled block whose action drops below the body.
 ///
 /// Use when:
 /// A screen reports something in place — a failed submit, a restored
-/// draft, an offline notice — and the message fits one line of `sm` text.
-/// The kit composes this, not `.banner`, on every feature screen.
+/// draft, an offline notice, a first-run success — with a message and at
+/// most one action. The kit composes this, not `.banner`, on feature screens.
 ///
 /// Do not use when:
-/// The notice needs a title above its body (`MxBanner`), or it is a
-/// transient confirmation (`MxSnackbar`).
+/// It is a blocking decision (`MxDialog`) or a transient confirmation
+/// (`MxSnackbar`).
 ///
 /// Category:
 /// feedback
 ///
 /// Public API:
 /// - tone: shares the kit's tone scale with [MxBanner] — the soft fill and
-///   its on-color come from the same token pair.
-/// - text: the sentence, at `sm`.
+///   its on-color come from the same token pair (`accent` is the kit's
+///   celebratory first-run tone).
+/// - text: the message, at `sm`.
+/// - title: optional heading; switches to the titled (action-below) layout.
 /// - icon: tone glyph; defaults to the tone's own.
-/// - action: optional trailing control, e.g. an `MxLink`.
+/// - action: optional control (trailing on the single row, below the body
+///   in the titled layout).
+/// - onDismiss: optional trailing `×`; the parent owns the effect.
 ///
 /// Variants:
-/// See [MxBannerTone].
+/// See [MxBannerTone]; single-row vs titled by [title].
 class MxActionCallout extends StatelessWidget {
   const MxActionCallout({
     super.key,
     required this.tone,
     required this.text,
     this.icon,
+    this.title,
     this.action,
+    this.onDismiss,
+    this.dismissSemanticLabel,
   });
 
   final MxBannerTone tone;
   final String text;
   final IconData? icon;
+
+  /// Optional heading above the body. Present it and the callout becomes the
+  /// kit's titled variant: the action drops **below** the body instead of
+  /// sitting inline, so a multi-line celebratory notice reads as a block.
+  final String? title;
   final Widget? action;
+
+  /// When set, a trailing dismiss (`×`) is shown; the parent owns what it
+  /// does (e.g. hide the callout).
+  final VoidCallback? onDismiss;
+  final String? dismissSemanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +94,13 @@ class MxActionCallout extends StatelessWidget {
         colors.onErrorSoft,
         Symbols.error_rounded,
       ),
+      MxBannerTone.accent => (
+        colors.accentSoft,
+        colors.onAccentSoft,
+        Symbols.celebration_rounded,
+      ),
     };
-    final action = this.action;
+    final title = this.title;
 
     return Container(
       // Kit `ActionCallout`: s3/s4 padding on the control radius — tighter
@@ -91,16 +114,71 @@ class MxActionCallout extends StatelessWidget {
         color: background,
         borderRadius: AppBorderRadii.control,
       ),
-      child: Row(
-        children: [
-          MxIcon(icon: icon ?? toneIcon, color: foreground),
-          const MxGap.s3(),
-          Expanded(
-            child: MxText(text, role: MxTextRole.caption, color: foreground),
-          ),
-          if (action != null) ...[const MxGap.s3(), action],
-        ],
-      ),
+      // `title` promotes to non-null in the titled branch, so the block
+      // takes it as a plain String (no assertion).
+      child: title == null
+          ? _singleRow(context, foreground, toneIcon)
+          : _titledBlock(context, foreground, toneIcon, title),
     );
+  }
+
+  /// No title → the kit's original centred single-row layout.
+  Widget _singleRow(BuildContext context, Color foreground, IconData toneIcon) {
+    final action = this.action;
+    return Row(
+      children: [
+        MxIcon(icon: icon ?? toneIcon, color: foreground),
+        const MxGap.s3(),
+        Expanded(
+          child: MxText(text, role: MxTextRole.caption, color: foreground),
+        ),
+        if (action != null) ...[const MxGap.s3(), action],
+        ..._dismiss(foreground),
+      ],
+    );
+  }
+
+  /// Titled → heading above the body with the action on its own row below
+  /// (kit `ActionCallout` titled variant; `create-deck.md` §7).
+  Widget _titledBlock(
+    BuildContext context,
+    Color foreground,
+    IconData toneIcon,
+    String title,
+  ) {
+    final action = this.action;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        MxIcon(icon: icon ?? toneIcon, color: foreground),
+        const MxGap.s3(),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MxText(title, role: MxTextRole.subtitle, color: foreground),
+              const MxGap.s1(),
+              MxText(text, role: MxTextRole.caption, color: foreground),
+              if (action != null) ...[const MxGap.s2(), action],
+            ],
+          ),
+        ),
+        ..._dismiss(foreground),
+      ],
+    );
+  }
+
+  List<Widget> _dismiss(Color foreground) {
+    if (onDismiss == null) return const [];
+    return [
+      const MxGap.s2(),
+      MxIconButton(
+        icon: Symbols.close_rounded,
+        small: true,
+        semanticLabel: dismissSemanticLabel ?? '',
+        onPressed: onDismiss,
+      ),
+    ];
   }
 }

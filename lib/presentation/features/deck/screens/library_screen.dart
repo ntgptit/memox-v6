@@ -8,6 +8,7 @@ import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_action_callout.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_badge.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
@@ -15,9 +16,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_deck_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_list.dart';
 
 /// Library root (WBS 5.2.4A, kit shell per 3.15B): the reactive
 /// root-deck list of the active pair inside the shared chrome
@@ -61,13 +60,19 @@ class _LibraryBody extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const MxGap.s4(),
-                  for (final summary in summaries) ...[
-                    _DeckRow(
-                      summary: summary,
-                      isNew: summary.deck.id == calloutDeckId,
-                    ),
-                    const MxGap.s3(),
-                  ],
+                  // Shared inter-item gap contract (kit `MxList`, space-3
+                  // between rows); the trailing gap below separates the
+                  // list block from the callout/create action.
+                  MxList(
+                    children: [
+                      for (final summary in summaries)
+                        _DeckRow(
+                          summary: summary,
+                          isNew: summary.deck.id == calloutDeckId,
+                        ),
+                    ],
+                  ),
+                  const MxGap.s3(),
                   if (calloutDeckId != null) ...[
                     const MxGap.s2(),
                     _FirstDeckCallout(deckId: calloutDeckId),
@@ -134,34 +139,27 @@ class _FirstDeckCallout extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
 
-    return MxBanner(
-      tone: MxBannerTone.success,
+    void dismiss() =>
+        ref.read(firstDeckCalloutViewmodelProvider.notifier).dismissCallout();
+
+    // Kit `library/first-deck-callout`: the celebratory accent ActionCallout
+    // — title + body with the "Open deck" primary below, and the dismiss as
+    // the trailing × (create-deck.md §7).
+    return MxActionCallout(
+      tone: MxBannerTone.accent,
+      icon: Symbols.celebration_rounded,
       title: l10n.firstDeckReadyTitle,
-      body: l10n.firstDeckReadyBody,
-      action: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          MxTappable(
-            semanticLabel: l10n.openDeckLabel,
-            onTap: () {
-              ref
-                  .read(firstDeckCalloutViewmodelProvider.notifier)
-                  .dismissCallout();
-              context.goDeckDetail(deckId);
-            },
-            child: MxText(l10n.openDeckLabel, role: MxTextRole.subtitle),
-          ),
-          const MxGap.s3(),
-          MxIconButton(
-            icon: Symbols.close,
-            small: true,
-            semanticLabel: l10n.dismissLabel,
-            onPressed: () => ref
-                .read(firstDeckCalloutViewmodelProvider.notifier)
-                .dismissCallout(),
-          ),
-        ],
+      text: l10n.firstDeckReadyBody,
+      action: MxButton(
+        label: l10n.openDeckLabel,
+        size: MxButtonSize.sm,
+        onPressed: () {
+          dismiss();
+          context.goDeckDetail(deckId);
+        },
       ),
+      onDismiss: dismiss,
+      dismissSemanticLabel: l10n.dismissLabel,
     );
   }
 }

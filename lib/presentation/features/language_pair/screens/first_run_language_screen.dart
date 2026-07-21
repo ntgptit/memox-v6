@@ -64,8 +64,18 @@ class _FirstRunLanguageBody extends HookConsumerWidget {
     );
 
     final isComplete = draft.learningCode != null && draft.nativeCode != null;
+    final isSameLanguage =
+        draft.learningCode != null && draft.learningCode == draft.nativeCode;
     final isSaving = saveState is AsyncLoading<void>;
     final failure = MxActionErrors.failureOf(saveState);
+
+    // A picked language supersedes any prior save failure and, once the
+    // pair is distinct again, any same-language guidance — so clear the
+    // stale banner the moment the draft changes.
+    void onLanguageChanged(void Function() applyToDraft) {
+      applyToDraft();
+      ref.read(saveLanguagePairViewmodelProvider.notifier).reset();
+    }
 
     // Kit step1 rhythm: s4 below the bar, s6 between body children.
     return Column(
@@ -86,9 +96,11 @@ class _FirstRunLanguageBody extends HookConsumerWidget {
           label: l10n.learningLanguageLabel,
           selectedCode: draft.learningCode,
           onDismissedEmpty: () => learningTouched.value = true,
-          onSelected: (code) => ref
-              .read(firstRunLanguageDraftViewmodelProvider.notifier)
-              .setLearningLanguage(code),
+          onSelected: (code) => onLanguageChanged(
+            () => ref
+                .read(firstRunLanguageDraftViewmodelProvider.notifier)
+                .setLearningLanguage(code),
+          ),
         ),
         // The kit renders the message as a sibling of the row on the body
         // rhythm, not inside it, and leaves the row's own border alone
@@ -104,13 +116,19 @@ class _FirstRunLanguageBody extends HookConsumerWidget {
           label: l10n.meaningLanguageLabel,
           selectedCode: draft.nativeCode,
           onDismissedEmpty: () => meaningTouched.value = true,
-          onSelected: (code) => ref
-              .read(firstRunLanguageDraftViewmodelProvider.notifier)
-              .setMeaningLanguage(code),
+          onSelected: (code) => onLanguageChanged(
+            () => ref
+                .read(firstRunLanguageDraftViewmodelProvider.notifier)
+                .setMeaningLanguage(code),
+          ),
         ),
-        if (meaningTouched.value && draft.nativeCode == null) ...[
+        // One meaning-field guidance line: the empty-required message when
+        // the field was left blank, the distinct-pair message when it
+        // duplicates the learning language, nothing otherwise.
+        if (_meaningError(l10n, draft, meaningTouched.value, isSameLanguage)
+            case final String message) ...[
           const MxGap.s6(),
-          _RequiredSelectionError(message: l10n.meaningLanguageRequiredMessage),
+          _RequiredSelectionError(message: message),
         ],
         const MxGap.s6(),
         MxText(l10n.languagePairsHelperText, role: MxTextRole.caption),
@@ -118,7 +136,7 @@ class _FirstRunLanguageBody extends HookConsumerWidget {
         MxButton(
           label: l10n.continueLabel,
           block: true,
-          onPressed: isComplete && !isSaving
+          onPressed: isComplete && !isSameLanguage && !isSaving
               ? () => ref
                     .read(saveLanguagePairViewmodelProvider.notifier)
                     .saveLanguagePair()
@@ -127,6 +145,21 @@ class _FirstRunLanguageBody extends HookConsumerWidget {
       ],
     );
   }
+}
+
+/// The single meaning-field guidance message, if any: empty-required beats
+/// distinct-pair, and a valid distinct selection shows nothing.
+String? _meaningError(
+  AppLocalizations l10n,
+  FirstRunLanguageDraft draft,
+  bool meaningTouched,
+  bool isSameLanguage,
+) {
+  if (meaningTouched && draft.nativeCode == null) {
+    return l10n.meaningLanguageRequiredMessage;
+  }
+  if (isSameLanguage) return l10n.meaningLanguageDistinctMessage;
+  return null;
 }
 
 class _LanguageSelectorField extends StatelessWidget {

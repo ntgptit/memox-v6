@@ -12,6 +12,10 @@
   "@routeNotFoundMessage": {
     "description": "Body message of the screen shown for unknown routes."
   },
+  "routeNotFoundRecoveryLabel": "Back to home",
+  "@routeNotFoundRecoveryLabel": {
+    "description": "Recovery action on the not-found screen; returns to the home destination."
+  },
   "dataCorruptionMessage": "Some saved data could not be read.",
   "@dataCorruptionMessage": {
     "description": "Shown when persisted data fails to map (DataCorruptionFailure)."
@@ -75,6 +79,10 @@
   "meaningLanguageRequiredMessage": "Choose a language for meanings.",
   "@meaningLanguageRequiredMessage": {
     "description": "Step 1 inline error under an empty meaning-language selector. MIRRORED from the learning-language copy — the kit shot only specifies the learning field; needs kit-owner confirmation."
+  },
+  "meaningLanguageDistinctMessage": "Choose a different meaning language.",
+  "@meaningLanguageDistinctMessage": {
+    "description": "Step 1 inline guidance under the meaning selector when it matches the learning language; the pair must be distinct (create-language-pair.md §5)."
   },
   "continueLabel": "Continue",
   "@continueLabel": {
