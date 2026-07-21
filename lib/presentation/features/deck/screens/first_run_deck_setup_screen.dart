@@ -71,20 +71,12 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
       draft.name.isNotEmpty || draft.description.isNotEmpty,
     );
 
-    // The created deck's id is the kept-id the submit reuses, captured
-    // before the command clears the draft so success can open the deck.
-    final createdDeckId = useRef<String?>(null);
-
     listenMxAction(
       ref,
       createFirstDeckViewmodelProvider,
-      onSuccess: () {
-        final deckId = createdDeckId.value;
-        // Success opens the just-created (empty) deck directly, where its
-        // own empty state offers add-card / add-subdeck — the first
-        // content fixes the deck kind (`create-deck.md` §§1, 7).
-        if (deckId != null) context.goDeckDetail(deckId);
-      },
+      // Success returns to the Library deck list — the new deck now sits
+      // in it, and the user picks it up from there (`create-deck.md` §7).
+      onSuccess: () => context.goLibrary(),
     );
 
     final isSubmitting = createState is AsyncLoading<void>;
@@ -192,14 +184,9 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
           icon: isSubmitting ? null : Symbols.add_rounded,
           block: true,
           onPressed: name.canSubmit && !isSubmitting
-              ? () {
-                  createdDeckId.value = ref
-                      .read(firstRunDeckDraftViewmodelProvider.notifier)
-                      .ensureRetryDeckId();
-                  ref
-                      .read(createFirstDeckViewmodelProvider.notifier)
-                      .createDeck();
-                }
+              ? () => ref
+                    .read(createFirstDeckViewmodelProvider.notifier)
+                    .createDeck()
               : null,
         ),
         const MxGap.s6(),
