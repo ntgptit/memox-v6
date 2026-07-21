@@ -8,9 +8,6 @@ import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_action_callout.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_badge.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_deck_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
@@ -21,8 +18,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_list.dart';
 /// Library root (WBS 5.2.4A, kit shell per 3.15B): the reactive
 /// root-deck list of the active pair inside the shared chrome
 /// (contextual app bar; the tab bar belongs to `AppTabShell`), the kit
-/// LIB-04 empty state, the
-/// transferred first-run success callout and per-row deck navigation.
+/// LIB-04 empty state and per-row deck navigation.
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({super.key});
 
@@ -47,7 +43,6 @@ class _LibraryBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final roots = ref.watch(libraryRootDecksProvider);
-    final calloutDeckId = ref.watch(firstDeckCalloutViewmodelProvider);
 
     return MxAsyncBuilder<List<DeckSummary>>(
       value: roots,
@@ -61,22 +56,15 @@ class _LibraryBody extends ConsumerWidget {
                 children: [
                   const MxGap.s4(),
                   // Shared inter-item gap contract (kit `MxList`, space-3
-                  // between rows); the trailing gap below separates the
-                  // list block from the callout/create action.
+                  // between rows); the trailing gap separates the list from
+                  // the create action.
                   MxList(
                     children: [
                       for (final summary in summaries)
-                        _DeckRow(
-                          summary: summary,
-                          isNew: summary.deck.id == calloutDeckId,
-                        ),
+                        _DeckRow(summary: summary),
                     ],
                   ),
                   const MxGap.s3(),
-                  if (calloutDeckId != null) ...[
-                    const MxGap.s2(),
-                    _FirstDeckCallout(deckId: calloutDeckId),
-                  ],
                   const MxGap.s6(),
                   MxButton(
                     label: l10n.createDeckLabel,
@@ -130,57 +118,21 @@ class _LibraryEmptyState extends StatelessWidget {
   }
 }
 
-class _FirstDeckCallout extends ConsumerWidget {
-  const _FirstDeckCallout({required this.deckId});
-
-  final String deckId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-
-    void dismiss() =>
-        ref.read(firstDeckCalloutViewmodelProvider.notifier).dismissCallout();
-
-    // Kit `library/first-deck-callout`: the celebratory accent ActionCallout
-    // — title + body with the "Open deck" primary below, and the dismiss as
-    // the trailing × (create-deck.md §7).
-    return MxActionCallout(
-      tone: MxBannerTone.accent,
-      icon: Symbols.celebration_rounded,
-      title: l10n.firstDeckReadyTitle,
-      text: l10n.firstDeckReadyBody,
-      action: MxButton(
-        label: l10n.openDeckLabel,
-        size: MxButtonSize.sm,
-        onPressed: () {
-          dismiss();
-          context.goDeckDetail(deckId);
-        },
-      ),
-      onDismiss: dismiss,
-      dismissSemanticLabel: l10n.dismissLabel,
-    );
-  }
-}
-
 class _DeckRow extends StatelessWidget {
-  const _DeckRow({required this.summary, required this.isNew});
+  const _DeckRow({required this.summary});
 
   final DeckSummary summary;
-  final bool isNew;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
     // Kit shared DeckCard: default deck glyph `style`, accent tile,
-    // "N cards" meta, soft "New" badge on the just-created deck.
+    // "N cards" meta.
     return MxDeckCard(
       icon: Symbols.style_rounded,
       title: summary.deck.name,
       meta: l10n.cardsCountLabel(summary.cardCount),
-      trailing: isNew ? MxBadge(label: l10n.newBadgeLabel, soft: true) : null,
       onTap: () => context.goDeckDetail(summary.deck.id),
     );
   }

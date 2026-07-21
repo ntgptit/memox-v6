@@ -50,16 +50,17 @@ async function reachStepTwo(page: Page): Promise<void> {
 }
 
 /**
- * H → I → J("Thành công") → K. Asserting the created deck in Library is
- * what makes each capture part of a journey instead of a screenshot.
+ * H → I → J("Thành công") → K. Success opens the just-created deck
+ * directly (create-deck.md §7): the empty deck's own state, titled with
+ * the deck name, is what proves the capture is part of a real journey.
  */
-async function submitDeckAndExpectLibrary(
+async function submitDeckAndExpectDeck(
   page: Page,
   name: string,
 ): Promise<void> {
   await tapControl(page, 'Create deck');
-  await expectRoute(page, '/library');
   await expect(page.getByText(name)).toBeVisible();
+  await expect(page.getByText('This deck is empty')).toBeVisible();
 }
 
 // MX-VIS-004 · First-run language (step 1) · Complete selection
@@ -91,7 +92,7 @@ test('MX-VIS-004 completes the step 1 language selection', async ({
   // The selection is only proven complete if it lets the wizard advance.
   await reachStepTwo(page);
   await fillField(page, /Deck name/i, KIT_DECK_NAME);
-  await submitDeckAndExpectLibrary(page, KIT_DECK_NAME);
+  await submitDeckAndExpectDeck(page, KIT_DECK_NAME);
   await holdDemoFrame(page);
 });
 
@@ -123,7 +124,7 @@ test('MX-VIS-009 fills the first deck name in step 2', async ({
     route: '/first-run/deck',
   });
 
-  await submitDeckAndExpectLibrary(page, KIT_DECK_NAME);
+  await submitDeckAndExpectDeck(page, KIT_DECK_NAME);
   await holdDemoFrame(page);
 });
 
@@ -164,7 +165,7 @@ test('MX-VIS-010 expands the optional section in step 2', async ({
     route: '/first-run/deck',
   });
 
-  await submitDeckAndExpectLibrary(page, KIT_DECK_NAME);
+  await submitDeckAndExpectDeck(page, KIT_DECK_NAME);
   await holdDemoFrame(page);
 });
 
@@ -353,7 +354,7 @@ test('MX-VIS-014 rejects a deck name past the limit and keeps it', async ({
     KIT_LONG_DECK_NAME,
   );
   await fillField(page, /Deck name/i, KIT_DECK_NAME, { blur: false });
-  await submitDeckAndExpectLibrary(page, KIT_DECK_NAME);
+  await submitDeckAndExpectDeck(page, KIT_DECK_NAME);
   await holdDemoFrame(page);
 });
 

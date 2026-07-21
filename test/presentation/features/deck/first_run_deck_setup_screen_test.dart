@@ -124,7 +124,7 @@ void main() {
     expect(find.text('Korean TOPIK I'), findsOneWidget);
   });
 
-  testWidgets('creating persists name and description then lands home', (
+  testWidgets('creating persists the deck then opens it directly', (
     tester,
   ) async {
     await tester.pumpWidget(app());
@@ -143,9 +143,10 @@ void main() {
     await tester.tap(find.text('Create deck'));
     await pumpLibrary(tester);
 
-    // Success lands in the Library with the first-deck callout.
-    expect(find.text('Library'), findsWidgets);
-    expect(find.text('Your first deck is ready'), findsOneWidget);
+    // Success opens the just-created deck straight away — its empty state,
+    // not a Library detour (create-deck.md §7).
+    expect(find.text('This deck is empty'), findsOneWidget);
+    expect(find.text('Your first deck is ready'), findsNothing);
 
     await disposeAndFlushStreams(tester);
 

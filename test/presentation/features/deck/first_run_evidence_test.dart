@@ -63,7 +63,7 @@ void main() {
   }
 
   group('E2E: landing through deck creation on the real router', () {
-    testWidgets('the full first-run journey lands home with data', (
+    testWidgets('the full first-run journey opens the new deck with data', (
       tester,
     ) async {
       final router = createAppRouter();
@@ -100,9 +100,11 @@ void main() {
       await tester.tap(find.text('Create deck'));
       await pumpLibrary(tester);
 
-      expect(find.text('Library'), findsWidgets);
-      expect(find.text('Your first deck is ready'), findsOneWidget);
-      expect(find.text('Korean TOPIK I'), findsOneWidget);
+      // Success opens the just-created deck directly: its name titles the
+      // detail and its empty state offers the next step (create-deck.md §7).
+      expect(find.text('Korean TOPIK I'), findsWidgets);
+      expect(find.text('This deck is empty'), findsOneWidget);
+      expect(find.text('Your first deck is ready'), findsNothing);
 
       await disposeAndFlushStreams(tester);
       final counts = await database

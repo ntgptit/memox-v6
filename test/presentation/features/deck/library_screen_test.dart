@@ -9,7 +9,6 @@ import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
-import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
 
 void main() {
   late db.AppDatabase database;
@@ -101,35 +100,6 @@ void main() {
     await pumpLibrary(tester);
 
     expect(find.text('Travel'), findsOneWidget);
-
-    await disposeAndFlushStreams(tester);
-  });
-
-  testWidgets('the callout highlights, opens and dismisses', (tester) async {
-    await database.deckDao.insertDeck(
-      'd1',
-      'lp1',
-      null,
-      'Travel',
-      'travel',
-      0,
-      0,
-    );
-    container
-        .read(firstDeckCalloutViewmodelProvider.notifier)
-        .showForDeck('d1');
-
-    await tester.pumpWidget(app());
-    await pumpLibrary(tester);
-
-    expect(find.text('Your first deck is ready'), findsOneWidget);
-
-    await tester.tap(find.text('Open deck'));
-    await pumpLibrary(tester);
-
-    // Open clears the callout and opens the (empty) new deck.
-    expect(find.text('This deck is empty'), findsOneWidget);
-    expect(container.read(firstDeckCalloutViewmodelProvider), isNull);
 
     await disposeAndFlushStreams(tester);
   });

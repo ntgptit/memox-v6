@@ -44,7 +44,7 @@ flowchart TD
     H --> I["Creating…"]
     I --> J{"Kết quả"}
     J -- "Lỗi" --> H
-    J -- "Thành công" --> K["Library · first deck ready"]
+    J -- "Thành công" --> K["Open Deck · empty (add card / nested deck)"]
 
     B -- "Không" --> L["Dashboard / Library"]
     L --> M["Create Deck dialog"]
@@ -261,21 +261,17 @@ Your information is still here. Try again.
 
 ## Success
 
+> Quyết định (owner, 2026-07-21): first-run success **mở thẳng deck vừa tạo**
+> thay vì dừng ở Library kèm callout. Deck mới rỗng, nên màn hình đích là empty
+> state của chính deck đó — nơi user chọn ngay "Add card" (→ leaf) hoặc "Create
+> nested deck" (→ parent), đúng nguyên tắc §1 "nội dung đầu tiên xác định loại
+> deck". Bỏ Library-detour vì nó thêm một bước và một màn hình rỗng không giúp
+> gì cho user. Callout "Your first deck is ready" bị loại khỏi flow.
+
 - Không mở card editor.
-- Không mở deck ngay.
-- Chuyển đến Library.
-- Highlight Deck vừa tạo.
-- Hiện contextual callout:
-
-```text
-Your first deck is ready
-
-Add cards or organise it into smaller decks whenever you’re ready.
-
-Open deck                                              ×
-```
-
-User có thể bỏ qua callout và sử dụng navigation bình thường.
+- **Mở thẳng deck vừa tạo** (empty-deck), không dừng ở Library.
+- Empty state của deck cung cấp bước tiếp: `Add card` / `Create nested deck`.
+- Back từ deck vừa tạo trả về Library.
 
 # 8. Create Deck dialog thông thường
 

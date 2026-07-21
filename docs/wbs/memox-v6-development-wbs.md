@@ -493,8 +493,8 @@ yet measured under this gate.
 | MX-VIS-018 | Library | Empty | `library--empty` | **Playwright PASS — 1.43% light / 1.93% dark** (fresh launch → Today → tap Library tab → empty branch; capture at `Q`, PASS only after Create deck commits and the deck replaces the empty state) |
 | MX-VIS-019 | Library | Loading | `library--loading` | Blocked — FilterRow skeleton + app-bar search/avatar (10.2, 5.x, 9.x) |
 | MX-VIS-020 | Library | Loaded list | `library--loaded` | Blocked — FilterRow + SRS counters (10.2, 5.4.2) |
-| MX-VIS-021 | Library | First-deck callout | `library--first-deck-created` | Blocked — same as MX-VIS-020 |
-| MX-VIS-022 | Library | Callout dismissed | `library--first-deck-created-dismissed` | Blocked — same as MX-VIS-020 |
+| MX-VIS-021 | Library | First-deck callout | `library--first-deck-created` | **Superseded (owner, 2026-07-21).** First-run success now opens the new deck directly (`create-deck.md` §7), so the Library first-deck callout no longer exists in the flow; success parity is the empty-deck state (`empty-deck--default`, MX-VIS-050 class). Kit shot retained for reference only. |
+| MX-VIS-022 | Library | Callout dismissed | `library--first-deck-created-dismissed` | **Superseded (owner, 2026-07-21)** — see MX-VIS-021; the dismissed state no longer exists either. |
 | MX-VIS-023 | Library | Dense list | `library--dense` | Blocked — same as MX-VIS-020 |
 | MX-VIS-024 | Library | Error | *no kit reference* (nearest `library--offline`) | Pending — kit decision needed |
 | MX-VIS-025 | Create Deck dialog | Root default | `create-deck-dialog--root-default` | Blocked — dialog lacks the language-pair and description rows (5.2.4); backdrop needs 10.2 + 5.4.2 |

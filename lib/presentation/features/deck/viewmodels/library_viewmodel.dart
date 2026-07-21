@@ -18,17 +18,3 @@ Stream<List<DeckSummary>> libraryRootDecks(Ref ref) async* {
   }
   yield* ref.watch(watchLibraryUseCaseProvider).rootSummariesOf(pair.id);
 }
-
-/// The transferred first-run success callout (`create-deck.md` §7):
-/// success lands in the Library with the new deck highlighted and this
-/// dismissible callout. Keep-alive so the state survives the
-/// navigation from step 2 into the Library; cleared on dismiss/open.
-@Riverpod(keepAlive: true)
-class FirstDeckCalloutViewmodel extends _$FirstDeckCalloutViewmodel {
-  @override
-  String? build() => null;
-
-  void showForDeck(String deckId) => state = deckId;
-
-  void dismissCallout() => state = null;
-}
