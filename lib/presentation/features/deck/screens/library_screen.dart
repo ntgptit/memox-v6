@@ -148,12 +148,32 @@ class _DeckRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
+    // Kit deck-card status: due outranks new outranks up-to-date, and a
+    // deck with no cards shows only its count.
+    final (status, statusTone) = switch (summary) {
+      _ when summary.dueCount > 0 => (
+        l10n.cardsDueLabel(summary.dueCount),
+        MxDeckStatusTone.due,
+      ),
+      _ when summary.newCount > 0 => (
+        l10n.cardsNewLabel(summary.newCount),
+        MxDeckStatusTone.isNew,
+      ),
+      _ when summary.cardCount > 0 => (
+        l10n.deckUpToDateLabel,
+        MxDeckStatusTone.upToDate,
+      ),
+      _ => (null, null),
+    };
+
     // Kit shared DeckCard: default deck glyph `style`, accent tile,
-    // "N cards" meta.
+    // "N cards" meta with the toned study status.
     return MxDeckCard(
       icon: Symbols.style_rounded,
       title: summary.deck.name,
       meta: l10n.cardsCountLabel(summary.cardCount),
+      status: status,
+      statusTone: statusTone,
       onTap: () => context.goDeckDetail(summary.deck.id),
     );
   }

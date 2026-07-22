@@ -181,6 +181,20 @@
     "description": "Deck-card meta line (kit DeckCard).",
     "placeholders": {"count": {"type": "num"}}
   },
+  "cardsDueLabel": "{count} đến hạn",
+  "@cardsDueLabel": {
+    "description": "Deck-card status: cards due for review now (kit DeckCard).",
+    "placeholders": {"count": {"type": "num"}}
+  },
+  "cardsNewLabel": "{count} thẻ mới",
+  "@cardsNewLabel": {
+    "description": "Deck-card status: never-studied cards (kit DeckCard).",
+    "placeholders": {"count": {"type": "num"}}
+  },
+  "deckUpToDateLabel": "Đã ôn xong",
+  "@deckUpToDateLabel": {
+    "description": "Deck-card status: no due or new cards (kit DeckCard)."
+  },
   "emptyLibraryMessage": "Tạo một deck để bắt đầu xây thư viện của bạn.",
   "@emptyLibraryMessage": {
     "description": "Library empty-state copy (WBS 5.2.4A)."

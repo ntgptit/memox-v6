@@ -217,6 +217,20 @@
     "description": "Deck-card meta line (kit DeckCard).",
     "placeholders": {"count": {"type": "num"}}
   },
+  "cardsDueLabel": "{count} due",
+  "@cardsDueLabel": {
+    "description": "Deck-card status: cards due for review now (kit DeckCard).",
+    "placeholders": {"count": {"type": "num"}}
+  },
+  "cardsNewLabel": "{count} new",
+  "@cardsNewLabel": {
+    "description": "Deck-card status: never-studied cards (kit DeckCard).",
+    "placeholders": {"count": {"type": "num"}}
+  },
+  "deckUpToDateLabel": "Up to date",
+  "@deckUpToDateLabel": {
+    "description": "Deck-card status: no due or new cards (kit DeckCard)."
+  },
   "emptyLibraryMessage": "Create a deck to start building your library.",
   "@emptyLibraryMessage": {
     "description": "Library empty-state copy (WBS 5.2.4A)."

@@ -49,6 +49,8 @@ extension DeckSummaryRowMapper on db.WatchRootDeckSummariesResult {
       updatedAt: utcDateTime(updatedAt),
     ),
     cardCount: cardCount,
+    dueCount: dueCount,
+    newCount: newCount,
   );
 }
 

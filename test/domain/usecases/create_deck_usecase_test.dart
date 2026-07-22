@@ -1,3 +1,4 @@
+import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
@@ -19,7 +20,7 @@ void main() {
 
   setUp(() async {
     database = db.AppDatabase.forTesting(NativeDatabase.memory());
-    decks = DriftDeckRepository(database);
+    decks = DriftDeckRepository(database, const SystemClock());
     createDeck = CreateDeckUseCase(
       decks: decks,
       pairs: DriftLanguagePairRepository(database),

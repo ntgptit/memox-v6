@@ -21,15 +21,28 @@ SELECT * FROM decks
 WHERE language_pair_id = :languagePairId AND parent_id IS NULL
 ORDER BY normalized_name, id;
 
--- Root decks with their direct card count (kit deck-card meta line).
--- Counts exclude soft-deleted cards; nested-deck totals arrive with the
--- deck-detail scope (subtree counts stay one-shot via countSubtreeCards).
+-- Root decks with their direct card count and study-status counters (kit
+-- deck-card meta line). Counts exclude soft-deleted cards; due/new also
+-- exclude hidden cards to match the study-scope semantics (pageDueProgress).
+-- `due` = a card whose progress is scheduled at or before :nowUtc; `new` =
+-- a card that has never been studied (no progress row). Nested-deck totals
+-- arrive with the deck-detail scope (subtree counts via countSubtreeCards).
 watchRootDeckSummaries:
 SELECT d.*,
-  (SELECT COUNT(*) FROM flashcards f
-   WHERE f.deck_id = d.id AND f.deleted_at IS NULL) AS card_count
+  COUNT(DISTINCT CASE WHEN f.deleted_at IS NULL THEN f.id END) AS card_count,
+  COUNT(DISTINCT CASE
+    WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      AND learning_progress.due_at IS NOT NULL
+      AND learning_progress.due_at <= CAST(:nowUtc AS INTEGER)
+      THEN f.id END) AS due_count,
+  COUNT(DISTINCT CASE
+    WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      AND learning_progress.id IS NULL THEN f.id END) AS new_count
 FROM decks d
+LEFT JOIN flashcards f ON f.deck_id = d.id
+LEFT JOIN learning_progress ON learning_progress.card_id = f.id
 WHERE d.language_pair_id = :languagePairId AND d.parent_id IS NULL
+GROUP BY d.id
 ORDER BY d.normalized_name, d.id;
 
 watchChildDecks:

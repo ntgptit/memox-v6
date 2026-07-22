@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/app/router/route_paths.dart';
+import 'package:memox_v6/core/time/app_clock.dart';
+import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
@@ -102,5 +104,63 @@ void main() {
     expect(find.text('Travel'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
+  });
+
+  test('deck summary counts due and new cards for the meta status', () async {
+    await database.deckDao.insertDeck(
+      'd1',
+      'lp1',
+      null,
+      'Korean',
+      'korean',
+      0,
+      0,
+    );
+    // c0: never studied → new. c1: scheduled in the past → due. c2: boxed
+    // with no due date → neither (up to date).
+    await database.flashcardDao.insertFlashcard(
+      'c0',
+      'd1',
+      'a',
+      'a',
+      'm',
+      0,
+      0,
+    );
+    await database.flashcardDao.insertFlashcard(
+      'c1',
+      'd1',
+      'b',
+      'b',
+      'm',
+      0,
+      0,
+    );
+    await database.learningProgressDao.insertProgress('p1', 'c1', 1, 1, 0, 0);
+    await database.flashcardDao.insertFlashcard(
+      'c2',
+      'd1',
+      'c',
+      'c',
+      'm',
+      0,
+      0,
+    );
+    await database.learningProgressDao.insertProgress(
+      'p2',
+      'c2',
+      8,
+      null,
+      0,
+      0,
+    );
+
+    final repo = DriftDeckRepository(database, const SystemClock());
+    final summaries = await repo.watchRootSummaries('lp1').first;
+    final korean = summaries.singleWhere((s) => s.deck.id == 'd1');
+
+    expect(korean.cardCount, 3);
+    expect(korean.dueCount, 1);
+    expect(korean.newCount, 1);
   });
 }

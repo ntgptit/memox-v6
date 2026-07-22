@@ -1,3 +1,4 @@
+import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -169,7 +170,7 @@ void main() {
       0,
     );
     final createDeck = CreateDeckUseCase(
-      decks: DriftDeckRepository(database),
+      decks: DriftDeckRepository(database, const SystemClock()),
       pairs: DriftLanguagePairRepository(database),
       idGenerator: SequentialIdGenerator(),
       clock: FakeClock(DateTime.utc(2026, 7, 19)),
