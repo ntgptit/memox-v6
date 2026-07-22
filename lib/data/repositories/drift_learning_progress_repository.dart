@@ -4,6 +4,7 @@ import 'package:memox_v6/data/database/sqlite_error_mapper.dart';
 import 'package:memox_v6/data/mappers/progress_mapper.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress_repository.dart';
+import 'package:memox_v6/domain/learning_progress/study_candidates.dart';
 import 'package:memox_v6/domain/study_session/study_attempt.dart';
 
 /// Drift-backed [LearningProgressRepository] (WBS 4.6B).
@@ -116,6 +117,25 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
     // `OR IGNORE` skipped without an existing row means the card was absent
     // (FK) — surface it rather than fabricate a state.
     throw StateError('ensureInitialProgress produced no row for card $cardId');
+  }
+
+  @override
+  Future<StudyCandidates> studyCandidatesInScope({
+    required String scopeDeckId,
+    required DateTime nowUtc,
+  }) async {
+    final rows = await _database.learningProgressDao
+        .studyCandidatesInScope(
+          scopeDeckId,
+          nowUtc.millisecondsSinceEpoch.toString(),
+        )
+        .get();
+    final due = <String>[];
+    final fresh = <String>[];
+    for (final row in rows) {
+      (row.isNew ? fresh : due).add(row.cardId);
+    }
+    return StudyCandidates(dueCardIds: due, newCardIds: fresh);
   }
 
   @override

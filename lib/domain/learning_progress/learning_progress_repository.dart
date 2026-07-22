@@ -13,6 +13,8 @@ import 'package:memox_v6/domain/study_session/study_attempt.dart';
 ///
 /// `resetCard` is operation 6: progress returns to Box 0 with no due
 /// date and cleared counters without touching card content.
+import 'package:memox_v6/domain/learning_progress/study_candidates.dart';
+
 abstract interface class LearningProgressRepository {
   Future<void> applyScheduledOutcome({
     required StudyAttempt attempt,
@@ -39,6 +41,16 @@ abstract interface class LearningProgressRepository {
   Future<LearningProgress> ensureInitialProgress({
     required String id,
     required String cardId,
+    required DateTime nowUtc,
+  });
+
+  /// Read-only due + new study queues for a deck scope (5.4.2,
+  /// `surface-due-cards.md`): the recursive subtree of [scopeDeckId], each
+  /// eligible card classified once (New = Box 0/no due; Due = Box 1..7 with
+  /// `dueAt <= nowUtc`), hidden/deleted and Box 8 excluded, due ordered
+  /// soonest-first. Never mutates progress.
+  Future<StudyCandidates> studyCandidatesInScope({
+    required String scopeDeckId,
     required DateTime nowUtc,
   });
 

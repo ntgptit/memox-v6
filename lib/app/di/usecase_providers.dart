@@ -1,3 +1,4 @@
+import 'package:memox_v6/domain/usecases/learning_progress/load_study_candidates_usecase.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/initialise_card_progress_usecase.dart';
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
@@ -150,6 +151,14 @@ MoveFlashcardUseCase moveFlashcardUseCase(Ref ref) {
 @riverpod
 InitialiseCardProgressUseCase initialiseCardProgressUseCase(Ref ref) {
   return InitialiseCardProgressUseCase(
+    repository: ref.watch(learningProgressRepositoryProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+LoadStudyCandidatesUseCase loadStudyCandidatesUseCase(Ref ref) {
+  return LoadStudyCandidatesUseCase(
     repository: ref.watch(learningProgressRepositoryProvider),
     clock: ref.watch(appClockProvider),
   );
