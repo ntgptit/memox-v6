@@ -269,3 +269,30 @@ dueAt null) — see the 5.4.2 ⚠️ note above. Needs an owner OK to fix merged
 **Model corrections made mid-wave (both spec-grounded, folded into the package
 that needed them):** `ModeOutcomeReason.duplicateNormalizedMeaning` (SM-MATCH-003,
 in 5.5.4); the 5.5.1 "only timeout" test relaxed accordingly.
+
+---
+
+## Continuation — resumed on owner review ("why stop early?")
+
+Owner asked to push further on the genuinely-non-UI work (the deferrals above were
+partly a size/coupling judgement, not all hard blocks). Confirmed the atomic
+session ops (startSession op2, saveAttemptWithCheckpoint op3, finalizeSession op5)
+already exist from wave 4.6C, so these are thin domain slices, not big new
+transactions. Three more gate-green commits:
+
+- **5.6.2 `SessionSnapshotBuilder`** (e79d597) — pure assembly of the
+  `startSession` triple (session + base card snapshots + first-stage round
+  order); composes the plan resolver + order policy; §7. Per-type eligible-card
+  gathering + practice/relearn sourcing still deferred (ambiguous card-set
+  semantics — won't guess).
+- **5.6.10 `MasteryRoundPolicy`** (c017c2e) — pure round-advance / failed-set
+  rule (§§5,11,13). The single-consistency-boundary terminal path
+  (attempt+checkpoint+schedule in one txn) still deferred: repo has no combined
+  op, needs the 5.6.3 command provider or a new data-layer op.
+- **8.3 `ModePreferences` constraint** (7e813af) — Practice mode-config invariants
+  (≥1 enabled, default ∈ enabled, selectable-only, dedupe; compatibility
+  normalize). User owns default/order; persistence + Settings UI still gated.
+
+**Still genuinely deferred (unchanged reasons):** 5.6.3 command provider (couples
+to gated mode UIs + mastery rounds), the 5.6.2 start use case (per-type card-set
+semantics), the terminal single-consistency-boundary op, all UI rows (STOP RULE).
