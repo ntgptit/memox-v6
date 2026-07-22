@@ -5,11 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/app/router/route_paths.dart';
+import 'package:memox_v6/core/time/app_clock.dart';
+import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
-import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
 
 void main() {
   late db.AppDatabase database;
@@ -105,32 +106,86 @@ void main() {
     await disposeAndFlushStreams(tester);
   });
 
-  testWidgets('the callout highlights, opens and dismisses', (tester) async {
-    await database.deckDao.insertDeck(
-      'd1',
-      'lp1',
-      null,
-      'Travel',
-      'travel',
-      0,
-      0,
-    );
-    container
-        .read(firstDeckCalloutViewmodelProvider.notifier)
-        .showForDeck('d1');
+  testWidgets('the filter row filters the list by status', (tester) async {
+    await database.deckDao.insertDeck('a', 'lp1', null, 'Alpha', 'alpha', 0, 0);
+    await database.deckDao.insertDeck('b', 'lp1', null, 'Beta', 'beta', 0, 0);
+    // Beta owns a card scheduled in the past → it is the only "due" deck.
+    await database.flashcardDao.insertFlashcard('c1', 'b', 't', 't', 'm', 0, 0);
+    await database.learningProgressDao.insertProgress('p1', 'c1', 1, 1, 0, 0);
 
     await tester.pumpWidget(app());
     await pumpLibrary(tester);
 
-    expect(find.text('Your first deck is ready'), findsOneWidget);
+    expect(find.text('Alpha'), findsOneWidget);
+    expect(find.text('Beta'), findsOneWidget);
 
-    await tester.tap(find.text('Open deck'));
+    // Open the filters sheet and keep only decks with due cards.
+    await tester.tap(find.text('Filters'));
+    await pumpLibrary(tester);
+    await tester.tap(find.text('Due'));
     await pumpLibrary(tester);
 
-    // Open clears the callout and opens the (empty) new deck.
-    expect(find.text('This deck is empty'), findsOneWidget);
-    expect(container.read(firstDeckCalloutViewmodelProvider), isNull);
+    expect(find.text('Alpha'), findsNothing);
+    expect(find.text('Beta'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
+  });
+
+  test('deck summary counts due and new cards for the meta status', () async {
+    await database.deckDao.insertDeck(
+      'd1',
+      'lp1',
+      null,
+      'Korean',
+      'korean',
+      0,
+      0,
+    );
+    // c0: never studied → new. c1: scheduled in the past → due. c2: boxed
+    // with no due date → neither (up to date).
+    await database.flashcardDao.insertFlashcard(
+      'c0',
+      'd1',
+      'a',
+      'a',
+      'm',
+      0,
+      0,
+    );
+    await database.flashcardDao.insertFlashcard(
+      'c1',
+      'd1',
+      'b',
+      'b',
+      'm',
+      0,
+      0,
+    );
+    await database.learningProgressDao.insertProgress('p1', 'c1', 1, 1, 0, 0);
+    await database.flashcardDao.insertFlashcard(
+      'c2',
+      'd1',
+      'c',
+      'c',
+      'm',
+      0,
+      0,
+    );
+    await database.learningProgressDao.insertProgress(
+      'p2',
+      'c2',
+      8,
+      null,
+      0,
+      0,
+    );
+
+    final repo = DriftDeckRepository(database, const SystemClock());
+    final summaries = await repo.watchRootSummaries('lp1').first;
+    final korean = summaries.singleWhere((s) => s.deck.id == 'd1');
+
+    expect(korean.cardCount, 3);
+    expect(korean.dueCount, 1);
+    expect(korean.newCount, 1);
   });
 }

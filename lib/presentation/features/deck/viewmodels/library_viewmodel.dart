@@ -19,16 +19,26 @@ Stream<List<DeckSummary>> libraryRootDecks(Ref ref) async* {
   yield* ref.watch(watchLibraryUseCaseProvider).rootSummariesOf(pair.id);
 }
 
-/// The transferred first-run success callout (`create-deck.md` §7):
-/// success lands in the Library with the new deck highlighted and this
-/// dismissible callout. Keep-alive so the state survives the
-/// navigation from step 2 into the Library; cleared on dismiss/open.
-@Riverpod(keepAlive: true)
-class FirstDeckCalloutViewmodel extends _$FirstDeckCalloutViewmodel {
+/// Deck-list ordering (kit FilterRow sort chip).
+enum LibrarySort { az, za }
+
+/// Deck-list status filter (kit FilterRow filters chip), keyed off the
+/// per-deck due/new counters.
+enum LibraryStatusFilter { all, due, isNew }
+
+/// The Library controls row state — sort order and status filter — held
+/// separately from the reactive deck stream so toggling never re-queries.
+@riverpod
+class LibraryControlsViewmodel extends _$LibraryControlsViewmodel {
   @override
-  String? build() => null;
+  ({LibrarySort sort, LibraryStatusFilter status}) build() =>
+      (sort: LibrarySort.az, status: LibraryStatusFilter.all);
 
-  void showForDeck(String deckId) => state = deckId;
+  void toggleSort() => state = (
+    sort: state.sort == LibrarySort.az ? LibrarySort.za : LibrarySort.az,
+    status: state.status,
+  );
 
-  void dismissCallout() => state = null;
+  void setStatus(LibraryStatusFilter status) =>
+      state = (sort: state.sort, status: status);
 }

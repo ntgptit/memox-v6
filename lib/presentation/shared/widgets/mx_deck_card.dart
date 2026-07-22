@@ -24,7 +24,10 @@ import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
 /// - icon: the tile glyph (kit default deck glyph: `style`).
 /// - tone: tile tone (kit default: accent).
 /// - title: deck name (base/bold, clamps to 2 lines).
-/// - meta: secondary line (counts/status, single line).
+/// - meta: secondary line (counts, single line).
+/// - status / statusTone: optional coloured study status appended to the
+///   meta line (kit deck-card meta: `N cards · 48 due`), toned due /
+///   new / up-to-date.
 /// - trailing: optional trailing widget (badge, action).
 /// - onTap: opens the deck.
 class MxDeckCard extends StatelessWidget {
@@ -34,6 +37,8 @@ class MxDeckCard extends StatelessWidget {
     this.tone = MxIconTileTone.accent,
     required this.title,
     required this.meta,
+    this.status,
+    this.statusTone,
     this.trailing,
     this.onTap,
   });
@@ -42,6 +47,8 @@ class MxDeckCard extends StatelessWidget {
   final MxIconTileTone tone;
   final String title;
   final String meta;
+  final String? status;
+  final MxDeckStatusTone? statusTone;
   final Widget? trailing;
   final VoidCallback? onTap;
 
@@ -50,6 +57,13 @@ class MxDeckCard extends StatelessWidget {
     final colors = context.colors;
     final styles = context.textStyles;
     final trailing = this.trailing;
+    final status = this.status;
+    final secondary = styles.caption.copyWith(color: colors.textSecondary);
+    final statusColor = switch (statusTone) {
+      MxDeckStatusTone.due => colors.warning,
+      MxDeckStatusTone.isNew => colors.accent,
+      MxDeckStatusTone.upToDate || null => colors.success,
+    };
 
     return MxCard(
       padding: MxCardPadding.sm,
@@ -73,11 +87,25 @@ class MxDeckCard extends StatelessWidget {
                   ),
                 ),
                 const MxGap.s1(),
-                Text(
-                  meta,
+                Text.rich(
+                  TextSpan(
+                    style: secondary,
+                    children: [
+                      TextSpan(text: meta),
+                      if (status != null) ...[
+                        const TextSpan(text: ' · '),
+                        TextSpan(
+                          text: status,
+                          style: secondary.copyWith(
+                            color: statusColor,
+                            fontWeight: styles.boldWeight,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: styles.caption.copyWith(color: colors.textSecondary),
                 ),
               ],
             ),
@@ -88,3 +116,7 @@ class MxDeckCard extends StatelessWidget {
     );
   }
 }
+
+/// The study status colour on a deck card's meta line: overdue reviews
+/// (warning), unstudied cards (accent), or all-caught-up (success).
+enum MxDeckStatusTone { due, isNew, upToDate }

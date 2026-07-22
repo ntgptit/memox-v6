@@ -6,6 +6,7 @@ import 'package:memox_v6/core/theme/tokens/app_colors.dart';
 import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 import 'package:memox_v6/presentation/shared/bottom_sheets/mx_sheet.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_dialog.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_action_callout.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_progress.dart';
@@ -104,6 +105,63 @@ void main() {
       final title = tester.widget<Text>(find.text('Save failed'));
       expect(title.style?.color, AppColors.light.onErrorSoft);
       expect(find.byIcon(Symbols.error), findsOneWidget);
+    });
+  });
+
+  group('MxActionCallout', () {
+    testWidgets('titled accent variant drops the action below the body '
+        'and dismisses', (tester) async {
+      var dismissed = false;
+      var opened = false;
+      await tester.pumpWidget(
+        _host(
+          MxActionCallout(
+            tone: MxBannerTone.accent,
+            icon: Symbols.celebration_rounded,
+            title: 'Your first deck is ready',
+            text: 'Add cards whenever you are ready.',
+            action: MxButton(
+              onPressed: () => opened = true,
+              label: 'Open deck',
+              size: MxButtonSize.sm,
+            ),
+            onDismiss: () => dismissed = true,
+            dismissSemanticLabel: 'Dismiss',
+          ),
+        ),
+      );
+
+      // Accent tone pulls the new soft/on-soft token pair.
+      final container = tester.widget<Container>(
+        find
+            .descendant(
+              of: find.byType(MxActionCallout),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      expect(
+        (container.decoration! as BoxDecoration).color,
+        AppColors.light.accentSoft,
+      );
+      final title = tester.widget<Text>(find.text('Your first deck is ready'));
+      expect(title.style?.color, AppColors.light.onAccentSoft);
+
+      // Titled layout: the action sits inside the body Column (below the
+      // text), not in the outer row beside it.
+      expect(
+        find.descendant(
+          of: find.byType(Column),
+          matching: find.text('Open deck'),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Open deck'));
+      expect(opened, isTrue);
+
+      await tester.tap(find.byIcon(Symbols.close_rounded));
+      expect(dismissed, isTrue);
     });
   });
 

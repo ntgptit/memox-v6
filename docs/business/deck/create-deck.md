@@ -44,7 +44,7 @@ flowchart TD
     H --> I["Creating…"]
     I --> J{"Kết quả"}
     J -- "Lỗi" --> H
-    J -- "Thành công" --> K["Library · first deck ready"]
+    J -- "Thành công" --> K["Library · danh sách deck (deck vừa tạo)"]
 
     B -- "Không" --> L["Dashboard / Library"]
     L --> M["Create Deck dialog"]
@@ -261,21 +261,16 @@ Your information is still here. Try again.
 
 ## Success
 
+> Quyết định (owner, 2026-07-21): first-run success **về thẳng Library (danh
+> sách deck)**, không callout, không tự mở deck detail. Deck vừa tạo xuất hiện
+> trong danh sách; user tự mở khi muốn. Callout "Your first deck is ready" bị
+> loại khỏi flow (thừa, chỉ thêm một lớp). Không auto-open deck detail vì user
+> muốn thấy ngay danh sách deck của mình như các app phổ biến.
+
 - Không mở card editor.
-- Không mở deck ngay.
-- Chuyển đến Library.
-- Highlight Deck vừa tạo.
-- Hiện contextual callout:
-
-```text
-Your first deck is ready
-
-Add cards or organise it into smaller decks whenever you’re ready.
-
-Open deck                                              ×
-```
-
-User có thể bỏ qua callout và sử dụng navigation bình thường.
+- Không tự mở deck detail.
+- Về thẳng Library — danh sách deck, deck vừa tạo nằm trong đó.
+- Không callout; danh sách deck chính là màn hình đích.
 
 # 8. Create Deck dialog thông thường
 

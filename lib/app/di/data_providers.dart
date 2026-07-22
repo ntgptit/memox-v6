@@ -44,7 +44,10 @@ LanguagePairRepository languagePairRepository(Ref ref) {
 
 @Riverpod(keepAlive: true)
 DeckRepository deckRepository(Ref ref) {
-  return DriftDeckRepository(ref.watch(appDatabaseProvider));
+  return DriftDeckRepository(
+    ref.watch(appDatabaseProvider),
+    ref.watch(appClockProvider),
+  );
 }
 
 @Riverpod(keepAlive: true)

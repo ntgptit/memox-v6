@@ -27,6 +27,12 @@ class FirstRunLanguageDraftViewmodel extends _$FirstRunLanguageDraftViewmodel {
   }
 
   bool get isComplete => state.learningCode != null && state.nativeCode != null;
+
+  /// True once both selections are set and identical — a distinct pair is
+  /// required, so this is prevented before submit rather than surfaced as
+  /// a save failure (`create-language-pair.md` §5).
+  bool get isSameLanguage =>
+      state.learningCode != null && state.learningCode == state.nativeCode;
 }
 
 /// Save command: create (or adopt the existing duplicate — never a
@@ -35,6 +41,13 @@ class FirstRunLanguageDraftViewmodel extends _$FirstRunLanguageDraftViewmodel {
 class SaveLanguagePairViewmodel extends _$SaveLanguagePairViewmodel {
   @override
   AsyncValue<void> build() => const AsyncData(null);
+
+  /// Retires a superseded failure so a banner from a past attempt does not
+  /// outlive the draft change that corrects it.
+  void reset() {
+    if (state is AsyncData<void>) return;
+    state = const AsyncData(null);
+  }
 
   Future<void> saveLanguagePair() async {
     final draft = ref.read(firstRunLanguageDraftViewmodelProvider);

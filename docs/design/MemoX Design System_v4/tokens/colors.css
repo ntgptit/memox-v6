@@ -38,6 +38,7 @@
   --memox-accent: #7355d6;
   --memox-on-accent: #ffffff;
   --memox-accent-soft: #efeafb;
+  --memox-on-accent-soft: #4b3a8c;
 
   /* --- structural --- */
   --memox-border: rgba(28, 24, 45, 0.11);
@@ -143,6 +144,7 @@
   --memox-accent: #a88fff;
   --memox-on-accent: #141220;
   --memox-accent-soft: rgba(168, 143, 255, 0.16);
+  --memox-on-accent-soft: #a88fff;
 
   /* --- structural --- */
   --memox-border: rgba(255, 255, 255, 0.13);

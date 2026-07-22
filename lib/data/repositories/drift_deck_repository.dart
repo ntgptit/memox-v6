@@ -1,3 +1,4 @@
+import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/data/database/sqlite_error_mapper.dart';
 import 'package:memox_v6/data/mappers/content_mapper.dart';
@@ -10,9 +11,10 @@ import 'package:memox_v6/domain/deck/deck_repository.dart';
 /// the conflict mapper, so the 4.3 trigger aborts arrive as typed
 /// `ConflictFailure`s with their stable codes.
 class DriftDeckRepository implements DeckRepository {
-  DriftDeckRepository(this._database);
+  DriftDeckRepository(this._database, this._clock);
 
   final db.AppDatabase _database;
+  final AppClock _clock;
 
   @override
   Future<void> createDeck(domain.Deck deck) {
@@ -55,8 +57,13 @@ class DriftDeckRepository implements DeckRepository {
 
   @override
   Stream<List<domain.DeckSummary>> watchRootSummaries(String languagePairId) {
+    // Due-ness is measured against subscription time; the library refreshes
+    // on re-entry rather than ticking per second. drift types this bound
+    // variable as text, so the query `CAST`s it back to the integer epoch
+    // it is compared against.
+    final nowUtc = _clock.nowUtc().millisecondsSinceEpoch.toString();
     return _database.deckDao
-        .watchRootDeckSummaries(languagePairId)
+        .watchRootDeckSummaries(nowUtc, languagePairId)
         .watch()
         .map((rows) => rows.map((row) => row.toDomain()).toList());
   }

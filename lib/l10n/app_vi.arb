@@ -3,6 +3,7 @@
   "appTitle": "MemoX",
   "homeTitle": "Trang chủ MemoX",
   "routeNotFoundMessage": "Trang này không tồn tại.",
+  "routeNotFoundRecoveryLabel": "Về trang chủ",
   "dataCorruptionMessage": "Một phần dữ liệu đã lưu không đọc được.",
   "@dataCorruptionMessage": {
     "description": "Shown when persisted data fails to map (DataCorruptionFailure)."
@@ -59,6 +60,9 @@
   "@noLanguagesFoundMessage": {
     "description": "Empty state of the language search."
   },
+  "learningLanguageRequiredMessage": "Hãy chọn ngôn ngữ bạn muốn học.",
+  "meaningLanguageRequiredMessage": "Hãy chọn ngôn ngữ hiển thị nghĩa.",
+  "meaningLanguageDistinctMessage": "Hãy chọn ngôn ngữ nghĩa khác với ngôn ngữ học.",
   "continueLabel": "Tiếp tục",
   "@continueLabel": {
     "description": "Primary action finishing first-run language selection."
@@ -127,10 +131,15 @@
   "@createDeckLabel": {
     "description": "First-run deck setup (step 2) copy."
   },
+  "draftKeptMessage": "Bản nháp của bạn vẫn được giữ.",
+  "startOverLabel": "Làm lại từ đầu",
+  "deckCreatingLabel": "Đang tạo…",
   "deckNameRequiredMessage": "Hãy nhập tên deck.",
   "@deckNameRequiredMessage": {
     "description": "First-run deck setup (step 2) copy."
   },
+  "deckNameTooLongMessage": "Hãy dùng tên deck ngắn hơn.",
+  "deckNameDuplicateRootMessage": "Đã có deck trùng tên trong Thư viện của bạn.",
   "deckNameDuplicateMessage": "Đã có deck trùng tên ở đây.",
   "@deckNameDuplicateMessage": {
     "description": "First-run deck setup (step 2) copy."
@@ -172,21 +181,35 @@
     "description": "Deck-card meta line (kit DeckCard).",
     "placeholders": {"count": {"type": "num"}}
   },
-  "newBadgeLabel": "Mới",
-  "@newBadgeLabel": {
-    "description": "Just-created deck badge (kit DeckCard newBadge)."
+  "cardsDueLabel": "{count} đến hạn",
+  "@cardsDueLabel": {
+    "description": "Deck-card status: cards due for review now (kit DeckCard).",
+    "placeholders": {"count": {"type": "num"}}
   },
+  "cardsNewLabel": "{count} thẻ mới",
+  "@cardsNewLabel": {
+    "description": "Deck-card status: never-studied cards (kit DeckCard).",
+    "placeholders": {"count": {"type": "num"}}
+  },
+  "deckUpToDateLabel": "Đã ôn xong",
+  "@deckUpToDateLabel": {
+    "description": "Deck-card status: no due or new cards (kit DeckCard)."
+  },
+  "libraryScopeAllLabel": "Tất cả deck",
+  "libraryFiltersLabel": "Bộ lọc",
+  "libraryFiltersActiveLabel": "Bộ lọc · {count}",
+  "@libraryFiltersActiveLabel": {
+    "placeholders": {"count": {"type": "num"}}
+  },
+  "librarySortAzLabel": "A–Z",
+  "librarySortZaLabel": "Z–A",
+  "libraryFilterDueLabel": "Đến hạn",
+  "libraryFilterNewLabel": "Thẻ mới",
+  "libraryFilterTitle": "Hiện deck",
+  "libraryNoMatchLabel": "Không có deck nào khớp bộ lọc này.",
   "emptyLibraryMessage": "Tạo một deck để bắt đầu xây thư viện của bạn.",
   "@emptyLibraryMessage": {
-    "description": "Library / first-deck callout copy (WBS 5.2.4A)."
-  },
-  "firstDeckReadyTitle": "Deck đầu tiên đã sẵn sàng",
-  "@firstDeckReadyTitle": {
-    "description": "Library / first-deck callout copy (WBS 5.2.4A)."
-  },
-  "firstDeckReadyBody": "Thêm thẻ hoặc chia thành các deck nhỏ hơn bất cứ khi nào bạn sẵn sàng.",
-  "@firstDeckReadyBody": {
-    "description": "Library / first-deck callout copy (WBS 5.2.4A)."
+    "description": "Library empty-state copy (WBS 5.2.4A)."
   },
   "openDeckLabel": "Mở deck",
   "@openDeckLabel": {
@@ -309,6 +332,7 @@
   "@tryAgainLabel": {
     "description": "Card Editor submit-error retry (WBS 5.3.2B)."
   },
+  "deckCreateFailedMessage": "Kh\u00f4ng t\u1ea1o \u0111\u01b0\u1ee3c b\u1ed9 th\u1ebb. Th\u00f4ng tin c\u1ee7a b\u1ea1n v\u1eabn c\u00f2n \u0111\u00e2y.",
   "cardSaveFailedMessage": "Kh\u00f4ng l\u01b0u \u0111\u01b0\u1ee3c th\u1ebb. D\u1eef li\u1ec7u c\u1ee7a b\u1ea1n v\u1eabn c\u00f2n \u0111\u00e2y.",
   "@cardSaveFailedMessage": {
     "description": "Card Editor submit-error banner (WBS 5.3.2B)."

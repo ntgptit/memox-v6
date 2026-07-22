@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
+import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/domain/language_pair/supported_languages.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/language_pair/viewmodels/first_run_language_viewmodel.dart';
@@ -40,7 +42,7 @@ class FirstRunLanguageScreen extends StatelessWidget {
   }
 }
 
-class _FirstRunLanguageBody extends ConsumerWidget {
+class _FirstRunLanguageBody extends HookConsumerWidget {
   const _FirstRunLanguageBody();
 
   @override
@@ -49,6 +51,12 @@ class _FirstRunLanguageBody extends ConsumerWidget {
     final draft = ref.watch(firstRunLanguageDraftViewmodelProvider);
     final saveState = ref.watch(saveLanguagePairViewmodelProvider);
 
+    // A selector that was opened and closed without a choice is the only
+    // way to leave a required field visibly empty, so that is when the
+    // kit shows its inline error. An untouched field stays quiet.
+    final learningTouched = useState(false);
+    final meaningTouched = useState(false);
+
     listenMxAction(
       ref,
       saveLanguagePairViewmodelProvider,
@@ -56,8 +64,18 @@ class _FirstRunLanguageBody extends ConsumerWidget {
     );
 
     final isComplete = draft.learningCode != null && draft.nativeCode != null;
+    final isSameLanguage =
+        draft.learningCode != null && draft.learningCode == draft.nativeCode;
     final isSaving = saveState is AsyncLoading<void>;
     final failure = MxActionErrors.failureOf(saveState);
+
+    // A picked language supersedes any prior save failure and, once the
+    // pair is distinct again, any same-language guidance — so clear the
+    // stale banner the moment the draft changes.
+    void onLanguageChanged(void Function() applyToDraft) {
+      applyToDraft();
+      ref.read(saveLanguagePairViewmodelProvider.notifier).reset();
+    }
 
     // Kit step1 rhythm: s4 below the bar, s6 between body children.
     return Column(
@@ -77,25 +95,48 @@ class _FirstRunLanguageBody extends ConsumerWidget {
         _LanguageSelectorField(
           label: l10n.learningLanguageLabel,
           selectedCode: draft.learningCode,
-          onSelected: (code) => ref
-              .read(firstRunLanguageDraftViewmodelProvider.notifier)
-              .setLearningLanguage(code),
+          onDismissedEmpty: () => learningTouched.value = true,
+          onSelected: (code) => onLanguageChanged(
+            () => ref
+                .read(firstRunLanguageDraftViewmodelProvider.notifier)
+                .setLearningLanguage(code),
+          ),
         ),
+        // The kit renders the message as a sibling of the row on the body
+        // rhythm, not inside it, and leaves the row's own border alone
+        // (`CreateDeckFirstRun.jsx` §5).
+        if (learningTouched.value && draft.learningCode == null) ...[
+          const MxGap.s6(),
+          _RequiredSelectionError(
+            message: l10n.learningLanguageRequiredMessage,
+          ),
+        ],
         const MxGap.s6(),
         _LanguageSelectorField(
           label: l10n.meaningLanguageLabel,
           selectedCode: draft.nativeCode,
-          onSelected: (code) => ref
-              .read(firstRunLanguageDraftViewmodelProvider.notifier)
-              .setMeaningLanguage(code),
+          onDismissedEmpty: () => meaningTouched.value = true,
+          onSelected: (code) => onLanguageChanged(
+            () => ref
+                .read(firstRunLanguageDraftViewmodelProvider.notifier)
+                .setMeaningLanguage(code),
+          ),
         ),
+        // One meaning-field guidance line: the empty-required message when
+        // the field was left blank, the distinct-pair message when it
+        // duplicates the learning language, nothing otherwise.
+        if (_meaningError(l10n, draft, meaningTouched.value, isSameLanguage)
+            case final String message) ...[
+          const MxGap.s6(),
+          _RequiredSelectionError(message: message),
+        ],
         const MxGap.s6(),
         MxText(l10n.languagePairsHelperText, role: MxTextRole.caption),
         const MxGap.s6(),
         MxButton(
           label: l10n.continueLabel,
           block: true,
-          onPressed: isComplete && !isSaving
+          onPressed: isComplete && !isSameLanguage && !isSaving
               ? () => ref
                     .read(saveLanguagePairViewmodelProvider.notifier)
                     .saveLanguagePair()
@@ -106,16 +147,36 @@ class _FirstRunLanguageBody extends ConsumerWidget {
   }
 }
 
+/// The single meaning-field guidance message, if any: empty-required beats
+/// distinct-pair, and a valid distinct selection shows nothing.
+String? _meaningError(
+  AppLocalizations l10n,
+  FirstRunLanguageDraft draft,
+  bool meaningTouched,
+  bool isSameLanguage,
+) {
+  if (meaningTouched && draft.nativeCode == null) {
+    return l10n.meaningLanguageRequiredMessage;
+  }
+  if (isSameLanguage) return l10n.meaningLanguageDistinctMessage;
+  return null;
+}
+
 class _LanguageSelectorField extends StatelessWidget {
   const _LanguageSelectorField({
     required this.label,
     required this.selectedCode,
     required this.onSelected,
+    required this.onDismissedEmpty,
   });
 
   final String label;
   final String? selectedCode;
   final ValueChanged<String> onSelected;
+
+  /// Fired when the picker closes with nothing chosen, which is what
+  /// marks the field touched.
+  final VoidCallback onDismissedEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +196,11 @@ class _LanguageSelectorField extends StatelessWidget {
           title: label,
           selected: selectedCode,
         );
-        if (code != null) onSelected(code);
+        if (code == null) {
+          onDismissedEmpty();
+          return;
+        }
+        onSelected(code);
       },
     );
   }
@@ -147,5 +212,24 @@ class _LanguageSelectorField extends StatelessWidget {
       if (language.code == code) return language;
     }
     return null;
+  }
+}
+
+/// The kit `field-group__error` line: sm, error-colored, announced.
+class _RequiredSelectionError extends StatelessWidget {
+  const _RequiredSelectionError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      child: MxText(
+        message,
+        role: MxTextRole.caption,
+        color: context.colors.error,
+      ),
+    );
   }
 }

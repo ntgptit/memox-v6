@@ -14,7 +14,9 @@ import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
+import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_area.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_action_callout.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
@@ -62,9 +64,18 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
     final description = useMxTextValue(initial: draft.description);
     final showOptional = useState(draft.description.isNotEmpty);
 
+    // Whether this screen was entered on top of work the user already did.
+    // Captured once at mount: the draft survives Change/back, so arriving
+    // with content in it means it was restored, not typed just now.
+    final resumedDraft = useState(
+      draft.name.isNotEmpty || draft.description.isNotEmpty,
+    );
+
     listenMxAction(
       ref,
       createFirstDeckViewmodelProvider,
+      // Success returns to the Library deck list — the new deck now sits
+      // in it, and the user picks it up from there (`create-deck.md` §7).
       onSuccess: () => context.goLibrary(),
     );
 
@@ -77,6 +88,36 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const MxGap.s4(),
+        // A submit failure announces itself above the title, so the first
+        // thing read after a failed attempt is why it failed and that the
+        // draft survived (`create-deck.md` §9).
+        if (failure != null && nameError == null) ...[
+          MxActionCallout(
+            tone: MxBannerTone.error,
+            text: l10n.deckCreateFailedMessage,
+          ),
+          const MxGap.s6(),
+        ],
+        if (resumedDraft.value) ...[
+          MxActionCallout(
+            tone: MxBannerTone.info,
+            icon: Symbols.history_rounded,
+            text: l10n.draftKeptMessage,
+            action: MxLink(
+              label: l10n.startOverLabel,
+              onTap: () {
+                ref
+                    .read(firstRunDeckDraftViewmodelProvider.notifier)
+                    .clearDraft();
+                name.controller.clear();
+                description.controller.clear();
+                showOptional.value = false;
+                resumedDraft.value = false;
+              },
+            ),
+          ),
+          const MxGap.s6(),
+        ],
         MxText(l10n.createFirstDeckLabel, role: MxTextRole.title),
         const MxGap.s6(),
         MxAsyncBuilder<LanguagePair?>(
@@ -114,29 +155,33 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
         ),
         if (showOptional.value) ...[
           const MxGap.s2(),
-          MxTextField(
+          // A description keeps intentional line breaks (`edit-deck.md`
+          // §Description), so it is a real multi-line control. It rests at
+          // one row like the kit and grows into its content, rather than
+          // reserving empty rows before anything is typed.
+          MxTextArea(
             controller: description.controller,
             label: l10n.deckDescriptionLabel,
             boxed: true,
             enabled: !isSubmitting,
-            multiline: true,
+            rows: 1,
             onChanged: (value) => ref
                 .read(firstRunDeckDraftViewmodelProvider.notifier)
                 .setDeckDescription(value),
           ),
         ],
-        if (failure != null && nameError == null) ...[
-          const MxGap.s4(),
-          MxBanner(
-            tone: MxBannerTone.error,
-            title: l10n.saveFailedTitle,
-            body: MxActionErrors.messageOf(failure, l10n),
-          ),
-        ],
         const MxGap.s6(),
         MxButton(
-          label: l10n.createDeckLabel,
-          icon: Symbols.add_rounded,
+          // The CTA names what is happening: the work in flight while
+          // submitting, the retry after a failure, the action otherwise
+          // (`create-deck.md` §7). The `+` belongs to the action only —
+          // it would read as "add" against progress copy.
+          label: switch ((isSubmitting, failure != null && nameError == null)) {
+            (true, _) => l10n.deckCreatingLabel,
+            (false, true) => l10n.tryAgainLabel,
+            (false, false) => l10n.createDeckLabel,
+          },
+          icon: isSubmitting ? null : Symbols.add_rounded,
           block: true,
           onPressed: name.canSubmit && !isSubmitting
               ? () => ref
@@ -151,10 +196,17 @@ class _FirstRunDeckSetupBody extends HookConsumerWidget {
 
   String? _nameErrorOf(AppFailure? failure, AppLocalizations l10n) {
     if (failure is ValidationFailure && failure.field == 'deckName') {
-      return l10n.deckNameRequiredMessage;
+      // The field has more than one way to be invalid, so the code — not
+      // the field — picks the guidance (`create-deck.md` §19).
+      return switch (failure.code) {
+        'too-long' => l10n.deckNameTooLongMessage,
+        _ => l10n.deckNameRequiredMessage,
+      };
     }
     if (failure is ConflictFailure && failure.code == 'duplicate') {
-      return l10n.deckNameDuplicateMessage;
+      // First-run always creates a root deck, so the clash is with the
+      // Library, never with a sibling (`create-deck.md` §9).
+      return l10n.deckNameDuplicateRootMessage;
     }
     return null;
   }

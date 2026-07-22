@@ -82,6 +82,58 @@ void main() {
     expect(continueButton().onPressed, isNotNull);
   });
 
+  testWidgets(
+    'same language on both selectors blocks Continue with inline guidance',
+    (tester) async {
+      await tester.pumpWidget(app());
+      await tester.pumpAndSettle();
+
+      MxButton continueButton() =>
+          tester.widget<MxButton>(find.byType(MxButton));
+
+      await pickLanguage(tester, fieldIndex: 0, rowText: '한국어 · Korean');
+      await pickLanguage(tester, fieldIndex: 1, rowText: '한국어 · Korean');
+
+      // Both complete, but not distinct: the kit prevents the submit
+      // rather than letting it fail (create-language-pair.md §5).
+      expect(continueButton().onPressed, isNull);
+      expect(find.text('Choose a different meaning language.'), findsOneWidget);
+
+      // Making them distinct clears the guidance and enables Continue.
+      await pickLanguage(
+        tester,
+        fieldIndex: 1,
+        rowText: 'Tiếng Việt · Vietnamese',
+      );
+      expect(find.text('Choose a different meaning language.'), findsNothing);
+      expect(continueButton().onPressed, isNotNull);
+    },
+  );
+
+  testWidgets('changing a selection clears a prior save-failure banner', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    await pickLanguage(tester, fieldIndex: 0, rowText: 'English · English');
+    await pickLanguage(
+      tester,
+      fieldIndex: 1,
+      rowText: 'Tiếng Việt · Vietnamese',
+    );
+
+    await database.customStatement('DROP TABLE language_pairs');
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    expect(find.byType(MxBanner), findsOneWidget);
+
+    // Correcting the draft must retire the superseded failure, not leave
+    // it hanging until the next submit.
+    await pickLanguage(tester, fieldIndex: 0, rowText: '한국어 · Korean');
+    expect(find.byType(MxBanner), findsNothing);
+  });
+
   testWidgets('the sheet search filters languages', (tester) async {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();

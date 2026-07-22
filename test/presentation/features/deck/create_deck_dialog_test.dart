@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
 import 'package:go_router/go_router.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/app/router/route_paths.dart';
@@ -146,7 +147,8 @@ void main() {
     await tester.pumpWidget(app(RoutePaths.library));
     await pumpStreams(tester);
 
-    await tester.tap(find.text('Create deck'));
+    // The populated Library opens create from the FAB (icon-only) now.
+    await tester.tap(find.byType(MxFab));
     await pumpStreams(tester);
     await tester.enterText(find.byType(TextField), ' KOREAN ');
     await pumpStreams(tester);

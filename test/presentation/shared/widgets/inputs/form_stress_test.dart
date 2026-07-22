@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_search_field.dart';
+import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_area.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
 
 import '../../../../support/l10n_fixtures.dart';
@@ -33,7 +34,7 @@ void main() {
   });
 
   testWidgets('multiline field holds long CJK content', (tester) async {
-    await tester.pumpWidget(host(const MxTextField(multiline: true)));
+    await tester.pumpWidget(host(const MxTextArea()));
     await tester.enterText(
       find.byType(TextField),
       '$cjkFixtureText\n$vietnameseFixtureText',

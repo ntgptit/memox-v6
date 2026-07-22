@@ -477,24 +477,24 @@ yet measured under this gate.
 | MX-VIS-002 | First-run landing | Not-now dismissing | `create-deck-firstrun--not-now` | Blocked — the shot is the Today dashboard after dismissal, not a landing state (5.7; also search 5.x, avatar 9.x) |
 | MX-VIS-003 | First-run language (step 1) | Empty draft | *no kit reference* | Pending — kit decision needed |
 | MX-VIS-004 | First-run language (step 1) | Complete selection | `create-deck-firstrun--step1` | **Playwright PASS — 1.37% light / 1.38% dark** (fresh launch → Create first deck → select Korean→Vietnamese; capture at `E`, journey continues to a created deck in Library) |
-| MX-VIS-005 | First-run language (step 1) | Validation error | `create-deck-firstrun--step1-validation` | Blocked — step-1 field validation + `MxSelectRow` error slot (5.1.2); Continue is disabled while incomplete, so the state is unreachable |
+| MX-VIS-005 | First-run language (step 1) | Validation error | `create-deck-firstrun--step1-validation` | **Playwright PASS — 1.73% light / 1.72% dark** (open the learning picker, dismiss it with Escape, then fill the second field; capture at `E`, then recovery asserted). Closed the `5.1.2` gap: step 1 had no per-field validation at all |
 | MX-VIS-006 | Language select sheet | Unfiltered list | *no kit reference* (nearest `languages--list`) | Pending — kit decision needed |
 | MX-VIS-007 | Language select sheet | Search filtered | *no kit reference* | Pending — kit decision needed |
 | MX-VIS-008 | Language select sheet | No match | *no kit reference* | Pending — kit decision needed |
 | MX-VIS-009 | First-run deck setup (step 2) | Name filled | `create-deck-firstrun--step2` | **Playwright PASS — 0.80% light / 1.28% dark** (fresh launch → step 1 → step 2 with the deck name filled; capture at `H`, journey continues to Library) |
-| MX-VIS-010 | First-run deck setup (step 2) | Optional section expanded | `create-deck-firstrun--step2-optional` | Blocked (remediation) — the app builds the Description field with `multiline: true`, ~4.4% over the gate; single- vs multi-line is a business/design decision (P0.5) |
-| MX-VIS-011 | First-run deck setup (step 2) | Submitting | `create-deck-firstrun--submitting` | Pending — **actionable** after a `Creating…` CTA label swap |
-| MX-VIS-012 | First-run deck setup (step 2) | Submit failure banner | `create-deck-firstrun--submit-failure` | Pending — **actionable** after moving the banner above the title and wiring `Try again` |
-| MX-VIS-013 | First-run deck setup (step 2) | Duplicate name conflict | `create-deck-firstrun--duplicate` | Pending — **actionable** |
-| MX-VIS-014 | First-run deck setup (step 2) | Name too long | `create-deck-firstrun--name-too-long` | Blocked — no deck-name length rule exists (5.2.1) |
-| MX-VIS-015 | First-run deck setup (step 2) | Resume draft | `create-deck-firstrun--resume-draft` | Blocked — draft-resume banner + `Start over` affordance (5.2.3B) |
+| MX-VIS-010 | First-run deck setup (step 2) | Optional section expanded | `create-deck-firstrun--step2-optional` | **Playwright PASS — 0.86% light / 1.63% dark** (step 2 → expand OPTIONAL → type the description; capture at `H`, journey continues to Library). Remediated in P0.5: the field rested at two rows because `MxTextField` defaulted multiline `minLines` to 2. It is now `MxTextArea(rows: 1)` — still multi-line, per `edit-deck.md` §Description |
+| MX-VIS-011 | First-run deck setup (step 2) | Submitting | `create-deck-firstrun--submitting` | **Playwright PASS — 0.83% light / 0.90% dark** (step 2 → press Create deck against a create command the fixture pins on an unresolved completer; capture at `I`, then §7 asserted: the field and the CTA are both inert) |
+| MX-VIS-012 | First-run deck setup (step 2) | Submit failure banner | `create-deck-firstrun--submit-failure` | **Playwright PASS — 1.14% light / 1.26% dark** (fixture breaks the write path; the spec presses the real button and the production error renders). Took four real causes to close: the message was in `MxBanner`'s title slot instead of its body, the spec tabbed out and left a focus ring, the pointer stayed on the CTA and kept its hover overlay, and the screen used `MxBanner` where the kit composes `ActionCallout` (8px tighter) |
+| MX-VIS-013 | First-run deck setup (step 2) | Duplicate name conflict | `create-deck-firstrun--duplicate` | **Structurally unreachable — needs a kit-owner decision.** Onboarding shows only for a user with no content (`navigation/README.md` §First launch), a Deck is content, and the first Deck is created against an empty Library, so a first-run duplicate cannot occur. Reaching it needs either a seeded Deck (which closes the first-run gate, `router_providers.dart:20`) or a deep link (banned by §6.6). Same class as `MX-VIS-027`. The §19 duplicate copy is real but belongs to the Create Deck dialog; `deckNameDuplicateRootMessage` now exists for it |
+| MX-VIS-014 | First-run deck setup (step 2) | Name too long | `create-deck-firstrun--name-too-long` | **Playwright PASS — 1.04% light / 1.07% dark** (types the kit's own 89-character name, submits, keeps it, then recovers). Closed the `5.2.1` gap: no deck-name length rule existed. `deckNameMaxLength = 60` is chosen in `deck_name.dart` with its reasoning — no spec, schema or kit fixed a number, so it needs an owner's confirmation |
+| MX-VIS-015 | First-run deck setup (step 2) | Resume draft | `create-deck-firstrun--resume-draft` | **Playwright PASS — 0.73% light / 0.74% dark** (types a name, leaves through `Change`, returns, and the draft is there; `Start over` then discards it). Closed the `5.2.3B` gap: the draft persisted but nothing told the user, and there was no way to discard it |
 | MX-VIS-016 | First-run deck setup (step 2) | Success handoff | `create-deck-firstrun--success` | Blocked — the shot is Library loaded; same as MX-VIS-020 |
 | MX-VIS-017 | First-run | Import branch | `create-deck-firstrun--import-branch` | Blocked — import flow (13.1) |
 | MX-VIS-018 | Library | Empty | `library--empty` | **Playwright PASS — 1.43% light / 1.93% dark** (fresh launch → Today → tap Library tab → empty branch; capture at `Q`, PASS only after Create deck commits and the deck replaces the empty state) |
 | MX-VIS-019 | Library | Loading | `library--loading` | Blocked — FilterRow skeleton + app-bar search/avatar (10.2, 5.x, 9.x) |
 | MX-VIS-020 | Library | Loaded list | `library--loaded` | Blocked — FilterRow + SRS counters (10.2, 5.4.2) |
-| MX-VIS-021 | Library | First-deck callout | `library--first-deck-created` | Blocked — same as MX-VIS-020 |
-| MX-VIS-022 | Library | Callout dismissed | `library--first-deck-created-dismissed` | Blocked — same as MX-VIS-020 |
+| MX-VIS-021 | Library | First-deck callout | `library--first-deck-created` | **Superseded (owner, 2026-07-21).** First-run success returns to the plain Library deck list (`create-deck.md` §7) — no callout. Success parity is the Library-with-decks state (`library--deck-created` / MX-VIS-020 class), not this callout shot; kit shot retained for reference only. |
+| MX-VIS-022 | Library | Callout dismissed | `library--first-deck-created-dismissed` | **Superseded (owner, 2026-07-21)** — see MX-VIS-021; the dismissed state no longer exists either. |
 | MX-VIS-023 | Library | Dense list | `library--dense` | Blocked — same as MX-VIS-020 |
 | MX-VIS-024 | Library | Error | *no kit reference* (nearest `library--offline`) | Pending — kit decision needed |
 | MX-VIS-025 | Create Deck dialog | Root default | `create-deck-dialog--root-default` | Blocked — dialog lacks the language-pair and description rows (5.2.4); backdrop needs 10.2 + 5.4.2 |
@@ -554,11 +554,38 @@ and `5.4.2`, and `10.2` and `5.4.2` wait on `P0.6`.
 This packet already anticipates the shape of the escape hatch — states whose
 shot depends on unshipped features are "measured, but not required to pass
 before `P0.6`" — but it names only five IDs (`017`, `020`, `021`, `022`,
-`034`). The audit puts the real count near 25. **Closing `P0.6` therefore
-requires an owner decision**: either widen that exemption to every
-feature-blocked row, or carve `10.2` and `5.4.2` out of the precedence rule so
-they can ship first. Recorded here rather than resolved, because it changes the
-phase contract.
+`034`). The audit puts the real count near 25.
+
+#### Owner decision, 2026-07-20 — `P0.6` closes per vertical slice
+
+Neither of the two obvious escapes was taken (widening the exemption to ~25
+rows, or carving `10.2`/`5.4.2` out of the precedence rule). Instead:
+
+**A slice is done when every state on that user flow measures ≤3%. A state
+owned by a feature that has not shipped defers *with that feature*, not as a
+waiver.** `P0.6` is the sum of closed slices rather than a single 49-state
+gate.
+
+This dissolves the deadlock without loosening anything: `MX-VIS-002` defers
+with `5.7` (Today dashboard), `016` with `10.2` + `5.4.2` (FilterRow, SRS
+counters), `017` with `13.1` (import). Each is still measured and still
+recorded — it simply belongs to its owner's slice.
+
+The working order that follows from it is **outside-in**: take one user flow
+end to end, close every branch of it — including the error and edge branches
+the kit specifies — and only then start the next flow. Layer-first closure is
+what let the gaps below through: an item goes Done when the happy path works,
+while the branches the kit draws are never built.
+
+**First slice: onboarding** (`001`–`018`). Closing it properly reopens three
+items that are currently marked Done but cannot render a state the kit
+specifies:
+
+| State | Kit requires | Ships today | Item marked Done |
+| --- | --- | --- | --- |
+| `MX-VIS-005` | Inline error under the language select | `MxSelectRow` has no error slot | `5.1.2` |
+| `MX-VIS-014` | Deck-name-too-long guidance | No name-length rule anywhere | `5.2.1` |
+| `MX-VIS-015` | "We kept your draft" banner + `Start over` | Draft persists, but no resume affordance | `5.2.3B` |
 
 Actionable without any further feature work, after this audit: `004`, `009`,
 `010`, `011`, `012`, `013`, `038`, `039`, `044`, and `043` once a
@@ -586,7 +613,7 @@ comparison.
 | 1.1 CP | Dependency baseline | M | 0.4 | Execute [WBS-1.1 packet](./implementation-packets/WBS-1.1-dependency-baseline.md): approved direct manifest in `pubspec.yaml`, reproducible `pubspec.lock`, no disallowed dependency source, full verifier pass. |
 | 1.2 CP | Consolidated verifier | L | 0.4 | `tool/verify/run.mjs` or equivalent owns pub-get/l10n/codegen/format/guard/analyze/tests and emits a pass marker; CI/hooks call the same entry. |
 | 1.3 CP | App bootstrap | M | 1.1 | `main.dart` contains only bootstrap; ProviderScope, error zones, lifecycle and app widget are wired. |
-| 1.4 CP | Router skeleton | L | 1.1 | RouteNames/RoutePaths, navigation extension, app router, feature route registries and empty shell routes; no raw route strings. |
+| 1.4 CP | Router skeleton | L | 1.1 | RouteNames/RoutePaths, navigation extension, app router, feature route registries and empty shell routes; no raw route strings. The `errorBuilder` not-found surface carries an in-app typed recovery action (per `docs/business/navigation` missing/invalid contract), so a stale/unknown URL never strands the user with only browser/system Back. |
 | 1.5 CP | Error and observability pipeline | L | 1.3 | Typed AppFailure mapping, redacted logger, Flutter/platform async error capture and user-safe error presentation. |
 | 1.6 CP | Deterministic infrastructure | M | 1.3 | Clock/timezone, ID/idempotency and deterministic random/shuffle ports with test fakes. |
 | 1.7 | Developer fixtures | M | 1.3 | Seed/reset commands for empty, minimum, dense, error, paused-session and due-card states; never shipped in release mode. |
@@ -616,6 +643,18 @@ Relevant audit groups: KIT-02–13, KIT-32–39, KIT-42, KIT-48.
 
 Build components in dependency order. Each public shared type has guard-required documentation: summary, purpose, use-when, do-not-use-when, category, public API, variants and states.
 
+> **DoD — integration reachability (global, applies to every component and screen task).**
+> A component or screen task is **not Done** until the deliverable is *reachable from an
+> app launch at `/`* and exercised by a flow that enters through the app-launch node
+> (`tool/parity/flows.ts` `enterFlow`), **or** it is explicitly listed as inventory with the
+> WBS id of the screen that will wire it. Rationale: a widget can pass every widget/golden/a11y
+> test in isolation while being unreachable or stranding the user — component existence is not
+> integration. This clause exists because the app-shell composition (persistent bottom nav /
+> rail) was handed from `1.4` to `3.5`/`3.6` but written into no DoD, so `MxBottomNav` shipped
+> with no shell wiring it in, leaving Today/Stats/Profile as dead ends behind a green build.
+> The audit backing this clause also found orphaned primitives — a shared type with **zero
+> production consumers** is inventory, not Done, and must name its pending consumer here.
+
 | WBS | Work package | Size | Depends on | Deliverable / Definition of Done |
 | --- | --- | --- | --- | --- |
 | 3.1 CP | Shared text/icon/tappable foundation | L | 2.10 | `MxText`, icon adapter, shaped/focused tappable semantics and spacing helpers. |
@@ -623,7 +662,7 @@ Build components in dependency order. Each public shared type has guard-required
 | 3.3 CP | `MxTextField` and form foundation | XL | 3.1 | Label/help/error, validation, controller/focus hooks, keyboard/autofill, multiline and long-text states. |
 | 3.4 CP | `MxCard`, list and surface primitives | XL | 3.1 | Card variants, list rows, icon tiles, section headers, dividers and semantic tap behavior. |
 | 3.5 CP | `MxScaffold` and content shells | XL | 2.10, 3.1 | App bar/body/nav/FAB slots, safe areas, retained composition, constrained study/form/detail layouts. |
-| 3.6 CP | Navigation primitives | L | 3.2, 3.5 | Contextual app bar, bottom nav, rail adaptation, FAB, icon buttons and search dock. |
+| 3.6 CP | Navigation primitives | L | 3.2, 3.5 | Contextual app bar, bottom nav, rail adaptation, FAB, icon buttons and search dock — **each wired into the app-shell composition (`StatefulShellRoute` + `AppTabShell`) so it is reachable from `/`, not only present as an isolated widget.** Owns the persistent root-destination shell handed over by `1.4`. Open sub-items (not Done): **rail adaptation** — `usesNavigationRail` has no rail widget and no production consumer, so medium+ still shows the bottom bar; **search dock** — inventory until the Search feature lands (name its consumer per the reachability clause). |
 | 3.7 CP | First-learning feedback primitives | L | 3.2–3.5 | Progress, banner, loading/error/offline, dialog and sheet states required by create/start/study/retry. |
 | 3.8 | Selection/control primitives | L | 3.1–3.4 | Chip, segmented control, switch, badge, avatar and link with full state matrices. |
 | 3.9 CP | Async/action infrastructure | L | 3.7 | `AppAsyncBuilder`, action runner, typed effect listener, `MxAsyncDraft` and retry surfaces aligned with guard rules. |

@@ -23,6 +23,7 @@ final class AppColorTokens {
     required this.info,
     required this.infoSoft,
     required this.onAccent,
+    required this.onAccentSoft,
     required this.onError,
     required this.onErrorSoft,
     required this.onInfo,
@@ -112,6 +113,9 @@ final class AppColorTokens {
 
   /// `--memox-on-accent`
   final Color onAccent;
+
+  /// `--memox-on-accent-soft`
+  final Color onAccentSoft;
 
   /// `--memox-on-error`
   final Color onError;
@@ -283,6 +287,7 @@ final class AppColorTokens {
     '--memox-info': info,
     '--memox-info-soft': infoSoft,
     '--memox-on-accent': onAccent,
+    '--memox-on-accent-soft': onAccentSoft,
     '--memox-on-error': onError,
     '--memox-on-error-soft': onErrorSoft,
     '--memox-on-info': onInfo,
@@ -351,6 +356,7 @@ final class AppColorTokens {
     Color? info,
     Color? infoSoft,
     Color? onAccent,
+    Color? onAccentSoft,
     Color? onError,
     Color? onErrorSoft,
     Color? onInfo,
@@ -417,6 +423,7 @@ final class AppColorTokens {
       info: info ?? this.info,
       infoSoft: infoSoft ?? this.infoSoft,
       onAccent: onAccent ?? this.onAccent,
+      onAccentSoft: onAccentSoft ?? this.onAccentSoft,
       onError: onError ?? this.onError,
       onErrorSoft: onErrorSoft ?? this.onErrorSoft,
       onInfo: onInfo ?? this.onInfo,
@@ -493,6 +500,7 @@ abstract final class AppColors {
     info: Color(0xFF4B3A8C),
     infoSoft: Color.fromRGBO(75, 58, 140, 0.1),
     onAccent: Color(0xFFFFFFFF),
+    onAccentSoft: Color(0xFF4B3A8C),
     onError: Color(0xFFFFFFFF),
     onErrorSoft: Color(0xFFC1272D),
     onInfo: Color(0xFFFFFFFF),
@@ -560,6 +568,7 @@ abstract final class AppColors {
     info: Color(0xFF8A79E0),
     infoSoft: Color.fromRGBO(138, 121, 224, 0.18),
     onAccent: Color(0xFF141220),
+    onAccentSoft: Color(0xFFA88FFF),
     onError: Color(0xFF3B1622),
     onErrorSoft: Color(0xFFFF8A8A),
     onInfo: Color(0xFF141220),

@@ -124,7 +124,7 @@ void main() {
     expect(find.text('Korean TOPIK I'), findsOneWidget);
   });
 
-  testWidgets('creating persists name and description then lands home', (
+  testWidgets('creating persists the deck then lands on the Library list', (
     tester,
   ) async {
     await tester.pumpWidget(app());
@@ -143,9 +143,12 @@ void main() {
     await tester.tap(find.text('Create deck'));
     await pumpLibrary(tester);
 
-    // Success lands in the Library with the first-deck callout.
+    // Success returns to the Library deck list with the new deck in it —
+    // no callout, no forced deck detail (create-deck.md §7).
     expect(find.text('Library'), findsWidgets);
-    expect(find.text('Your first deck is ready'), findsOneWidget);
+    expect(find.text('Korean TOPIK I'), findsOneWidget);
+    expect(find.text('This deck is empty'), findsNothing);
+    expect(find.text('Your first deck is ready'), findsNothing);
 
     await disposeAndFlushStreams(tester);
 
@@ -156,7 +159,7 @@ void main() {
     expect(row.read<String>('description'), 'Vocabulary for TOPIK I');
   });
 
-  testWidgets('a sibling duplicate shows the inline name error', (
+  testWidgets('a duplicate root deck shows the Library-scoped inline error', (
     tester,
   ) async {
     await database.deckDao.insertDeck(
@@ -177,8 +180,10 @@ void main() {
     await tester.tap(find.text('Create deck'));
     await tester.pumpAndSettle();
 
+    // First-run always creates a root deck, so the clash is with the
+    // Library, never with a sibling (`create-deck.md` §19).
     expect(
-      find.text('A deck with this name already exists here.'),
+      find.text('A deck with this name already exists in your Library.'),
       findsOneWidget,
     );
     expect(find.text('Library'), findsNothing);

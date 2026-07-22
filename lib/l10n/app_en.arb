@@ -12,6 +12,10 @@
   "@routeNotFoundMessage": {
     "description": "Body message of the screen shown for unknown routes."
   },
+  "routeNotFoundRecoveryLabel": "Back to home",
+  "@routeNotFoundRecoveryLabel": {
+    "description": "Recovery action on the not-found screen; returns to the home destination."
+  },
   "dataCorruptionMessage": "Some saved data could not be read.",
   "@dataCorruptionMessage": {
     "description": "Shown when persisted data fails to map (DataCorruptionFailure)."
@@ -67,6 +71,18 @@
   "noLanguagesFoundMessage": "No languages match your search.",
   "@noLanguagesFoundMessage": {
     "description": "Empty state of the language search."
+  },
+  "learningLanguageRequiredMessage": "Choose a language to learn.",
+  "@learningLanguageRequiredMessage": {
+    "description": "Step 1 inline error under an empty learning-language selector (copy from create-deck-firstrun--step1-validation)."
+  },
+  "meaningLanguageRequiredMessage": "Choose a language for meanings.",
+  "@meaningLanguageRequiredMessage": {
+    "description": "Step 1 inline error under an empty meaning-language selector. MIRRORED from the learning-language copy — the kit shot only specifies the learning field; needs kit-owner confirmation."
+  },
+  "meaningLanguageDistinctMessage": "Choose a different meaning language.",
+  "@meaningLanguageDistinctMessage": {
+    "description": "Step 1 inline guidance under the meaning selector when it matches the learning language; the pair must be distinct (create-language-pair.md §5)."
   },
   "continueLabel": "Continue",
   "@continueLabel": {
@@ -136,9 +152,29 @@
   "@createDeckLabel": {
     "description": "First-run deck setup (step 2) copy."
   },
+  "draftKeptMessage": "We kept your draft.",
+  "@draftKeptMessage": {
+    "description": "First-run step 2 callout when a draft is restored (create-deck.md §18)."
+  },
+  "startOverLabel": "Start over",
+  "@startOverLabel": {
+    "description": "Discards the restored first-run draft."
+  },
+  "deckCreatingLabel": "Creating…",
+  "@deckCreatingLabel": {
+    "description": "First-run step 2 CTA while the deck is being created (create-deck.md §7 Submitting)."
+  },
   "deckNameRequiredMessage": "Add a deck name.",
   "@deckNameRequiredMessage": {
     "description": "First-run deck setup (step 2) copy."
+  },
+  "deckNameTooLongMessage": "Use a shorter deck name.",
+  "@deckNameTooLongMessage": {
+    "description": "Deck name past deckNameMaxLength (create-deck.md §19)."
+  },
+  "deckNameDuplicateRootMessage": "A deck with this name already exists in your Library.",
+  "@deckNameDuplicateRootMessage": {
+    "description": "Duplicate name against a root deck (create-deck.md §9)."
   },
   "deckNameDuplicateMessage": "A deck with this name already exists here.",
   "@deckNameDuplicateMessage": {
@@ -181,21 +217,60 @@
     "description": "Deck-card meta line (kit DeckCard).",
     "placeholders": {"count": {"type": "num"}}
   },
-  "newBadgeLabel": "New",
-  "@newBadgeLabel": {
-    "description": "Just-created deck badge (kit DeckCard newBadge)."
+  "cardsDueLabel": "{count} due",
+  "@cardsDueLabel": {
+    "description": "Deck-card status: cards due for review now (kit DeckCard).",
+    "placeholders": {"count": {"type": "num"}}
+  },
+  "cardsNewLabel": "{count} new",
+  "@cardsNewLabel": {
+    "description": "Deck-card status: never-studied cards (kit DeckCard).",
+    "placeholders": {"count": {"type": "num"}}
+  },
+  "deckUpToDateLabel": "Up to date",
+  "@deckUpToDateLabel": {
+    "description": "Deck-card status: no due or new cards (kit DeckCard)."
+  },
+  "libraryScopeAllLabel": "All decks",
+  "@libraryScopeAllLabel": {
+    "description": "Library FilterRow scope chip (kit)."
+  },
+  "libraryFiltersLabel": "Filters",
+  "@libraryFiltersLabel": {
+    "description": "Library FilterRow filters chip, idle (kit)."
+  },
+  "libraryFiltersActiveLabel": "Filters · {count}",
+  "@libraryFiltersActiveLabel": {
+    "description": "Library FilterRow filters chip when a filter is active (kit).",
+    "placeholders": {"count": {"type": "num"}}
+  },
+  "librarySortAzLabel": "A–Z",
+  "@librarySortAzLabel": {
+    "description": "Library FilterRow sort chip, ascending (kit)."
+  },
+  "librarySortZaLabel": "Z–A",
+  "@librarySortZaLabel": {
+    "description": "Library FilterRow sort chip, descending."
+  },
+  "libraryFilterDueLabel": "Due",
+  "@libraryFilterDueLabel": {
+    "description": "Library status filter option: decks with due cards."
+  },
+  "libraryFilterNewLabel": "New",
+  "@libraryFilterNewLabel": {
+    "description": "Library status filter option: decks with new cards."
+  },
+  "libraryFilterTitle": "Show decks",
+  "@libraryFilterTitle": {
+    "description": "Title of the library status filter sheet."
+  },
+  "libraryNoMatchLabel": "No decks match this filter.",
+  "@libraryNoMatchLabel": {
+    "description": "Shown when the active library filter hides every deck."
   },
   "emptyLibraryMessage": "Create a deck to start building your library.",
   "@emptyLibraryMessage": {
-    "description": "Library / first-deck callout copy (WBS 5.2.4A)."
-  },
-  "firstDeckReadyTitle": "Your first deck is ready",
-  "@firstDeckReadyTitle": {
-    "description": "Library / first-deck callout copy (WBS 5.2.4A)."
-  },
-  "firstDeckReadyBody": "Add cards or organise it into smaller decks whenever you’re ready.",
-  "@firstDeckReadyBody": {
-    "description": "Library / first-deck callout copy (WBS 5.2.4A)."
+    "description": "Library empty-state copy (WBS 5.2.4A)."
   },
   "openDeckLabel": "Open deck",
   "@openDeckLabel": {
@@ -317,6 +392,10 @@
   "tryAgainLabel": "Try again",
   "@tryAgainLabel": {
     "description": "Card Editor submit-error retry (WBS 5.3.2B)."
+  },
+  "deckCreateFailedMessage": "Couldn\u2019t create the deck. Your information is still here.",
+  "@deckCreateFailedMessage": {
+    "description": "First-run step 2 submit-failure banner (create-deck.md \u00a79 create failure)."
   },
   "cardSaveFailedMessage": "Couldn\u2019t save the card. Your changes are still here.",
   "@cardSaveFailedMessage": {

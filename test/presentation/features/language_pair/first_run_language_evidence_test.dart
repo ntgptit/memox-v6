@@ -70,7 +70,7 @@ void main() {
   }
 
   group('E2E over the real app router', () {
-    testWidgets('first run completes through to home', (tester) async {
+    testWidgets('first run completes through to the Library', (tester) async {
       final router = createAppRouter();
       await tester.pumpWidget(
         ProviderScope(
@@ -104,7 +104,7 @@ void main() {
       await tester.tap(find.text('Create deck'));
       await pumpLibrary(tester);
 
-      // Landed in the Library with the pair and deck persisted.
+      // Landed on the Library deck list, with the pair and deck persisted.
       expect(find.text('Library'), findsWidgets);
 
       await disposeAndFlushStreams(tester);
