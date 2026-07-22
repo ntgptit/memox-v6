@@ -61,6 +61,8 @@ void main() {
   }
 
   test(
+    // SRS8-013 (Box 1..7 dueAt == nowUtc → Due), 014 (Box 8 excluded from
+    // queues), 015 (hidden due card excluded), 025 (deleted card excluded).
     'classifies new / due and excludes mastered, future, hidden, deleted',
     () async {
       await deck('d');

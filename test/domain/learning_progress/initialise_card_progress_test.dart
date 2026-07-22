@@ -58,7 +58,10 @@ void main() {
 
     expect(p.box, 0);
     expect(p.dueAt, isNull);
+    // Migration contract: v1 initial creation stamps the policy id/version;
+    // no in-place reinterpretation of persisted history under this id.
     expect(p.policyId, 'leitner-8-box-v1');
+    expect(p.policyVersion, 1);
     expect(await progressCount('c1'), 1);
   });
 
