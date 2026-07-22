@@ -44,13 +44,24 @@ void main() {
       }
     });
 
-    test('the only v1 outcome reason is timeout', () {
-      expect(ModeOutcomeReason.values.map((r) => r.id).toList(), <String>[
-        'timeout',
-      ]);
-      expect(ModeOutcomeReason.tryFromId('timeout'), ModeOutcomeReason.timeout);
-      expect(ModeOutcomeReason.tryFromId('slow'), isNull);
-    });
+    test(
+      'the v1 outcome reasons are timeout and duplicateNormalizedMeaning',
+      () {
+        expect(ModeOutcomeReason.values.map((r) => r.id).toSet(), <String>{
+          'timeout',
+          'duplicateNormalizedMeaning',
+        });
+        expect(
+          ModeOutcomeReason.tryFromId('timeout'),
+          ModeOutcomeReason.timeout,
+        );
+        expect(
+          ModeOutcomeReason.tryFromId('duplicateNormalizedMeaning'),
+          ModeOutcomeReason.duplicateNormalizedMeaning,
+        );
+        expect(ModeOutcomeReason.tryFromId('slow'), isNull);
+      },
+    );
   });
 
   group('CanonicalModeEvidence', () {

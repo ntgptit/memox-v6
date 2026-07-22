@@ -29,11 +29,14 @@ enum ModeOutcome {
   }
 }
 
-/// The canonical metadata reason a graded outcome may carry (WBS 5.5.1). v1 has
-/// exactly one: a Recall countdown that expires before reveal maps to
-/// `wrong` with `reason = timeout` (`recall-and-self-grade.md`).
+/// The canonical metadata reasons a graded outcome may carry (WBS 5.5.1). v1
+/// has exactly two: a Recall countdown that expires before reveal maps to
+/// `wrong` with `reason = timeout` (`recall-and-self-grade.md`); a Match
+/// selection of two differently-keyed tiles whose meanings normalize equal maps
+/// to `almost` with `reason = duplicateNormalizedMeaning` (SM-MATCH-003).
 enum ModeOutcomeReason {
-  timeout('timeout');
+  timeout('timeout'),
+  duplicateNormalizedMeaning('duplicateNormalizedMeaning');
 
   const ModeOutcomeReason(this.id);
 
