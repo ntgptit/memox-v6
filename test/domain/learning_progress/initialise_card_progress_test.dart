@@ -40,7 +40,15 @@ void main() {
 
   test('repairs a card missing its progress to a New state', () async {
     // A raw card row (no progress) — the DAO insert does not seed progress.
-    await database.flashcardDao.insertFlashcard('c1', 'd1', 't', 't', 'm', 0, 0);
+    await database.flashcardDao.insertFlashcard(
+      'c1',
+      'd1',
+      't',
+      't',
+      'm',
+      0,
+      0,
+    );
 
     final p = await repo.ensureInitialProgress(
       id: 'progress-c1',
@@ -54,27 +62,38 @@ void main() {
     expect(await progressCount('c1'), 1);
   });
 
-  test('is idempotent — returns the existing state without resetting it', () async {
-    await database.flashcardDao.insertFlashcard('c1', 'd1', 't', 't', 'm', 0, 0);
-    // A learned card: Box 5 with a due date (boxes 1..7 carry one).
-    await database.learningProgressDao.insertProgress(
-      'progress-c1',
-      'c1',
-      5,
-      1000,
-      0,
-      0,
-    );
+  test(
+    'is idempotent — returns the existing state without resetting it',
+    () async {
+      await database.flashcardDao.insertFlashcard(
+        'c1',
+        'd1',
+        't',
+        't',
+        'm',
+        0,
+        0,
+      );
+      // A learned card: Box 5 with a due date (boxes 1..7 carry one).
+      await database.learningProgressDao.insertProgress(
+        'progress-c1',
+        'c1',
+        5,
+        1000,
+        0,
+        0,
+      );
 
-    final p = await repo.ensureInitialProgress(
-      id: 'progress-c1',
-      cardId: 'c1',
-      nowUtc: now,
-    );
+      final p = await repo.ensureInitialProgress(
+        id: 'progress-c1',
+        cardId: 'c1',
+        nowUtc: now,
+      );
 
-    expect(p.box, 5, reason: 'a learned card must not be reset to New');
-    expect(await progressCount('c1'), 1);
-  });
+      expect(p.box, 5, reason: 'a learned card must not be reset to New');
+      expect(await progressCount('c1'), 1);
+    },
+  );
 
   test('creates no orphan progress for a missing card', () async {
     // No card 'ghost' exists; the card_id FK must prevent an orphan row.
