@@ -32,6 +32,16 @@ abstract interface class LearningProgressRepository {
 
   Future<LearningProgress?> findByCard(String cardId);
 
+  /// Idempotent New-state initialisation / safe repair (5.4.1,
+  /// `initialise-card-progress.md`): returns the card's current progress, or
+  /// creates a New state (Box 0, no due) when none exists. Never resets an
+  /// existing state; a missing card creates no orphan (the card_id FK).
+  Future<LearningProgress> ensureInitialProgress({
+    required String id,
+    required String cardId,
+    required DateTime nowUtc,
+  });
+
   Future<List<LearningProgress>> pageDue(
     DateTime nowUtc, {
     required int limit,

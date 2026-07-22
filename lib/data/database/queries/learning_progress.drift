@@ -13,6 +13,17 @@ INSERT INTO learning_progress (
   :id, :cardId, :box, :dueAt, :createdAt, :updatedAt
 );
 
+-- Idempotent New-state initialise (5.4.1): Box 0, no due date, policy v1
+-- (schema default). `OR IGNORE` makes a duplicate initialise a no-op on the
+-- card_id UNIQUE constraint; a missing card still raises the FK error so no
+-- orphan progress is ever created.
+initialiseCardProgress:
+INSERT OR IGNORE INTO learning_progress (
+  id, card_id, box, due_at, created_at, updated_at
+) VALUES (
+  :id, :cardId, 0, NULL, :createdAt, :updatedAt
+);
+
 findProgressByCard:
 SELECT * FROM learning_progress WHERE card_id = :cardId;
 

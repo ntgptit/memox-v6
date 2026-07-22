@@ -91,6 +91,34 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
   }
 
   @override
+  Future<LearningProgress> ensureInitialProgress({
+    required String id,
+    required String cardId,
+    required DateTime nowUtc,
+  }) async {
+    // Idempotent: an existing state is returned untouched (never reset).
+    final existing = await findByCard(cardId);
+    if (existing != null) return existing;
+
+    final ms = nowUtc.millisecondsSinceEpoch;
+    await mapSqliteConflicts(
+      entity: 'learning_progress',
+      () => _database.learningProgressDao.initialiseCardProgress(
+        id,
+        cardId,
+        ms,
+        ms,
+      ),
+    );
+
+    final created = await findByCard(cardId);
+    if (created != null) return created;
+    // `OR IGNORE` skipped without an existing row means the card was absent
+    // (FK) — surface it rather than fabricate a state.
+    throw StateError('ensureInitialProgress produced no row for card $cardId');
+  }
+
+  @override
   Future<List<LearningProgress>> pageDue(
     DateTime nowUtc, {
     required int limit,
