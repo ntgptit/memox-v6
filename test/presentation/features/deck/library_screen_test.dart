@@ -106,6 +106,31 @@ void main() {
     await disposeAndFlushStreams(tester);
   });
 
+  testWidgets('the filter row filters the list by status', (tester) async {
+    await database.deckDao.insertDeck('a', 'lp1', null, 'Alpha', 'alpha', 0, 0);
+    await database.deckDao.insertDeck('b', 'lp1', null, 'Beta', 'beta', 0, 0);
+    // Beta owns a card scheduled in the past → it is the only "due" deck.
+    await database.flashcardDao.insertFlashcard('c1', 'b', 't', 't', 'm', 0, 0);
+    await database.learningProgressDao.insertProgress('p1', 'c1', 1, 1, 0, 0);
+
+    await tester.pumpWidget(app());
+    await pumpLibrary(tester);
+
+    expect(find.text('Alpha'), findsOneWidget);
+    expect(find.text('Beta'), findsOneWidget);
+
+    // Open the filters sheet and keep only decks with due cards.
+    await tester.tap(find.text('Filters'));
+    await pumpLibrary(tester);
+    await tester.tap(find.text('Due'));
+    await pumpLibrary(tester);
+
+    expect(find.text('Alpha'), findsNothing);
+    expect(find.text('Beta'), findsOneWidget);
+
+    await disposeAndFlushStreams(tester);
+  });
+
   test('deck summary counts due and new cards for the meta status', () async {
     await database.deckDao.insertDeck(
       'd1',

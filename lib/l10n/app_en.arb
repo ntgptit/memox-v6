@@ -231,6 +231,43 @@
   "@deckUpToDateLabel": {
     "description": "Deck-card status: no due or new cards (kit DeckCard)."
   },
+  "libraryScopeAllLabel": "All decks",
+  "@libraryScopeAllLabel": {
+    "description": "Library FilterRow scope chip (kit)."
+  },
+  "libraryFiltersLabel": "Filters",
+  "@libraryFiltersLabel": {
+    "description": "Library FilterRow filters chip, idle (kit)."
+  },
+  "libraryFiltersActiveLabel": "Filters · {count}",
+  "@libraryFiltersActiveLabel": {
+    "description": "Library FilterRow filters chip when a filter is active (kit).",
+    "placeholders": {"count": {"type": "num"}}
+  },
+  "librarySortAzLabel": "A–Z",
+  "@librarySortAzLabel": {
+    "description": "Library FilterRow sort chip, ascending (kit)."
+  },
+  "librarySortZaLabel": "Z–A",
+  "@librarySortZaLabel": {
+    "description": "Library FilterRow sort chip, descending."
+  },
+  "libraryFilterDueLabel": "Due",
+  "@libraryFilterDueLabel": {
+    "description": "Library status filter option: decks with due cards."
+  },
+  "libraryFilterNewLabel": "New",
+  "@libraryFilterNewLabel": {
+    "description": "Library status filter option: decks with new cards."
+  },
+  "libraryFilterTitle": "Show decks",
+  "@libraryFilterTitle": {
+    "description": "Title of the library status filter sheet."
+  },
+  "libraryNoMatchLabel": "No decks match this filter.",
+  "@libraryNoMatchLabel": {
+    "description": "Shown when the active library filter hides every deck."
+  },
   "emptyLibraryMessage": "Create a deck to start building your library.",
   "@emptyLibraryMessage": {
     "description": "Library empty-state copy (WBS 5.2.4A)."

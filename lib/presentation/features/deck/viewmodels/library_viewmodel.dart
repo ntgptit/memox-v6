@@ -18,3 +18,27 @@ Stream<List<DeckSummary>> libraryRootDecks(Ref ref) async* {
   }
   yield* ref.watch(watchLibraryUseCaseProvider).rootSummariesOf(pair.id);
 }
+
+/// Deck-list ordering (kit FilterRow sort chip).
+enum LibrarySort { az, za }
+
+/// Deck-list status filter (kit FilterRow filters chip), keyed off the
+/// per-deck due/new counters.
+enum LibraryStatusFilter { all, due, isNew }
+
+/// The Library controls row state — sort order and status filter — held
+/// separately from the reactive deck stream so toggling never re-queries.
+@riverpod
+class LibraryControlsViewmodel extends _$LibraryControlsViewmodel {
+  @override
+  ({LibrarySort sort, LibraryStatusFilter status}) build() =>
+      (sort: LibrarySort.az, status: LibraryStatusFilter.all);
+
+  void toggleSort() => state = (
+    sort: state.sort == LibrarySort.az ? LibrarySort.za : LibrarySort.az,
+    status: state.status,
+  );
+
+  void setStatus(LibraryStatusFilter status) =>
+      state = (sort: state.sort, status: status);
+}

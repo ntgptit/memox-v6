@@ -16,6 +16,10 @@ import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_list.dart';
+import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
+import 'package:memox_v6/presentation/shared/bottom_sheets/mx_select_sheet.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_chip.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// Library root (WBS 5.2.4A, kit shell per 3.15B): the reactive
 /// root-deck list of the active pair inside the shared chrome
@@ -73,30 +77,138 @@ class _LibraryBody extends ConsumerWidget {
       errorTitle: l10n.somethingWentWrongMessage,
       data: (context, summaries) {
         if (summaries.isEmpty) return const _LibraryEmptyState();
-        // Kit default order is A–Z by name; creation lives on the FAB now,
-        // so the list owns the whole body.
-        final sorted = [...summaries]
-          ..sort(
-            (a, b) => StringUtils.lowerCased(
-              a.deck.name,
-            ).compareTo(StringUtils.lowerCased(b.deck.name)),
-          );
+        final controls = ref.watch(libraryControlsViewmodelProvider);
+        final visible =
+            summaries
+                .where(
+                  (s) => switch (controls.status) {
+                    LibraryStatusFilter.all => true,
+                    LibraryStatusFilter.due => s.dueCount > 0,
+                    LibraryStatusFilter.isNew => s.newCount > 0,
+                  },
+                )
+                .toList()
+              ..sort((a, b) {
+                final byName = StringUtils.lowerCased(
+                  a.deck.name,
+                ).compareTo(StringUtils.lowerCased(b.deck.name));
+                return controls.sort == LibrarySort.az ? byName : -byName;
+              });
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const MxGap.s4(),
-              MxList(
-                children: [
-                  for (final summary in sorted) _DeckRow(summary: summary),
-                ],
-              ),
+              const _LibraryControls(),
+              const MxGap.s4(),
+              // A ternary (not `if/else`) keeps the guard's no-else rule.
+              visible.isEmpty
+                  ? _NoMatch(message: l10n.libraryNoMatchLabel)
+                  : MxList(
+                      children: [
+                        for (final summary in visible)
+                          _DeckRow(summary: summary),
+                      ],
+                    ),
               const MxGap.s6(),
             ],
           ),
         );
       },
     );
+  }
+}
+
+/// Shown when the active filter hides every deck.
+class _NoMatch extends StatelessWidget {
+  const _NoMatch({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const MxGap.s6(),
+        MxText(
+          message,
+          role: MxTextRole.body,
+          textAlign: TextAlign.center,
+          color: context.colors.textSecondary,
+        ),
+        const MxGap.s6(),
+      ],
+    );
+  }
+}
+
+/// Kit `library/controls` (FilterRow): scope · filters · sort. The scope
+/// chip is static until multi-pair scoping lands; filters and sort drive
+/// [LibraryControlsViewmodel].
+class _LibraryControls extends ConsumerWidget {
+  const _LibraryControls();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final controls = ref.watch(libraryControlsViewmodelProvider);
+    final notifier = ref.read(libraryControlsViewmodelProvider.notifier);
+    final filtered = controls.status != LibraryStatusFilter.all;
+
+    return Row(
+      children: [
+        MxChip(label: l10n.libraryScopeAllLabel),
+        const Spacer(),
+        MxChip(
+          label: filtered
+              ? l10n.libraryFiltersActiveLabel(1)
+              : l10n.libraryFiltersLabel,
+          icon: Symbols.tune_rounded,
+          selected: filtered,
+          onTap: () =>
+              _openStatusSheet(context, l10n, controls.status, notifier),
+        ),
+        const MxGap.s2(),
+        MxChip(
+          label: controls.sort == LibrarySort.az
+              ? l10n.librarySortAzLabel
+              : l10n.librarySortZaLabel,
+          icon: Symbols.swap_vert_rounded,
+          onTap: notifier.toggleSort,
+        ),
+      ],
+    );
+  }
+
+  Future<void> _openStatusSheet(
+    BuildContext context,
+    AppLocalizations l10n,
+    LibraryStatusFilter current,
+    LibraryControlsViewmodel notifier,
+  ) async {
+    final picked = await showMxSelectSheet<LibraryStatusFilter>(
+      context,
+      title: l10n.libraryFilterTitle,
+      selected: current,
+      options: [
+        MxSelectOption(
+          key: LibraryStatusFilter.all,
+          icon: Symbols.stacks_rounded,
+          label: l10n.libraryScopeAllLabel,
+        ),
+        MxSelectOption(
+          key: LibraryStatusFilter.due,
+          icon: Symbols.schedule_rounded,
+          label: l10n.libraryFilterDueLabel,
+        ),
+        MxSelectOption(
+          key: LibraryStatusFilter.isNew,
+          icon: Symbols.fiber_new_rounded,
+          label: l10n.libraryFilterNewLabel,
+        ),
+      ],
+    );
+    if (picked != null) notifier.setStatus(picked);
   }
 }
 
