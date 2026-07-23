@@ -216,6 +216,22 @@
   "@appearanceLabel": {
     "description": "Settings entry + sheet title for the theme preference (WBS 8.1)."
   },
+  "studyModesLabel": "Study modes",
+  "@studyModesLabel": {
+    "description": "Settings entry + title for the Practice mode preferences (WBS 8.3)."
+  },
+  "modeDefaultLabel": "Default",
+  "@modeDefaultLabel": {
+    "description": "Badge marking the default Practice mode (WBS 8.3)."
+  },
+  "makeDefaultLabel": "Set as default",
+  "@makeDefaultLabel": {
+    "description": "Control that makes an enabled mode the default (WBS 8.3)."
+  },
+  "modePreferencesInvalidHint": "Enable at least one mode and choose a default.",
+  "@modePreferencesInvalidHint": {
+    "description": "Guidance shown when the mode configuration is invalid (WBS 8.3 §2)."
+  },
   "appearanceSystemLabel": "System",
   "@appearanceSystemLabel": {
     "description": "Appearance option that follows the OS theme (WBS 8.1)."

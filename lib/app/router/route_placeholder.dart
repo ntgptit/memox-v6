@@ -3,6 +3,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/settings/widgets/appearance_sheet.dart';
+import 'package:memox_v6/presentation/features/settings/widgets/mode_preferences_sheet.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 
 /// Skeleton home screen; replaced when the Today feature (WBS 5.7) lands.
@@ -52,6 +53,11 @@ class ProfilePlaceholderScreen extends StatelessWidget {
             leading: const Icon(Symbols.contrast_rounded),
             title: Text(l10n.appearanceLabel),
             onTap: () => showAppearanceSheet(context),
+          ),
+          ListTile(
+            leading: const Icon(Symbols.tune_rounded),
+            title: Text(l10n.studyModesLabel),
+            onTap: () => showModePreferencesSheet(context),
           ),
         ],
       ),
