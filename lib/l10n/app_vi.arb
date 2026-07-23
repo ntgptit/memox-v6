@@ -182,6 +182,8 @@
   "searchFilterAll": "Tất cả",
   "searchFilterDecks": "Deck",
   "searchFilterCards": "Thẻ",
+  "recentSearchesLabel": "Tìm kiếm gần đây",
+  "clearRecentSearchesLabel": "Xoá",
   "modeDefaultLabel": "Mặc định",
   "makeDefaultLabel": "Đặt làm mặc định",
   "moveUpLabel": "Chuyển lên",

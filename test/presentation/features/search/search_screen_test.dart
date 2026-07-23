@@ -103,6 +103,32 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('a submitted query becomes a recent search on blank', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'hel');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+
+    // Clear the field: the recent list shows the committed query.
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pumpAndSettle();
+
+    expect(find.text('RECENT SEARCHES'), findsOneWidget);
+    expect(find.text('hel'), findsOneWidget);
+
+    // Clear wipes it back to the neutral prompt.
+    await tester.tap(find.text('Clear'));
+    await tester.pumpAndSettle();
+    expect(find.text('RECENT SEARCHES'), findsNothing);
+    expect(find.text('Search your decks and cards by name.'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('the type filters narrow the results by kind', (tester) async {
     await database.deckDao.insertDeck(
       'appdeck',

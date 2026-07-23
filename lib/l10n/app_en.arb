@@ -248,6 +248,14 @@
   "@searchFilterCards": {
     "description": "Search filter chip limiting results to cards (WBS 10.2)."
   },
+  "recentSearchesLabel": "Recent searches",
+  "@recentSearchesLabel": {
+    "description": "Header of the recent-searches list on blank search (WBS 10.2)."
+  },
+  "clearRecentSearchesLabel": "Clear",
+  "@clearRecentSearchesLabel": {
+    "description": "Clears the recent-searches history (WBS 10.2)."
+  },
   "modeDefaultLabel": "Default",
   "@modeDefaultLabel": {
     "description": "Badge marking the default Practice mode (WBS 8.3)."

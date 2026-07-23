@@ -61,6 +61,14 @@ class _SearchBody extends HookConsumerWidget {
     final query = StringUtils.trimmed(input.value);
     final filter = useState(SearchResultFilter.all);
 
+    void recordSubmitted(String value) {
+      final committed = StringUtils.trimmed(value);
+      if (committed.isEmpty) return;
+      ref
+          .read(recentSearchesCommandViewmodelProvider.notifier)
+          .record(committed);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -71,6 +79,7 @@ class _SearchBody extends HookConsumerWidget {
           boxed: true,
           placeholder: l10n.searchPlaceholder,
           onChanged: (_) {},
+          onSubmitted: recordSubmitted,
         ),
         const MxGap.s4(),
         if (query.isNotEmpty) ...[
@@ -82,9 +91,66 @@ class _SearchBody extends HookConsumerWidget {
         ],
         Expanded(
           child: query.isEmpty
-              ? _Prompt(message: l10n.searchPromptMessage)
+              ? _Recent(onSelect: (value) => input.controller.text = value)
               : _Results(query: query, filter: filter.value),
         ),
+      ],
+    );
+  }
+}
+
+class _Recent extends ConsumerWidget {
+  const _Recent({required this.onSelect});
+
+  final ValueChanged<String> onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final recent = ref.watch(recentSearchesProvider).value ?? const <String>[];
+    if (recent.isEmpty) {
+      return _Prompt(message: l10n.searchPromptMessage);
+    }
+
+    return ListView(
+      children: [
+        Row(
+          children: [
+            const MxGap.s3(),
+            Expanded(
+              child: MxText(
+                l10n.recentSearchesLabel,
+                role: MxTextRole.overline,
+              ),
+            ),
+            MxTappable(
+              semanticLabel: l10n.clearRecentSearchesLabel,
+              onTap: () => ref
+                  .read(recentSearchesCommandViewmodelProvider.notifier)
+                  .clearRecent(),
+              child: MxText(
+                l10n.clearRecentSearchesLabel,
+                role: MxTextRole.caption,
+              ),
+            ),
+            const MxGap.s3(),
+          ],
+        ),
+        const MxGap.s2(),
+        for (final query in recent)
+          MxTappable(
+            semanticLabel: query,
+            onTap: () => onSelect(query),
+            child: Row(
+              children: [
+                const MxGap.s3(),
+                const MxIcon(icon: Symbols.history_rounded),
+                const MxGap.s4(),
+                Expanded(child: MxText(query, role: MxTextRole.body)),
+                const MxGap.s3(),
+              ],
+            ),
+          ),
       ],
     );
   }
