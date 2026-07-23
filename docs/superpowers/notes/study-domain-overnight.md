@@ -346,7 +346,17 @@ case); `.valueOrNull` banned (use `.asData?.value`); gate analyze is
 runnable: Playwright installed, `build_web.mjs`). Study route + dispatcher landed
 (270a1b1), making Review reachable.
 
-## ⛔ HARD STOP — web build blocker (needs owner decision)
+## ✅ RESOLVED (owner approved Option C) — web build unblocked (5e03244)
+
+`DeterministicRandom` + `roundOrderSeed` rewritten with **BigInt masked to 64
+bits**: byte-identical output on native + web (the "known-answer sequence locked
+across releases" test passes **unchanged** → determinism contract preserved),
+`roundOrderSeed` returns the low 53 bits for a web-safe seed. **`flutter build
+web` now compiles** (`build/parity-web`). The parity pipeline is unblocked;
+resume the Review parity fixture + spec + harness run. Original blocker below for
+the record.
+
+## ⛔ (was) HARD STOP — web build blocker
 
 Ran the parity web build (`tool/parity/build_web.mjs` → `flutter build web
 --release --target=lib/app/dev/parity_main.dart`). It **fails to compile**:
