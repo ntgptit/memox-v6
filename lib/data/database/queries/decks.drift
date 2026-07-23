@@ -130,6 +130,17 @@ WHERE d.language_pair_id = :languagePairId
   )
 ORDER BY d.normalized_name, d.id;
 
+-- Valid move targets for a card (WBS 6.5 move-flashcard). Every deck in the
+-- pair that can hold cards — Empty or Leaf, i.e. it has no child decks (a deck
+-- with children is a Parent and 4.3 exclusivity forbids it owning cards) —
+-- excluding the card's current deck. Ordered by name for the picker.
+cardMoveDestinationDecks:
+SELECT d.* FROM decks d
+WHERE d.language_pair_id = :languagePairId
+  AND d.id != :sourceDeckId
+  AND NOT EXISTS (SELECT 1 FROM decks child WHERE child.parent_id = d.id)
+ORDER BY d.normalized_name, d.id;
+
 -- The active card ids in a deck's whole subtree — the reset-progress scope
 -- (reset-deck-progress.md); Leaf = direct cards, Parent = descendant cards.
 subtreeCardIds:

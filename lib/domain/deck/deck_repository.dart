@@ -36,6 +36,14 @@ abstract interface class DeckRepository {
     required String movingDeckId,
   });
 
+  /// Decks in [languagePairId] that can hold a card — Empty or Leaf (no child
+  /// decks) — excluding [excludeDeckId] (the card's current deck). The
+  /// card-move-destination picker's eligible list (WBS 6.5).
+  Future<List<Deck>> cardMoveTargets(
+    String languagePairId, {
+    required String excludeDeckId,
+  });
+
   Future<void> rename(
     String deckId, {
     required String name,

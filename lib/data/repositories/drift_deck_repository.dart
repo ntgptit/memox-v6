@@ -94,6 +94,17 @@ class DriftDeckRepository implements DeckRepository {
   }
 
   @override
+  Future<List<domain.Deck>> cardMoveTargets(
+    String languagePairId, {
+    required String excludeDeckId,
+  }) async {
+    final rows = await _database.deckDao
+        .cardMoveDestinationDecks(languagePairId, excludeDeckId)
+        .get();
+    return rows.map((row) => row.toDomain()).toList();
+  }
+
+  @override
   Future<void> rename(
     String deckId, {
     required String name,
