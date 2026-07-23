@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
 import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
+import 'package:memox_v6/presentation/features/study/screens/fill_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/guess_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/recall_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/review_screen.dart';
@@ -43,9 +44,9 @@ class _StudyStageDispatch extends ConsumerWidget {
           StudyModeType.review => const ReviewScreen(),
           StudyModeType.guess => const GuessScreen(),
           StudyModeType.recall => const RecallScreen(),
-          // The remaining mode screens land in later slices (Match 5.6.6 is
-          // deferred on a board-runtime gap; Fill 5.6.9); until then a completed
-          // stage parks here rather than crashing.
+          StudyModeType.fill => const FillScreen(),
+          // Match (5.6.6) is deferred on a board-runtime gap; until its screen
+          // lands a Match stage parks here rather than crashing.
           _ => MxEmptyState(
             icon: Icons.hourglass_empty_outlined,
             title: l10n.studyStageComingSoonMessage,

@@ -563,5 +563,46 @@
   "recallTimeoutFeedback": "Time’s up · Forgot",
   "@recallTimeoutFeedback": {
     "description": "Shown when the Recall countdown reaches zero (auto-reveal, maps to wrong/timeout)."
+  },
+  "fillModeTitle": "Fill",
+  "@fillModeTitle": {
+    "description": "Study Fill stage title (WBS 5.6.9)."
+  },
+  "fillTypeTermLabel": "Type the term",
+  "@fillTypeTermLabel": {
+    "description": "Label above the Fill answer input (the meaning is shown; type the term)."
+  },
+  "fillAnswerPlaceholder": "Type your answer…",
+  "@fillAnswerPlaceholder": {
+    "description": "Placeholder in the empty Fill answer input."
+  },
+  "fillCheckLabel": "Check",
+  "@fillCheckLabel": {
+    "description": "Fill primary action: compare the typed answer."
+  },
+  "fillHelpLabel": "Help",
+  "@fillHelpLabel": {
+    "description": "Fill secondary action: reveal a hint."
+  },
+  "fillHintMessage": "Hint: {count} characters, starts with {start}",
+  "@fillHintMessage": {
+    "description": "Fill hint revealing the answer length and first character.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "start": {
+        "type": "String"
+      }
+    }
+  },
+  "fillAnswerRevealLabel": "Answer: {answer}",
+  "@fillAnswerRevealLabel": {
+    "description": "Reveals the correct answer in the Fill wrong-feedback state.",
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
   }
 }

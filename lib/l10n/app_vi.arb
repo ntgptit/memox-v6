@@ -415,5 +415,12 @@
   "recallShowLabel": "Hiện · {seconds}s",
   "recallGotItLabel": "Đã nhớ",
   "recallForgotLabel": "Quên",
-  "recallTimeoutFeedback": "Hết giờ · Quên"
+  "recallTimeoutFeedback": "Hết giờ · Quên",
+  "fillModeTitle": "Điền",
+  "fillTypeTermLabel": "Nhập từ",
+  "fillAnswerPlaceholder": "Nhập câu trả lời…",
+  "fillCheckLabel": "Kiểm tra",
+  "fillHelpLabel": "Trợ giúp",
+  "fillHintMessage": "Gợi ý: {count} ký tự, bắt đầu bằng {start}",
+  "fillAnswerRevealLabel": "Đáp án: {answer}"
 }
