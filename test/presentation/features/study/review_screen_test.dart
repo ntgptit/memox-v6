@@ -11,9 +11,10 @@ import 'package:memox_v6/domain/study_session/session_type.dart';
 import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
 import 'package:memox_v6/domain/study_session/study_session.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/presentation/features/study/screens/review_screen.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 
 /// WBS 5.6.5 — the Review screen shows term + meaning together with browse
 /// navigation (`review-cards.md`, kit `review-mode`).
@@ -72,12 +73,23 @@ void main() {
     expect(find.text('Review'), findsOneWidget);
     expect(find.text('1/2'), findsOneWidget);
 
-    // Previous is disabled on the first card; Next is enabled.
-    final previous = tester.widget<MxButton>(
-      find.widgetWithText(MxButton, 'Previous'),
+    // Kit review-mode bottom hint between the chevrons.
+    expect(find.text('Swipe to continue'), findsOneWidget);
+
+    // The previous chevron is disabled on the first card; next is enabled.
+    final previous = tester.widget<MxIconButton>(
+      find.ancestor(
+        of: find.byIcon(Symbols.chevron_left_rounded),
+        matching: find.byType(MxIconButton),
+      ),
     );
     expect(previous.onPressed, isNull);
-    final next = tester.widget<MxButton>(find.widgetWithText(MxButton, 'Next'));
+    final next = tester.widget<MxIconButton>(
+      find.ancestor(
+        of: find.byIcon(Symbols.chevron_right_rounded),
+        matching: find.byType(MxIconButton),
+      ),
+    );
     expect(next.onPressed, isNotNull);
   });
 

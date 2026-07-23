@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_symbols_icons/symbols.dart';
+import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/domain/study_modes/strategies/review_study_mode_strategy.dart';
 import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
 import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
@@ -9,10 +11,10 @@ import 'package:memox_v6/presentation/features/study/viewmodels/study_answer_vie
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 import 'package:memox_v6/presentation/features/study/widgets/study_shell.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_section_label.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
@@ -102,23 +104,32 @@ class _ReviewStage extends ConsumerWidget {
           ),
         ],
       ),
+      // Kit review-mode: a "‹ Swipe to continue ›" hint. The chevrons are the
+      // accessible Previous/Next controls (review-cards.md §4 keyboard/no-gesture
+      // equivalence); the hint sits between them.
       bottomBar: Row(
         children: <Widget>[
+          MxIconButton(
+            icon: Symbols.chevron_left_rounded,
+            semanticLabel: l10n.reviewPreviousLabel,
+            onPressed: canGoBack
+                ? () => ref.read(reviewBrowseCursorProvider.notifier).back()
+                : null,
+          ),
           Expanded(
-            child: MxButton(
-              label: l10n.reviewPreviousLabel,
-              variant: MxButtonVariant.secondary,
-              onPressed: canGoBack
-                  ? () => ref.read(reviewBrowseCursorProvider.notifier).back()
-                  : null,
+            child: MxText(
+              l10n.reviewSwipeHint,
+              role: MxTextRole.body,
+              color: context.colors.textSecondary,
+              textAlign: TextAlign.center,
             ),
           ),
-          const MxGap.s3(),
-          Expanded(
-            child: MxButton(
-              label: isLastCard ? l10n.reviewFinishLabel : l10n.reviewNextLabel,
-              onPressed: () => _goForward(ref, card?.cardId, browseBack),
-            ),
+          MxIconButton(
+            icon: Symbols.chevron_right_rounded,
+            semanticLabel: isLastCard
+                ? l10n.reviewFinishLabel
+                : l10n.reviewNextLabel,
+            onPressed: () => _goForward(ref, card?.cardId, browseBack),
           ),
         ],
       ),

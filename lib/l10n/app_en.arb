@@ -518,5 +518,9 @@
   "studyDeckLabel": "Study",
   "@studyDeckLabel": {
     "description": "Deck-detail action starting a study session."
+  },
+  "reviewSwipeHint": "Swipe to continue",
+  "@reviewSwipeHint": {
+    "description": "Review bottom hint between the previous/next chevrons (kit review-mode)."
   }
 }
