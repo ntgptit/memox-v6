@@ -510,5 +510,13 @@
   "reviewNoSessionMessage": "No study session is in progress.",
   "@reviewNoSessionMessage": {
     "description": "Shown when Review opens without an active session."
+  },
+  "studyStageComingSoonMessage": "This study stage is coming soon.",
+  "@studyStageComingSoonMessage": {
+    "description": "Placeholder for a study stage whose screen is not built yet."
+  },
+  "studyDeckLabel": "Study",
+  "@studyDeckLabel": {
+    "description": "Deck-detail action starting a study session."
   }
 }

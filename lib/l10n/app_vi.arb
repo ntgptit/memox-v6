@@ -403,5 +403,7 @@
   "reviewPreviousLabel": "Trước",
   "reviewNextLabel": "Tiếp",
   "reviewFinishLabel": "Hoàn thành",
-  "reviewNoSessionMessage": "Không có phiên học nào đang diễn ra."
+  "reviewNoSessionMessage": "Không có phiên học nào đang diễn ra.",
+  "studyStageComingSoonMessage": "Giai đoạn học này sắp ra mắt.",
+  "studyDeckLabel": "Học"
 }

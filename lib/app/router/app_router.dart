@@ -6,6 +6,7 @@ import 'package:memox_v6/app/router/route_placeholder.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
 import 'package:memox_v6/presentation/features/flashcard/routes/flashcard_routes.dart';
 import 'package:memox_v6/presentation/features/language_pair/routes/language_pair_routes.dart';
+import 'package:memox_v6/presentation/features/study/routes/study_routes.dart';
 
 /// Builds a fresh router. Production resolves it through
 /// `appRouterInstanceProvider` (which supplies the first-run gate); tests
@@ -79,6 +80,7 @@ GoRouter createAppRouter({
       ...firstRunDeckRoutes(),
       ...deckDetailRoutes(),
       ...flashcardRoutes(),
+      ...studyRoutes(),
     ],
     errorBuilder: (context, state) => const RouteNotFoundScreen(),
   );

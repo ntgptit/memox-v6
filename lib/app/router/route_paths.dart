@@ -19,4 +19,8 @@ abstract final class RoutePaths {
   static const String newCardPattern = '/deck/:${RouteParams.deckId}/new-card';
 
   static String newCard(String deckId) => '/deck/$deckId/new-card';
+
+  /// The active study session (WBS 5.6). Top-level, full-screen: it covers the
+  /// tab bar and shows the current stage's mode screen.
+  static const String study = '/study';
 }
