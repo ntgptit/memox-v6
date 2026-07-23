@@ -5,6 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
+import 'package:memox_v6/presentation/features/flashcard/widgets/card_tags_section.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_translations_section.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
 import 'package:memox_v6/presentation/features/flashcard/viewmodels/card_editor_viewmodel.dart';
@@ -330,6 +331,8 @@ class _CardEditorForm extends HookConsumerWidget {
                         cardId: editingCard.id,
                         languageCode: editor.meaningLanguageCode,
                       ),
+                      const MxGap.s6(),
+                      CardTagsSection(cardId: editingCard.id),
                       const MxGap.s6(),
                     ],
                   ],

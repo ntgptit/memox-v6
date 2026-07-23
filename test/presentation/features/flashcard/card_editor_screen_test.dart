@@ -8,6 +8,8 @@ import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/flashcard/screens/card_editor_screen.dart';
+import 'package:memox_v6/presentation/features/flashcard/widgets/card_tags_section.dart';
+import 'package:memox_v6/presentation/features/flashcard/widgets/card_translations_section.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 
 void main() {
@@ -279,8 +281,8 @@ void main() {
       await pumpEditor(tester);
 
       expect(find.text('Edit card'), findsOneWidget);
-      // term, meaning, and the add-translation field — tags stay create-only.
-      expect(find.byType(TextField), findsNWidgets(3));
+      // term, meaning, add-translation and add-tag fields (no free tags field).
+      expect(find.byType(TextField), findsNWidgets(4));
       final termField = tester.widget<TextField>(find.byType(TextField).at(0));
       final meaningField = tester.widget<TextField>(
         find.byType(TextField).at(1),
@@ -347,7 +349,12 @@ void main() {
       // term, meaning, and the add-translation field.
       await tester.enterText(find.byType(TextField).at(2), 'goodbye');
       await tester.pump();
-      await tester.tap(find.byIcon(Symbols.add_rounded));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(CardTranslationsSection),
+          matching: find.byIcon(Symbols.add_rounded),
+        ),
+      );
       await pumpEditor(tester);
 
       expect(await translationTexts(), ['goodbye']);
@@ -363,7 +370,12 @@ void main() {
 
       await tester.enterText(find.byType(TextField).at(2), 'goodbye');
       await tester.pump();
-      await tester.tap(find.byIcon(Symbols.add_rounded));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(CardTranslationsSection),
+          matching: find.byIcon(Symbols.add_rounded),
+        ),
+      );
       await pumpEditor(tester);
       expect(await translationTexts(), ['goodbye']);
 
@@ -383,10 +395,70 @@ void main() {
       // The add control stays disabled with no text (nothing to persist).
       await tester.enterText(find.byType(TextField).at(2), '   ');
       await tester.pump();
-      await tester.tap(find.byIcon(Symbols.add_rounded));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(CardTranslationsSection),
+          matching: find.byIcon(Symbols.add_rounded),
+        ),
+      );
       await pumpEditor(tester);
 
       expect(await translationTexts(), isEmpty);
+
+      await disposeAndFlushStreams(tester);
+    });
+
+    Future<List<String>> tagNames() async {
+      final rows = await database
+          .customSelect(
+            'SELECT t.name AS name FROM tags t '
+            'JOIN flashcard_tags ct ON ct.tag_id = t.id '
+            "WHERE ct.card_id = 'c1' ORDER BY t.name",
+          )
+          .get();
+      return rows.map((r) => r.read<String>('name')).toList();
+    }
+
+    Finder tagsAdd() => find.descendant(
+      of: find.byType(CardTagsSection),
+      matching: find.byIcon(Symbols.add_rounded),
+    );
+
+    testWidgets('attaches a tag chip that persists', (tester) async {
+      await seedCard();
+      await tester.pumpWidget(editApp('c1'));
+      await pumpEditor(tester);
+
+      // term, meaning, add-translation, add-tag — the tag field is last.
+      await tester.enterText(find.byType(TextField).at(3), 'grammar');
+      await tester.pump();
+      await tester.ensureVisible(tagsAdd());
+      await tester.tap(tagsAdd());
+      await pumpEditor(tester);
+
+      expect(await tagNames(), ['grammar']);
+      expect(find.text('grammar'), findsOneWidget);
+
+      await disposeAndFlushStreams(tester);
+    });
+
+    testWidgets('removes a tag by tapping its chip', (tester) async {
+      await seedCard();
+      await tester.pumpWidget(editApp('c1'));
+      await pumpEditor(tester);
+
+      await tester.enterText(find.byType(TextField).at(3), 'grammar');
+      await tester.pump();
+      await tester.ensureVisible(tagsAdd());
+      await tester.tap(tagsAdd());
+      await pumpEditor(tester);
+      expect(await tagNames(), ['grammar']);
+
+      await tester.ensureVisible(find.text('grammar'));
+      await tester.tap(find.text('grammar'));
+      await pumpEditor(tester);
+
+      expect(await tagNames(), isEmpty);
 
       await disposeAndFlushStreams(tester);
     });

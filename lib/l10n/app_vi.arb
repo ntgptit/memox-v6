@@ -338,6 +338,8 @@
   "@tagsSectionLabel": {
     "description": "Card Editor tags section (WBS 5.3.2)."
   },
+  "addTagLabel": "Th\u00eam tag",
+  "removeTagLabel": "Xo\u00e1 tag",
   "addTagsPlaceholder": "Th\u00eam tag \u2014 v\u00ed d\u1ee5 #TOPIK_I, #\ub3d9\uc0ac",
   "@addTagsPlaceholder": {
     "description": "Card Editor tags placeholder (WBS 5.3.2)."

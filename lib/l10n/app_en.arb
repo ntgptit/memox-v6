@@ -535,6 +535,14 @@
   "@addTagsPlaceholder": {
     "description": "Card Editor tags placeholder (WBS 5.3.2)."
   },
+  "addTagLabel": "Add tag",
+  "@addTagLabel": {
+    "description": "Attaches a tag to the card in the editor (WBS 6.4)."
+  },
+  "removeTagLabel": "Remove tag",
+  "@removeTagLabel": {
+    "description": "Detaches a tag from the card in the editor (WBS 6.4)."
+  },
   "moreOptionsLabel": "More options",
   "@moreOptionsLabel": {
     "description": "Card Editor progressive disclosure (WBS 5.3.2)."
