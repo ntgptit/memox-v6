@@ -53,6 +53,11 @@ abstract interface class StudySessionRepository {
 
   Future<SessionCheckpoint?> checkpoint(String sessionId);
 
+  /// The session's committed attempts in commit order (`study_attempts` by
+  /// `session_id`), for terminal-grade aggregation and the finalize summary
+  /// (WBS 5.6.13).
+  Future<List<StudyAttempt>> attempts(String sessionId);
+
   Future<void> finalizeSession({
     required String sessionId,
     required int expectedRevision,

@@ -162,6 +162,14 @@ class DriftStudySessionRepository implements StudySessionRepository {
   }
 
   @override
+  Future<List<domain.StudyAttempt>> attempts(String sessionId) async {
+    final rows = await _database.studyAttemptDao
+        .listAttemptsForSession(sessionId)
+        .get();
+    return rows.map((row) => row.toDomain()).toList();
+  }
+
+  @override
   Future<void> finalizeSession({
     required String sessionId,
     required int expectedRevision,
