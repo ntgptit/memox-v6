@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:memox_v6/data/database/app_database.dart';
 
 /// Data preconditions for kit visual-parity states (WBS P0.3).
@@ -36,6 +38,7 @@ class ParityFixtures {
     'MX-VIS-015',
     'MX-VIS-018',
     'MX-VIS-049',
+    'MX-VIS-050',
   ];
 
   /// Seeds [id] over a reset database.
@@ -63,6 +66,9 @@ class ParityFixtures {
         return;
       case 'MX-VIS-018':
         await _seedActivePair();
+        return;
+      case 'MX-VIS-050':
+        await _seedActiveReviewSession();
         return;
       case 'MX-VIS-049':
         // The Card Editor journey starts at a true fresh install. The
@@ -121,6 +127,86 @@ class ParityFixtures {
       _activePairPreferenceKey,
       '"fx-lp-1"',
       1,
+      fixedInstantMs,
+    );
+  }
+
+  /// An active newLearning session resumed into Review, stage 0, card 1/5 — the
+  /// kit `review-mode--browsing` state (WBS 5.6.5). The first card in the
+  /// persisted round order is the shot's `학교` / `school`. Seeded as data (the
+  /// session, its five card snapshots and the round order) so navigating to the
+  /// study route resumes into Review without a start flow.
+  Future<void> _seedActiveReviewSession() async {
+    await _seedActivePair();
+    await _database.deckDao.insertDeck(
+      'fx-rv-deck',
+      'fx-lp-1',
+      null,
+      'Nouns',
+      'nouns',
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+
+    const cards = <(String, String, String)>[
+      ('fx-rv-c0', '학교', 'school'),
+      ('fx-rv-c1', '선생님', 'teacher'),
+      ('fx-rv-c2', '학생', 'student'),
+      ('fx-rv-c3', '책', 'book'),
+      ('fx-rv-c4', '연필', 'pencil'),
+    ];
+    for (final (id, term, meaning) in cards) {
+      await _database.flashcardDao.insertFlashcard(
+        id,
+        'fx-rv-deck',
+        term,
+        term,
+        meaning,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+      await _database.learningProgressDao.insertProgress(
+        'p-$id',
+        id,
+        0,
+        null,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+    }
+
+    await _database.studySessionDao.insertSession(
+      'fx-rv-session',
+      'newLearning',
+      'fx-rv-deck',
+      'subtree',
+      'active',
+      1,
+      fixedInstantMs,
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+    for (var i = 0; i < cards.length; i++) {
+      final (id, term, meaning) = cards[i];
+      await _database.sessionSnapshotDao.insertSessionCard(
+        'sc-$id',
+        'fx-rv-session',
+        id,
+        i,
+        term,
+        meaning,
+        1,
+        0,
+        0,
+        fixedInstantMs,
+      );
+    }
+    await _database.sessionSnapshotDao.insertRoundOrder(
+      'fx-rv-order',
+      'fx-rv-session',
+      1,
+      1,
+      jsonEncode(cards.map((card) => card.$1).toList()),
       fixedInstantMs,
     );
   }

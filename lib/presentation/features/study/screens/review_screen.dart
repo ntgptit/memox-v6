@@ -84,14 +84,19 @@ class _ReviewStage extends ConsumerWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          MxCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                MxSectionLabel(text: l10n.meaningLabel),
-                const MxGap.s2(),
-                MxText(card?.meaning ?? '', role: MxTextRole.title),
-              ],
+          // Kit review-mode: the meaning and term cards split the stage
+          // roughly evenly; the meaning label + text sit at the card's top.
+          Expanded(
+            child: MxCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const MxGap.s3(),
+                  MxSectionLabel(text: l10n.meaningLabel),
+                  const MxGap.s4(),
+                  MxText(card?.meaning ?? '', role: MxTextRole.title),
+                ],
+              ),
             ),
           ),
           const MxGap.s4(),
