@@ -1,5 +1,6 @@
 import 'package:memox_v6/domain/usecases/learning_progress/apply_terminal_outcome_usecase.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/load_study_candidates_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_session/start_study_session_usecase.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/initialise_card_progress_usecase.dart';
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
@@ -169,5 +170,16 @@ LoadStudyCandidatesUseCase loadStudyCandidatesUseCase(Ref ref) {
 ApplyTerminalOutcomeUseCase applyTerminalOutcomeUseCase(Ref ref) {
   return ApplyTerminalOutcomeUseCase(
     repository: ref.watch(learningProgressRepositoryProvider),
+  );
+}
+
+@riverpod
+StartStudySessionUseCase startStudySessionUseCase(Ref ref) {
+  return StartStudySessionUseCase(
+    progress: ref.watch(learningProgressRepositoryProvider),
+    cards: ref.watch(flashcardRepositoryProvider),
+    sessions: ref.watch(studySessionRepositoryProvider),
+    clock: ref.watch(appClockProvider),
+    idGenerator: ref.watch(idGeneratorProvider),
   );
 }
