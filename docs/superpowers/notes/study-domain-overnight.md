@@ -662,3 +662,36 @@ Also: fixed a recurring dart-format-drift brace lint (fill_screen `onSubmitted`)
 and **untracked `evidence/parity/`** (added a gitignore rule + removed 88 harness
 PNG/JSON artifacts that had been accidentally tracked; f2fb385) so parity output is
 never committed.
+
+## 5.6.13 Finalize/result — audit + part 1: terminal-grade policy (20e9464)
+
+**Backend audit:** the finalize pieces mostly exist —
+- `Srs8BoxPolicy.applyGrade({box, grade, nowUtc})` → box math (promote/demote,
+  floor Box 1, ceiling Box 8, fixed intervals);
+- `StudySessionRepository.finalizeSession({sessionId, expectedRevision,
+  terminalState, finalizedAt, goalContribution?, streakContribution?})` — the
+  idempotent terminal-state transition + goal/streak contributions (op 5);
+- `LearningProgressRepository.applyScheduledOutcome(...)` — applies a card's
+  terminal attempt + schedule exactly once (revision-guarded);
+- `SessionCardSnapshot` carries `progressBox` + `progressRevision` (the current
+  box + optimistic-concurrency token per card);
+- **Study Result kit shots exist**: study-result--{standard,goal-met,goal-missed,
+  many-wrong,finalizing,finalize-error,retry-finalize}--{light,dark}.
+
+**Missing:** the finalize orchestration use case + the Study Result screen.
+
+**Part 1 (20e9464):** `SessionTerminalGradePolicy` — pure, order-independent
+aggregation of a session's committed mode outcomes into one terminal `SrsGrade`
+per card. Sticky lapse (finalize §5 / SRS §1): any committed wrong/almost →
+terminal wrong even if a later mastery round passed; a card with a correct and no
+lapse → correct; `reviewed` never contributes. 7 tests. Gate green.
+
+**Part 2 (next):** `FinalizeStudySessionUseCase` — on `isComplete`, read the
+session's committed attempts (needs an attempts-by-session repo read — audit if it
+exists), aggregate grades via this policy, for each SRS-active card compute the
+schedule (`Srs8BoxPolicy.activateCard` for Box 0 / new cards vs `applyGrade` for
+Box 1–8) and persist via `applyScheduledOutcome`, build a summary from committed
+attempts, then `finalizeSession` (idempotent). Practice → no terminal SRS grade.
+Goal/streak contribution computation may need its own audit; defer + record if it
+needs a subsystem not built. **Part 3:** the Study Result screen (kit shots exist,
+§10 wants <3% parity — the StudyShell fix applies).
