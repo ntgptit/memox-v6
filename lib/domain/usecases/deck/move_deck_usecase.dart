@@ -1,5 +1,6 @@
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
+import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
 
 /// Moves a deck to a new parent, or to the Library root (WBS 6.1; `move-deck.md`,
@@ -43,5 +44,15 @@ class MoveDeckUseCase {
       newParentId: newParentId,
       updatedAt: _clock.nowUtc(),
     );
+  }
+
+  /// The decks [deckId] can be reparented under (WBS 6.2 picker) — eligible
+  /// destinations within its own language pair. Library root is offered
+  /// separately by the caller; the store still has final say on the write.
+  Future<List<Deck>> destinationsFor({
+    required String deckId,
+    required String languagePairId,
+  }) {
+    return _decks.moveDestinations(languagePairId, movingDeckId: deckId);
   }
 }

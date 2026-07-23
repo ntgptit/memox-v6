@@ -26,6 +26,16 @@ abstract interface class DeckRepository {
   /// (the deck) for a root deck, or an empty list when the deck is missing.
   Future<List<Deck>> ancestors(String deckId);
 
+  /// Decks in [languagePairId] that [movingDeckId] can be reparented under —
+  /// the move-destination picker's eligible list (WBS 6.2). Excludes the
+  /// moving deck's own subtree (a cycle), decks holding direct cards (4.3
+  /// mixed content) and the current parent (a no-op). Library root is not a
+  /// row here — the caller offers it separately.
+  Future<List<Deck>> moveDestinations(
+    String languagePairId, {
+    required String movingDeckId,
+  });
+
   Future<void> rename(
     String deckId, {
     required String name,

@@ -109,6 +109,27 @@ WITH RECURSIVE chain (id, language_pair_id, parent_id, name, normalized_name,
 SELECT id, language_pair_id, parent_id, name, normalized_name, description,
   created_at, updated_at FROM chain ORDER BY depth DESC;
 
+-- Valid move destinations for :movingDeckId (WBS 6.2 reparent). Every deck in
+-- the pair that is NOT inside the moving deck's own subtree (moving into a
+-- descendant would cycle), holds no direct active cards (deck exclusivity 4.3
+-- forbids a deck owning both cards and child decks), and is not the deck's
+-- current parent (a no-op move). Ordered by name for the picker.
+moveDestinationDecks:
+WITH RECURSIVE subtree (id) AS (
+  SELECT :movingDeckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+)
+SELECT d.* FROM decks d
+WHERE d.language_pair_id = :languagePairId
+  AND d.id NOT IN (SELECT id FROM subtree)
+  AND d.id IS NOT (SELECT parent_id FROM decks WHERE id = :movingDeckId)
+  AND NOT EXISTS (
+    SELECT 1 FROM flashcards f
+    WHERE f.deck_id = d.id AND f.deleted_at IS NULL
+  )
+ORDER BY d.normalized_name, d.id;
+
 -- The active card ids in a deck's whole subtree — the reset-progress scope
 -- (reset-deck-progress.md); Leaf = direct cards, Parent = descendant cards.
 subtreeCardIds:

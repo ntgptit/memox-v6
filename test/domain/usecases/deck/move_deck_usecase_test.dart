@@ -77,6 +77,19 @@ void main() {
     expect(repo.moveCalls, 0);
   });
 
+  test('destinationsFor delegates to the store with the pair scope', () async {
+    final repo = _FakeDecks({'d1': deck('d1')})
+      ..destinations = [deck('p1'), deck('p2')];
+    final result = await MoveDeckUseCase(
+      decks: repo,
+      clock: _FixedClock(now),
+    ).destinationsFor(deckId: 'd1', languagePairId: 'lp1');
+
+    expect(result.map((d) => d.id), ['p1', 'p2']);
+    expect(repo.destinationsPair, 'lp1');
+    expect(repo.destinationsMovingId, 'd1');
+  });
+
   test('a cyclic move surfaces the store conflict', () async {
     final repo = _FakeDecks({
       'd1': deck('d1'),
@@ -111,8 +124,22 @@ class _FakeDecks implements DeckRepository {
   String? movedParent;
   DateTime? movedAt;
 
+  List<Deck> destinations = const [];
+  String? destinationsPair;
+  String? destinationsMovingId;
+
   @override
   Future<Deck?> findById(String id) async => _decks[id];
+
+  @override
+  Future<List<Deck>> moveDestinations(
+    String languagePairId, {
+    required String movingDeckId,
+  }) async {
+    destinationsPair = languagePairId;
+    destinationsMovingId = movingDeckId;
+    return destinations;
+  }
 
   @override
   Future<void> move(
