@@ -1,5 +1,8 @@
 import 'package:memox_v6/domain/usecases/learning_progress/apply_terminal_outcome_usecase.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/load_study_candidates_usecase.dart';
+import 'package:memox_v6/app/di/study_mode_providers.dart';
+import 'package:memox_v6/domain/usecases/study_session/answer_study_stage_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/start_study_session_usecase.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/initialise_card_progress_usecase.dart';
 import 'package:memox_v6/app/di/core_providers.dart';
@@ -181,5 +184,22 @@ StartStudySessionUseCase startStudySessionUseCase(Ref ref) {
     sessions: ref.watch(studySessionRepositoryProvider),
     clock: ref.watch(appClockProvider),
     idGenerator: ref.watch(idGeneratorProvider),
+  );
+}
+
+@riverpod
+AnswerStudyStageUseCase answerStudyStageUseCase(Ref ref) {
+  return AnswerStudyStageUseCase(
+    sessions: ref.watch(studySessionRepositoryProvider),
+    factory: ref.watch(studyModeFactoryProvider),
+    clock: ref.watch(appClockProvider),
+    idGenerator: ref.watch(idGeneratorProvider),
+  );
+}
+
+@riverpod
+LoadStudyRuntimeUseCase loadStudyRuntimeUseCase(Ref ref) {
+  return LoadStudyRuntimeUseCase(
+    sessions: ref.watch(studySessionRepositoryProvider),
   );
 }
