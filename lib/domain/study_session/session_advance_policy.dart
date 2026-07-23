@@ -99,8 +99,10 @@ class SessionAdvancePolicy {
         phase: SessionPhase.sessionComplete,
       );
     }
-    // A new graded stage always starts at round 1 over all session cards.
-    const newStageRound = 1;
+    // A new stage opens over all session cards. roundIndex is a session-global
+    // monotonic counter (persistence keys round orders UNIQUE per
+    // session_id+round_index), so it advances rather than resetting per stage.
+    final newStageRound = current.roundIndex + 1;
     return SessionPosition(
       stageIndex: nextStage,
       roundIndex: newStageRound,

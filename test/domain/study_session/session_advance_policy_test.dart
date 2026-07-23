@@ -47,15 +47,19 @@ void main() {
     expect(next.failedCardIds, <String>['a']);
   });
 
-  test('a clean last card advances to the next stage at round 1', () {
-    // Last card of a round with no failures.
-    final next = advance(pos(stage: 0, cursor: 2), passed: true);
-    expect(next.stageIndex, 1);
-    expect(next.roundIndex, 1);
-    expect(next.cardPosition, 0);
-    expect(next.roundCardIds.toSet(), allCards.toSet(), reason: 'all cards');
-    expect(next.failedCardIds, isEmpty);
-  });
+  test(
+    'a clean last card advances to the next stage, roundIndex monotonic',
+    () {
+      // Last card of stage 0's round 3 with no failures → stage 1 at round 4
+      // (session-global monotonic round index, never reset per stage).
+      final next = advance(pos(stage: 0, round: 3, cursor: 2), passed: true);
+      expect(next.stageIndex, 1);
+      expect(next.roundIndex, 4);
+      expect(next.cardPosition, 0);
+      expect(next.roundCardIds.toSet(), allCards.toSet(), reason: 'all cards');
+      expect(next.failedCardIds, isEmpty);
+    },
+  );
 
   test('a last card with failures opens a new round over the failed set', () {
     // 'a' failed earlier; 'c' (last card) fails now → next round is {a, c}.
