@@ -1,5 +1,23 @@
 # Study-wave domain — overnight autonomous run
 
+## ⚑ 6.1 Move deck — full destination picker deferred (scoped to move-to-root)
+move-deck.md §4 is a destination-selection surface (Library root + eligible
+Parent/Empty decks; Leaf/self/descendant shown disabled). Building the full
+picker needs pieces that do not exist yet: a **pair-wide deck list** query
+(`DeckRepository` only has `watchRoots`/`watchChildren`, no flat/tree list) and
+an **`MxRadio`/selectable-row** shared widget, plus per-deck eligibility (exclude
+self + descendants + Leaf targets — needs each candidate's content state). The
+store is already the cycle/mixed/pair/duplicate authority, but pre-*disabling*
+ineligible targets needs that per-deck info. Cross-pair move (§5 "confirm whole
+subtree") is a separate owner decision.
+
+Shipped the **move-to-Library-root** slice (the un-nest case): a nested deck's
+app bar offers Move → confirm → `MoveDeckUseCase(deckId, null)` → refresh in
+place. This covers the common promote/un-nest move with no new query/widget.
+Follow-up: the arbitrary-parent picker (needs the pair-wide deck-list query + a
+selectable-row widget + eligibility derivation).
+
+
 ## ⚑ 6.1 reset-deck-progress — data-layer gap (deferred; not a guess)
 reset-deck-progress.md §1 requires an **atomic** reset of every card's SRS
 progress in a deck scope ("Reset atomic cho confirmed scope"; "No partial reset")

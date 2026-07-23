@@ -338,6 +338,27 @@
   "@deleteDeckLabel": {
     "description": "Deck app-bar action that opens the delete confirm (WBS 6.1)."
   },
+  "moveDeckLabel": "Move to Library",
+  "@moveDeckLabel": {
+    "description": "Deck app-bar action that moves a nested deck to root (WBS 6.1)."
+  },
+  "moveDeckTitle": "Move “{deckName}”?",
+  "@moveDeckTitle": {
+    "description": "Move-deck dialog title (WBS 6.1).",
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      }
+    }
+  },
+  "moveDeckToRootBody": "This deck will move to the Library root. Its cards, nested decks and learning progress stay with it.",
+  "@moveDeckToRootBody": {
+    "description": "Move-to-Library-root impact (move-deck.md §1)."
+  },
+  "moveDeckConfirmLabel": "Move here",
+  "@moveDeckConfirmLabel": {
+    "description": "Confirm action on the move-deck dialog (move-deck.md §4)."
+  },
   "deleteDeckTitle": "Delete “{deckName}”?",
   "@deleteDeckTitle": {
     "description": "Delete-deck confirm dialog title (WBS 6.1).",

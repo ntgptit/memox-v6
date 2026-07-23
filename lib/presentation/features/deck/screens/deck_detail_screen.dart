@@ -8,6 +8,7 @@ import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/delete_deck_dialog.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/move_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/rename_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_start_notifier.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
@@ -55,6 +56,16 @@ class DeckDetailScreen extends ConsumerWidget {
                 currentName: d.name,
               ),
             ),
+            if (d.parentId != null)
+              MxIconButton.toolbar(
+                icon: Symbols.drive_file_move_rounded,
+                semanticLabel: l10n.moveDeckLabel,
+                onPressed: () => showMoveToRootDialog(
+                  context,
+                  deckId: d.id,
+                  deckName: d.name,
+                ),
+              ),
             MxIconButton.toolbar(
               icon: Symbols.delete_rounded,
               semanticLabel: l10n.deleteDeckLabel,
