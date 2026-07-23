@@ -326,5 +326,24 @@ order (6cb191d) · StudyRuntimeState read model · AnswerStudyStageUseCase
 · studySessionRuntime query + StudyAnswerViewmodel command (FD-09 split). Guard
 learnings: presentation must not `ref.watch(...RepositoryProvider)` (go via a use
 case); `.valueOrNull` banned (use `.asData?.value`); gate analyze is
-`--fatal-infos` (unnecessary imports fail). **Next: first UI — 5.6.4 study shell
-(memox-design + kit parity).**
+`--fatal-infos` (unnecessary imports fail).
+
+## UI screens started
+
+- **5.6.4 study shell** ✅ (commit before 3683299): `StudyShell` shared chrome
+  (app bar + progress + counter + body + bottom slot) from Mx* + tokens.
+- **5.6.5 Review — browsing state** ✅ (3683299): kit review-mode layout
+  (MEANING + TERM cards, progress, Previous/Next/Finish). Backward = local
+  re-view via `ReviewBrowseCursor` notifier (guards forbid StatefulWidget in
+  features; provider files need a `_notifier/_viewmodel/_provider` suffix).
+  Widget-tested. **DEFERRED (recorded, not claimed):** audio/edit/font-size/
+  overflow affordances (need audio 12.x / edit 6.3), the study route +
+  start-session entry, and the **<3% kit-parity measurement** (needs route +
+  parity fixtures + flutter-web build + Playwright — NOT yet run).
+
+**Parity-pipeline reality:** the <3% bar needs the study route + `parity_fixtures`
++ a Playwright spec + `flutter build web` (tool/parity harness exists and is
+runnable: Playwright installed, `build_web.mjs`). **Next priority: wire the study
+route + start entry + a Review parity fixture and actually RUN the parity harness
+to get a real Review % (or record a pipeline blocker) — validate the pipeline
+end-to-end before building the other 4 mode screens unmeasured.**
