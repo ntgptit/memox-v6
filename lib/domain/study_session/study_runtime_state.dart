@@ -79,4 +79,12 @@ class StudyRuntimeState {
 
   /// Cards in the current round.
   int get roundCardCount => position.roundCardIds.length;
+
+  /// Every session card id in the stable snapshot base order (by displayOrder) —
+  /// the membership a new stage's round-1 order shuffles over.
+  List<String> get allCardIdsInBaseOrder {
+    final ordered = cardsById.values.toList()
+      ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
+    return ordered.map((card) => card.cardId).toList();
+  }
 }
