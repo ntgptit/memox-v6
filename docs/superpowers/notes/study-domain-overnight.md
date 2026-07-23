@@ -319,3 +319,12 @@ found and fixed/flagged:
   `SessionRoundOrder`. **Next iteration builds this, then the notifier.**
 - **Terminal SRS timing** (when Box 0→1 activation / per-card grade applies) is
   finalize/aggregation semantics → wired in 5.6.13, not the core answer loop.
+
+**5.6.3 command provider COMPLETE** (commits through 2487f9b): GAP-C atomic
+order (6cb191d) · StudyRuntimeState read model · AnswerStudyStageUseCase
+(answer→evidence→persist→advance, non-terminal attempts) · LoadStudyRuntimeUseCase
+· studySessionRuntime query + StudyAnswerViewmodel command (FD-09 split). Guard
+learnings: presentation must not `ref.watch(...RepositoryProvider)` (go via a use
+case); `.valueOrNull` banned (use `.asData?.value`); gate analyze is
+`--fatal-infos` (unnecessary imports fail). **Next: first UI — 5.6.4 study shell
+(memox-design + kit parity).**
