@@ -60,3 +60,26 @@ node tool/verify/run.mjs --quick --test test/path_test.dart
 The verifier checks documentation links/IDs, the design checklist, the MemoX
 guard, required code generation/formatting, analysis and tests, then writes a
 gitignored pass marker under `.dart_tool/`.
+
+## Web development
+
+Drift's preferred OPFS storage mode requires browser cross-origin isolation so
+`SharedArrayBuffer` is available. Start the Flutter development server with:
+
+```text
+flutter run -d web-server --web-port 3001 --cross-origin-isolation
+```
+
+The Codex launch configurations use this flag for debug and release web runs.
+Production hosting must return these response headers for the app and its
+same-origin assets:
+
+```text
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: credentialless
+```
+
+Flutter's development server currently emits the `credentialless` policy for
+`--cross-origin-isolation`. A production host may use `require-corp` instead,
+but then every cross-origin script, font, image, or API response must opt in
+through CORS or `Cross-Origin-Resource-Policy` headers.
