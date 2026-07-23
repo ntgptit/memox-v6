@@ -752,3 +752,14 @@ documented: goal/streak StreakGoalCard + the time stat (not computed at finalize
 Review-missed → relearn-session start (GAP-A). A result parity fixture/spec is the
 remaining polish (the study-result--standard shot is Latin, so both themes should
 pass with the StudyShell fix).
+
+## 5.7.1 Today read projection (6fa316d)
+
+`LoadTodayProjectionUseCase` composes the Today entry state read-only (owns no
+source calcs): resumable session (`watchActive`) + library card count
+(`countForLanguagePair` via the active pair) + due count (`countDue`) → one
+primary action (paused→continue, empty→create, due→review, else caught-up).
+Exposed via `todayProjectionProvider` (AsyncValue). 5 fake tests. Gate green.
+GAP recorded: no library-wide new-count (studyCandidatesInScope is per-deck) or
+relearn count (session-derived, relearn-start deferred GAP-A) — added when the
+sources exist. Next: 5.7.2 Today screen + states (kit dashboard/today shots).
