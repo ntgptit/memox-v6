@@ -521,3 +521,42 @@ spec detail. **Match UI (5.6.6) is deferred until this lands.**
 
 **Loop continues** to the next mode whose backend the sequential runtime already
 supports (audit-first), leaving Match cleanly flagged — not silently skipped.
+
+## 5.6.8 Recall screen — built + committed; parity CJK+shared-shell capped (c0cc4a8, 2592e17)
+
+**Screen (c0cc4a8, gate-green):** `RecallScreen` renders `StudyShell` with the
+term card + a hidden meaning card and a live 20s countdown in the Show button.
+Tap Show → reveal + Got it / Forgot; the deadline auto-reveals, shows
+"Time's up · Forgot" and locks to `wrong(timeout)`. Got it → `correct`, Forgot →
+`wrong`, timeout → `wrong(reason: timeout)`, committed one card at a time through
+the existing sequential `AnswerStudyStageUseCase`. The countdown + resolved-once
+lock live in a Riverpod notifier (`RecallTimer`) that owns the `Timer` and cancels
+via `ref.onDispose` — no `StatefulWidget`; the deadline/tap race resolves once.
+Dispatcher wires `StudyModeType.recall`. Copy via ARB (en+vi). Durable cross-exit
+timer persistence (`remainingMs`) deferred to WBS 5.6.12. Widget tests (pumped
+time): reveal gate, Show reveals both actions, Got it commits remembered, the 20s
+deadline commits a single timeout.
+
+**Parity (2592e17):** fixture `MX-VIS-052` (resumed into the Recall stage via a
+stage-3 checkpoint; current card `친구`/`friend`) + `recall.spec.ts`, which taps
+Show to reach the stable `recall-mode--revealed` state (the before-reveal
+countdown never settles). Measured honestly: LIGHT **5.35% FAIL**, DARK **6.59%
+FAIL** (gate ≤3%). Root cause (verified, not a screen defect): CJK term tofu
+(bigger here) + the shared StudyShell/app-bar ~40px vertical offset cascading
+through two full-height cards and a two-button bottom bar, + a minor meaning-weight
+difference. No token contract bent.
+
+### 🔧 Systemic finding is now concrete — the shared StudyShell header offset caps light parity on 3 screens
+Across **review (2.94%, passed — less content), guess (3.42%), recall (5.35%)** the
+same ~40px vertical offset between the app bar and the progress row (my content
+sits ~28px higher than every study kit shot; `MxProgress` is a correct 4px bar per
+its contract) is the dominant *non-CJK* diff, and it scales with how much content a
+screen stacks. This is no longer just "an owner decision" — it is worth an
+**investigation** grounded in the kit study-session spec/CSS: if the kit defines a
+header top-gap the app is missing, adding it to `StudyShell` (5.6.4) would lift
+guess + recall (and future fill) under 3% for light in one change, and should only
+*improve* review (which currently renders 28px too high). If it turns out to be a
+shot-vs-token artifact (like the progress-bar thickness), document and leave it.
+**Next package proposes exactly that investigation before building Fill**, so Fill
+isn't built on the same misalignment. CJK term tofu remains the separate
+owner-pending cap for dark.
