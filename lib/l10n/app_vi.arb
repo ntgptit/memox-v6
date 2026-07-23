@@ -409,5 +409,11 @@
   "reviewSwipeHint": "Vuốt để tiếp tục",
   "guessModeTitle": "Đoán",
   "studyContinueLabel": "Tiếp tục",
-  "guessInvalidPoolMessage": "Không đủ lựa chọn khác nhau để đoán thẻ này."
+  "guessInvalidPoolMessage": "Không đủ lựa chọn khác nhau để đoán thẻ này.",
+  "recallModeTitle": "Nhớ lại",
+  "recallHintBeforeReveal": "Nhớ lại nghĩa rồi chạm “Hiện”",
+  "recallShowLabel": "Hiện · {seconds}s",
+  "recallGotItLabel": "Đã nhớ",
+  "recallForgotLabel": "Quên",
+  "recallTimeoutFeedback": "Hết giờ · Quên"
 }

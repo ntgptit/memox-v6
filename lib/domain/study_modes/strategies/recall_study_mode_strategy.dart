@@ -9,6 +9,17 @@ import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
 /// (`recall-and-self-grade.md` §1, `RECALL_RESPONSE_TIMEOUT_SECONDS`).
 const int kRecallTimeoutSeconds = 20;
 
+/// The Recall countdown granularity in seconds: it displays whole remaining
+/// seconds (`recall-and-self-grade.md` §5), so the presentation clock ticks once
+/// per second. A domain constant (like [kRecallTimeoutSeconds]) — the deadline
+/// clock's cadence, not a motion/animation design token.
+const int kRecallTickSeconds = 1;
+
+/// [kRecallTickSeconds] as a [Duration] for the presentation timer. Built from
+/// the named constant (not a raw literal) so the deadline clock stays domain
+/// logic rather than a visual token.
+const Duration kRecallTickInterval = Duration(seconds: kRecallTickSeconds);
+
 /// How a Recall card resolved. `remembered`/`forgot` are presentation labels;
 /// `timeout` is the system deadline event. None of these persist — they map to
 /// canonical outcomes (`recall-and-self-grade.md` §1).

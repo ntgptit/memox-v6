@@ -534,5 +534,34 @@
   "guessInvalidPoolMessage": "Not enough distinct options to guess this card.",
   "@guessInvalidPoolMessage": {
     "description": "Shown when the Guess candidate pool lacks five distinct meanings."
+  },
+  "recallModeTitle": "Recall",
+  "@recallModeTitle": {
+    "description": "Study Recall stage title (WBS 5.6.8)."
+  },
+  "recallHintBeforeReveal": "Recall the meaning, then tap “Show”",
+  "@recallHintBeforeReveal": {
+    "description": "Placeholder in the answer card before the learner reveals it."
+  },
+  "recallShowLabel": "Show · {seconds}s",
+  "@recallShowLabel": {
+    "description": "Recall reveal button with the live countdown (kit recall-mode; RECALL_RESPONSE_TIMEOUT_SECONDS).",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "recallGotItLabel": "Got it",
+  "@recallGotItLabel": {
+    "description": "Recall self-grade meaning Remembered (maps to correct)."
+  },
+  "recallForgotLabel": "Forgot",
+  "@recallForgotLabel": {
+    "description": "Recall self-grade meaning Forgot (maps to wrong)."
+  },
+  "recallTimeoutFeedback": "Time’s up · Forgot",
+  "@recallTimeoutFeedback": {
+    "description": "Shown when the Recall countdown reaches zero (auto-reveal, maps to wrong/timeout)."
   }
 }
