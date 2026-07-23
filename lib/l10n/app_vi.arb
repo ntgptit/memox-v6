@@ -264,6 +264,13 @@
   "createDeckTitle": "Tạo deck",
   "renameDeckTitle": "Đổi tên deck",
   "renameDeckLabel": "Đổi tên",
+  "deleteDeckLabel": "Xoá",
+  "deleteDeckTitle": "Xoá “{deckName}”?",
+  "deleteDeckKeepLabel": "Giữ deck",
+  "deleteDeckConfirmLabel": "Xoá deck",
+  "deleteDeckEmptyBody": "Deck rỗng này sẽ bị xoá vĩnh viễn.",
+  "deleteDeckLeafBody": "{cardCount, plural, other{{cardCount} thẻ và tiến độ học của chúng sẽ bị xoá vĩnh viễn.}}",
+  "deleteDeckParentBody": "Bao gồm {deckCount, plural, other{{deckCount} deck lồng nhau}}, {cardCount, plural, other{{cardCount} thẻ}}, và tiến độ học của chúng. Không thể hoàn tác.",
   "@createDeckTitle": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
   },

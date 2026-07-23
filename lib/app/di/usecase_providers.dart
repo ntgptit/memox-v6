@@ -11,6 +11,7 @@ import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/delete_deck_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/load_deck_deletion_impact_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/move_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/rename_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/open_deck_usecase.dart';
@@ -83,6 +84,13 @@ RenameDeckUseCase renameDeckUseCase(Ref ref) {
 @riverpod
 DeleteDeckUseCase deleteDeckUseCase(Ref ref) {
   return DeleteDeckUseCase(decks: ref.watch(deckRepositoryProvider));
+}
+
+@riverpod
+LoadDeckDeletionImpactUseCase loadDeckDeletionImpactUseCase(Ref ref) {
+  return LoadDeckDeletionImpactUseCase(
+    decks: ref.watch(deckRepositoryProvider),
+  );
 }
 
 @riverpod

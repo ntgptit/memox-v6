@@ -334,6 +334,52 @@
   "@renameDeckLabel": {
     "description": "Deck app-bar action that opens the rename dialog (WBS 6.1)."
   },
+  "deleteDeckLabel": "Delete",
+  "@deleteDeckLabel": {
+    "description": "Deck app-bar action that opens the delete confirm (WBS 6.1)."
+  },
+  "deleteDeckTitle": "Delete “{deckName}”?",
+  "@deleteDeckTitle": {
+    "description": "Delete-deck confirm dialog title (WBS 6.1).",
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteDeckKeepLabel": "Keep deck",
+  "@deleteDeckKeepLabel": {
+    "description": "Safe cancel action on the delete-deck confirm (WBS 6.1)."
+  },
+  "deleteDeckConfirmLabel": "Delete deck",
+  "@deleteDeckConfirmLabel": {
+    "description": "Destructive confirm action on the delete-deck dialog (WBS 6.1)."
+  },
+  "deleteDeckEmptyBody": "This empty deck will be permanently deleted.",
+  "@deleteDeckEmptyBody": {
+    "description": "Delete impact for an Empty deck (delete-deck.md §4)."
+  },
+  "deleteDeckLeafBody": "{cardCount, plural, =1{1 card and its learning progress will be permanently deleted.} other{{cardCount} cards and their learning progress will be permanently deleted.}}",
+  "@deleteDeckLeafBody": {
+    "description": "Delete impact for a Leaf deck (delete-deck.md §4).",
+    "placeholders": {
+      "cardCount": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteDeckParentBody": "This includes {deckCount, plural, =1{1 nested deck} other{{deckCount} nested decks}}, {cardCount, plural, =1{1 card} other{{cardCount} cards}}, and their learning progress. This can’t be undone.",
+  "@deleteDeckParentBody": {
+    "description": "Delete impact for a Parent deck (delete-deck.md §4).",
+    "placeholders": {
+      "deckCount": {
+        "type": "int"
+      },
+      "cardCount": {
+        "type": "int"
+      }
+    }
+  },
   "insideLibraryLabel": "Inside Library",
   "@insideLibraryLabel": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."

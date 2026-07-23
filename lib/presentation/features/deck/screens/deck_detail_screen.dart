@@ -7,6 +7,7 @@ import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/delete_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/rename_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_start_notifier.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
@@ -44,7 +45,7 @@ class DeckDetailScreen extends ConsumerWidget {
         onBack: () => context.backFromDeck(),
         backLabel: l10n.backLabel,
         actions: <Widget>[
-          if (deck.value case final d?)
+          if (deck.value case final d?) ...<Widget>[
             MxIconButton.toolbar(
               icon: Symbols.edit_rounded,
               semanticLabel: l10n.renameDeckLabel,
@@ -54,6 +55,13 @@ class DeckDetailScreen extends ConsumerWidget {
                 currentName: d.name,
               ),
             ),
+            MxIconButton.toolbar(
+              icon: Symbols.delete_rounded,
+              semanticLabel: l10n.deleteDeckLabel,
+              onPressed: () =>
+                  showDeleteDeckDialog(context, deckId: d.id, deckName: d.name),
+            ),
+          ],
         ],
       ),
       scrollable: false,
