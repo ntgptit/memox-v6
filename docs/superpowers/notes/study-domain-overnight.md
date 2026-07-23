@@ -429,3 +429,45 @@ bar; dark CJK near-misses are documented, not faked.**
 
 Review parity = **LIGHT verified; DARK documented near-miss (CJK-tofu, harness).**
 Moving on per the near-miss rule.
+
+## 5.6.7 Guess screen — built + committed; parity CJK-capped (0a9cd9d, e52ba10)
+
+**Screen (0a9cd9d, gate-green):** `GuessScreen` renders `StudyShell` with the
+term prompt + exactly five meaning-choice cards (one correct + four distractors)
+built from the runtime snapshot pool via `GuessQuestionBuilder`. Single-select in
+a Riverpod notifier (`GuessSelection`, no `StatefulWidget`); selecting reveals
+correct/wrong feedback + Continue, which commits a `GuessInput` through the answer
+command. Invalid distractor pool (<5 distinct meanings) → recovery `MxEmptyState`
+(ST-TYPE-011). Dispatcher wires `StudyModeType.guess`. Copy via ARB (en+vi).
+Widget tests: five options render, selection reveals Continue, invalid-pool
+recovery.
+
+**Parity (e52ba10):** fixture `MX-VIS-051` (active newLearning session resumed
+into the Guess stage via a stage-2 checkpoint; current card `학교`/`school`,
+distractors hospital/park/restaurant/library) + `guess.spec.ts` vs the kit
+`guess-mode--waiting` shot. Round index **67** chosen (brute-forced offline
+against the real seed math) so the seeded distractor+option shuffles reproduce
+the kit's exact top-to-bottom option order — isolating the diff to non-defect
+causes.
+
+**Measured honestly (harness, both themes):** LIGHT **3.42% FAIL**, DARK **5.28%
+FAIL** (gate ≤3%). Pixel-analysis root cause (verified, not a screen defect):
+- **CJK prompt term (`학교`) tofu** — the single largest diff block; same
+  owner-pending harness cap as review-mode. Removing it alone would drop light
+  well under 3%.
+- **Shared StudyShell/app-bar vertical offset (~40px)** + the kit shot's thicker
+  progress bar — *shot-vs-token* discrepancies present across **all** study modes
+  (Review absorbed them at 2.94% with two cards; Guess's five option rows push the
+  accumulated offset over). Confirmed `MxProgress` is a **4px** bar per its own
+  component contract, and the option text **x-height is 23px in both** actual and
+  expected — i.e. size/colour/order all match; the option-text magenta is purely
+  the vertical offset, not a rendering defect.
+- **Deferred edit/audio prompt-card affordances** (need audio 12.x / edit 6.3).
+
+**No token contract was bent to force a pass.** New finding worth an owner look:
+the ~40px StudyShell/app-bar header offset is systematic vs *every* study kit shot
+(Review shares it) — either the study kit shots were authored with a taller header
+than the app renders, or the app is missing a header top-gap token. A shared
+StudyShell header-spacing review would improve parity across all modes at once;
+left as a follow-up (not guessed at tonight). Light-parity stays the bar once the
+CJK font decision lands. Moving on per the near-miss rule.
