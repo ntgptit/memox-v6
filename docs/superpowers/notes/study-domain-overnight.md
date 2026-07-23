@@ -595,3 +595,46 @@ fidelity follow-up. Non-study screens untouched (they don't use StudyShell).
 **Net:** owner-decision #2 is resolved (fixed, not deferred). Remaining study-parity
 caps are (a) the CJK term for review-dark + recall (owner-decision #1, font), and
 (b) Recall's own mode-specific fidelity gap. Guess is fully clean.
+
+## 5.6.9 Fill screen — built + committed (dfc23bb, 65b7096); mode-screen phase complete
+
+**Screen (dfc23bb, gate-green):** `FillScreen` shows the MEANING card, a centered
+text input (the guard-blessed `useMxTextSubmitState` hook — no `StatefulWidget`),
+and a Help/Check row. Check previews the outcome via the mode factory's pure
+`evaluate` (SM-FILL-v1: NFC → case fold → whitespace collapse, exact match vs the
+accepted answer); correct/wrong feedback shows with the answer revealed on wrong,
+and Continue commits + advances through the sequential answer command. Blank keeps
+Check disabled (no attempt). Hint is audit-only. Dispatcher wires
+`StudyModeType.fill`. Per the master flow the commit lands on Continue (same input,
+same strategy → same outcome); the kit's per-card "Correct" override + Retry are
+out of the master flow (round-level retry only) and deferred. Widget tests cover
+waiting / correct / wrong / blank-disabled.
+
+**Parity (65b7096):** fixture `MX-VIS-053` (resumed into Fill; prompt `friend`, no
+term shown) + `fill.spec.ts` vs the **CJK-free** `fill-mode--waiting` shot.
+Measured LIGHT **4.97%** / DARK **6.14%** — no CJK here, so pure layout fidelity.
+
+### Study-screen parity: remaining gaps are all owner-decisions (parity polish blocked)
+With the header offset fixed (Guess passes both themes), the residual study-parity
+gaps no longer have a clean autonomous fix — each needs an owner call:
+1. **CJK term font** (owner-decision #1) — caps review-dark, recall (both).
+2. **Progress-bar thickness** — the kit `ProgressHeader` renders `ProgressBar
+   height={8}` everywhere, but Flutter `MxProgress` is a **4px** bar per its own
+   component contract. This is now a visible full-width band on every study screen.
+   Whether the app adopts an 8px `ProgressHeader` variant is a **design-system
+   decision** (contradicts the current 4px doc), not flippable here. Affects
+   review/recall/fill numbers (would not, alone, flip any to passing).
+3. **Recall countdown location** — the business spec (§9) puts the countdown *in*
+   the Show button (what I built); the kit `RecallMode.jsx` uses a separate
+   `Time: 00:20` badge + a plain Show button. **Spec-vs-kit conflict** — needs an
+   owner ruling on which is authoritative.
+4. **Fill prompt-card structure** — StudyShell isolates the bottomBar, so the
+   Expanded prompt card is taller than the kit's `flex:1` card that shares its
+   column with the controls; the meaning sits lower. Structural, would need a
+   StudyShell/Fill restructure and still wouldn't clear 3% alone.
+
+**Conclusion:** the five mode screens (Review, Guess, Recall, Fill built; Match
+deferred on the board-runtime gap) are done and gate-green; Guess passes parity
+both themes, the rest are honestly measured and capped by the four owner-decisions
+above. Further parity polish is **paused pending owner input**; the loop advances
+to functional WBS items (5.6.11+).
