@@ -296,3 +296,26 @@ transactions. Three more gate-green commits:
 **Still genuinely deferred (unchanged reasons):** 5.6.3 command provider (couples
 to gated mode UIs + mastery rounds), the 5.6.2 start use case (per-type card-set
 semantics), the terminal single-consistency-boundary op, all UI rows (STOP RULE).
+
+---
+
+## UI wave started (owner enabled UI; loop cadence 60s, FD-01..16 per screen)
+
+Landed since: `SessionAdvancePolicy` (a2822c6), `StartStudySessionUseCase`
+new/due (eebc614). Then a **command-notifier backend audit** (backend-first)
+found and fixed/flagged:
+
+- **FIX (committed):** `SessionAdvancePolicy` used per-stage `roundIndex` reset to
+  1; `study_round_orders` is `UNIQUE(session_id, round_index)` → must be
+  session-global monotonic. New stages now advance the index.
+- **GAP-A mode plan not persisted:** `study_sessions` has `type` but no plan /
+  selected mode. Re-resolvable from type for newLearning/dueReview (deterministic);
+  a column is needed for practice/relearn **resume**. Deferred with practice/relearn.
+- **GAP-B no initial checkpoint:** `startSession` writes no checkpoint; the runtime
+  derives the initial position (stage 0, round 1, pos 0, empty failed) when none.
+- **GAP-C atomic new-order:** `saveAttemptWithCheckpoint` (op 3) can't persist a
+  newly-generated round order, but answer-study-stage §7 requires
+  attempt+checkpoint+order in one transaction → extend op 3 with an optional
+  `SessionRoundOrder`. **Next iteration builds this, then the notifier.**
+- **Terminal SRS timing** (when Box 0→1 activation / per-card grade applies) is
+  finalize/aggregation semantics → wired in 5.6.13, not the core answer loop.
