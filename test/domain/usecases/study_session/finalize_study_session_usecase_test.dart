@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/ids/id_generator.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress.dart';
@@ -81,21 +82,24 @@ void main() {
     expect(summary.correctCount, 1);
   });
 
-  test('a sticky-lapse activated card demotes exactly one box', () async {
-    final sessions = _FakeSessions(
-      // Failed then mastered in a retry round → sticky wrong.
-      attempts: [_attempt('c1', 'wrong'), _attempt('c1', 'correct')],
-    );
-    final progress = _FakeProgress({'c1': _progressAt(box: 2)});
+  test(
+    'SRS8-010: a sticky-lapse activated card demotes exactly one box',
+    () async {
+      final sessions = _FakeSessions(
+        // Failed then mastered in a retry round → sticky wrong.
+        attempts: [_attempt('c1', 'wrong'), _attempt('c1', 'correct')],
+      );
+      final progress = _FakeProgress({'c1': _progressAt(box: 2)});
 
-    await build(
-      sessions,
-      progress,
-    ).call(completed(session(type: SessionType.dueReview)));
+      await build(
+        sessions,
+        progress,
+      ).call(completed(session(type: SessionType.dueReview)));
 
-    expect(progress.boxOf('c1'), 1, reason: 'Box 2 wrong → Box 1 (SRS8-018)');
-    expect(progress.lapsesOf('c1'), 1);
-  });
+      expect(progress.boxOf('c1'), 1, reason: 'Box 2 wrong → Box 1 (SRS8-018)');
+      expect(progress.lapsesOf('c1'), 1);
+    },
+  );
 
   test('an activated card answered correct promotes one box', () async {
     final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
@@ -126,37 +130,61 @@ void main() {
     },
   );
 
-  test('a practice session schedules no SRS but still finalizes', () async {
-    final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
-    final progress = _FakeProgress({'c1': _progressAt(box: 2)});
+  test(
+    'SRS8-027: a practice session schedules no SRS but still finalizes',
+    () async {
+      final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
+      final progress = _FakeProgress({'c1': _progressAt(box: 2)});
 
-    await build(
-      sessions,
-      progress,
-    ).call(completed(session(type: SessionType.practice, scheduleSrs: false)));
+      await build(sessions, progress).call(
+        completed(session(type: SessionType.practice, scheduleSrs: false)),
+      );
 
-    expect(progress.applyCount, 0, reason: 'no SRS scheduling for practice');
-    expect(progress.boxOf('c1'), 2);
-    expect(sessions.finalized, hasLength(1));
-  });
+      expect(progress.applyCount, 0, reason: 'no SRS scheduling for practice');
+      expect(progress.boxOf('c1'), 2);
+      expect(sessions.finalized, hasLength(1));
+    },
+  );
 
-  test('an incomplete runtime is rejected', () async {
-    final sessions = _FakeSessions(attempts: const []);
-    final progress = _FakeProgress(const {});
-    final incomplete = StudyRuntimeState(
-      session: session(),
-      stages: const <StudyModeType>[StudyModeType.guess],
-      position: const SessionPosition(
-        stageIndex: 0,
-        roundIndex: 1,
-        roundCardIds: <String>['c1'],
-        cardPosition: 0,
-        failedCardIds: <String>[],
-      ),
-      cardsById: const {},
-    );
-    expect(build(sessions, progress).call(incomplete), throwsA(anything));
-  });
+  test(
+    'SRS8-002: an incomplete pipeline does not activate (rejected)',
+    () async {
+      final sessions = _FakeSessions(attempts: const []);
+      final progress = _FakeProgress(const {});
+      final incomplete = StudyRuntimeState(
+        session: session(),
+        stages: const <StudyModeType>[StudyModeType.guess],
+        position: const SessionPosition(
+          stageIndex: 0,
+          roundIndex: 1,
+          roundCardIds: <String>['c1'],
+          cardPosition: 0,
+          failedCardIds: <String>[],
+        ),
+        cardsById: const {},
+      );
+      expect(build(sessions, progress).call(incomplete), throwsA(anything));
+    },
+  );
+
+  test(
+    'SRS8-012: a stale progress version surfaces a typed conflict',
+    () async {
+      final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
+      final progress = _FakeProgress({'c1': _progressAt(box: 2)})
+        ..failWithConflict = true;
+
+      // Finalize must not swallow a revision conflict — it stays recoverable
+      // (finalize-study-session.md §6), never a silent last-write-wins.
+      await expectLater(
+        build(
+          sessions,
+          progress,
+        ).call(completed(session(type: SessionType.dueReview))),
+        throwsA(isA<ConflictFailure>()),
+      );
+    },
+  );
 }
 
 StudyAttempt _attempt(String cardId, String outcome) => StudyAttempt(
@@ -228,6 +256,10 @@ class _FakeProgress implements LearningProgressRepository {
   final Set<String> appliedKeys = <String>{};
   int applyCount = 0;
 
+  /// When set, applying a schedule raises the repository's revision conflict
+  /// (SRS8-012): a stale writer must surface a typed failure, not last-write-win.
+  bool failWithConflict = false;
+
   int? boxOf(String cardId) => _byCard[cardId]?.box;
   int? lapsesOf(String cardId) => _byCard[cardId]?.lapseCount;
 
@@ -244,6 +276,9 @@ class _FakeProgress implements LearningProgressRepository {
     required int expectedRevision,
     required DateTime updatedAt,
   }) async {
+    if (failWithConflict) {
+      throw ConflictFailure(code: 'revision', entity: 'learning_progress');
+    }
     // Exactly-once by the terminal idempotency key.
     if (!appliedKeys.add(attempt.idempotencyKey)) return;
     applyCount++;

@@ -29,7 +29,9 @@ void main() {
     expect(grades, <String, SrsGrade>{'a': SrsGrade.wrong});
   });
 
-  test('the lapse is sticky regardless of outcome order', () {
+  test('SRS8-010: the lapse is sticky regardless of outcome order', () {
+    // A card that lapses then passes a retry aggregates to terminal wrong; the
+    // finalize scheduler applies exactly one box decrement (SRS8-010).
     final grades = policy.gradesByCard(<CardOutcome>[
       outcome('a', ModeOutcome.correct),
       outcome('a', ModeOutcome.wrong),
