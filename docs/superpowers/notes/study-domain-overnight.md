@@ -405,8 +405,27 @@ newLearning session, school/학교) + `review.spec.ts` (resume deep-link to /stu
 layout tuned to the kit (equal-height meaning/term cards).
 
 **Measured (evidence uncommitted):** Review **LIGHT PASS 2.94%** (<3% ✓);
-**DARK 4.04%** — near-miss, fine card-edge rendering in dark (library dark passes
-with the same MxCard, so it's position/height, not border-style). **Next: tune
-dark <3%** (card height ratio / shadow), then Review affordances, then the other
-4 mode screens (pipeline now repeatable). Parity value already paid off — it
-caught the bottom-bar (buttons→swipe hint) and card-height divergences.
+**DARK 4.04%** — near-miss. Parity value already paid off — it caught the
+bottom-bar (buttons→swipe hint) and card-height divergences.
+
+### ⚠️ Systemic finding — CJK terms render as tofu in the offline parity harness
+Inspecting the dark actual: the kit term **`학교` renders as a notdef/tofu box**
+(the Latin `school` renders fine). Root cause: the parity build uses
+`--no-web-resources-cdn` (deterministic/offline, `build_web.mjs`), which disables
+CanvasKit's Google-Fonts **Noto CJK fallback**; the app bundles only the Latin
+Plus Jakarta Sans. So the harness cannot render the kit's Korean example term,
+leaving a **fixed diff cost** vs the kit shot. In production (CDN enabled) Korean
+renders fine, so this is a **harness limitation, not an app/study-screen defect**.
+
+**Impact:** every study mode screen shows a term, and the kit shots use Korean
+(`학교`), so this tofu cost applies to *all* of them — light may pass, dark likely
+near-misses. **Owner decision (recorded, not blocking):** to make study screens
+pass parity in **both** themes, either (a) bundle a CJK font (Noto Sans KR/CJK —
+~bundle-size cost), (b) allow the parity harness a CJK font (drop
+`--no-web-resources-cdn` for CJK states, or add Noto KR to the harness), or
+(c) regenerate the study kit shots with Latin/Vietnamese example content (the
+app's real en→vi pair). Until then, **light-parity is the achievable per-screen
+bar; dark CJK near-misses are documented, not faked.**
+
+Review parity = **LIGHT verified; DARK documented near-miss (CJK-tofu, harness).**
+Moving on per the near-miss rule.
