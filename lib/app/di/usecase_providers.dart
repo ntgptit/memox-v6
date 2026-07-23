@@ -3,6 +3,7 @@ import 'package:memox_v6/domain/usecases/learning_progress/load_study_candidates
 import 'package:memox_v6/app/di/study_mode_providers.dart';
 import 'package:memox_v6/domain/usecases/study_session/answer_study_stage_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/finalize_study_session_usecase.dart';
+import 'package:memox_v6/domain/usecases/today/load_today_projection_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/start_study_session_usecase.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/initialise_card_progress_usecase.dart';
@@ -174,6 +175,17 @@ LoadStudyCandidatesUseCase loadStudyCandidatesUseCase(Ref ref) {
 ApplyTerminalOutcomeUseCase applyTerminalOutcomeUseCase(Ref ref) {
   return ApplyTerminalOutcomeUseCase(
     repository: ref.watch(learningProgressRepositoryProvider),
+  );
+}
+
+@riverpod
+LoadTodayProjectionUseCase loadTodayProjectionUseCase(Ref ref) {
+  return LoadTodayProjectionUseCase(
+    sessions: ref.watch(studySessionRepositoryProvider),
+    progress: ref.watch(learningProgressRepositoryProvider),
+    decks: ref.watch(deckRepositoryProvider),
+    languagePairs: ref.watch(selectLanguagePairUseCaseProvider),
+    clock: ref.watch(appClockProvider),
   );
 }
 
