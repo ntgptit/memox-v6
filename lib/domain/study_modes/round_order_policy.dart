@@ -24,14 +24,20 @@ int roundOrderSeed({
       '$sessionId$separator$modeId$separator$roundIndex$separator'
       '$shuffleVersion';
 
-  const offsetBasis = 0xcbf29ce484222325;
-  const prime = 0x100000001b3;
+  // FNV-1a/64 in BigInt so the 64-bit constants and wrap are exact on native
+  // and on the web (dart2js `int` is only 53-bit exact and cannot hold these
+  // literals).
+  final offsetBasis = BigInt.parse('cbf29ce484222325', radix: 16);
+  final prime = BigInt.parse('100000001b3', radix: 16);
+  final mask64 = (BigInt.one << 64) - BigInt.one;
   var hash = offsetBasis;
   for (var i = 0; i < key.length; i++) {
-    hash ^= key.codeUnitAt(i);
-    hash *= prime; // 64-bit two's-complement wrap, like DeterministicRandom.
+    hash = hash ^ BigInt.from(key.codeUnitAt(i));
+    hash = (hash * prime) & mask64;
   }
-  return hash;
+  // Keep the low 53 bits so the seed is a web-safe `int`; DeterministicRandom
+  // diffuses it back across 64 bits, and 2^53 distinct seeds is ample.
+  return (hash & ((BigInt.one << 53) - BigInt.one)).toInt();
 }
 
 /// Deterministic presentation-order policy for a mode round (WBS 5.5.3; Study
