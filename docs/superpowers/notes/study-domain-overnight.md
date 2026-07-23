@@ -1105,3 +1105,16 @@ ready to wire once that contract is fixed.
 
 Advancing to **8.1 Appearance preference** (dep 2.7, done; no timezone) as the
 next buildable, dependency-satisfied slice.
+
+### 8.2 Study/SRS preferences — mostly OWNER-BLOCKED (v1 SRS is fixed)
+`configure-study-preferences.md` §4.1 (SRS v1 boundary): v1 uses the fixed
+`leitner-8-box-v1` policy — the 8 boxes + intervals (1·3·7·14·30·60·120) are
+READ-ONLY; the user cannot change box count, intervals, lapse algorithm or
+policy id. The only candidate preference is a **new-card limit**, and only "nếu
+flow/decision table riêng chốt range và default" AND the session-build consumes
+it. Grep shows NO new-card-limit / dailyNew / sessionSize field is stored or
+consumed by session start / study-candidate selection. So there is no wired,
+spec-fixed knob to persist — building one would invent a setting the session
+snapshot ignores. A read-only SRS-policy display is the only buildable piece and
+is low-value. RECORD: 8.2 needs an owner decision on whether a new-card limit is
+in-scope for v1 (range/default decision table) + the session must consume it.

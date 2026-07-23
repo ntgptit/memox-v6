@@ -232,6 +232,22 @@
   "@modePreferencesInvalidHint": {
     "description": "Guidance shown when the mode configuration is invalid (WBS 8.3 §2)."
   },
+  "restoreDefaultsLabel": "Restore defaults",
+  "@restoreDefaultsLabel": {
+    "description": "Settings row that resets preferences to their defaults (WBS 8.6)."
+  },
+  "restoreDefaultsTitle": "Restore default settings?",
+  "@restoreDefaultsTitle": {
+    "description": "Restore-defaults confirmation title (WBS 8.6)."
+  },
+  "restoreDefaultsBody": "Appearance and study-mode preferences return to their defaults. Your decks, cards and progress are unaffected.",
+  "@restoreDefaultsBody": {
+    "description": "Restore-defaults confirmation body / impact summary (WBS 8.6)."
+  },
+  "restoreDefaultsConfirmLabel": "Restore",
+  "@restoreDefaultsConfirmLabel": {
+    "description": "Confirm action of the restore-defaults dialog (WBS 8.6)."
+  },
   "appearanceSystemLabel": "System",
   "@appearanceSystemLabel": {
     "description": "Appearance option that follows the OS theme (WBS 8.1)."
