@@ -42,6 +42,7 @@ class ParityFixtures {
     'MX-VIS-051',
     'MX-VIS-052',
     'MX-VIS-053',
+    'MX-VIS-054',
   ];
 
   /// Seeds [id] over a reset database.
@@ -81,6 +82,12 @@ class ParityFixtures {
         return;
       case 'MX-VIS-053':
         await _seedActiveFillSession();
+        return;
+      case 'MX-VIS-054':
+        // Study Result standard: past first-run so `/study` loads; the committed
+        // summary is supplied through `parity_overrides` (the finished session is
+        // not an active row a resume could reach).
+        await _seedActivePair();
         return;
       case 'MX-VIS-049':
         // The Card Editor journey starts at a true fresh install. The

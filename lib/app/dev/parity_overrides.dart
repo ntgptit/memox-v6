@@ -1,12 +1,15 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/study_session/session_summary_policy.dart';
 import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
+import 'package:memox_v6/presentation/features/study/viewmodels/study_result_notifier.dart';
 
 /// Dependency preconditions for kit visual-parity states (WBS P0.3).
 ///
@@ -43,8 +46,29 @@ List<Override> parityOverridesFor(String fixtureId) {
         ),
       ),
     ],
+    // Study Result standard: a finished session's committed summary. The result
+    // is a terminal screen whose precondition (a completed, finalized session)
+    // is not an active row a data fixture could resume into, so the summary is
+    // supplied directly here; the finalize orchestration is unit-tested.
+    'MX-VIS-054' => <Override>[
+      studyResultProvider.overrideWith(_SeededStudyResult.new),
+    ],
     _ => const <Override>[],
   };
+}
+
+/// Renders the Study Result standard state with the kit's committed summary
+/// (24 reviewed, 21 correct → 88%).
+class _SeededStudyResult extends StudyResult {
+  @override
+  AsyncValue<StudySessionSummary?> build() =>
+      const AsyncData<StudySessionSummary?>(
+        StudySessionSummary(
+          reviewedCount: 24,
+          correctCount: 21,
+          missedCardIds: <String>['m1', 'm2', 'm3'],
+        ),
+      );
 }
 
 /// A create path that never completes, for the submitting state.
