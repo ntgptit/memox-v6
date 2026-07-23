@@ -17,6 +17,7 @@ import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
@@ -152,12 +153,63 @@ class _DeckContent extends ConsumerWidget {
         value: cards,
         loadingLabel: l10n.loadingLabel,
         errorTitle: l10n.somethingWentWrongMessage,
-        data: (context, directCards) => _DeckBranch(
-          deck: deck,
-          childDecks: childDecks,
-          directCards: directCards,
+        data: (context, directCards) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _DeckBreadcrumb(deckId: deck.id),
+            Expanded(
+              child: _DeckBranch(
+                deck: deck,
+                childDecks: childDecks,
+                directCards: directCards,
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+/// The nested-deck breadcrumb header (WBS 6.2). Renders `Library › … ›` above
+/// the deck content for a nested deck; a root deck (only itself in the chain)
+/// shows nothing — the app-bar back is its up-navigation. The ancestor crumbs
+/// navigate up; the current deck is the bold, non-interactive page crumb.
+class _DeckBreadcrumb extends ConsumerWidget {
+  const _DeckBreadcrumb({required this.deckId});
+
+  final String deckId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final chain = ref.watch(deckBreadcrumbProvider(deckId: deckId)).value;
+    // Hide until resolved, and for a root deck (the chain is just the deck).
+    if (chain == null || chain.length < 2) return const SizedBox.shrink();
+
+    final items = <MxBreadcrumbItem>[
+      MxBreadcrumbItem(
+        label: l10n.libraryTitle,
+        onTap: () => context.goLibrary(),
+      ),
+      // The current deck (last in the chain) gets no onTap — MxBreadcrumb
+      // renders the final crumb as the bold, non-interactive page label.
+      for (final deck in chain)
+        MxBreadcrumbItem(
+          label: deck.name,
+          onTap: deck.id == deckId
+              ? null
+              : () => context.pushDeckDetail(deck.id),
+        ),
+    ];
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        MxBreadcrumb(items: items),
+        const MxGap.s2(),
+      ],
     );
   }
 }

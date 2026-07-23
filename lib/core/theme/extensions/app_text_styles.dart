@@ -153,6 +153,20 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     fontWeight: AppTypography.fontWeightSemibold,
   );
 
+  /// Breadcrumb ancestor-crumb role (kit `.breadcrumb__crumb`: sm/medium;
+  /// consumers apply the secondary color).
+  TextStyle get breadcrumbCrumb => _base.copyWith(
+    fontSize: AppTypography.fontSizeSm,
+    fontWeight: AppTypography.fontWeightMedium,
+  );
+
+  /// Breadcrumb current-page role (kit `.breadcrumb__current`: sm/semibold;
+  /// consumers apply the primary text color).
+  TextStyle get breadcrumbCurrent => _base.copyWith(
+    fontSize: AppTypography.fontSizeSm,
+    fontWeight: AppTypography.fontWeightSemibold,
+  );
+
   /// Button label roles (kit `.btn`: bold at sm/base/md sizes).
   TextStyle get buttonSm => _base.copyWith(
     fontSize: AppTypography.fontSizeSm,

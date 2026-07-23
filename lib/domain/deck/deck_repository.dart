@@ -21,6 +21,11 @@ abstract interface class DeckRepository {
 
   Stream<List<Deck>> watchChildren(String parentId);
 
+  /// The ancestor chain for [deckId], ordered root → … → the deck itself —
+  /// the nested-deck breadcrumb path (WBS 6.2). Returns a single-element list
+  /// (the deck) for a root deck, or an empty list when the deck is missing.
+  Future<List<Deck>> ancestors(String deckId);
+
   Future<void> rename(
     String deckId, {
     required String name,

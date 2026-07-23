@@ -78,4 +78,19 @@ void main() {
     expect(await decks.countSubtreeDecks('child2'), 0);
     expect(await decks.countSubtreeDecks('grandchild'), 0);
   });
+
+  // WBS 6.2 — ancestors returns the breadcrumb chain root → … → the deck.
+  test('ancestors returns the chain ordered root first, deck last', () async {
+    final chain = await decks.ancestors('grandchild');
+    expect(chain.map((d) => d.id).toList(), ['root', 'child1', 'grandchild']);
+  });
+
+  test('a root deck is its own single-element chain', () async {
+    final chain = await decks.ancestors('root');
+    expect(chain.map((d) => d.id).toList(), ['root']);
+  });
+
+  test('a missing deck has an empty chain', () async {
+    expect(await decks.ancestors('nope'), isEmpty);
+  });
 }

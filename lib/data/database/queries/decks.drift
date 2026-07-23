@@ -93,6 +93,22 @@ WITH RECURSIVE subtree (id) AS (
 SELECT COUNT(*) AS deck_count FROM decks
 WHERE parent_id IN (SELECT id FROM subtree);
 
+-- The ancestor chain of a deck (root → … → the deck itself) — the breadcrumb
+-- path (WBS 6.2). `depth` counts up from the deck to the root, so ORDER BY
+-- depth DESC yields the root first and the deck itself last.
+deckAncestors:
+WITH RECURSIVE chain (id, language_pair_id, parent_id, name, normalized_name,
+  description, created_at, updated_at, depth) AS (
+  SELECT id, language_pair_id, parent_id, name, normalized_name, description,
+    created_at, updated_at, 0 FROM decks WHERE id = :deckId
+  UNION ALL
+  SELECT d.id, d.language_pair_id, d.parent_id, d.name, d.normalized_name,
+    d.description, d.created_at, d.updated_at, chain.depth + 1
+  FROM decks d INNER JOIN chain ON d.id = chain.parent_id
+)
+SELECT id, language_pair_id, parent_id, name, normalized_name, description,
+  created_at, updated_at FROM chain ORDER BY depth DESC;
+
 -- The active card ids in a deck's whole subtree — the reset-progress scope
 -- (reset-deck-progress.md); Leaf = direct cards, Parent = descendant cards.
 subtreeCardIds:

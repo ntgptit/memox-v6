@@ -32,3 +32,11 @@ Future<int> deckSubtreeCards(Ref ref, {required String deckId}) async {
   await ref.watch(deckChildrenProvider(deckId: deckId).future);
   return ref.watch(openDeckUseCaseProvider).subtreeCardCount(deckId);
 }
+
+/// The ancestor chain for the breadcrumb (WBS 6.2), ordered root → … → the
+/// deck itself. Re-reads when the deck record changes (a move reparents it).
+@riverpod
+Future<List<Deck>> deckBreadcrumb(Ref ref, {required String deckId}) async {
+  await ref.watch(deckDetailProvider(deckId: deckId).future);
+  return ref.watch(openDeckUseCaseProvider).ancestorsOf(deckId);
+}
