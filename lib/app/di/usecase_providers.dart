@@ -10,6 +10,7 @@ import 'package:memox_v6/domain/usecases/learning_progress/initialise_card_progr
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/rename_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/open_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/watch_library_usecase.dart';
 import 'package:memox_v6/domain/usecases/flashcard/create_flashcard_usecase.dart';
@@ -65,6 +66,14 @@ CreateDeckUseCase createDeckUseCase(Ref ref) {
     decks: ref.watch(deckRepositoryProvider),
     pairs: ref.watch(languagePairRepositoryProvider),
     idGenerator: ref.watch(idGeneratorProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+RenameDeckUseCase renameDeckUseCase(Ref ref) {
+  return RenameDeckUseCase(
+    decks: ref.watch(deckRepositoryProvider),
     clock: ref.watch(appClockProvider),
   );
 }
