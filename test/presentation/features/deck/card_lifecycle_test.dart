@@ -99,6 +99,13 @@ void main() {
     return row.read<int?>('deleted_at') != null;
   }
 
+  Future<String> deckOf(String id) async {
+    final row = await database
+        .customSelect("SELECT deck_id FROM flashcards WHERE id = '$id'")
+        .getSingle();
+    return row.read<String>('deck_id');
+  }
+
   testWidgets('Hide toggles the card and shows the hidden indicator', (
     tester,
   ) async {
@@ -132,6 +139,37 @@ void main() {
     await pumpStreams(tester);
 
     expect(await isDeleted('c1'), isTrue);
+    expect(find.text('hello'), findsNothing);
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  testWidgets('Move relocates the card to the chosen deck', (tester) async {
+    // An empty sibling deck is the only eligible target.
+    await database.deckDao.insertDeck(
+      'target',
+      'lp1',
+      null,
+      'Archive',
+      'archive',
+      0,
+      0,
+    );
+
+    await tester.pumpWidget(app());
+    await pumpStreams(tester);
+
+    await tester.tap(find.text('hello'));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Move'));
+    await pumpStreams(tester);
+    expect(find.text('Move card to…'), findsOneWidget);
+
+    await tester.tap(find.text('Archive'));
+    await pumpStreams(tester);
+
+    expect(await deckOf('c1'), 'target');
+    // The card left the source Leaf list.
     expect(find.text('hello'), findsNothing);
 
     await disposeAndFlushStreams(tester);

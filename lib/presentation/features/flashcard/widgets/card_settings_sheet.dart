@@ -9,7 +9,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// A card lifecycle action chosen from the card-settings sheet (WBS 6.5).
-enum CardSettingsAction { edit, toggleHidden, delete }
+enum CardSettingsAction { edit, move, toggleHidden, delete }
 
 /// The card-settings action sheet (WBS 6.5; `hide-flashcard.md`,
 /// `delete-flashcard.md`). Groups the card lifecycle actions off the Leaf card
@@ -44,6 +44,11 @@ class _CardSettingsBody extends StatelessWidget {
           icon: Symbols.edit_rounded,
           label: l10n.editCardLabel,
           action: CardSettingsAction.edit,
+        ),
+        _ActionRow(
+          icon: Symbols.drive_file_move_rounded,
+          label: l10n.moveCardLabel,
+          action: CardSettingsAction.move,
         ),
         _ActionRow(
           icon: isHidden

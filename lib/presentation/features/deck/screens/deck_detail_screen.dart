@@ -14,6 +14,7 @@ import 'package:memox_v6/presentation/features/deck/widgets/rename_deck_dialog.d
 import 'package:memox_v6/presentation/features/deck/widgets/reset_deck_progress_dialog.dart';
 import 'package:memox_v6/presentation/features/flashcard/viewmodels/card_lifecycle_viewmodel.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_settings_sheet.dart';
+import 'package:memox_v6/presentation/features/flashcard/widgets/move_card_sheet.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_start_notifier.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
@@ -380,6 +381,8 @@ Future<void> _openCardSettings(
   switch (action) {
     case CardSettingsAction.edit:
       context.pushEditCard(deckId, card.id);
+    case CardSettingsAction.move:
+      await showMoveCardSheet(context, cardId: card.id);
     case CardSettingsAction.toggleHidden:
       await notifier.setCardHidden(cardId: card.id, hidden: !card.isHidden);
     case CardSettingsAction.delete:

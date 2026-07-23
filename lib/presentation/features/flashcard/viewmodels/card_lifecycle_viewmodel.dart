@@ -42,4 +42,16 @@ class CardLifecycleCommandViewmodel extends _$CardLifecycleCommandViewmodel {
       await ref.read(deleteFlashcardUseCaseProvider).deleteCard(cardId);
     });
   }
+
+  Future<void> moveCard({
+    required String cardId,
+    required String targetDeckId,
+  }) async {
+    state = const AsyncLoading<void>();
+    state = await runMxAction(() async {
+      await ref
+          .read(moveFlashcardUseCaseProvider)
+          .call(cardId: cardId, targetDeckId: targetDeckId);
+    });
+  }
 }

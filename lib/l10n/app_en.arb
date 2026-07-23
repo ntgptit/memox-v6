@@ -493,6 +493,18 @@
   "@editCardLabel": {
     "description": "Card action-sheet row that opens the editor (WBS 6.5)."
   },
+  "moveCardLabel": "Move",
+  "@moveCardLabel": {
+    "description": "Card action-sheet row that opens the move picker (WBS 6.5)."
+  },
+  "moveCardPickerTitle": "Move card to…",
+  "@moveCardPickerTitle": {
+    "description": "Card move-destination picker sheet title (WBS 6.5)."
+  },
+  "moveCardNoDestinationsBody": "No other deck can hold this card yet. Create an empty deck first.",
+  "@moveCardNoDestinationsBody": {
+    "description": "Shown when no deck is an eligible card move target (WBS 6.5)."
+  },
   "hideCardLabel": "Hide",
   "@hideCardLabel": {
     "description": "Card action that excludes it from fresh study queues (WBS 6.5)."
