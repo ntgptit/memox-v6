@@ -50,6 +50,16 @@ void main() {
       0,
       0,
     );
+    // An empty sibling under root — an eligible move destination for Child.
+    await database.deckDao.insertDeck(
+      'other',
+      'lp1',
+      'root',
+      'Other',
+      'other',
+      0,
+      0,
+    );
   });
 
   tearDown(() async {
@@ -91,22 +101,38 @@ void main() {
     return row.read<String?>('parent_id');
   }
 
-  testWidgets('moving a nested deck relocates it to the Library root', (
-    tester,
-  ) async {
+  Future<void> openMovePicker(WidgetTester tester) async {
+    await tester.tap(find.byIcon(Symbols.more_vert_rounded));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Move'));
+    await pumpStreams(tester);
+  }
+
+  testWidgets('the Library-root row un-nests the deck', (tester) async {
     await tester.pumpWidget(app(RoutePaths.deckDetail('child')));
     await pumpStreams(tester);
 
-    await tester.tap(find.byIcon(Symbols.more_vert_rounded));
-    await pumpStreams(tester);
-    await tester.tap(find.text('Move to Library'));
-    await pumpStreams(tester);
-
-    expect(find.text('Move “Child”?'), findsOneWidget);
-    await tester.tap(find.text('Move here'));
+    await openMovePicker(tester);
+    expect(find.text('Move to…'), findsOneWidget);
+    await tester.tap(find.text('Library root'));
     await pumpStreams(tester);
 
     expect(await parentOf('child'), isNull);
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  testWidgets('picking a destination deck reparents into it', (tester) async {
+    await tester.pumpWidget(app(RoutePaths.deckDetail('child')));
+    await pumpStreams(tester);
+
+    await openMovePicker(tester);
+    // The empty sibling is an eligible destination; the current parent (root)
+    // and the deck's own subtree are not listed.
+    await tester.tap(find.text('Other'));
+    await pumpStreams(tester);
+
+    expect(await parentOf('child'), 'other');
 
     await disposeAndFlushStreams(tester);
   });
@@ -117,7 +143,7 @@ void main() {
 
     await tester.tap(find.byIcon(Symbols.more_vert_rounded));
     await pumpStreams(tester);
-    expect(find.text('Move to Library'), findsNothing);
+    expect(find.text('Move'), findsNothing);
     expect(find.byIcon(Symbols.drive_file_move_rounded), findsNothing);
 
     await disposeAndFlushStreams(tester);

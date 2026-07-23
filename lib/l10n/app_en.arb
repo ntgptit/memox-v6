@@ -342,9 +342,21 @@
   "@deleteDeckLabel": {
     "description": "Deck app-bar action that opens the delete confirm (WBS 6.1)."
   },
-  "moveDeckLabel": "Move to Library",
+  "moveDeckLabel": "Move",
   "@moveDeckLabel": {
-    "description": "Deck app-bar action that moves a nested deck to root (WBS 6.1)."
+    "description": "Deck-settings action that opens the move-destination picker (WBS 6.2)."
+  },
+  "moveDeckPickerTitle": "Move to…",
+  "@moveDeckPickerTitle": {
+    "description": "Move-destination picker sheet title (WBS 6.2)."
+  },
+  "moveToLibraryRootLabel": "Library root",
+  "@moveToLibraryRootLabel": {
+    "description": "Picker row that un-nests the deck to the Library root (WBS 6.2)."
+  },
+  "moveDeckNoDestinationsBody": "No other decks to move into — you can still move this to the Library root.",
+  "@moveDeckNoDestinationsBody": {
+    "description": "Shown when no nested deck is an eligible move destination (WBS 6.2)."
   },
   "moveDeckTitle": "Move “{deckName}”?",
   "@moveDeckTitle": {

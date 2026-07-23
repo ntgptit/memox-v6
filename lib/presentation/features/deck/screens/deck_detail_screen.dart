@@ -80,7 +80,7 @@ Future<void> _openDeckSettings(BuildContext context, Deck deck) async {
         currentName: deck.name,
       );
     case DeckSettingsAction.move:
-      await showMoveToRootDialog(context, deckId: deck.id, deckName: deck.name);
+      await showMoveDeckSheet(context, deckId: deck.id, deckName: deck.name);
     case DeckSettingsAction.resetProgress:
       await showResetDeckProgressDialog(
         context,
