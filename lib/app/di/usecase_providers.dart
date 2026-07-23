@@ -27,6 +27,7 @@ import 'package:memox_v6/domain/usecases/flashcard/manage_card_tags_usecase.dart
 import 'package:memox_v6/domain/usecases/flashcard/manage_card_translations_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/create_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/onboarding/dismiss_first_run_usecase.dart';
+import 'package:memox_v6/domain/usecases/preferences/set_appearance_preference_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/remove_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -50,6 +51,14 @@ CreateLanguagePairUseCase createLanguagePairUseCase(Ref ref) {
 SelectLanguagePairUseCase selectLanguagePairUseCase(Ref ref) {
   return SelectLanguagePairUseCase(
     pairs: ref.watch(languagePairRepositoryProvider),
+    preferences: ref.watch(preferenceRepositoryProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+SetAppearancePreferenceUseCase setAppearancePreferenceUseCase(Ref ref) {
+  return SetAppearancePreferenceUseCase(
     preferences: ref.watch(preferenceRepositoryProvider),
     clock: ref.watch(appClockProvider),
   );

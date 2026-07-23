@@ -173,6 +173,10 @@
     "description": "Bottom navigation labels (kit shell NAV)."
   },
   "navProfileLabel": "Hồ sơ",
+  "appearanceLabel": "Giao diện",
+  "appearanceSystemLabel": "Hệ thống",
+  "appearanceLightLabel": "Sáng",
+  "appearanceDarkLabel": "Tối",
   "@navProfileLabel": {
     "description": "Bottom navigation labels (kit shell NAV)."
   },

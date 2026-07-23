@@ -1075,3 +1075,33 @@ ready to wire once that lands.
   other three decisions (View / Keep-both / Edit) already ship.
 - Translations inline-edit + reorder; create-mode child-content draft buffering
   (edit mode persists per-mutation, which is defensible for an existing card).
+
+---
+
+## Section 7 (Goal/Streak) — OWNER-BLOCKED (timezone/local-date strategy undefined)
+
+7.1–7.5 (Daily Goal, Study Streak, Today/Result enrichment, E2E gate) all pivot
+on a **local-date + IANA timezone-id derivation** that does not exist in the
+codebase:
+- `DailyGoal` / `GoalDayProgress` / `StreakDay` require `effectiveFromLocalDate`
+  + `timezoneId` (non-nullable) — even the minimal Set-Goal must stamp them.
+- The `timezone: ^0.10.0` package is in `pubspec.yaml` but is **never
+  initialized** (no `initializeTimeZones()`, no local-location set) and unused.
+- There is **no device-timezone detection** (no `flutter_timezone` dep) and
+  `DateTime.timeZoneName` yields an abbreviation, not an IANA id — insufficient
+  for the DST reconciliation the specs (`handle-goal-day-boundary.md`,
+  `reconcile-streak-history.md`) and WBS rows (7.1 "timezone rollover", 7.2
+  "timezone/DST reconciliation", 7.5 "Midnight, timezone") require.
+- `finalize_study_session_usecase` calls `finalizeSession` WITHOUT
+  goalContribution/streakContribution — the contribution wiring is unbuilt.
+
+Building this now would mean **inventing** the timezone/local-date contract the
+specs treat as delicate. **Needs an owner decision on the timezone strategy**:
+add `flutter_timezone` + initialize `timezone`, define the local-date + tz-id
+resolution (a `LocalDateResolver`/clock extension), and the day-boundary/
+rollover/DST reconciliation rules. Domain repos + models + drift queries
+(StudyGoalRepository, StreakRepository, study_goals.drift, streaks.drift) are
+ready to wire once that contract is fixed.
+
+Advancing to **8.1 Appearance preference** (dep 2.7, done; no timezone) as the
+next buildable, dependency-satisfied slice.

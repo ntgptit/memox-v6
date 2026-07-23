@@ -212,6 +212,22 @@
   "@navProfileLabel": {
     "description": "Bottom navigation labels (kit shell NAV)."
   },
+  "appearanceLabel": "Appearance",
+  "@appearanceLabel": {
+    "description": "Settings entry + sheet title for the theme preference (WBS 8.1)."
+  },
+  "appearanceSystemLabel": "System",
+  "@appearanceSystemLabel": {
+    "description": "Appearance option that follows the OS theme (WBS 8.1)."
+  },
+  "appearanceLightLabel": "Light",
+  "@appearanceLightLabel": {
+    "description": "Appearance option forcing the light theme (WBS 8.1)."
+  },
+  "appearanceDarkLabel": "Dark",
+  "@appearanceDarkLabel": {
+    "description": "Appearance option forcing the dark theme (WBS 8.1)."
+  },
   "cardsCountLabel": "{count, plural, =1{1 card} other{{count} cards}}",
   "@cardsCountLabel": {
     "description": "Deck-card meta line (kit DeckCard).",

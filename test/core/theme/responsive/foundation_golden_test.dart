@@ -1,8 +1,11 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/app/router/app_router.dart';
 import 'package:memox_v6/app/router/router_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/app/bootstrap/app_bootstrap.dart';
+import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/domain/today/today_projection.dart';
 import 'package:memox_v6/presentation/features/today/viewmodels/today_projection_provider.dart';
 
@@ -35,6 +38,11 @@ void main() {
         await tester.pumpWidget(
           buildRoot(
             overrides: [
+              // The root reads the appearance preference (WBS 8.1); give it an
+              // in-memory DB so it doesn't open the real one in a golden test.
+              appDatabaseProvider.overrideWithValue(
+                db.AppDatabase.forTesting(NativeDatabase.memory()),
+              ),
               appRouterInstanceProvider.overrideWithValue(createAppRouter()),
               // Home is the async Today entry (WBS 5.7.2); pin a resolved
               // projection so the snapshot is deterministic (no live spinner).
