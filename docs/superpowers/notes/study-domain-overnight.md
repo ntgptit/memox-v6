@@ -1037,3 +1037,41 @@ wired via the dispatcher + end-of-round flush, then parity <3% both themes.
 
 This supersedes the 27560c9 Match blocker. Owner decision #3 (board/timer durable
 persistence) still stands but only blocks 5.6.12 exit/resume, not the Match stage.
+
+---
+
+## Section 6 progress (deck + flashcard lifecycle)
+
+Gate-green packages, all pushed to `feat/study-domain`:
+- 6.1 deck lifecycle (rename/move/delete/reset) + deck-settings action sheet
+  (`01d759b`).
+- 6.2 nested-deck navigation COMPLETE: breadcrumb (`f51e046`) + move-destination
+  eligibility (`67590b8`) + arbitrary-reparent picker sheet (`d1bf468`);
+  empty→leaf transition already covered by `deck_detail_screen_test`.
+- 6.3 flashcard EDIT (`7238428`): editor edit mode + leaf-row entry. The edit
+  domain/data (`EditFlashcardUseCase`, version-guarded `editCardContent`,
+  duplicate-excludes-own-id) pre-existed + was tested; this was UI-only.
+- 6.4 child content — TRANSLATIONS (`cafeaee`) + TAGS (`a4ac2d3`) sections in the
+  editor edit mode (list + add + remove, immediate per-mutation version bump).
+
+### 6.4 AUDIO — OWNER-BLOCKED (infra missing)
+`manage-card-audio.md` requires an audio ref to persist **only after a generated
+(TTS) or attached (file) asset is verified** — `CardAudioRef.assetId`/`provider`
+name a real, stored asset, not user-typed metadata. The app has **none** of the
+required infrastructure: no TTS/text-to-speech provider, no audio player
+(playback), no file picker, and no audio-asset store (zero audio deps in
+`pubspec.yaml`; `addCardAudioRef` is wired only through repo/use-case/DI, never
+from UI). Building a "type an assetId" field would violate the spec's
+verified-asset rule and invent semantics. **Needs an owner decision on the audio
+stack** (TTS engine choice + asset store, or a file-picker + player dependency)
+before the Card Editor audio section can be built. Domain/data
+(`ManageCardAudioUseCase` + `audioRefsOf/addCardAudioRef/removeCardAudioRef`) is
+ready to wire once that lands.
+
+### Recorded 6.x follow-ups
+- 6.3 MERGE duplicate-decision (`resolve-duplicate-flashcard.md` §5): a
+  preview+conflict flow that folds optional child fields into the existing card;
+  depends on child-content sections being in the editor (now partly there). The
+  other three decisions (View / Keep-both / Edit) already ship.
+- Translations inline-edit + reorder; create-mode child-content draft buffering
+  (edit mode persists per-mutation, which is defensible for an existing card).

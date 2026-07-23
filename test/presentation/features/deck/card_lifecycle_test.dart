@@ -10,10 +10,10 @@ import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 
-/// WBS 6.1 — the deck Reset action returns the subtree's cards to Box 0 after a
-/// confirm; Keep progress cancels (reset-deck-progress.md §4).
+/// WBS 6.5 — the Leaf card row opens a lifecycle sheet: Hide toggles the card's
+/// eligibility (and a hidden indicator), Delete removes it after a confirm
+/// (hide-flashcard.md / delete-flashcard.md).
 void main() {
   late db.AppDatabase database;
 
@@ -45,17 +45,9 @@ void main() {
     await database.flashcardDao.insertFlashcard(
       'c1',
       'root',
-      't1',
-      't1',
-      'm1',
-      0,
-      0,
-    );
-    await database.learningProgressDao.insertProgress(
-      'p1',
-      'c1',
-      5,
-      9999,
+      'hello',
+      'hello',
+      'xin chào',
       0,
       0,
     );
@@ -93,56 +85,71 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   }
 
-  Future<int> boxOf(String cardId) async {
+  Future<int> hiddenOf(String id) async {
     final row = await database
-        .customSelect(
-          "SELECT box FROM learning_progress WHERE card_id = '$cardId'",
-        )
+        .customSelect("SELECT is_hidden FROM flashcards WHERE id = '$id'")
         .getSingle();
-    return row.read<int>('box');
+    return row.read<int>('is_hidden');
   }
 
-  testWidgets('Reset progress returns the deck cards to Box 0', (tester) async {
+  Future<bool> isDeleted(String id) async {
+    final row = await database
+        .customSelect("SELECT deleted_at FROM flashcards WHERE id = '$id'")
+        .getSingle();
+    return row.read<int?>('deleted_at') != null;
+  }
+
+  testWidgets('Hide toggles the card and shows the hidden indicator', (
+    tester,
+  ) async {
     await tester.pumpWidget(app());
     await pumpStreams(tester);
 
-    await tester.tap(
-      find.descendant(
-        of: find.byType(MxContextualAppBar),
-        matching: find.byIcon(Symbols.more_vert_rounded),
-      ),
-    );
+    await tester.tap(find.text('hello'));
     await pumpStreams(tester);
-    await tester.tap(find.text('Reset progress'));
+    expect(find.text('Card options'), findsOneWidget);
+
+    await tester.tap(find.text('Hide'));
     await pumpStreams(tester);
 
-    expect(find.text('Reset learning progress?'), findsOneWidget);
-    await tester.tap(find.text('Reset progress'));
-    await pumpStreams(tester);
-
-    expect(await boxOf('c1'), 0);
+    expect(await hiddenOf('c1'), 1);
+    expect(find.byIcon(Symbols.visibility_off_rounded), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });
 
-  testWidgets('Keep progress cancels without resetting', (tester) async {
+  testWidgets('Delete removes the card after the confirm', (tester) async {
     await tester.pumpWidget(app());
     await pumpStreams(tester);
 
-    await tester.tap(
-      find.descendant(
-        of: find.byType(MxContextualAppBar),
-        matching: find.byIcon(Symbols.more_vert_rounded),
-      ),
-    );
+    await tester.tap(find.text('hello'));
     await pumpStreams(tester);
-    await tester.tap(find.text('Reset progress'));
-    await pumpStreams(tester);
-    await tester.tap(find.text('Keep progress'));
+    await tester.tap(find.text('Delete'));
     await pumpStreams(tester);
 
-    expect(find.text('Reset learning progress?'), findsNothing);
-    expect(await boxOf('c1'), 5);
+    expect(find.text('Delete this card?'), findsOneWidget);
+    await tester.tap(find.text('Delete card'));
+    await pumpStreams(tester);
+
+    expect(await isDeleted('c1'), isTrue);
+    expect(find.text('hello'), findsNothing);
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  testWidgets('Keep card cancels the delete', (tester) async {
+    await tester.pumpWidget(app());
+    await pumpStreams(tester);
+
+    await tester.tap(find.text('hello'));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Delete'));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Keep card'));
+    await pumpStreams(tester);
+
+    expect(await isDeleted('c1'), isFalse);
+    expect(find.text('hello'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });

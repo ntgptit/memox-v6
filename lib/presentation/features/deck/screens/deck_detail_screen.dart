@@ -12,7 +12,10 @@ import 'package:memox_v6/presentation/features/deck/widgets/delete_deck_dialog.d
 import 'package:memox_v6/presentation/features/deck/widgets/move_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/rename_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/reset_deck_progress_dialog.dart';
+import 'package:memox_v6/presentation/features/flashcard/viewmodels/card_lifecycle_viewmodel.dart';
+import 'package:memox_v6/presentation/features/flashcard/widgets/card_settings_sheet.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_start_notifier.dart';
+import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
@@ -360,14 +363,49 @@ class _EmptyBranch extends StatelessWidget {
   }
 }
 
-class _LeafBranch extends StatelessWidget {
+/// Opens the card-settings sheet, then runs the chosen lifecycle action
+/// (WBS 6.5). Delete confirms first; hide/show and delete command the store,
+/// and the Leaf stream reflects the change.
+Future<void> _openCardSettings(
+  BuildContext context,
+  WidgetRef ref, {
+  required String deckId,
+  required Flashcard card,
+}) async {
+  // Capture the notifier before the sheet await — the row's WidgetRef must
+  // not be used across the async gap.
+  final notifier = ref.read(cardLifecycleCommandViewmodelProvider.notifier);
+  final action = await showCardSettingsSheet(context, isHidden: card.isHidden);
+  if (!context.mounted || action == null) return;
+  switch (action) {
+    case CardSettingsAction.edit:
+      context.pushEditCard(deckId, card.id);
+    case CardSettingsAction.toggleHidden:
+      await notifier.setCardHidden(cardId: card.id, hidden: !card.isHidden);
+    case CardSettingsAction.delete:
+      final l10n = AppLocalizations.of(context);
+      final confirmed = await showMxConfirmDialog(
+        context,
+        icon: Symbols.delete_rounded,
+        tone: MxConfirmTone.error,
+        title: l10n.deleteCardTitle,
+        text: l10n.deleteCardBody,
+        confirmLabel: l10n.deleteCardConfirmLabel,
+        cancelLabel: l10n.keepCardLabel,
+        danger: true,
+      );
+      if (confirmed) await notifier.deleteCard(cardId: card.id);
+  }
+}
+
+class _LeafBranch extends ConsumerWidget {
   const _LeafBranch({required this.deckId, required this.directCards});
 
   final String deckId;
   final List<Flashcard> directCards;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -378,10 +416,11 @@ class _LeafBranch extends StatelessWidget {
         ),
         const MxGap.s3(),
         for (final card in directCards)
-          // Tapping a card opens the editor in edit mode (WBS 6.3).
+          // Tapping a card opens its lifecycle actions (WBS 6.5).
           MxTappable(
             semanticLabel: card.term,
-            onTap: () => context.pushEditCard(deckId, card.id),
+            onTap: () =>
+                _openCardSettings(context, ref, deckId: deckId, card: card),
             child: Row(
               children: [
                 const MxGap.s3(),
@@ -401,7 +440,11 @@ class _LeafBranch extends StatelessWidget {
                     ],
                   ),
                 ),
-                const MxIcon(icon: Symbols.chevron_right),
+                if (card.isHidden) ...[
+                  const MxIcon(icon: Symbols.visibility_off_rounded),
+                  const MxGap.s2(),
+                ],
+                const MxIcon(icon: Symbols.more_vert_rounded),
                 const MxGap.s3(),
               ],
             ),

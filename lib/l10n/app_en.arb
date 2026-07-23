@@ -485,6 +485,42 @@
   "@editCardTitle": {
     "description": "Card Editor title in edit mode (WBS 6.3; edit-flashcard.md §4)."
   },
+  "cardOptionsLabel": "Card options",
+  "@cardOptionsLabel": {
+    "description": "Title of the card lifecycle action sheet (WBS 6.5)."
+  },
+  "editCardLabel": "Edit",
+  "@editCardLabel": {
+    "description": "Card action-sheet row that opens the editor (WBS 6.5)."
+  },
+  "hideCardLabel": "Hide",
+  "@hideCardLabel": {
+    "description": "Card action that excludes it from fresh study queues (WBS 6.5)."
+  },
+  "showCardLabel": "Show",
+  "@showCardLabel": {
+    "description": "Card action that restores a hidden card's eligibility (WBS 6.5)."
+  },
+  "deleteCardLabel": "Delete",
+  "@deleteCardLabel": {
+    "description": "Card action that opens the delete confirmation (WBS 6.5)."
+  },
+  "deleteCardTitle": "Delete this card?",
+  "@deleteCardTitle": {
+    "description": "Delete-card confirmation title (WBS 6.5; delete-flashcard.md)."
+  },
+  "deleteCardBody": "The card, its translations, tags and progress are permanently deleted. Finished study history is kept.",
+  "@deleteCardBody": {
+    "description": "Delete-card confirmation body (WBS 6.5)."
+  },
+  "deleteCardConfirmLabel": "Delete card",
+  "@deleteCardConfirmLabel": {
+    "description": "Confirm action of the delete-card dialog (WBS 6.5)."
+  },
+  "keepCardLabel": "Keep card",
+  "@keepCardLabel": {
+    "description": "Cancel action of the delete-card dialog (WBS 6.5)."
+  },
   "cardNotFoundMessage": "This card is no longer available.",
   "@cardNotFoundMessage": {
     "description": "Shown when the card to edit was deleted (WBS 6.3; edit-flashcard.md §8)."
