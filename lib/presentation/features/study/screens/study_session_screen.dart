@@ -5,6 +5,7 @@ import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/study/screens/fill_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/guess_screen.dart';
+import 'package:memox_v6/presentation/features/study/screens/match_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/recall_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/review_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/study_result_screen.dart';
@@ -61,11 +62,11 @@ class _StudyStageDispatch extends ConsumerWidget {
         if (runtime.isComplete) return const StudyResultScreen();
         return switch (runtime.currentMode) {
           StudyModeType.review => const ReviewScreen(),
+          StudyModeType.match => const MatchScreen(),
           StudyModeType.guess => const GuessScreen(),
           StudyModeType.recall => const RecallScreen(),
           StudyModeType.fill => const FillScreen(),
-          // Match (5.6.6) is deferred on a board-runtime gap; until its screen
-          // lands a Match stage parks here rather than crashing.
+          // srsBinaryReview (dueReview sessions) has no dedicated screen yet.
           _ => MxEmptyState(
             icon: Icons.hourglass_empty_outlined,
             title: l10n.studyStageComingSoonMessage,

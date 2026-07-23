@@ -527,6 +527,22 @@
   "@guessModeTitle": {
     "description": "Study Guess stage title (WBS 5.6.7)."
   },
+  "matchModeTitle": "Match",
+  "@matchModeTitle": {
+    "description": "Study Match stage title (WBS 5.6.6)."
+  },
+  "matchRoundCompleteTitle": "Round complete!",
+  "@matchRoundCompleteTitle": {
+    "description": "Match board finished — every pair is matched."
+  },
+  "matchRoundCompleteBody": "You matched every pair. Keep the momentum.",
+  "@matchRoundCompleteBody": {
+    "description": "Supporting copy on the Match round-complete state."
+  },
+  "matchNextRoundLabel": "Next round",
+  "@matchNextRoundLabel": {
+    "description": "Commits the Match board and advances (WBS 5.6.6)."
+  },
   "studyContinueLabel": "Continue",
   "@studyContinueLabel": {
     "description": "Advances to the next card after answering."

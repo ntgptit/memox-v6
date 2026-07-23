@@ -17,6 +17,12 @@ import 'package:memox_v6/domain/study_modes/mode_outcome.dart';
 class MatchRound {
   const MatchRound._(this._pairIds, this._locked, this._lapsed);
 
+  /// An empty round (no pairs) — the resting state before a Match stage opens.
+  const MatchRound.empty()
+    : _pairIds = const <String>[],
+      _locked = const <String>{},
+      _lapsed = const <String, ModeOutcome>{};
+
   /// Opens a round over [pairIds] (the term-owner card ids of the current
   /// round, each its own pair), nothing locked or lapsed yet.
   factory MatchRound.of(Iterable<String> pairIds) => MatchRound._(
