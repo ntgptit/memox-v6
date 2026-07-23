@@ -1118,3 +1118,58 @@ spec-fixed knob to persist — building one would invent a setting the session
 snapshot ignores. A read-only SRS-policy display is the only buildable piece and
 is low-value. RECORD: 8.2 needs an owner decision on whether a new-card limit is
 in-scope for v1 (range/default decision table) + the session must consume it.
+
+---
+
+## Full-WBS autonomous run — final status (feat/study-domain)
+
+Shipped 26 gate-green packages this run (each = one `node tool/verify/run.mjs`
+exit-0 commit, pushed to feat/study-domain, never to main):
+
+- **Section 6 (deck + flashcard lifecycle) — COMPLETE.** 6.1 rename/move/delete/
+  reset + deck-settings sheet; 6.2 breadcrumb + arbitrary-reparent picker +
+  eligibility; 6.3 card edit; 6.4 translations + tags sections; 6.5 card
+  hide/delete + move eligibility + move picker.
+- **Section 8 (preferences).** 8.1 appearance; 8.3 mode-prefs persistence + UI +
+  accessible reorder (COMPLETE); 8.6 restore-defaults.
+- **Section 10 (search).** 10.1 ranked read-model; 10.2 UI + type filters +
+  recent searches; 10.3 per-type open-result.
+- **Section 16.** 16.3 ARB en/vi parity regression test.
+
+### Remaining WBS — every item needs an OWNER decision or missing infrastructure
+(the reason each is not buildable without inventing spec/semantics or adding a
+dependency; none are code-blocked):
+
+- **6.6 Library bulk-select** — no business spec for the selection/bulk
+  interaction model (no manage-selection.md; `organise-deck.md` is the
+  content-state contract). Tri-state select-all, filtered-hidden selection,
+  partial-outcome semantics + the bulk-action set are undefined; MxDeckCard has
+  no selection support. Needs a spec/kit-owner decision. **6.7** E2E gate is
+  behind 6.6.
+- **Section 7 (Goal/Streak)** — no local-date + IANA timezone-id derivation
+  (timezone pkg present but uninitialised; no device-zone detection). Needs an
+  owner timezone-strategy decision. **Section 11 (Stats)** depends on 7.2 → blocked.
+- **8.2 Study/SRS** — v1 SRS is the fixed leitner-8-box policy; no wired
+  new-card-limit knob. **8.4 word-display** — presupposes card metadata
+  (gender/romanization) the model lacks. **8.5 voice** — audio stack (below).
+- **6.4 audio / 8.5 voice / Section 12 audio** — no TTS engine, audio player,
+  file picker or asset store (zero audio deps in pubspec). Owner audio-stack decision.
+- **Section 9 (Reminders)** — no notifications plugin (flutter_local_notifications
+  absent). Owner platform-notification decision.
+- **Section 13 (Import/Export)** — no file/share/picker plugins (file_picker /
+  share_plus / file_selector absent). Owner file-I/O decision.
+- **Section 14 (Account/Sync)** — no auth/sync SDK; owner provider + threat-model
+  decision. **Section 15 (Backup)** depends on 13.4 → blocked.
+- **Section 16 certification gates** (16.1 responsive, 16.2 a11y, 16.4 perf,
+  16.5 security, 16.6 migration, 16.7 observability, 16.8 final) — owner sign-off
+  audits, not buildable features. 16.3 parity guard shipped.
+
+### Recorded follow-ups on shipped features (non-blocking polish)
+6.3 merge duplicate-decision (depends child content); translations inline-edit +
+reorder + create-mode child buffering; card cross-pair move review; search
+debounce (§4; needs a motion-duration token) + library-wide scope filter
+(STUDY-WAVE OWNER ITEM #6 — do not reopen); search meaning/translation match
+(needs normalized-stored columns = schema change).
+
+PR #99 stays draft-ready; the owner sign-off points (CJK font #1, 13 audit P1
+evidence, and the decisions above) gate the merge — surfaced, not bypassed.
