@@ -726,3 +726,29 @@ missed next actions. Wiring the answer command to trigger finalize on
 `isComplete` and navigate to the result is a small integration step for part 3.
 Deferred still: goal/streak contribution computation; the `Review missed` →
 relearn-session start (GAP-A).
+
+## 5.6.13 part 3 — Study Result screen + finalize-on-complete (1365bba)
+
+`StudyResultScreen` (kit `study-result`): terminal summary page (root app bar
+"Results", no back). It renders the committed `StudySessionSummary` from
+`studyResultProvider`; the kit states map to the AsyncValue — finalizing
+(loading), finalize-error + Retry (error, §6), standard result (data). Standard
+shows "Session complete", reviewed count, accuracy (guarded /0) and Continue
+studying (→ home) / Done (→ library). Copy via ARB (en+vi).
+
+**Finalize integration (the tricky bit):** `StudyResult` is a **Notifier** (state
+persists) rather than a runtime-derived provider, so the result survives finalize
+clearing the active session (which would make a runtime-watching provider re-emit
+null and lose the result). It runs `FinalizeStudySessionUseCase` exactly once
+(guarded to the initial `AsyncData(null)` state; the use case is itself idempotent
+as a second guard) and exposes `retry()`. The dispatcher
+(`study_session_screen`) triggers finalize via `ref.listen` when the runtime
+reports `isComplete`, and shows the result whenever finalize has started / failed
+/ produced a summary — so it survives the session going null. 5 widget tests.
+Gate green.
+
+**5.6.13 COMPLETE** (finalize backend + result screen + integration). Deferred +
+documented: goal/streak StreakGoalCard + the time stat (not computed at finalize);
+Review-missed → relearn-session start (GAP-A). A result parity fixture/spec is the
+remaining polish (the study-result--standard shot is Latin, so both themes should
+pass with the StudyShell fix).
