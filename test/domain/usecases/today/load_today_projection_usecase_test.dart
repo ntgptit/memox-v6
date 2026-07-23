@@ -71,12 +71,19 @@ void main() {
     expect(projection.primaryAction, TodayPrimaryAction.createLibrary);
   });
 
-  test('no session with due cards starts a review, composing the count', () async {
-    final projection = await build(pair: pair, libraryCards: 12, due: 7).call();
-    expect(projection.primaryAction, TodayPrimaryAction.startReview);
-    expect(projection.dueCount, 7);
-    expect(projection.pausedSession, isNull);
-  });
+  test(
+    'no session with due cards starts a review, composing the count',
+    () async {
+      final projection = await build(
+        pair: pair,
+        libraryCards: 12,
+        due: 7,
+      ).call();
+      expect(projection.primaryAction, TodayPrimaryAction.startReview);
+      expect(projection.dueCount, 7);
+      expect(projection.pausedSession, isNull);
+    },
+  );
 
   test('no session, cards present but none due, is caught up', () async {
     final projection = await build(pair: pair, libraryCards: 12, due: 0).call();

@@ -433,5 +433,18 @@
   "studyFinalizingLabel": "Đang hoàn tất…",
   "studyFinalizeErrorTitle": "Không thể lưu kết quả",
   "studyFinalizeErrorMessage": "Phiên học đã xong nhưng chưa cập nhật được lịch ôn. Hãy thử lại để phiên này được tính.",
-  "studyRetryLabel": "Thử lại"
+  "studyRetryLabel": "Thử lại",
+  "todayTitle": "Hôm nay",
+  "todayPausedTitle": "Phiên học đang tạm dừng",
+  "todayPausedBody": "Câu trả lời đã lưu vẫn được giữ nguyên.",
+  "todayResumeLabel": "Tiếp tục phiên",
+  "todayDueTitle": "Tiếp tục học",
+  "todayDueCaption": "{count} thẻ đến hạn",
+  "todayStartReviewLabel": "Bắt đầu ôn",
+  "todayEmptyTitle": "Tạo bộ thẻ đầu tiên",
+  "todayEmptyBody": "Thêm những từ bạn muốn nhớ — MemoX sẽ lên lịch ôn cho bạn.",
+  "todayCreateLabel": "Tạo bộ thẻ",
+  "todayCaughtUpTitle": "Bạn đã ôn hết rồi",
+  "todayCaughtUpBody": "Hiện không có thẻ nào đến hạn.",
+  "todayErrorTitle": "Không tải được Hôm nay"
 }

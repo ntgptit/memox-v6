@@ -653,5 +653,62 @@
   "studyRetryLabel": "Retry",
   "@studyRetryLabel": {
     "description": "Retries a failed finalize on the Study Result."
+  },
+  "todayTitle": "Today",
+  "@todayTitle": {
+    "description": "Today entry screen title (WBS 5.7.2)."
+  },
+  "todayPausedTitle": "Study session paused",
+  "@todayPausedTitle": {
+    "description": "Today paused-session callout title."
+  },
+  "todayPausedBody": "Your saved answers are unchanged.",
+  "@todayPausedBody": {
+    "description": "Today paused-session callout body."
+  },
+  "todayResumeLabel": "Resume session",
+  "@todayResumeLabel": {
+    "description": "Today primary action resuming a paused session."
+  },
+  "todayDueTitle": "Continue studying",
+  "@todayDueTitle": {
+    "description": "Today due-cards section title."
+  },
+  "todayDueCaption": "{count} cards due",
+  "@todayDueCaption": {
+    "description": "Today due-cards count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "todayStartReviewLabel": "Start review",
+  "@todayStartReviewLabel": {
+    "description": "Today primary action starting a review."
+  },
+  "todayEmptyTitle": "Start your first deck",
+  "@todayEmptyTitle": {
+    "description": "Today empty-library hero title."
+  },
+  "todayEmptyBody": "Add the words you want to remember — MemoX schedules the reviews for you.",
+  "@todayEmptyBody": {
+    "description": "Today empty-library hero body."
+  },
+  "todayCreateLabel": "Create a deck",
+  "@todayCreateLabel": {
+    "description": "Today empty-library primary action opening the library."
+  },
+  "todayCaughtUpTitle": "You’re all caught up",
+  "@todayCaughtUpTitle": {
+    "description": "Today caught-up title (no cards due)."
+  },
+  "todayCaughtUpBody": "No cards due right now.",
+  "@todayCaughtUpBody": {
+    "description": "Today caught-up body."
+  },
+  "todayErrorTitle": "Today couldn’t load",
+  "@todayErrorTitle": {
+    "description": "Today load-error title."
   }
 }

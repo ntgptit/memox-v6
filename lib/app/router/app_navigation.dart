@@ -24,6 +24,9 @@ extension AppNavigation on BuildContext {
   /// Opens the Library root.
   void goLibrary() => GoRouter.of(this).go(RoutePaths.library);
 
+  /// Opens the active study session route (WBS 5.6/5.7).
+  void goStudy() => GoRouter.of(this).go(RoutePaths.study);
+
   /// Opens the Stats root (placeholder until WBS 5.8 lands).
   void goStats() => GoRouter.of(this).go(RoutePaths.stats);
 
