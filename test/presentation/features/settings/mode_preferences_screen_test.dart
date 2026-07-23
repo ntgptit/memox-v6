@@ -113,4 +113,29 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  testWidgets('moving a mode down saves the new order', (tester) async {
+    await openSheet(tester);
+
+    // Review starts first; move it down one place.
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const ValueKey('mode-review')),
+        matching: find.bySemanticsLabel('Move down'),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(await savedEnabled(), [
+      StudyModeType.match,
+      StudyModeType.review,
+      StudyModeType.guess,
+      StudyModeType.recall,
+      StudyModeType.fill,
+    ]);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }

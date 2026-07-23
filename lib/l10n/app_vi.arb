@@ -184,6 +184,8 @@
   "searchFilterCards": "Thẻ",
   "modeDefaultLabel": "Mặc định",
   "makeDefaultLabel": "Đặt làm mặc định",
+  "moveUpLabel": "Chuyển lên",
+  "moveDownLabel": "Chuyển xuống",
   "modePreferencesInvalidHint": "Bật ít nhất một chế độ và chọn mặc định.",
   "restoreDefaultsLabel": "Khôi phục mặc định",
   "restoreDefaultsTitle": "Khôi phục cài đặt mặc định?",

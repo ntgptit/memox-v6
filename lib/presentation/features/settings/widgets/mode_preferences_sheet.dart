@@ -72,6 +72,12 @@ class _ModePreferencesForm extends HookConsumerWidget {
       initial.enabledInOrder.toSet(),
     );
     final defaultMode = useState<StudyModeType>(initial.defaultMode);
+    // The full selectable list in draft order: the enabled modes in their
+    // saved order first, then the rest in canonical order.
+    final order = useState<List<StudyModeType>>([
+      ...initial.enabledInOrder,
+      ...modes.where((mode) => !initial.enabledInOrder.contains(mode)),
+    ]);
 
     final saveState = ref.watch(modePreferencesCommandViewmodelProvider);
     final isSaving = saveState is AsyncLoading<void>;
@@ -94,8 +100,16 @@ class _ModePreferencesForm extends HookConsumerWidget {
       enabled.value = next;
     }
 
+    void swap(int a, int b) {
+      final next = [...order.value];
+      final held = next[a];
+      next[a] = next[b];
+      next[b] = held;
+      order.value = next;
+    }
+
     void save() {
-      final ordered = modes
+      final ordered = order.value
           .where((mode) => enabled.value.contains(mode))
           .toList();
       ref
@@ -112,7 +126,7 @@ class _ModePreferencesForm extends HookConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final mode in modes)
+        for (final (index, mode) in order.value.indexed)
           _ModeRow(
             key: ValueKey('mode-${mode.id}'),
             title: _titleOf(mode, l10n),
@@ -122,8 +136,16 @@ class _ModePreferencesForm extends HookConsumerWidget {
             onMakeDefault: isSaving || !enabled.value.contains(mode)
                 ? null
                 : () => defaultMode.value = mode,
+            onMoveUp: isSaving || index == 0
+                ? null
+                : () => swap(index, index - 1),
+            onMoveDown: isSaving || index == order.value.length - 1
+                ? null
+                : () => swap(index, index + 1),
             makeDefaultLabel: l10n.makeDefaultLabel,
             defaultBadge: l10n.modeDefaultLabel,
+            moveUpLabel: l10n.moveUpLabel,
+            moveDownLabel: l10n.moveDownLabel,
           ),
         if (!valid) ...[
           const MxGap.s3(),
@@ -155,8 +177,12 @@ class _ModeRow extends StatelessWidget {
     required this.isDefault,
     required this.onToggle,
     required this.onMakeDefault,
+    required this.onMoveUp,
+    required this.onMoveDown,
     required this.makeDefaultLabel,
     required this.defaultBadge,
+    required this.moveUpLabel,
+    required this.moveDownLabel,
   });
 
   final String title;
@@ -164,8 +190,12 @@ class _ModeRow extends StatelessWidget {
   final bool isDefault;
   final VoidCallback? onToggle;
   final VoidCallback? onMakeDefault;
+  final VoidCallback? onMoveUp;
+  final VoidCallback? onMoveDown;
   final String makeDefaultLabel;
   final String defaultBadge;
+  final String moveUpLabel;
+  final String moveDownLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -187,6 +217,18 @@ class _ModeRow extends StatelessWidget {
           MxText(defaultBadge, role: MxTextRole.caption),
           const MxGap.s3(),
         ],
+        MxTappable(
+          semanticLabel: moveUpLabel,
+          onTap: onMoveUp,
+          child: const MxIcon(icon: Symbols.arrow_upward_rounded),
+        ),
+        const MxGap.s2(),
+        MxTappable(
+          semanticLabel: moveDownLabel,
+          onTap: onMoveDown,
+          child: const MxIcon(icon: Symbols.arrow_downward_rounded),
+        ),
+        const MxGap.s2(),
         MxTappable(
           semanticLabel: makeDefaultLabel,
           onTap: onMakeDefault,

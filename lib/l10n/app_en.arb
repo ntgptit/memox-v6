@@ -256,6 +256,14 @@
   "@makeDefaultLabel": {
     "description": "Control that makes an enabled mode the default (WBS 8.3)."
   },
+  "moveUpLabel": "Move up",
+  "@moveUpLabel": {
+    "description": "Accessible reorder control moving an item up (WBS 8.3)."
+  },
+  "moveDownLabel": "Move down",
+  "@moveDownLabel": {
+    "description": "Accessible reorder control moving an item down (WBS 8.3)."
+  },
   "modePreferencesInvalidHint": "Enable at least one mode and choose a default.",
   "@modePreferencesInvalidHint": {
     "description": "Guidance shown when the mode configuration is invalid (WBS 8.3 §2)."
