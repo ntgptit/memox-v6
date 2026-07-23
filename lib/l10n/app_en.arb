@@ -654,6 +654,10 @@
   "@studyRetryLabel": {
     "description": "Retries a failed finalize on the Study Result."
   },
+  "deckStudyLabel": "Study",
+  "@deckStudyLabel": {
+    "description": "Starts a study session for the open deck (WBS 5.6.1/2)."
+  },
   "todayTitle": "Today",
   "@todayTitle": {
     "description": "Today entry screen title (WBS 5.7.2)."

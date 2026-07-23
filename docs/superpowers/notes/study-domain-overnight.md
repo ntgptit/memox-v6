@@ -792,6 +792,56 @@ library-wide start. So today the built study flow can only be *resumed*, never
 button, and end-to-end start→study→finalize→result. Library-wide start-review may
 need a scope decision (owner) but a deck-scoped start is buildable now.
 
+## Session-start UI command + deck Study button (WBS 5.6.1/2 UI wiring)
+Closes the major finding above: the app can now **start** a session, not only
+resume one.
+
+- `study_start_notifier.dart` — `@riverpod class StudyStart` command. `build()`
+  returns `AsyncData(null)`; `start({deckId, type = newLearning})` guards
+  re-entrancy, sets `AsyncLoading`, and runs `StartStudySessionUseCase` behind
+  `runMxAction` over `SessionScope.subtree`. Start-eligibility failures
+  (no-eligible-cards, due-caught-up) and a conflicting active session surface as
+  the mapped `AsyncError`; the screen never touches a repository.
+- `deck_detail_screen.dart` — a reusable `_StudyButton` consumer (block MxButton,
+  play icon) placed above **both** content branches (leaf + parent; the empty
+  deck has nothing to study). It `listenMxAction(onSuccess: context.goStudy())`,
+  disables while starting, and renders the mapped failure inline via
+  `MxActionErrors.messageOf`. Wiring: tap → start(deckId) → committed session →
+  `/study`, where the dispatcher resumes it into stage one (Review).
+- Copy: `deckStudyLabel` (en "Study" / vi "Học").
+- Tests: `study_start_notifier_test.dart` (3) — commits a deck-subtree session
+  and lands on data (captures deckId/scope/type); a blocked start surfaces the
+  typed `ValidationFailure`; a second in-flight start is dropped by the guard.
+
+Deferred (documented): the deck Study button starts `newLearning` only — a deck
+with due-but-not-new cards would want `dueReview`, which needs the deck's new/due
+counts loaded on the detail screen (a separate query the screen does not watch
+yet). The **library-wide** start-review for Today's due-CTA stays deferred:
+`StartStudySessionUseCase` is deck-scoped, and a library-wide scope is an owner
+decision (open decision #6). No mode picker (5.6.1): only Guess/Review are built,
+so a single Study CTA is the minimal correct surface.
+
+### ⚑ Full-suite fallout from the 5.7.2 home swap (fixed here)
+The scoped pre-commit never ran the app/core suites, so swapping the home route
+from `HomePlaceholderScreen` to the **async** `TodayScreen` (5.7.2) left ~26
+full-suite failures that only surfaced under the stop-hook's whole-suite run:
+- Stale assertions on the old home widget/title (`HomePlaceholderScreen`,
+  "MemoX Home" / "Trang chủ MemoX") in `app_router_test` (9), `app_bootstrap_test`,
+  `first_run_redirect_test`, `resize_behavior_test` — retargeted to `TodayScreen` /
+  "Today" / "Hôm nay" (`findsWidgets`: the title also labels the nav tab).
+- `pumpAndSettle` on the home now hangs forever on the `MxAsyncBuilder` loading
+  spinner. Fix: pin `todayProjectionProvider` to a resolved `caughtUp` projection
+  in every test that pumps the real app root (buildRoot/MemoxApp/router harness),
+  so home settles deterministically. `app_router_test` had no `ProviderScope` at
+  all (the old placeholder needed none) — wrapped its harness in one.
+- `foundation_golden_test` (10 goldens) snapshots the app root at home →
+  regenerated for the Today caught-up home. `deck_evidence_test` `deck_parent_390`
+  goldens (2) regenerated for the new deck **Study** CTA (~17% legit diff).
+
+Lesson: a home-route swap is a cross-suite change; the scoped test selector hides
+it until a full run. Any test that pumps the real app root must pin the async
+Today projection or it will hang on the loading spinner.
+
 ### ⚑ Environment note
 The pre-commit hook's full flutter-test suite + occasional `sqlite3.dll` locks
 (orphaned flutter_tester processes from timed-out runs) make commits exceed tool

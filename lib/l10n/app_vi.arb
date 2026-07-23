@@ -434,6 +434,7 @@
   "studyFinalizeErrorTitle": "Không thể lưu kết quả",
   "studyFinalizeErrorMessage": "Phiên học đã xong nhưng chưa cập nhật được lịch ôn. Hãy thử lại để phiên này được tính.",
   "studyRetryLabel": "Thử lại",
+  "deckStudyLabel": "Học",
   "todayTitle": "Hôm nay",
   "todayPausedTitle": "Phiên học đang tạm dừng",
   "todayPausedBody": "Câu trả lời đã lưu vẫn được giữ nguyên.",

@@ -3,6 +3,8 @@ import 'package:memox_v6/app/router/app_router.dart';
 import 'package:memox_v6/app/router/router_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/app/bootstrap/app_bootstrap.dart';
+import 'package:memox_v6/domain/today/today_projection.dart';
+import 'package:memox_v6/presentation/features/today/viewmodels/today_projection_provider.dart';
 
 import '../../../support/golden_test_harness.dart';
 
@@ -34,6 +36,14 @@ void main() {
           buildRoot(
             overrides: [
               appRouterInstanceProvider.overrideWithValue(createAppRouter()),
+              // Home is the async Today entry (WBS 5.7.2); pin a resolved
+              // projection so the snapshot is deterministic (no live spinner).
+              todayProjectionProvider.overrideWith(
+                (ref) async => const TodayProjection(
+                  primaryAction: TodayPrimaryAction.caughtUp,
+                  dueCount: 0,
+                ),
+              ),
             ],
           ),
         );

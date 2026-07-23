@@ -7,7 +7,10 @@ import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
+import 'package:memox_v6/presentation/features/study/viewmodels/study_start_notifier.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
+import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
+import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
@@ -139,6 +142,8 @@ class _DeckBranch extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const MxGap.s4(),
+            _StudyButton(deckId: deck.id),
+            const MxGap.s6(),
             _ParentBranch(deck: deck, childDecks: childDecks),
             const MxGap.s6(),
           ],
@@ -151,6 +156,8 @@ class _DeckBranch extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const MxGap.s4(),
+            _StudyButton(deckId: deck.id),
+            const MxGap.s6(),
             _LeafBranch(directCards: directCards),
             const MxGap.s6(),
           ],
@@ -158,6 +165,51 @@ class _DeckBranch extends StatelessWidget {
       );
     }
     return _EmptyBranch(deck: deck);
+  }
+}
+
+/// The deck-scoped Study entry (WBS 5.6.1/2; `study-deck.md`). It commands
+/// [StudyStart] over the deck subtree; start eligibility (no eligible cards, a
+/// due queue already caught up) and a conflicting active session surface as the
+/// inline failure, and a committed session navigates to `/study`, where the
+/// dispatcher resumes it into its first stage. Placed above both content
+/// branches; the empty deck has nothing to study.
+class _StudyButton extends ConsumerWidget {
+  const _StudyButton({required this.deckId});
+
+  final String deckId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final startState = ref.watch(studyStartProvider);
+
+    listenMxAction(ref, studyStartProvider, onSuccess: () => context.goStudy());
+
+    final isStarting = startState is AsyncLoading<void>;
+    final failure = MxActionErrors.failureOf(startState);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        MxButton(
+          label: l10n.deckStudyLabel,
+          icon: Symbols.play_arrow_rounded,
+          block: true,
+          onPressed: isStarting
+              ? null
+              : () =>
+                    ref.read(studyStartProvider.notifier).start(deckId: deckId),
+        ),
+        if (failure != null) ...[
+          const MxGap.s2(),
+          MxText(
+            MxActionErrors.messageOf(failure, l10n),
+            role: MxTextRole.caption,
+          ),
+        ],
+      ],
+    );
   }
 }
 
