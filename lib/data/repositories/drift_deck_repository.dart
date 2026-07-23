@@ -128,6 +128,11 @@ class DriftDeckRepository implements DeckRepository {
   }
 
   @override
+  Future<int> countSubtreeDecks(String deckId) {
+    return _database.deckDao.countSubtreeDecks(deckId).getSingle();
+  }
+
+  @override
   Future<int> countForLanguagePair(String languagePairId) {
     return _database.deckDao
         .countDecksForLanguagePair(languagePairId)

@@ -44,6 +44,10 @@ abstract interface class DeckRepository {
   /// aggregate count in `open-deck.md` §5).
   Future<int> countSubtreeCards(String deckId);
 
+  /// Count of nested decks below [deckId] (all descendants, excluding the deck
+  /// itself) — the delete/reset impact summary (`delete-deck.md` §4).
+  Future<int> countSubtreeDecks(String deckId);
+
   /// Number of decks (any depth) owned by [languagePairId]; the
   /// language-pair removal guard reads this.
   Future<int> countForLanguagePair(String languagePairId);

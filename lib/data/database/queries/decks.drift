@@ -80,3 +80,15 @@ WITH RECURSIVE subtree (id) AS (
 )
 SELECT COUNT(*) AS card_count FROM flashcards
 WHERE deck_id IN (SELECT id FROM subtree) AND deleted_at IS NULL;
+
+-- Nested decks below a deck (all descendants, excluding the deck itself) — the
+-- delete/reset impact summary (delete-deck.md §4). A descendant is any deck
+-- whose parent is somewhere in the subtree.
+countSubtreeDecks:
+WITH RECURSIVE subtree (id) AS (
+  SELECT :deckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+)
+SELECT COUNT(*) AS deck_count FROM decks
+WHERE parent_id IN (SELECT id FROM subtree);
