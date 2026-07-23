@@ -39,6 +39,7 @@ class ParityFixtures {
     'MX-VIS-018',
     'MX-VIS-049',
     'MX-VIS-050',
+    'MX-VIS-051',
   ];
 
   /// Seeds [id] over a reset database.
@@ -69,6 +70,9 @@ class ParityFixtures {
         return;
       case 'MX-VIS-050':
         await _seedActiveReviewSession();
+        return;
+      case 'MX-VIS-051':
+        await _seedActiveGuessSession();
         return;
       case 'MX-VIS-049':
         // The Card Editor journey starts at a true fresh install. The
@@ -207,6 +211,109 @@ class ParityFixtures {
       1,
       1,
       jsonEncode(cards.map((card) => card.$1).toList()),
+      fixedInstantMs,
+    );
+  }
+
+  /// An active newLearning session resumed into Guess, stage 2 (Review → Match →
+  /// Guess), card 1/5 — the kit `guess-mode--waiting` state (WBS 5.6.7). The
+  /// current card is the shot's `학교` / `school`; the pool's four other meanings
+  /// (hospital, park, restaurant, library) are the distractors. The round index
+  /// (67) is chosen so the seeded distractor + option shuffles
+  /// ([GuessQuestionBuilder]) reproduce the kit's exact top-to-bottom option
+  /// order, isolating the visual diff to the known CJK-term cap (the Korean
+  /// prompt has no bundled glyph in the offline harness, same as review-mode) and
+  /// the not-yet-built edit/audio affordances. Seeded as data (session, five card
+  /// snapshots, the round order and the guess-stage checkpoint) so navigating to
+  /// the study route resumes into Guess without a start flow.
+  Future<void> _seedActiveGuessSession() async {
+    await _seedActivePair();
+    await _database.deckDao.insertDeck(
+      'fx-gs-deck',
+      'fx-lp-1',
+      null,
+      'Places',
+      'places',
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+
+    // Card 0 is the guessed card; its meaning is the correct choice. The other
+    // four supply the distractor meanings shown as options. Distractor terms are
+    // never rendered in the Guess prompt, so their script is immaterial.
+    const cards = <(String, String, String)>[
+      ('fx-gs-c0', '학교', 'school'),
+      ('fx-gs-c1', '병원', 'hospital'),
+      ('fx-gs-c2', '공원', 'park'),
+      ('fx-gs-c3', '식당', 'restaurant'),
+      ('fx-gs-c4', '도서관', 'library'),
+    ];
+    for (final (id, term, meaning) in cards) {
+      await _database.flashcardDao.insertFlashcard(
+        id,
+        'fx-gs-deck',
+        term,
+        term,
+        meaning,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+      await _database.learningProgressDao.insertProgress(
+        'p-$id',
+        id,
+        0,
+        null,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+    }
+
+    await _database.studySessionDao.insertSession(
+      'fx-gs-session',
+      'newLearning',
+      'fx-gs-deck',
+      'subtree',
+      'active',
+      1,
+      fixedInstantMs,
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+    for (var i = 0; i < cards.length; i++) {
+      final (id, term, meaning) = cards[i];
+      await _database.sessionSnapshotDao.insertSessionCard(
+        'sc-$id',
+        'fx-gs-session',
+        id,
+        i,
+        term,
+        meaning,
+        1,
+        0,
+        0,
+        fixedInstantMs,
+      );
+    }
+    // The guess round carries round index 67 (see the doc comment): the checkpoint
+    // and its round order share it so the loader resolves this order for stage 2.
+    const guessRoundIndex = 67;
+    await _database.sessionSnapshotDao.insertRoundOrder(
+      'fx-gs-order',
+      'fx-gs-session',
+      guessRoundIndex,
+      1,
+      jsonEncode(cards.map((card) => card.$1).toList()),
+      fixedInstantMs,
+    );
+    await _database.sessionCheckpointDao.upsertCheckpoint(
+      'fx-gs-checkpoint',
+      'fx-gs-session',
+      2,
+      guessRoundIndex,
+      0,
+      '[]',
+      '{}',
+      1,
       fixedInstantMs,
     );
   }

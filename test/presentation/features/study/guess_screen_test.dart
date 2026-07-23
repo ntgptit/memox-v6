@@ -24,14 +24,16 @@ void main() {
   // A tall surface so the lazily-built option list renders every card
   // (five options + the prompt) without scrolling.
   setUp(() {
-    final view = TestWidgetsFlutterBinding.ensureInitialized().platformDispatcher
+    final view = TestWidgetsFlutterBinding.ensureInitialized()
+        .platformDispatcher
         .views
         .first;
     view.physicalSize = const Size(1200, 2400);
     view.devicePixelRatio = 1.0;
   });
   tearDown(() {
-    final view = TestWidgetsFlutterBinding.ensureInitialized().platformDispatcher
+    final view = TestWidgetsFlutterBinding.ensureInitialized()
+        .platformDispatcher
         .views
         .first;
     view.resetPhysicalSize();
@@ -110,13 +112,20 @@ void main() {
     // The correct meaning plus four distractors are all shown.
     expect(find.text('school'), findsOneWidget);
     // Exactly five option cards' worth of meanings render.
-    final shown = <String>['school', 'hospital', 'park', 'restaurant', 'library', 'market']
-        .where((m) => tester.any(find.text(m)))
-        .length;
+    final shown = <String>[
+      'school',
+      'hospital',
+      'park',
+      'restaurant',
+      'library',
+      'market',
+    ].where((m) => tester.any(find.text(m))).length;
     expect(shown, 5);
   });
 
-  testWidgets('selecting an option reveals the Continue action', (tester) async {
+  testWidgets('selecting an option reveals the Continue action', (
+    tester,
+  ) async {
     await tester.pumpWidget(wrap(runtime(cardCount: 6)));
     await tester.pumpAndSettle();
 
@@ -126,14 +135,15 @@ void main() {
     expect(find.widgetWithText(MxButton, 'Continue'), findsOneWidget);
   });
 
-  testWidgets('a pool without five distinct meanings shows a recovery message', (
-    tester,
-  ) async {
-    await tester.pumpWidget(wrap(runtime(cardCount: 3)));
-    await tester.pumpAndSettle();
-    expect(
-      find.text('Not enough distinct options to guess this card.'),
-      findsOneWidget,
-    );
-  });
+  testWidgets(
+    'a pool without five distinct meanings shows a recovery message',
+    (tester) async {
+      await tester.pumpWidget(wrap(runtime(cardCount: 3)));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Not enough distinct options to guess this card.'),
+        findsOneWidget,
+      );
+    },
+  );
 }

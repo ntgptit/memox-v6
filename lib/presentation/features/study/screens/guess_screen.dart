@@ -64,7 +64,9 @@ class _GuessView extends ConsumerWidget {
               meaning: current.meaning,
             ),
             pool: runtime.cardsById.values
-                .map((c) => GuessCandidate(cardId: c.cardId, meaning: c.meaning))
+                .map(
+                  (c) => GuessCandidate(cardId: c.cardId, meaning: c.meaning),
+                )
                 .toList(),
           );
         } on ValidationFailure {
@@ -120,10 +122,9 @@ class _GuessStage extends ConsumerWidget {
               selected: selected,
               correctChoiceId: question.correctChoiceId,
               onTap: selected == null
-                  ? () =>
-                        ref.read(guessSelectionProvider.notifier).select(
-                          option.choiceId,
-                        )
+                  ? () => ref
+                        .read(guessSelectionProvider.notifier)
+                        .select(option.choiceId)
                   : null,
             ),
             const MxGap.s3(),
