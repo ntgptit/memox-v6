@@ -560,3 +560,38 @@ shot-vs-token artifact (like the progress-bar thickness), document and leave it.
 **Next package proposes exactly that investigation before building Fill**, so Fill
 isn't built on the same misalignment. CJK term tofu remains the separate
 owner-pending cap for dark.
+
+## StudyShell header alignment — FIXED, owner-decision #2 resolved (e83fa44)
+
+The systemic ~40px vertical offset that capped study-screen light parity was a
+**real missing spacing**, grounded in the kit source (not a shot artifact):
+`components.css` `.app__body` applies `padding: space-4 [top] gutter [sides]
+calc(nav+space-6) [bottom]` and `gap: space-6` between children — but Flutter's
+`MxContentShell` supplies only the horizontal gutter (`EdgeInsets.symmetric(
+horizontal: gutter)`), so every study screen rendered ~16px (space-4) too high
+with a space-5 inter-row gap instead of space-6. The kit `ProgressHeader`
+(`kit-helpers.jsx`) also renders `ProgressBar height={8}` vs Flutter `MxProgress`'s
+4px — a separate, smaller shared-component question left as-is (contract says 4px).
+
+**Fix (scoped to StudyShell, token-sourced):** a space-4 top gap before the
+progress row and space-6 inter-child gaps.
+
+**Re-measured (parity harness):**
+| Screen | id | light | dark |
+| --- | --- | --- | --- |
+| Review | MX-VIS-050 | 2.94 → **2.67 PASS** | 4.04 → 3.64 |
+| Guess  | MX-VIS-051 | 3.42 → **1.69 PASS** | 5.28 → **2.05 PASS** |
+| Recall | MX-VIS-052 | 5.35 → 5.25 | 6.59 → 6.62 |
+
+**Guess now passes BOTH themes** — the offset had been amplifying the CJK-term
+diff; once aligned, even Guess-dark (Korean `학교` prompt) clears 3%. Review
+improved and still passes light. **Recall barely moved** — its residual is
+Recall-specific, not the shell: the kit `recall-mode` (RecallMode.jsx) shows a
+right-aligned `Time: 00:20` MxBadge between the progress and the prompt (my screen
+puts the countdown in the Show button per the business spec instead), plus a
+meaning-weight difference and a `Continue` timeout button. Those are a Recall
+fidelity follow-up. Non-study screens untouched (they don't use StudyShell).
+
+**Net:** owner-decision #2 is resolved (fixed, not deferred). Remaining study-parity
+caps are (a) the CJK term for review-dark + recall (owner-decision #1, font), and
+(b) Recall's own mode-specific fidelity gap. Guess is fully clean.
