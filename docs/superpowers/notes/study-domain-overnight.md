@@ -471,3 +471,53 @@ than the app renders, or the app is missing a header top-gap token. A shared
 StudyShell header-spacing review would improve parity across all modes at once;
 left as a follow-up (not guessed at tonight). Light-parity stays the bar once the
 CJK font decision lands. Moving on per the near-miss rule.
+
+## 5.6.6 Match screen — BLOCKED (backend gap, recorded; not guess-built)
+
+**Backend audit (as instructed, before building):** read `MatchStudyModeStrategy`
+(SM-MATCH-v1), `docs/business/study-mode/match-terms-and-meanings.md`,
+`docs/decision-tables/match-outcomes.md`, `answer-study-stage.md` §2–3, the
+`AnswerStudyStageUseCase`, `SessionAdvancePolicy`, `SessionCheckpoint`,
+`StudyRuntimeState`, and the kit `match-mode--*` shots.
+
+**Finding — the Match *board* runtime does not exist.** Match is specified as a
+**board**: all pairs of the round visible at once; the learner pairs a term tile
+with a meaning tile in **any order**; a correct pair locks and leaves the board;
+`wrong`/`almost` add the term-owner card to the round's failed set and stay on the
+board; the round completes only when the board is empty, then advances to the next
+round (failed pairs only) or to Guess. The acceptance criteria require **Resume to
+restore round index, board order, remaining pairs, tile order, selection and the
+failed set** (checkpoint-persisted).
+
+The built backend (5.6.3) is a strictly **sequential one-card-at-a-time** model:
+`StudyRuntimeState.currentCard = roundCardIds[cardPosition]` (a single current
+card), `SessionAdvancePolicy` walks a linear `cardPosition` cursor and accrues a
+failed set, and `AnswerStudyStageUseCase` attributes each attempt to
+`currentCardId` and advances the cursor by one per answer. This fits Review /
+Guess / Recall / Fill (one prompt at a time) but **cannot represent a free-order
+board**: there is no "current" card on a board, per-pair resolution in arbitrary
+order would misattribute attempts and mis-advance the cursor, and there is **no
+board builder, no board-state fields, and no board-state table**. `timerStateJson`
+(the checkpoint's opaque payload) is currently always `'{}'`.
+
+**Why not guess-built:** the per-pair *outcome* rules are pinned (SM-MATCH-v1), but
+the **board→session integration** (how a free-order board maps onto the advance /
+checkpoint) and the **board-state persistence schema** (remaining pairs + tile
+order + selection + event summary — presumably into `timerStateJson`, but the shape
+is undefined) are **design decisions not derivable from the docs**, and they extend
+shared, committed session infra that Review/Guess rely on. Building them by
+guessing would violate "never invent session/SRS semantics" and risks regressing
+shipped modes. This is the loop's "needs an owner/design decision not derivable
+from docs" condition — recorded as a blocker rather than guessed.
+
+**OWNER DECISION NEEDED (recorded, non-blocking to the rest of the loop):** how
+should the board (and, relatedly, Recall's durable timer) session-state live?
+Options: (a) a mode-specific runtime-state payload serialized into the existing
+`timerStateJson` opaque column, with a Match-aware advance path; (b) a dedicated
+board-state table + a `MatchBoard` builder/runtime; (c) generalize
+`StudyRuntimeState`/`SessionAdvancePolicy` to a "resolvable-item-set" model that
+subsumes both sequential and board stages. Each is an architecture choice, not a
+spec detail. **Match UI (5.6.6) is deferred until this lands.**
+
+**Loop continues** to the next mode whose backend the sequential runtime already
+supports (audit-first), leaving Match cleanly flagged — not silently skipped.
