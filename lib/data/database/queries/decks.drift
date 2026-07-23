@@ -130,6 +130,42 @@ WHERE d.language_pair_id = :languagePairId
   )
 ORDER BY d.normalized_name, d.id;
 
+-- Library search read-model (WBS 10.1; search-library-content.md,
+-- search-rank-v1). Ranks card-term and deck-name matches across the pair by
+-- the absolute tier order exact(0) → prefix(1) → contained(2), then the field
+-- priority Card.term(0) → Deck.name(1), then a stable normalized/id tie-break.
+-- Hidden/deleted cards are excluded before ranking. Card term and deck name are
+-- normalized differently, so the caller passes each its own normalized query.
+-- Meaning/translation matching needs normalized storage those columns lack —
+-- a recorded follow-up.
+searchLibraryContent:
+SELECT f.id AS id, 'card' AS result_type, f.term AS display_text,
+  f.deck_id AS deck_id,
+  CASE
+    WHEN f.normalized_term = :cardQuery THEN 0
+    WHEN f.normalized_term LIKE :cardQuery || '%' THEN 1
+    ELSE 2
+  END AS tier,
+  0 AS field_priority, f.normalized_term AS sort_key
+FROM flashcards f
+INNER JOIN decks fd ON fd.id = f.deck_id
+WHERE fd.language_pair_id = :languagePairId
+  AND f.deleted_at IS NULL AND f.is_hidden = 0
+  AND f.normalized_term LIKE '%' || :cardQuery || '%'
+UNION ALL
+SELECT d.id AS id, 'deck' AS result_type, d.name AS display_text,
+  d.id AS deck_id,
+  CASE
+    WHEN d.normalized_name = :deckQuery THEN 0
+    WHEN d.normalized_name LIKE :deckQuery || '%' THEN 1
+    ELSE 2
+  END AS tier,
+  1 AS field_priority, d.normalized_name AS sort_key
+FROM decks d
+WHERE d.language_pair_id = :languagePairId
+  AND d.normalized_name LIKE '%' || :deckQuery || '%'
+ORDER BY tier, field_priority, sort_key, id;
+
 -- Valid move targets for a card (WBS 6.5 move-flashcard). Every deck in the
 -- pair that can hold cards — Empty or Leaf, i.e. it has no child decks (a deck
 -- with children is a Parent and 4.3 exclusivity forbids it owning cards) —
