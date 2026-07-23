@@ -22,7 +22,8 @@ class RecallTimerState {
 
   /// Active interaction time elapsed so far, in milliseconds.
   int get elapsedActiveMs =>
-      (kRecallTimeoutSeconds - remainingSeconds) * Duration.millisecondsPerSecond;
+      (kRecallTimeoutSeconds - remainingSeconds) *
+      Duration.millisecondsPerSecond;
 }
 
 /// Owns the Recall countdown for a single card (WBS 5.6.8). A Riverpod notifier

@@ -67,6 +67,10 @@ class StudyShell extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          // Kit `.app__body`: space-4 top padding above the first child and a
+          // space-6 gap between children (MxContentShell only supplies the
+          // horizontal gutter). Sourced from tokens, not measured pixels.
+          const MxGap.s4(),
           Row(
             children: <Widget>[
               Expanded(
@@ -83,9 +87,9 @@ class StudyShell extends StatelessWidget {
               ),
             ],
           ),
-          const MxGap.s5(),
+          const MxGap.s6(),
           Expanded(child: body),
-          if (bottomBar != null) ...<Widget>[const MxGap.s4(), bottomBar],
+          if (bottomBar != null) ...<Widget>[const MxGap.s6(), bottomBar],
         ],
       ),
     );

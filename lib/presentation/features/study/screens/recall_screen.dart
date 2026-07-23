@@ -78,13 +78,17 @@ class _RecallStage extends ConsumerWidget {
 
     // The deadline commits exactly one canonical wrong(timeout): the transition
     // guard fires the answer once, when counting first crosses into timedOut.
-    ref.listen<RecallTimerState>(recallTimerProvider(card.cardId), (prev, next) {
+    ref.listen<RecallTimerState>(recallTimerProvider(card.cardId), (
+      prev,
+      next,
+    ) {
       if (prev?.phase != RecallPhase.timedOut &&
           next.phase == RecallPhase.timedOut) {
         _commit(
           ref,
           RecallResolution.timeout,
-          elapsedActiveMs: kRecallTimeoutSeconds * Duration.millisecondsPerSecond,
+          elapsedActiveMs:
+              kRecallTimeoutSeconds * Duration.millisecondsPerSecond,
         );
       }
     });
@@ -102,9 +106,7 @@ class _RecallStage extends ConsumerWidget {
         children: <Widget>[
           Expanded(
             child: MxCard(
-              child: Center(
-                child: MxText(card.term, role: MxTextRole.display),
-              ),
+              child: Center(child: MxText(card.term, role: MxTextRole.display)),
             ),
           ),
           const MxGap.s5(),
@@ -241,7 +243,10 @@ class _RevealedAnswer extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              MxIcon(icon: Symbols.timer_off_rounded, color: context.colors.error),
+              MxIcon(
+                icon: Symbols.timer_off_rounded,
+                color: context.colors.error,
+              ),
               const MxGap.s2(),
               MxText(
                 AppLocalizations.of(context).recallTimeoutFeedback,

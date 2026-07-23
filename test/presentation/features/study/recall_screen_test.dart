@@ -23,14 +23,16 @@ void main() {
   final now = DateTime.utc(2026, 7, 23, 18);
 
   setUp(() {
-    final view = TestWidgetsFlutterBinding.ensureInitialized().platformDispatcher
+    final view = TestWidgetsFlutterBinding.ensureInitialized()
+        .platformDispatcher
         .views
         .first;
     view.physicalSize = const Size(1200, 2200);
     view.devicePixelRatio = 1.0;
   });
   tearDown(() {
-    final view = TestWidgetsFlutterBinding.ensureInitialized().platformDispatcher
+    final view = TestWidgetsFlutterBinding.ensureInitialized()
+        .platformDispatcher
         .views
         .first;
     view.resetPhysicalSize();
@@ -77,7 +79,9 @@ void main() {
 
   Widget wrap() => ProviderScope(
     overrides: [
-      studySessionRuntimeProvider.overrideWith((ref) => Future.value(runtime())),
+      studySessionRuntimeProvider.overrideWith(
+        (ref) => Future.value(runtime()),
+      ),
       studyAnswerViewmodelProvider.overrideWith(_SpyAnswer.new),
     ],
     child: MaterialApp(
