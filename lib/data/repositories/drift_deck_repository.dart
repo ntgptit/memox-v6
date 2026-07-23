@@ -77,6 +77,34 @@ class DriftDeckRepository implements DeckRepository {
   }
 
   @override
+  Future<List<domain.Deck>> ancestors(String deckId) async {
+    final rows = await _database.deckDao.deckAncestors(deckId).get();
+    return rows.map((row) => row.toDomain()).toList();
+  }
+
+  @override
+  Future<List<domain.Deck>> moveDestinations(
+    String languagePairId, {
+    required String movingDeckId,
+  }) async {
+    final rows = await _database.deckDao
+        .moveDestinationDecks(movingDeckId, languagePairId)
+        .get();
+    return rows.map((row) => row.toDomain()).toList();
+  }
+
+  @override
+  Future<List<domain.Deck>> cardMoveTargets(
+    String languagePairId, {
+    required String excludeDeckId,
+  }) async {
+    final rows = await _database.deckDao
+        .cardMoveDestinationDecks(languagePairId, excludeDeckId)
+        .get();
+    return rows.map((row) => row.toDomain()).toList();
+  }
+
+  @override
   Future<void> rename(
     String deckId, {
     required String name,
@@ -125,6 +153,11 @@ class DriftDeckRepository implements DeckRepository {
   @override
   Future<int> countSubtreeCards(String deckId) {
     return _database.deckDao.countSubtreeCards(deckId).getSingle();
+  }
+
+  @override
+  Future<int> countSubtreeDecks(String deckId) {
+    return _database.deckDao.countSubtreeDecks(deckId).getSingle();
   }
 
   @override

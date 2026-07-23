@@ -80,3 +80,110 @@ WITH RECURSIVE subtree (id) AS (
 )
 SELECT COUNT(*) AS card_count FROM flashcards
 WHERE deck_id IN (SELECT id FROM subtree) AND deleted_at IS NULL;
+
+-- Nested decks below a deck (all descendants, excluding the deck itself) — the
+-- delete/reset impact summary (delete-deck.md §4). A descendant is any deck
+-- whose parent is somewhere in the subtree.
+countSubtreeDecks:
+WITH RECURSIVE subtree (id) AS (
+  SELECT :deckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+)
+SELECT COUNT(*) AS deck_count FROM decks
+WHERE parent_id IN (SELECT id FROM subtree);
+
+-- The ancestor chain of a deck (root → … → the deck itself) — the breadcrumb
+-- path (WBS 6.2). `depth` counts up from the deck to the root, so ORDER BY
+-- depth DESC yields the root first and the deck itself last.
+deckAncestors:
+WITH RECURSIVE chain (id, language_pair_id, parent_id, name, normalized_name,
+  description, created_at, updated_at, depth) AS (
+  SELECT id, language_pair_id, parent_id, name, normalized_name, description,
+    created_at, updated_at, 0 FROM decks WHERE id = :deckId
+  UNION ALL
+  SELECT d.id, d.language_pair_id, d.parent_id, d.name, d.normalized_name,
+    d.description, d.created_at, d.updated_at, chain.depth + 1
+  FROM decks d INNER JOIN chain ON d.id = chain.parent_id
+)
+SELECT id, language_pair_id, parent_id, name, normalized_name, description,
+  created_at, updated_at FROM chain ORDER BY depth DESC;
+
+-- Valid move destinations for :movingDeckId (WBS 6.2 reparent). Every deck in
+-- the pair that is NOT inside the moving deck's own subtree (moving into a
+-- descendant would cycle), holds no direct active cards (deck exclusivity 4.3
+-- forbids a deck owning both cards and child decks), and is not the deck's
+-- current parent (a no-op move). Ordered by name for the picker.
+moveDestinationDecks:
+WITH RECURSIVE subtree (id) AS (
+  SELECT :movingDeckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+)
+SELECT d.* FROM decks d
+WHERE d.language_pair_id = :languagePairId
+  AND d.id NOT IN (SELECT id FROM subtree)
+  AND d.id IS NOT (SELECT parent_id FROM decks WHERE id = :movingDeckId)
+  AND NOT EXISTS (
+    SELECT 1 FROM flashcards f
+    WHERE f.deck_id = d.id AND f.deleted_at IS NULL
+  )
+ORDER BY d.normalized_name, d.id;
+
+-- Library search read-model (WBS 10.1; search-library-content.md,
+-- search-rank-v1). Ranks card-term and deck-name matches across the pair by
+-- the absolute tier order exact(0) → prefix(1) → contained(2), then the field
+-- priority Card.term(0) → Deck.name(1), then a stable normalized/id tie-break.
+-- Hidden/deleted cards are excluded before ranking. Card term and deck name are
+-- normalized differently, so the caller passes each its own normalized query.
+-- Meaning/translation matching needs normalized storage those columns lack —
+-- a recorded follow-up.
+searchLibraryContent:
+SELECT f.id AS id, 'card' AS result_type, f.term AS display_text,
+  f.deck_id AS deck_id,
+  CASE
+    WHEN f.normalized_term = :cardQuery THEN 0
+    WHEN f.normalized_term LIKE :cardQuery || '%' THEN 1
+    ELSE 2
+  END AS tier,
+  0 AS field_priority, f.normalized_term AS sort_key
+FROM flashcards f
+INNER JOIN decks fd ON fd.id = f.deck_id
+WHERE fd.language_pair_id = :languagePairId
+  AND f.deleted_at IS NULL AND f.is_hidden = 0
+  AND f.normalized_term LIKE '%' || :cardQuery || '%'
+UNION ALL
+SELECT d.id AS id, 'deck' AS result_type, d.name AS display_text,
+  d.id AS deck_id,
+  CASE
+    WHEN d.normalized_name = :deckQuery THEN 0
+    WHEN d.normalized_name LIKE :deckQuery || '%' THEN 1
+    ELSE 2
+  END AS tier,
+  1 AS field_priority, d.normalized_name AS sort_key
+FROM decks d
+WHERE d.language_pair_id = :languagePairId
+  AND d.normalized_name LIKE '%' || :deckQuery || '%'
+ORDER BY tier, field_priority, sort_key, id;
+
+-- Valid move targets for a card (WBS 6.5 move-flashcard). Every deck in the
+-- pair that can hold cards — Empty or Leaf, i.e. it has no child decks (a deck
+-- with children is a Parent and 4.3 exclusivity forbids it owning cards) —
+-- excluding the card's current deck. Ordered by name for the picker.
+cardMoveDestinationDecks:
+SELECT d.* FROM decks d
+WHERE d.language_pair_id = :languagePairId
+  AND d.id != :sourceDeckId
+  AND NOT EXISTS (SELECT 1 FROM decks child WHERE child.parent_id = d.id)
+ORDER BY d.normalized_name, d.id;
+
+-- The active card ids in a deck's whole subtree — the reset-progress scope
+-- (reset-deck-progress.md); Leaf = direct cards, Parent = descendant cards.
+subtreeCardIds:
+WITH RECURSIVE subtree (id) AS (
+  SELECT :deckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+)
+SELECT id FROM flashcards
+WHERE deck_id IN (SELECT id FROM subtree) AND deleted_at IS NULL;

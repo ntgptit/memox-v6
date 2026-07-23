@@ -1,12 +1,17 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/app/router/app_router.dart';
 import 'package:memox_v6/app/router/router_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/app/bootstrap/app_bootstrap.dart';
-import 'package:memox_v6/app/router/route_placeholder.dart';
+import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/core/theme/responsive/app_adaptive_values.dart';
 import 'package:memox_v6/core/theme/responsive/app_breakpoints.dart';
 import 'package:memox_v6/core/theme/tokens/app_sizes.dart';
+import 'package:memox_v6/domain/today/today_projection.dart';
+import 'package:memox_v6/presentation/features/today/screens/today_screen.dart';
+import 'package:memox_v6/presentation/features/today/viewmodels/today_projection_provider.dart';
 
 void main() {
   test('pane rule follows the width contract per class', () {
@@ -51,12 +56,25 @@ void main() {
     await tester.pumpWidget(
       buildRoot(
         overrides: [
+          // The root reads the appearance preference (WBS 8.1); give it an
+          // in-memory DB so it doesn't open the real one under test.
+          appDatabaseProvider.overrideWithValue(
+            db.AppDatabase.forTesting(NativeDatabase.memory()),
+          ),
           appRouterInstanceProvider.overrideWithValue(createAppRouter()),
+          // Home is the async Today entry (WBS 5.7.2); pin a resolved
+          // projection so it anchors a stable widget across resizes.
+          todayProjectionProvider.overrideWith(
+            (ref) async => const TodayProjection(
+              primaryAction: TodayPrimaryAction.caughtUp,
+              dueCount: 0,
+            ),
+          ),
         ],
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.byType(HomePlaceholderScreen), findsOneWidget);
+    expect(find.byType(TodayScreen), findsOneWidget);
 
     for (final size in const <Size>[
       Size(320, 780),
@@ -69,7 +87,7 @@ void main() {
       tester.view.physicalSize = size;
       await tester.pumpAndSettle();
 
-      final context = tester.element(find.byType(HomePlaceholderScreen));
+      final context = tester.element(find.byType(TodayScreen));
       expect(tester.takeException(), isNull);
       expect(
         context.screenClass,
@@ -77,7 +95,7 @@ void main() {
         reason: 'width ${size.width}',
       );
       // Route/state survives the class transition.
-      expect(find.byType(HomePlaceholderScreen), findsOneWidget);
+      expect(find.byType(TodayScreen), findsOneWidget);
     }
   });
 

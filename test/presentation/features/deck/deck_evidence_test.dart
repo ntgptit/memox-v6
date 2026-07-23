@@ -284,6 +284,44 @@ void main() {
 
         await disposeAndFlushStreams(tester);
       });
+
+      // WBS 6.2 — a nested deck renders the breadcrumb header above its
+      // content (kit `subdeck-list--loaded`); a root deck (deck_parent) shows
+      // none, so this shot is the breadcrumb's parity fixture.
+      testWidgets('deck nested 390 ${brightness.name}', (tester) async {
+        tester.view.devicePixelRatio = 1.0;
+        tester.view.physicalSize = const Size(390, 780);
+        addTearDown(tester.view.reset);
+        await seedLibrary();
+        await database.deckDao.insertDeck(
+          'asia',
+          'lp1',
+          'root',
+          'Asia',
+          'asia',
+          0,
+          0,
+        );
+        await database.deckDao.insertDeck(
+          'japan',
+          'lp1',
+          'asia',
+          'Japan',
+          'japan',
+          0,
+          0,
+        );
+
+        await tester.pumpWidget(app(RoutePaths.deckDetail('asia'), brightness));
+        await pumpStreams(tester);
+
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('goldens/deck_nested_390_${brightness.name}.png'),
+        );
+
+        await disposeAndFlushStreams(tester);
+      });
     }
   });
 }

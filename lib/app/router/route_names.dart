@@ -9,4 +9,7 @@ abstract final class RouteNames {
   static const String profile = 'profile';
   static const String deckDetail = 'deckDetail';
   static const String newCard = 'newCard';
+  static const String editCard = 'editCard';
+  static const String study = 'study';
+  static const String search = 'search';
 }

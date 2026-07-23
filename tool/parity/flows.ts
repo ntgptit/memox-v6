@@ -48,8 +48,11 @@ export async function deepLinkEntry(
     'deepLinkEntry requires a written justification (WBS §6.6)',
   ).toBeGreaterThan(20);
   await blockNetworkEgress(page);
+  // The fixture must sit in the root query so parity_main
+  // (`Uri.base.queryParameters`) reads it; the hash carries the deep-link
+  // route for the go_router hash strategy.
   await page.goto(
-    `/#${entry.route}?fixture=${encodeURIComponent(entry.fixture)}`,
+    `/?fixture=${encodeURIComponent(entry.fixture)}#${entry.route}`,
   );
   await enableFlutterAccessibility(page);
   await settle(page);

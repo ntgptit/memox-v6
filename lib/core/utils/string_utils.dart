@@ -21,4 +21,17 @@ abstract final class StringUtils {
   /// through lowercase; full Unicode case folding can replace this
   /// without changing call sites.
   static String caseFolded(String value) => value.toLowerCase();
+
+  /// Collapse every run of (Unicode) whitespace to a single ASCII space and
+  /// trim the outer edges. `\s` follows ECMAScript semantics here, so Unicode
+  /// space separators collapse too.
+  static String collapsedWhitespace(String value) =>
+      value.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+  /// The shared v1 answer/meaning comparison key used by Match, Guess and Fill:
+  /// NFC → case fold → trim + collapse internal whitespace. It keeps
+  /// diacritics, punctuation and word order (no transliteration, stemming or
+  /// fuzzy matching), so a normalized exact-compare is the only match.
+  static String comparisonKey(String value) =>
+      collapsedWhitespace(caseFolded(nfc(value)));
 }

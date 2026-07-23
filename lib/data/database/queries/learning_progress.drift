@@ -13,6 +13,43 @@ INSERT INTO learning_progress (
   :id, :cardId, :box, :dueAt, :createdAt, :updatedAt
 );
 
+-- Idempotent New-state initialise (5.4.1): Box 0, no due date, policy v1
+-- (schema default). `OR IGNORE` makes a duplicate initialise a no-op on the
+-- card_id UNIQUE constraint; a missing card still raises the FK error so no
+-- orphan progress is ever created.
+initialiseCardProgress:
+INSERT OR IGNORE INTO learning_progress (
+  id, card_id, box, due_at, created_at, updated_at
+) VALUES (
+  :id, :cardId, 0, NULL, :createdAt, :updatedAt
+);
+
+-- Due + New study candidates in a deck scope (5.4.2, surface-due-cards.md §4):
+-- the recursive subtree of :scopeDeckId, each eligible card classified once.
+-- New = Box 0 & no due date; Due = Box 1..7 & due_at <= now (equal is due).
+-- Box 8 (mastered) and hidden/deleted cards are excluded. Read-only, no
+-- double-count (one progress row per card, one subtree membership). :nowUtc
+-- binds as text so it is CAST back to the integer epoch it is compared to.
+studyCandidatesInScope:
+WITH RECURSIVE subtree(id) AS (
+  SELECT id FROM decks WHERE id = :scopeDeckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree ON d.parent_id = subtree.id
+)
+SELECT f.id AS card_id,
+  (learning_progress.box = 0 AND learning_progress.due_at IS NULL) AS is_new
+FROM flashcards f
+INNER JOIN subtree ON subtree.id = f.deck_id
+INNER JOIN learning_progress ON learning_progress.card_id = f.id
+WHERE f.deleted_at IS NULL AND f.is_hidden = 0
+  AND (
+    (learning_progress.box = 0 AND learning_progress.due_at IS NULL)
+    OR (learning_progress.box >= 1 AND learning_progress.box <= 7
+        AND learning_progress.due_at IS NOT NULL
+        AND learning_progress.due_at <= CAST(:nowUtc AS INTEGER))
+  )
+ORDER BY learning_progress.due_at, f.id;
+
 findProgressByCard:
 SELECT * FROM learning_progress WHERE card_id = :cardId;
 

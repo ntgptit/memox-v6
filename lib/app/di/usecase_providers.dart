@@ -1,6 +1,20 @@
+import 'package:memox_v6/domain/usecases/learning_progress/apply_terminal_outcome_usecase.dart';
+import 'package:memox_v6/domain/usecases/learning_progress/load_study_candidates_usecase.dart';
+import 'package:memox_v6/app/di/study_mode_providers.dart';
+import 'package:memox_v6/domain/usecases/study_session/answer_study_stage_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_session/finalize_study_session_usecase.dart';
+import 'package:memox_v6/domain/usecases/today/load_today_projection_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_session/start_study_session_usecase.dart';
+import 'package:memox_v6/domain/usecases/learning_progress/initialise_card_progress_usecase.dart';
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/delete_deck_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/load_deck_deletion_impact_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/move_deck_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/rename_deck_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/reset_deck_progress_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/open_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/watch_library_usecase.dart';
 import 'package:memox_v6/domain/usecases/flashcard/create_flashcard_usecase.dart';
@@ -13,6 +27,11 @@ import 'package:memox_v6/domain/usecases/flashcard/manage_card_tags_usecase.dart
 import 'package:memox_v6/domain/usecases/flashcard/manage_card_translations_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/create_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/onboarding/dismiss_first_run_usecase.dart';
+import 'package:memox_v6/domain/usecases/preferences/restore_default_preferences_usecase.dart';
+import 'package:memox_v6/domain/usecases/search/recent_searches_usecase.dart';
+import 'package:memox_v6/domain/usecases/search/search_library_usecase.dart';
+import 'package:memox_v6/domain/usecases/preferences/set_appearance_preference_usecase.dart';
+import 'package:memox_v6/domain/usecases/preferences/set_mode_preferences_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/remove_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -42,6 +61,42 @@ SelectLanguagePairUseCase selectLanguagePairUseCase(Ref ref) {
 }
 
 @riverpod
+SetAppearancePreferenceUseCase setAppearancePreferenceUseCase(Ref ref) {
+  return SetAppearancePreferenceUseCase(
+    preferences: ref.watch(preferenceRepositoryProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+SetModePreferencesUseCase setModePreferencesUseCase(Ref ref) {
+  return SetModePreferencesUseCase(
+    preferences: ref.watch(preferenceRepositoryProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+RestoreDefaultPreferencesUseCase restoreDefaultPreferencesUseCase(Ref ref) {
+  return RestoreDefaultPreferencesUseCase(
+    preferences: ref.watch(preferenceRepositoryProvider),
+  );
+}
+
+@riverpod
+SearchLibraryUseCase searchLibraryUseCase(Ref ref) {
+  return SearchLibraryUseCase(search: ref.watch(searchRepositoryProvider));
+}
+
+@riverpod
+RecentSearchesUseCase recentSearchesUseCase(Ref ref) {
+  return RecentSearchesUseCase(
+    preferences: ref.watch(preferenceRepositoryProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
 RemoveLanguagePairUseCase removeLanguagePairUseCase(Ref ref) {
   return RemoveLanguagePairUseCase(
     pairs: ref.watch(languagePairRepositoryProvider),
@@ -56,6 +111,43 @@ CreateDeckUseCase createDeckUseCase(Ref ref) {
     decks: ref.watch(deckRepositoryProvider),
     pairs: ref.watch(languagePairRepositoryProvider),
     idGenerator: ref.watch(idGeneratorProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+RenameDeckUseCase renameDeckUseCase(Ref ref) {
+  return RenameDeckUseCase(
+    decks: ref.watch(deckRepositoryProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+DeleteDeckUseCase deleteDeckUseCase(Ref ref) {
+  return DeleteDeckUseCase(decks: ref.watch(deckRepositoryProvider));
+}
+
+@riverpod
+LoadDeckDeletionImpactUseCase loadDeckDeletionImpactUseCase(Ref ref) {
+  return LoadDeckDeletionImpactUseCase(
+    decks: ref.watch(deckRepositoryProvider),
+  );
+}
+
+@riverpod
+ResetDeckProgressUseCase resetDeckProgressUseCase(Ref ref) {
+  return ResetDeckProgressUseCase(
+    progress: ref.watch(learningProgressRepositoryProvider),
+    idGenerator: ref.watch(idGeneratorProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+MoveDeckUseCase moveDeckUseCase(Ref ref) {
+  return MoveDeckUseCase(
+    decks: ref.watch(deckRepositoryProvider),
     clock: ref.watch(appClockProvider),
   );
 }
@@ -143,5 +235,78 @@ MoveFlashcardUseCase moveFlashcardUseCase(Ref ref) {
     cards: ref.watch(flashcardRepositoryProvider),
     decks: ref.watch(deckRepositoryProvider),
     clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+InitialiseCardProgressUseCase initialiseCardProgressUseCase(Ref ref) {
+  return InitialiseCardProgressUseCase(
+    repository: ref.watch(learningProgressRepositoryProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+LoadStudyCandidatesUseCase loadStudyCandidatesUseCase(Ref ref) {
+  return LoadStudyCandidatesUseCase(
+    repository: ref.watch(learningProgressRepositoryProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+ApplyTerminalOutcomeUseCase applyTerminalOutcomeUseCase(Ref ref) {
+  return ApplyTerminalOutcomeUseCase(
+    repository: ref.watch(learningProgressRepositoryProvider),
+  );
+}
+
+@riverpod
+LoadTodayProjectionUseCase loadTodayProjectionUseCase(Ref ref) {
+  return LoadTodayProjectionUseCase(
+    sessions: ref.watch(studySessionRepositoryProvider),
+    progress: ref.watch(learningProgressRepositoryProvider),
+    decks: ref.watch(deckRepositoryProvider),
+    languagePairs: ref.watch(selectLanguagePairUseCaseProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+FinalizeStudySessionUseCase finalizeStudySessionUseCase(Ref ref) {
+  return FinalizeStudySessionUseCase(
+    sessions: ref.watch(studySessionRepositoryProvider),
+    progress: ref.watch(learningProgressRepositoryProvider),
+    applyTerminalOutcome: ref.watch(applyTerminalOutcomeUseCaseProvider),
+    clock: ref.watch(appClockProvider),
+    idGenerator: ref.watch(idGeneratorProvider),
+  );
+}
+
+@riverpod
+StartStudySessionUseCase startStudySessionUseCase(Ref ref) {
+  return StartStudySessionUseCase(
+    progress: ref.watch(learningProgressRepositoryProvider),
+    cards: ref.watch(flashcardRepositoryProvider),
+    sessions: ref.watch(studySessionRepositoryProvider),
+    clock: ref.watch(appClockProvider),
+    idGenerator: ref.watch(idGeneratorProvider),
+  );
+}
+
+@riverpod
+AnswerStudyStageUseCase answerStudyStageUseCase(Ref ref) {
+  return AnswerStudyStageUseCase(
+    sessions: ref.watch(studySessionRepositoryProvider),
+    factory: ref.watch(studyModeFactoryProvider),
+    clock: ref.watch(appClockProvider),
+    idGenerator: ref.watch(idGeneratorProvider),
+  );
+}
+
+@riverpod
+LoadStudyRuntimeUseCase loadStudyRuntimeUseCase(Ref ref) {
+  return LoadStudyRuntimeUseCase(
+    sessions: ref.watch(studySessionRepositoryProvider),
   );
 }

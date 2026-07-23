@@ -3,7 +3,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
+import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
+import 'package:memox_v6/presentation/features/flashcard/widgets/card_tags_section.dart';
+import 'package:memox_v6/presentation/features/flashcard/widgets/card_translations_section.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
 import 'package:memox_v6/presentation/features/flashcard/viewmodels/card_editor_viewmodel.dart';
 import 'package:memox_v6/presentation/shared/hooks/mx_text_hooks.dart';
@@ -22,14 +25,16 @@ import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 import 'package:memox_v6/core/utils/string_utils.dart';
 
-/// Card Editor — create mode (WBS 5.3.2A; `create-flashcard.md`, kit
-/// `flashcard-editor--create`): one focused form, single sticky Save,
-/// deck-driven language labels and a deck-context pill. Duplicate
-/// review, edit mode and the advanced sections land with children B/C.
+/// Card Editor (WBS 5.3.2A create; WBS 6.3 edit — `create-flashcard.md`,
+/// `edit-flashcard.md`, kit `flashcard-editor--create`): one focused form,
+/// single sticky Save, deck-driven language labels and a deck-context pill.
+/// [cardId] non-null opens edit mode — the form prefills from the existing
+/// card and rewrites its content; null is create mode.
 class CardEditorScreen extends ConsumerWidget {
-  const CardEditorScreen({super.key, required this.deckId});
+  const CardEditorScreen({super.key, required this.deckId, this.cardId});
 
   final String deckId;
+  final String? cardId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,6 +42,7 @@ class CardEditorScreen extends ConsumerWidget {
     // is the kit dirty-cancel guard over the draft state (KIT-25-06).
     final l10n = AppLocalizations.of(context);
     final isDirty = ref.watch(cardEditorDirtyViewmodelProvider);
+    final cardId = this.cardId;
 
     Future<void> close() async {
       if (!isDirty) {
@@ -58,42 +64,97 @@ class CardEditorScreen extends ConsumerWidget {
 
     return MxScaffold(
       appBar: MxContextualAppBar(
-        title: l10n.newCardTitle,
+        title: cardId == null ? l10n.newCardTitle : l10n.editCardTitle,
         onClose: close,
         closeLabel: l10n.cancelLabel,
       ),
       scrollable: false,
-      body: _CardEditorBody(deckId: deckId),
+      body: cardId == null
+          ? _CardEditorForm(deckId: deckId, editingCard: null)
+          : _EditCardLoader(deckId: deckId, cardId: cardId),
     );
   }
 }
 
-class _CardEditorBody extends HookConsumerWidget {
-  const _CardEditorBody({required this.deckId});
+/// Resolves the card to edit before the form's hooks are created, so the
+/// term/meaning fields prefill from stable initial values (WBS 6.3).
+class _EditCardLoader extends ConsumerWidget {
+  const _EditCardLoader({required this.deckId, required this.cardId});
 
   final String deckId;
+  final String cardId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final card = ref.watch(editingCardProvider(cardId: cardId));
+
+    return MxAsyncBuilder<Flashcard?>(
+      value: card,
+      loadingLabel: l10n.loadingLabel,
+      errorTitle: l10n.somethingWentWrongMessage,
+      data: (context, value) => value == null
+          ? _CardNotFound(l10n: l10n)
+          : _CardEditorForm(deckId: deckId, editingCard: value),
+    );
+  }
+}
+
+class _CardNotFound extends StatelessWidget {
+  const _CardNotFound({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const MxGap.s8(),
+        MxText(l10n.cardNotFoundMessage, role: MxTextRole.body),
+      ],
+    );
+  }
+}
+
+class _CardEditorForm extends HookConsumerWidget {
+  const _CardEditorForm({required this.deckId, required this.editingCard});
+
+  final String deckId;
+  final Flashcard? editingCard;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final editorContext = ref.watch(cardEditorContextProvider(deckId: deckId));
+    final editingCard = this.editingCard;
+    final isEdit = editingCard != null;
 
-    final term = useMxTextSubmitState();
-    final meaning = useMxTextSubmitState();
+    final term = useMxTextSubmitState(initial: editingCard?.term ?? '');
+    final meaning = useMxTextSubmitState(
+      initial: editingCard?.primaryMeaning ?? '',
+    );
     final tagsInput = useMxTextValue();
     final createAnother = useState(false);
     final termTouched = useState(false);
     final meaningTouched = useState(false);
 
+    // Edit is dirty only when the content diverges from the loaded card
+    // (edit-flashcard.md §6 — a clean edit keeps Save disabled).
+    bool computeDirty() {
+      if (isEdit) {
+        return term.controller.text != editingCard.term ||
+            meaning.controller.text != editingCard.primaryMeaning;
+      }
+      return term.controller.text.isNotEmpty ||
+          meaning.controller.text.isNotEmpty ||
+          tagsInput.controller.text.isNotEmpty;
+    }
+
     void syncDraftState() {
       ref
           .read(cardEditorDirtyViewmodelProvider.notifier)
-          .set(
-            dirty:
-                term.controller.text.isNotEmpty ||
-                meaning.controller.text.isNotEmpty ||
-                tagsInput.controller.text.isNotEmpty,
-          );
+          .set(dirty: computeDirty());
       ref.read(cardEditorDuplicatesViewmodelProvider.notifier).clear();
     }
 
@@ -118,6 +179,18 @@ class _CardEditorBody extends HookConsumerWidget {
     final failure = MxActionErrors.failureOf(saveState);
 
     void submit({required bool allowDuplicate}) {
+      if (isEdit) {
+        ref
+            .read(cardEditorSaveViewmodelProvider.notifier)
+            .editFlashcard(
+              cardId: editingCard.id,
+              term: term.controller.text,
+              primaryMeaning: meaning.controller.text,
+              expectedContentVersion: editingCard.contentVersion,
+              allowDuplicate: allowDuplicate,
+            );
+        return;
+      }
       ref
           .read(cardEditorSaveViewmodelProvider.notifier)
           .createFlashcard(
@@ -144,7 +217,11 @@ class _CardEditorBody extends HookConsumerWidget {
           );
         }
 
-        final canSave = term.canSubmit && meaning.canSubmit && !isSubmitting;
+        final canSave =
+            term.canSubmit &&
+            meaning.canSubmit &&
+            !isSubmitting &&
+            (!isEdit || computeDirty());
 
         // Kit create state: the form scrolls while the footer (create
         // another + Save) stays pinned as sticky chrome.
@@ -234,28 +311,45 @@ class _CardEditorBody extends HookConsumerWidget {
                       },
                     ),
                     const MxGap.s6(),
-                    MxTextField(
-                      controller: tagsInput.controller,
-                      label: l10n.tagsSectionLabel,
-                      boxed: true,
-                      placeholder: l10n.addTagsPlaceholder,
-                      enabled: !isSubmitting,
-                      onChanged: (_) => syncDraftState(),
-                    ),
-                    const MxGap.s6(),
+                    // Tags are create-only here; editing a card's tags is the
+                    // manage-card-tags flow (WBS 6.4).
+                    if (!isEdit) ...[
+                      MxTextField(
+                        controller: tagsInput.controller,
+                        label: l10n.tagsSectionLabel,
+                        boxed: true,
+                        placeholder: l10n.addTagsPlaceholder,
+                        enabled: !isSubmitting,
+                        onChanged: (_) => syncDraftState(),
+                      ),
+                      const MxGap.s6(),
+                    ],
+                    // Additional translations manage in place on an existing
+                    // card (WBS 6.4); create adds them after the first save.
+                    if (isEdit) ...[
+                      CardTranslationsSection(
+                        cardId: editingCard.id,
+                        languageCode: editor.meaningLanguageCode,
+                      ),
+                      const MxGap.s6(),
+                      CardTagsSection(cardId: editingCard.id),
+                      const MxGap.s6(),
+                    ],
                   ],
                 ),
               ),
             ),
             MxFormFooter(
               children: [
-                _CreateAnotherToggle(
-                  value: createAnother.value,
-                  onChanged: isSubmitting
-                      ? null
-                      : (value) => createAnother.value = value,
-                ),
-                const MxGap.s4(),
+                if (!isEdit) ...[
+                  _CreateAnotherToggle(
+                    value: createAnother.value,
+                    onChanged: isSubmitting
+                        ? null
+                        : (value) => createAnother.value = value,
+                  ),
+                  const MxGap.s4(),
+                ],
                 MxButton(
                   label: isSubmitting ? l10n.savingLabel : l10n.saveLabel,
                   block: true,

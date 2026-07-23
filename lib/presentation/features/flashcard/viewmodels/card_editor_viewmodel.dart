@@ -1,6 +1,7 @@
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/flashcard/create_flashcard_result.dart';
+import 'package:memox_v6/domain/flashcard/edit_flashcard_result.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/domain/language_pair/language_pair.dart';
 import 'package:memox_v6/domain/language_pair/supported_languages.dart';
@@ -16,11 +17,16 @@ class CardEditorContext {
     required this.deck,
     required this.termLanguageName,
     required this.meaningLanguageName,
+    required this.meaningLanguageCode,
   });
 
   final Deck deck;
   final String termLanguageName;
   final String meaningLanguageName;
+
+  /// The native (meaning) language code — the language of an additional
+  /// translation added in the editor (WBS 6.4).
+  final String meaningLanguageCode;
 }
 
 @riverpod
@@ -37,7 +43,15 @@ Future<CardEditorContext?> cardEditorContext(
     deck: deck,
     termLanguageName: _languageNameOf(pair, learning: true),
     meaningLanguageName: _languageNameOf(pair, learning: false),
+    meaningLanguageCode: pair?.nativeLanguageCode ?? '',
   );
+}
+
+/// The card being edited (WBS 6.3; `edit-flashcard.md`), loaded with its
+/// current content version for prefill; null when the card is missing.
+@riverpod
+Future<Flashcard?> editingCard(Ref ref, {required String cardId}) {
+  return ref.watch(editFlashcardUseCaseProvider).loadCard(cardId);
 }
 
 String _languageNameOf(LanguagePair? pair, {required bool learning}) {
@@ -81,6 +95,38 @@ class CardEditorSaveViewmodel extends _$CardEditorSaveViewmodel {
       // Candidates are a review decision, not an error: the banner
       // surface owns them (resolve-duplicate-flashcard.md).
       if (result is DuplicateCandidatesFound) {
+        ref
+            .read(cardEditorDuplicatesViewmodelProvider.notifier)
+            .show(result.candidates);
+        return;
+      }
+      ref.read(cardEditorDuplicatesViewmodelProvider.notifier).clear();
+      ref.read(cardEditorSavedTickViewmodelProvider.notifier).bump();
+    });
+  }
+
+  /// Save action (edit mode): rewrites the card's own content behind the
+  /// expected version. A duplicate other than the card itself pauses on the
+  /// review banner instead of committing (edit-flashcard.md §5).
+  Future<void> editFlashcard({
+    required String cardId,
+    required String term,
+    required String primaryMeaning,
+    required int expectedContentVersion,
+    bool allowDuplicate = false,
+  }) async {
+    state = const AsyncLoading<void>();
+    state = await AsyncValue.guard(() async {
+      final result = await ref
+          .read(editFlashcardUseCaseProvider)
+          .call(
+            cardId: cardId,
+            term: term,
+            primaryMeaning: primaryMeaning,
+            expectedContentVersion: expectedContentVersion,
+            allowDuplicate: allowDuplicate,
+          );
+      if (result is EditDuplicateCandidatesFound) {
         ref
             .read(cardEditorDuplicatesViewmodelProvider.notifier)
             .show(result.candidates);

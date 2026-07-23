@@ -212,6 +212,98 @@
   "@navProfileLabel": {
     "description": "Bottom navigation labels (kit shell NAV)."
   },
+  "appearanceLabel": "Appearance",
+  "@appearanceLabel": {
+    "description": "Settings entry + sheet title for the theme preference (WBS 8.1)."
+  },
+  "studyModesLabel": "Study modes",
+  "@studyModesLabel": {
+    "description": "Settings entry + title for the Practice mode preferences (WBS 8.3)."
+  },
+  "searchLabel": "Search",
+  "@searchLabel": {
+    "description": "Library search action + screen title (WBS 10.2)."
+  },
+  "searchPlaceholder": "Search decks and cards",
+  "@searchPlaceholder": {
+    "description": "Library search input placeholder (WBS 10.2)."
+  },
+  "searchPromptMessage": "Search your decks and cards by name.",
+  "@searchPromptMessage": {
+    "description": "Neutral prompt shown before any search query (WBS 10.2)."
+  },
+  "searchNoResultsMessage": "No decks or cards match your search.",
+  "@searchNoResultsMessage": {
+    "description": "Shown when a search returns no hits (WBS 10.2)."
+  },
+  "searchFilterAll": "All",
+  "@searchFilterAll": {
+    "description": "Search filter chip showing every result type (WBS 10.2)."
+  },
+  "searchFilterDecks": "Decks",
+  "@searchFilterDecks": {
+    "description": "Search filter chip limiting results to decks (WBS 10.2)."
+  },
+  "searchFilterCards": "Cards",
+  "@searchFilterCards": {
+    "description": "Search filter chip limiting results to cards (WBS 10.2)."
+  },
+  "recentSearchesLabel": "Recent searches",
+  "@recentSearchesLabel": {
+    "description": "Header of the recent-searches list on blank search (WBS 10.2)."
+  },
+  "clearRecentSearchesLabel": "Clear",
+  "@clearRecentSearchesLabel": {
+    "description": "Clears the recent-searches history (WBS 10.2)."
+  },
+  "modeDefaultLabel": "Default",
+  "@modeDefaultLabel": {
+    "description": "Badge marking the default Practice mode (WBS 8.3)."
+  },
+  "makeDefaultLabel": "Set as default",
+  "@makeDefaultLabel": {
+    "description": "Control that makes an enabled mode the default (WBS 8.3)."
+  },
+  "moveUpLabel": "Move up",
+  "@moveUpLabel": {
+    "description": "Accessible reorder control moving an item up (WBS 8.3)."
+  },
+  "moveDownLabel": "Move down",
+  "@moveDownLabel": {
+    "description": "Accessible reorder control moving an item down (WBS 8.3)."
+  },
+  "modePreferencesInvalidHint": "Enable at least one mode and choose a default.",
+  "@modePreferencesInvalidHint": {
+    "description": "Guidance shown when the mode configuration is invalid (WBS 8.3 §2)."
+  },
+  "restoreDefaultsLabel": "Restore defaults",
+  "@restoreDefaultsLabel": {
+    "description": "Settings row that resets preferences to their defaults (WBS 8.6)."
+  },
+  "restoreDefaultsTitle": "Restore default settings?",
+  "@restoreDefaultsTitle": {
+    "description": "Restore-defaults confirmation title (WBS 8.6)."
+  },
+  "restoreDefaultsBody": "Appearance and study-mode preferences return to their defaults. Your decks, cards and progress are unaffected.",
+  "@restoreDefaultsBody": {
+    "description": "Restore-defaults confirmation body / impact summary (WBS 8.6)."
+  },
+  "restoreDefaultsConfirmLabel": "Restore",
+  "@restoreDefaultsConfirmLabel": {
+    "description": "Confirm action of the restore-defaults dialog (WBS 8.6)."
+  },
+  "appearanceSystemLabel": "System",
+  "@appearanceSystemLabel": {
+    "description": "Appearance option that follows the OS theme (WBS 8.1)."
+  },
+  "appearanceLightLabel": "Light",
+  "@appearanceLightLabel": {
+    "description": "Appearance option forcing the light theme (WBS 8.1)."
+  },
+  "appearanceDarkLabel": "Dark",
+  "@appearanceDarkLabel": {
+    "description": "Appearance option forcing the dark theme (WBS 8.1)."
+  },
   "cardsCountLabel": "{count, plural, =1{1 card} other{{count} cards}}",
   "@cardsCountLabel": {
     "description": "Deck-card meta line (kit DeckCard).",
@@ -326,6 +418,144 @@
   "@createDeckTitle": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
   },
+  "renameDeckTitle": "Rename deck",
+  "@renameDeckTitle": {
+    "description": "Rename-deck dialog title (WBS 6.1)."
+  },
+  "deckSettingsLabel": "Deck options",
+  "@deckSettingsLabel": {
+    "description": "Deck app-bar overflow action that opens the deck-settings action sheet (WBS 6.1)."
+  },
+  "renameDeckLabel": "Rename",
+  "@renameDeckLabel": {
+    "description": "Deck app-bar action that opens the rename dialog (WBS 6.1)."
+  },
+  "deleteDeckLabel": "Delete",
+  "@deleteDeckLabel": {
+    "description": "Deck app-bar action that opens the delete confirm (WBS 6.1)."
+  },
+  "moveDeckLabel": "Move",
+  "@moveDeckLabel": {
+    "description": "Deck-settings action that opens the move-destination picker (WBS 6.2)."
+  },
+  "moveDeckPickerTitle": "Move to…",
+  "@moveDeckPickerTitle": {
+    "description": "Move-destination picker sheet title (WBS 6.2)."
+  },
+  "moveToLibraryRootLabel": "Library root",
+  "@moveToLibraryRootLabel": {
+    "description": "Picker row that un-nests the deck to the Library root (WBS 6.2)."
+  },
+  "moveDeckNoDestinationsBody": "No other decks to move into — you can still move this to the Library root.",
+  "@moveDeckNoDestinationsBody": {
+    "description": "Shown when no nested deck is an eligible move destination (WBS 6.2)."
+  },
+  "moveDeckTitle": "Move “{deckName}”?",
+  "@moveDeckTitle": {
+    "description": "Move-deck dialog title (WBS 6.1).",
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      }
+    }
+  },
+  "moveDeckToRootBody": "This deck will move to the Library root. Its cards, nested decks and learning progress stay with it.",
+  "@moveDeckToRootBody": {
+    "description": "Move-to-Library-root impact (move-deck.md §1)."
+  },
+  "moveDeckConfirmLabel": "Move here",
+  "@moveDeckConfirmLabel": {
+    "description": "Confirm action on the move-deck dialog (move-deck.md §4)."
+  },
+  "resetDeckProgressLabel": "Reset progress",
+  "@resetDeckProgressLabel": {
+    "description": "Deck app-bar action that opens the reset-progress confirm (WBS 6.1)."
+  },
+  "resetDeckProgressTitle": "Reset learning progress?",
+  "@resetDeckProgressTitle": {
+    "description": "Reset-progress confirm dialog title (reset-deck-progress.md §4)."
+  },
+  "resetDeckProgressBody": "This will reset progress for {cardCount, plural, =1{1 card} other{{cardCount} cards}} in “{deckName}”. Your cards and nested decks will stay in place.",
+  "@resetDeckProgressBody": {
+    "description": "Reset impact for a Leaf deck (reset-deck-progress.md §4).",
+    "placeholders": {
+      "cardCount": {
+        "type": "int"
+      },
+      "deckName": {
+        "type": "String"
+      }
+    }
+  },
+  "resetDeckProgressParentBody": "This will reset progress for {cardCount, plural, =1{1 card} other{{cardCount} cards}} across {deckCount, plural, =1{1 nested deck} other{{deckCount} nested decks}} in “{deckName}”. Your cards stay in place.",
+  "@resetDeckProgressParentBody": {
+    "description": "Reset impact for a Parent deck (reset-deck-progress.md §4).",
+    "placeholders": {
+      "cardCount": {
+        "type": "int"
+      },
+      "deckCount": {
+        "type": "int"
+      },
+      "deckName": {
+        "type": "String"
+      }
+    }
+  },
+  "resetDeckProgressNothingBody": "There’s no learning progress to reset in this deck yet.",
+  "@resetDeckProgressNothingBody": {
+    "description": "Nothing-to-reset state (reset-deck-progress.md §3)."
+  },
+  "resetDeckProgressKeepLabel": "Keep progress",
+  "@resetDeckProgressKeepLabel": {
+    "description": "Safe action on the reset-progress confirm (WBS 6.1)."
+  },
+  "resetDeckProgressConfirmLabel": "Reset progress",
+  "@resetDeckProgressConfirmLabel": {
+    "description": "Destructive confirm on the reset-progress dialog (WBS 6.1)."
+  },
+  "deleteDeckTitle": "Delete “{deckName}”?",
+  "@deleteDeckTitle": {
+    "description": "Delete-deck confirm dialog title (WBS 6.1).",
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteDeckKeepLabel": "Keep deck",
+  "@deleteDeckKeepLabel": {
+    "description": "Safe cancel action on the delete-deck confirm (WBS 6.1)."
+  },
+  "deleteDeckConfirmLabel": "Delete deck",
+  "@deleteDeckConfirmLabel": {
+    "description": "Destructive confirm action on the delete-deck dialog (WBS 6.1)."
+  },
+  "deleteDeckEmptyBody": "This empty deck will be permanently deleted.",
+  "@deleteDeckEmptyBody": {
+    "description": "Delete impact for an Empty deck (delete-deck.md §4)."
+  },
+  "deleteDeckLeafBody": "{cardCount, plural, =1{1 card and its learning progress will be permanently deleted.} other{{cardCount} cards and their learning progress will be permanently deleted.}}",
+  "@deleteDeckLeafBody": {
+    "description": "Delete impact for a Leaf deck (delete-deck.md §4).",
+    "placeholders": {
+      "cardCount": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteDeckParentBody": "This includes {deckCount, plural, =1{1 nested deck} other{{deckCount} nested decks}}, {cardCount, plural, =1{1 card} other{{cardCount} cards}}, and their learning progress. This can’t be undone.",
+  "@deleteDeckParentBody": {
+    "description": "Delete impact for a Parent deck (delete-deck.md §4).",
+    "placeholders": {
+      "deckCount": {
+        "type": "int"
+      },
+      "cardCount": {
+        "type": "int"
+      }
+    }
+  },
   "insideLibraryLabel": "Inside Library",
   "@insideLibraryLabel": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
@@ -342,6 +572,78 @@
   "newCardTitle": "New card",
   "@newCardTitle": {
     "description": "Card Editor (kit flashcard-editor, WBS 5.3.2)."
+  },
+  "editCardTitle": "Edit card",
+  "@editCardTitle": {
+    "description": "Card Editor title in edit mode (WBS 6.3; edit-flashcard.md §4)."
+  },
+  "cardOptionsLabel": "Card options",
+  "@cardOptionsLabel": {
+    "description": "Title of the card lifecycle action sheet (WBS 6.5)."
+  },
+  "editCardLabel": "Edit",
+  "@editCardLabel": {
+    "description": "Card action-sheet row that opens the editor (WBS 6.5)."
+  },
+  "moveCardLabel": "Move",
+  "@moveCardLabel": {
+    "description": "Card action-sheet row that opens the move picker (WBS 6.5)."
+  },
+  "moveCardPickerTitle": "Move card to…",
+  "@moveCardPickerTitle": {
+    "description": "Card move-destination picker sheet title (WBS 6.5)."
+  },
+  "moveCardNoDestinationsBody": "No other deck can hold this card yet. Create an empty deck first.",
+  "@moveCardNoDestinationsBody": {
+    "description": "Shown when no deck is an eligible card move target (WBS 6.5)."
+  },
+  "hideCardLabel": "Hide",
+  "@hideCardLabel": {
+    "description": "Card action that excludes it from fresh study queues (WBS 6.5)."
+  },
+  "showCardLabel": "Show",
+  "@showCardLabel": {
+    "description": "Card action that restores a hidden card's eligibility (WBS 6.5)."
+  },
+  "deleteCardLabel": "Delete",
+  "@deleteCardLabel": {
+    "description": "Card action that opens the delete confirmation (WBS 6.5)."
+  },
+  "deleteCardTitle": "Delete this card?",
+  "@deleteCardTitle": {
+    "description": "Delete-card confirmation title (WBS 6.5; delete-flashcard.md)."
+  },
+  "deleteCardBody": "The card, its translations, tags and progress are permanently deleted. Finished study history is kept.",
+  "@deleteCardBody": {
+    "description": "Delete-card confirmation body (WBS 6.5)."
+  },
+  "deleteCardConfirmLabel": "Delete card",
+  "@deleteCardConfirmLabel": {
+    "description": "Confirm action of the delete-card dialog (WBS 6.5)."
+  },
+  "keepCardLabel": "Keep card",
+  "@keepCardLabel": {
+    "description": "Cancel action of the delete-card dialog (WBS 6.5)."
+  },
+  "cardNotFoundMessage": "This card is no longer available.",
+  "@cardNotFoundMessage": {
+    "description": "Shown when the card to edit was deleted (WBS 6.3; edit-flashcard.md §8)."
+  },
+  "additionalTranslationsLabel": "Additional translations",
+  "@additionalTranslationsLabel": {
+    "description": "Header of the extra-meanings section in the card editor (WBS 6.4)."
+  },
+  "addTranslationLabel": "Add translation",
+  "@addTranslationLabel": {
+    "description": "Adds an additional translation to the card (WBS 6.4)."
+  },
+  "addTranslationPlaceholder": "Another meaning",
+  "@addTranslationPlaceholder": {
+    "description": "Placeholder of the add-translation field (WBS 6.4)."
+  },
+  "removeTranslationLabel": "Remove translation",
+  "@removeTranslationLabel": {
+    "description": "Removes an additional translation from the card (WBS 6.4)."
   },
   "deckContextLabel": "Deck",
   "@deckContextLabel": {
@@ -372,6 +674,14 @@
   "addTagsPlaceholder": "Add tags \u2014 e.g. #TOPIK_I, #\ub3d9\uc0ac",
   "@addTagsPlaceholder": {
     "description": "Card Editor tags placeholder (WBS 5.3.2)."
+  },
+  "addTagLabel": "Add tag",
+  "@addTagLabel": {
+    "description": "Attaches a tag to the card in the editor (WBS 6.4)."
+  },
+  "removeTagLabel": "Remove tag",
+  "@removeTagLabel": {
+    "description": "Detaches a tag from the card in the editor (WBS 6.4)."
   },
   "moreOptionsLabel": "More options",
   "@moreOptionsLabel": {
@@ -470,5 +780,265 @@
         "type": "int"
       }
     }
+  },
+  "reviewModeTitle": "Review",
+  "@reviewModeTitle": {
+    "description": "Study Review stage title (WBS 5.6.5)."
+  },
+  "studyExitLabel": "Exit",
+  "@studyExitLabel": {
+    "description": "Back/exit action in the study shell."
+  },
+  "studyProgressLabel": "{current} of {total}",
+  "@studyProgressLabel": {
+    "description": "Study progress announcement for assistive tech.",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "meaningLabel": "Meaning",
+  "@meaningLabel": {
+    "description": "Section label above a card's meaning in Review."
+  },
+  "reviewPreviousLabel": "Previous",
+  "@reviewPreviousLabel": {
+    "description": "Review navigation to the previous card."
+  },
+  "reviewNextLabel": "Next",
+  "@reviewNextLabel": {
+    "description": "Review navigation to the next card."
+  },
+  "reviewFinishLabel": "Finish",
+  "@reviewFinishLabel": {
+    "description": "Review action on the last card that completes the stage."
+  },
+  "reviewNoSessionMessage": "No study session is in progress.",
+  "@reviewNoSessionMessage": {
+    "description": "Shown when Review opens without an active session."
+  },
+  "studyStageComingSoonMessage": "This study stage is coming soon.",
+  "@studyStageComingSoonMessage": {
+    "description": "Placeholder for a study stage whose screen is not built yet."
+  },
+  "studyDeckLabel": "Study",
+  "@studyDeckLabel": {
+    "description": "Deck-detail action starting a study session."
+  },
+  "reviewSwipeHint": "Swipe to continue",
+  "@reviewSwipeHint": {
+    "description": "Review bottom hint between the previous/next chevrons (kit review-mode)."
+  },
+  "guessModeTitle": "Guess",
+  "@guessModeTitle": {
+    "description": "Study Guess stage title (WBS 5.6.7)."
+  },
+  "matchModeTitle": "Match",
+  "@matchModeTitle": {
+    "description": "Study Match stage title (WBS 5.6.6)."
+  },
+  "matchRoundCompleteTitle": "Round complete!",
+  "@matchRoundCompleteTitle": {
+    "description": "Match board finished — every pair is matched."
+  },
+  "matchRoundCompleteBody": "You matched every pair. Keep the momentum.",
+  "@matchRoundCompleteBody": {
+    "description": "Supporting copy on the Match round-complete state."
+  },
+  "matchNextRoundLabel": "Next round",
+  "@matchNextRoundLabel": {
+    "description": "Commits the Match board and advances (WBS 5.6.6)."
+  },
+  "studyContinueLabel": "Continue",
+  "@studyContinueLabel": {
+    "description": "Advances to the next card after answering."
+  },
+  "guessInvalidPoolMessage": "Not enough distinct options to guess this card.",
+  "@guessInvalidPoolMessage": {
+    "description": "Shown when the Guess candidate pool lacks five distinct meanings."
+  },
+  "recallModeTitle": "Recall",
+  "@recallModeTitle": {
+    "description": "Study Recall stage title (WBS 5.6.8)."
+  },
+  "recallHintBeforeReveal": "Recall the meaning, then tap “Show”",
+  "@recallHintBeforeReveal": {
+    "description": "Placeholder in the answer card before the learner reveals it."
+  },
+  "recallShowLabel": "Show · {seconds}s",
+  "@recallShowLabel": {
+    "description": "Recall reveal button with the live countdown (kit recall-mode; RECALL_RESPONSE_TIMEOUT_SECONDS).",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "recallGotItLabel": "Got it",
+  "@recallGotItLabel": {
+    "description": "Recall self-grade meaning Remembered (maps to correct)."
+  },
+  "recallForgotLabel": "Forgot",
+  "@recallForgotLabel": {
+    "description": "Recall self-grade meaning Forgot (maps to wrong)."
+  },
+  "recallTimeoutFeedback": "Time’s up · Forgot",
+  "@recallTimeoutFeedback": {
+    "description": "Shown when the Recall countdown reaches zero (auto-reveal, maps to wrong/timeout)."
+  },
+  "fillModeTitle": "Fill",
+  "@fillModeTitle": {
+    "description": "Study Fill stage title (WBS 5.6.9)."
+  },
+  "fillTypeTermLabel": "Type the term",
+  "@fillTypeTermLabel": {
+    "description": "Label above the Fill answer input (the meaning is shown; type the term)."
+  },
+  "fillAnswerPlaceholder": "Type your answer…",
+  "@fillAnswerPlaceholder": {
+    "description": "Placeholder in the empty Fill answer input."
+  },
+  "fillCheckLabel": "Check",
+  "@fillCheckLabel": {
+    "description": "Fill primary action: compare the typed answer."
+  },
+  "fillHelpLabel": "Help",
+  "@fillHelpLabel": {
+    "description": "Fill secondary action: reveal a hint."
+  },
+  "fillHintMessage": "Hint: {count} characters, starts with {start}",
+  "@fillHintMessage": {
+    "description": "Fill hint revealing the answer length and first character.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "start": {
+        "type": "String"
+      }
+    }
+  },
+  "fillAnswerRevealLabel": "Answer: {answer}",
+  "@fillAnswerRevealLabel": {
+    "description": "Reveals the correct answer in the Fill wrong-feedback state.",
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "studyResultTitle": "Results",
+  "@studyResultTitle": {
+    "description": "Study Result screen title (WBS 5.6.13)."
+  },
+  "studyResultCompleteTitle": "Session complete",
+  "@studyResultCompleteTitle": {
+    "description": "Study Result hero title on a finished session."
+  },
+  "studyResultReviewedText": "You reviewed {count} cards this session.",
+  "@studyResultReviewedText": {
+    "description": "Study Result hero summary of how many cards were reviewed.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "studyResultCardsLabel": "cards",
+  "@studyResultCardsLabel": {
+    "description": "Label under the reviewed-count stat on the Study Result."
+  },
+  "studyResultCorrectLabel": "correct",
+  "@studyResultCorrectLabel": {
+    "description": "Label under the accuracy stat on the Study Result."
+  },
+  "studyResultContinueLabel": "Continue studying",
+  "@studyResultContinueLabel": {
+    "description": "Study Result primary action returning to the study entry."
+  },
+  "studyResultDoneLabel": "Done",
+  "@studyResultDoneLabel": {
+    "description": "Study Result secondary action returning to the library."
+  },
+  "studyFinalizingLabel": "Finalizing…",
+  "@studyFinalizingLabel": {
+    "description": "Shown while a completed session's results are being committed."
+  },
+  "studyFinalizeErrorTitle": "Couldn’t save your results",
+  "@studyFinalizeErrorTitle": {
+    "description": "Study Result finalize-error title."
+  },
+  "studyFinalizeErrorMessage": "Your session finished, but we couldn’t update your schedule. Retry so this session counts.",
+  "@studyFinalizeErrorMessage": {
+    "description": "Study Result finalize-error body."
+  },
+  "studyRetryLabel": "Retry",
+  "@studyRetryLabel": {
+    "description": "Retries a failed finalize on the Study Result."
+  },
+  "deckStudyLabel": "Study",
+  "@deckStudyLabel": {
+    "description": "Starts a study session for the open deck (WBS 5.6.1/2)."
+  },
+  "todayTitle": "Today",
+  "@todayTitle": {
+    "description": "Today entry screen title (WBS 5.7.2)."
+  },
+  "todayPausedTitle": "Study session paused",
+  "@todayPausedTitle": {
+    "description": "Today paused-session callout title."
+  },
+  "todayPausedBody": "Your saved answers are unchanged.",
+  "@todayPausedBody": {
+    "description": "Today paused-session callout body."
+  },
+  "todayResumeLabel": "Resume session",
+  "@todayResumeLabel": {
+    "description": "Today primary action resuming a paused session."
+  },
+  "todayDueTitle": "Continue studying",
+  "@todayDueTitle": {
+    "description": "Today due-cards section title."
+  },
+  "todayDueCaption": "{count} cards due",
+  "@todayDueCaption": {
+    "description": "Today due-cards count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "todayStartReviewLabel": "Start review",
+  "@todayStartReviewLabel": {
+    "description": "Today primary action starting a review."
+  },
+  "todayEmptyTitle": "Start your first deck",
+  "@todayEmptyTitle": {
+    "description": "Today empty-library hero title."
+  },
+  "todayEmptyBody": "Add the words you want to remember — MemoX schedules the reviews for you.",
+  "@todayEmptyBody": {
+    "description": "Today empty-library hero body."
+  },
+  "todayCreateLabel": "Create a deck",
+  "@todayCreateLabel": {
+    "description": "Today empty-library primary action opening the library."
+  },
+  "todayCaughtUpTitle": "You’re all caught up",
+  "@todayCaughtUpTitle": {
+    "description": "Today caught-up title (no cards due)."
+  },
+  "todayCaughtUpBody": "No cards due right now.",
+  "@todayCaughtUpBody": {
+    "description": "Today caught-up body."
+  },
+  "todayErrorTitle": "Today couldn’t load",
+  "@todayErrorTitle": {
+    "description": "Today load-error title."
   }
 }

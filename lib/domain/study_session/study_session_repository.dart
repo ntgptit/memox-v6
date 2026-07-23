@@ -39,12 +39,24 @@ abstract interface class StudySessionRepository {
 
   Future<SessionRoundOrder?> roundOrder(String sessionId, int roundIndex);
 
+  /// Op 3, extended: when a committed answer opens a new mastery round or
+  /// stage, its freshly generated [newRoundOrder] persists in the *same*
+  /// transaction as the attempt and checkpoint (`answer-study-stage.md` §7
+  /// atomic handoff), so resume can never see a checkpoint pointing at an order
+  /// that was not committed. A replay (stored idempotency key) persists none of
+  /// the three again.
   Future<void> saveAttemptWithCheckpoint({
     required StudyAttempt attempt,
     required SessionCheckpoint checkpoint,
+    SessionRoundOrder? newRoundOrder,
   });
 
   Future<SessionCheckpoint?> checkpoint(String sessionId);
+
+  /// The session's committed attempts in commit order (`study_attempts` by
+  /// `session_id`), for terminal-grade aggregation and the finalize summary
+  /// (WBS 5.6.13).
+  Future<List<StudyAttempt>> attempts(String sessionId);
 
   Future<void> finalizeSession({
     required String sessionId,
