@@ -236,6 +236,18 @@
   "@searchNoResultsMessage": {
     "description": "Shown when a search returns no hits (WBS 10.2)."
   },
+  "searchFilterAll": "All",
+  "@searchFilterAll": {
+    "description": "Search filter chip showing every result type (WBS 10.2)."
+  },
+  "searchFilterDecks": "Decks",
+  "@searchFilterDecks": {
+    "description": "Search filter chip limiting results to decks (WBS 10.2)."
+  },
+  "searchFilterCards": "Cards",
+  "@searchFilterCards": {
+    "description": "Search filter chip limiting results to cards (WBS 10.2)."
+  },
   "modeDefaultLabel": "Default",
   "@modeDefaultLabel": {
     "description": "Badge marking the default Practice mode (WBS 8.3)."

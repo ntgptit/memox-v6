@@ -103,6 +103,48 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('the type filters narrow the results by kind', (tester) async {
+    await database.deckDao.insertDeck(
+      'appdeck',
+      'lp1',
+      null,
+      'Apple',
+      'apple',
+      0,
+      0,
+    );
+    await database.flashcardDao.insertFlashcard(
+      'c_apple',
+      'root',
+      'apple',
+      'apple',
+      'táo',
+      0,
+      0,
+    );
+
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'app');
+    await tester.pumpAndSettle();
+
+    // All: both the deck and the card show.
+    expect(find.text('Apple'), findsOneWidget);
+    expect(find.text('apple'), findsOneWidget);
+
+    await tester.tap(find.text('Decks'));
+    await tester.pumpAndSettle();
+    expect(find.text('Apple'), findsOneWidget);
+    expect(find.text('apple'), findsNothing);
+
+    await tester.tap(find.text('Cards'));
+    await tester.pumpAndSettle();
+    expect(find.text('apple'), findsOneWidget);
+    expect(find.text('Apple'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('tapping a card result opens the card editor', (tester) async {
     final router = GoRouter(
       initialLocation: RoutePaths.search,
