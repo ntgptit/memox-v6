@@ -638,3 +638,27 @@ deferred on the board-runtime gap) are done and gate-green; Guess passes parity
 both themes, the rest are honestly measured and capped by the four owner-decisions
 above. Further parity polish is **paused pending owner input**; the loop advances
 to functional WBS items (5.6.11+).
+
+## 5.6.11 Mastery rounds and relearn — already shipped; pinned with tests (330f5b9)
+
+Backend audit found the mastery-round machinery already built + tested:
+`SessionAdvancePolicy` accumulates/resets the per-round failed set, opens a retry
+round over it in the same stage (monotonic round index), keeps lapsed cards sticky
+(a later pass never clears an already-failed card), and `RoundOrderPolicy` seeds
+each retry round afresh and resolves collisions so a round never repeats the prior
+sequence. The three retry namespaces are **already architecturally separate**:
+mastery retry (`SessionCheckpoint.failedCardIds`), the relearn queue
+(`session_relearn_items.retryCount` — the model literally documents it as "the
+learning retry namespace, distinct from persistence retry"), and persistence retry
+(`StudyAttempt.idempotencyKey`). The relearn-queue *population* is a
+finalize / relearn-session concern (relearn-session start is deferred, GAP-A) and
+is intentionally not wired in-session.
+
+Genuinely missing for the boundary were two edge tests (added to
+`session_advance_policy_test`): failed-set dedup on a later fail, and unlimited
+retry rounds until a clean round. Gate green.
+
+Also: fixed a recurring dart-format-drift brace lint (fill_screen `onSubmitted`),
+and **untracked `evidence/parity/`** (added a gitignore rule + removed 88 harness
+PNG/JSON artifacts that had been accidentally tracked; f2fb385) so parity output is
+never committed.
