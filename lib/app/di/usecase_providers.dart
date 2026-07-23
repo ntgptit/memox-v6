@@ -28,6 +28,7 @@ import 'package:memox_v6/domain/usecases/flashcard/manage_card_translations_usec
 import 'package:memox_v6/domain/usecases/language_pair/create_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/onboarding/dismiss_first_run_usecase.dart';
 import 'package:memox_v6/domain/usecases/preferences/set_appearance_preference_usecase.dart';
+import 'package:memox_v6/domain/usecases/preferences/set_mode_preferences_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/remove_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -59,6 +60,14 @@ SelectLanguagePairUseCase selectLanguagePairUseCase(Ref ref) {
 @riverpod
 SetAppearancePreferenceUseCase setAppearancePreferenceUseCase(Ref ref) {
   return SetAppearancePreferenceUseCase(
+    preferences: ref.watch(preferenceRepositoryProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+SetModePreferencesUseCase setModePreferencesUseCase(Ref ref) {
+  return SetModePreferencesUseCase(
     preferences: ref.watch(preferenceRepositoryProvider),
     clock: ref.watch(appClockProvider),
   );
