@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
 import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
+import 'package:memox_v6/presentation/features/study/screens/guess_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/review_screen.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
@@ -39,6 +40,7 @@ class _StudyStageDispatch extends ConsumerWidget {
         }
         return switch (runtime.currentMode) {
           StudyModeType.review => const ReviewScreen(),
+          StudyModeType.guess => const GuessScreen(),
           // The remaining mode screens land in later slices (5.6.6-5.6.9);
           // until then a completed Review parks here rather than crashing.
           _ => MxEmptyState(

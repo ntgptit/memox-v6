@@ -522,5 +522,17 @@
   "reviewSwipeHint": "Swipe to continue",
   "@reviewSwipeHint": {
     "description": "Review bottom hint between the previous/next chevrons (kit review-mode)."
+  },
+  "guessModeTitle": "Guess",
+  "@guessModeTitle": {
+    "description": "Study Guess stage title (WBS 5.6.7)."
+  },
+  "studyContinueLabel": "Continue",
+  "@studyContinueLabel": {
+    "description": "Advances to the next card after answering."
+  },
+  "guessInvalidPoolMessage": "Not enough distinct options to guess this card.",
+  "@guessInvalidPoolMessage": {
+    "description": "Shown when the Guess candidate pool lacks five distinct meanings."
   }
 }

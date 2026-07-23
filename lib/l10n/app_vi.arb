@@ -406,5 +406,8 @@
   "reviewNoSessionMessage": "Không có phiên học nào đang diễn ra.",
   "studyStageComingSoonMessage": "Giai đoạn học này sắp ra mắt.",
   "studyDeckLabel": "Học",
-  "reviewSwipeHint": "Vuốt để tiếp tục"
+  "reviewSwipeHint": "Vuốt để tiếp tục",
+  "guessModeTitle": "Đoán",
+  "studyContinueLabel": "Tiếp tục",
+  "guessInvalidPoolMessage": "Không đủ lựa chọn khác nhau để đoán thẻ này."
 }
