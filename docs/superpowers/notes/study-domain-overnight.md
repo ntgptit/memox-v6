@@ -1,5 +1,27 @@
 # Study-wave domain — overnight autonomous run
 
+## ⚑ Match parity (5.6.6) — BLOCKED on the CJK font (#1); functional Match is done + gate-green (1652724)
+The Match kit shots (`match-mode--{playing,selected,correct,wrong,almost,complete}`)
+render the **entire right column in Korean** (사랑/학교/음식/시간/친구) — half the
+board. The offline parity build (`tool/parity/build_web.mjs`, `--no-web-resources-cdn`)
+bundles only the latin `PlusJakartaSans-Variable.ttf`; the theme's
+`fontFamilyFallback` lists `Noto Sans CJK KR/JP/SC` but those are **platform**
+families absent from the web build, so the Korean tiles render as **tofu** and
+inflate the diff well past 3%. (Guess parity passed because it has only one
+Korean term; Match has five.) An OFL CJK `.ttf` cannot be obtained in this
+environment (no download; Windows `malgun.ttf` is not OFL, so not bundleable).
+
+Decision (owner-delegated): do NOT fake or guess an unmeasured parity %. Record
+the blocker and proceed on the release-critical path. Match parity — and full CJK
+coverage for Guess/Recall/Fill — needs the **owner to add an OFL CJK font**
+(e.g. `NotoSansKR`) to `assets/fonts/` + `pubspec.yaml` fonts + the parity build's
+bundled-font list + `AppTypography.fontFamilyFallback`. Once bundled, the Match
+parity pass transcribes the kit `Tile.jsx` tone map (radius-control; tone = soft
+bg + emphasis-stroke border; `matched` = hidden placeholder) and measures both
+themes. **This gates the PR #99 merge for all CJK parity screens** — flagged for
+the owner. Functional Match (board + flush + dispatcher) is complete and shipped.
+
+
 Branch: `feat/study-domain` (off `main` @ 0558139). Scope: non-UI / domain /
 data / policy WBS packages only (STOP RULE gates all UI until P0.6). One
 package = one gate-verified commit. Stops on: gated UI, spec ambiguity /
