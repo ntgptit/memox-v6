@@ -489,6 +489,22 @@
   "@cardNotFoundMessage": {
     "description": "Shown when the card to edit was deleted (WBS 6.3; edit-flashcard.md §8)."
   },
+  "additionalTranslationsLabel": "Additional translations",
+  "@additionalTranslationsLabel": {
+    "description": "Header of the extra-meanings section in the card editor (WBS 6.4)."
+  },
+  "addTranslationLabel": "Add translation",
+  "@addTranslationLabel": {
+    "description": "Adds an additional translation to the card (WBS 6.4)."
+  },
+  "addTranslationPlaceholder": "Another meaning",
+  "@addTranslationPlaceholder": {
+    "description": "Placeholder of the add-translation field (WBS 6.4)."
+  },
+  "removeTranslationLabel": "Remove translation",
+  "@removeTranslationLabel": {
+    "description": "Removes an additional translation from the card (WBS 6.4)."
+  },
   "deckContextLabel": "Deck",
   "@deckContextLabel": {
     "description": "Card Editor deck-context pill (WBS 5.3.2)."

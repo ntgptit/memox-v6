@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
@@ -278,8 +279,8 @@ void main() {
       await pumpEditor(tester);
 
       expect(find.text('Edit card'), findsOneWidget);
-      // Two fields only — tags are the manage-card-tags flow, not shown here.
-      expect(find.byType(TextField), findsNWidgets(2));
+      // term, meaning, and the add-translation field — tags stay create-only.
+      expect(find.byType(TextField), findsNWidgets(3));
       final termField = tester.widget<TextField>(find.byType(TextField).at(0));
       final meaningField = tester.widget<TextField>(
         find.byType(TextField).at(1),
@@ -320,6 +321,72 @@ void main() {
       await pumpEditor(tester);
 
       expect(find.text('This card is no longer available.'), findsOneWidget);
+
+      await disposeAndFlushStreams(tester);
+    });
+
+    Future<List<String>> translationTexts() async {
+      final rows = await database
+          .customSelect(
+            'SELECT translation_text FROM flashcard_translations '
+            "WHERE card_id = 'c1' ORDER BY display_order",
+          )
+          .get();
+      return rows.map((r) => r.read<String>('translation_text')).toList();
+    }
+
+    testWidgets('adds an additional translation that persists and lists', (
+      tester,
+    ) async {
+      await seedCard();
+      await tester.pumpWidget(editApp('c1'));
+      await pumpEditor(tester);
+
+      // The overline section header renders in caps.
+      expect(find.text('ADDITIONAL TRANSLATIONS'), findsOneWidget);
+      // term, meaning, and the add-translation field.
+      await tester.enterText(find.byType(TextField).at(2), 'goodbye');
+      await tester.pump();
+      await tester.tap(find.byIcon(Symbols.add_rounded));
+      await pumpEditor(tester);
+
+      expect(await translationTexts(), ['goodbye']);
+      expect(find.text('goodbye'), findsOneWidget);
+
+      await disposeAndFlushStreams(tester);
+    });
+
+    testWidgets('removes an additional translation', (tester) async {
+      await seedCard();
+      await tester.pumpWidget(editApp('c1'));
+      await pumpEditor(tester);
+
+      await tester.enterText(find.byType(TextField).at(2), 'goodbye');
+      await tester.pump();
+      await tester.tap(find.byIcon(Symbols.add_rounded));
+      await pumpEditor(tester);
+      expect(await translationTexts(), ['goodbye']);
+
+      await tester.tap(find.bySemanticsLabel('Remove translation'));
+      await pumpEditor(tester);
+
+      expect(await translationTexts(), isEmpty);
+
+      await disposeAndFlushStreams(tester);
+    });
+
+    testWidgets('a blank translation is rejected', (tester) async {
+      await seedCard();
+      await tester.pumpWidget(editApp('c1'));
+      await pumpEditor(tester);
+
+      // The add control stays disabled with no text (nothing to persist).
+      await tester.enterText(find.byType(TextField).at(2), '   ');
+      await tester.pump();
+      await tester.tap(find.byIcon(Symbols.add_rounded));
+      await pumpEditor(tester);
+
+      expect(await translationTexts(), isEmpty);
 
       await disposeAndFlushStreams(tester);
     });

@@ -5,6 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
+import 'package:memox_v6/presentation/features/flashcard/widgets/card_translations_section.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
 import 'package:memox_v6/presentation/features/flashcard/viewmodels/card_editor_viewmodel.dart';
 import 'package:memox_v6/presentation/shared/hooks/mx_text_hooks.dart';
@@ -319,6 +320,15 @@ class _CardEditorForm extends HookConsumerWidget {
                         placeholder: l10n.addTagsPlaceholder,
                         enabled: !isSubmitting,
                         onChanged: (_) => syncDraftState(),
+                      ),
+                      const MxGap.s6(),
+                    ],
+                    // Additional translations manage in place on an existing
+                    // card (WBS 6.4); create adds them after the first save.
+                    if (isEdit) ...[
+                      CardTranslationsSection(
+                        cardId: editingCard.id,
+                        languageCode: editor.meaningLanguageCode,
                       ),
                       const MxGap.s6(),
                     ],

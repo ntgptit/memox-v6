@@ -17,11 +17,16 @@ class CardEditorContext {
     required this.deck,
     required this.termLanguageName,
     required this.meaningLanguageName,
+    required this.meaningLanguageCode,
   });
 
   final Deck deck;
   final String termLanguageName;
   final String meaningLanguageName;
+
+  /// The native (meaning) language code — the language of an additional
+  /// translation added in the editor (WBS 6.4).
+  final String meaningLanguageCode;
 }
 
 @riverpod
@@ -38,6 +43,7 @@ Future<CardEditorContext?> cardEditorContext(
     deck: deck,
     termLanguageName: _languageNameOf(pair, learning: true),
     meaningLanguageName: _languageNameOf(pair, learning: false),
+    meaningLanguageCode: pair?.nativeLanguageCode ?? '',
   );
 }
 
