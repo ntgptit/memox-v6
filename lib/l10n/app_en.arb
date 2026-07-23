@@ -470,5 +470,45 @@
         "type": "int"
       }
     }
+  },
+  "reviewModeTitle": "Review",
+  "@reviewModeTitle": {
+    "description": "Study Review stage title (WBS 5.6.5)."
+  },
+  "studyExitLabel": "Exit",
+  "@studyExitLabel": {
+    "description": "Back/exit action in the study shell."
+  },
+  "studyProgressLabel": "{current} of {total}",
+  "@studyProgressLabel": {
+    "description": "Study progress announcement for assistive tech.",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "meaningLabel": "Meaning",
+  "@meaningLabel": {
+    "description": "Section label above a card's meaning in Review."
+  },
+  "reviewPreviousLabel": "Previous",
+  "@reviewPreviousLabel": {
+    "description": "Review navigation to the previous card."
+  },
+  "reviewNextLabel": "Next",
+  "@reviewNextLabel": {
+    "description": "Review navigation to the next card."
+  },
+  "reviewFinishLabel": "Finish",
+  "@reviewFinishLabel": {
+    "description": "Review action on the last card that completes the stage."
+  },
+  "reviewNoSessionMessage": "No study session is in progress.",
+  "@reviewNoSessionMessage": {
+    "description": "Shown when Review opens without an active session."
   }
 }

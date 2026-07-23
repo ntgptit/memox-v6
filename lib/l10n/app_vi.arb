@@ -395,5 +395,13 @@
     "description": "Empty-deck tertiary action opening the import flow (WBS 5.2.5)."
   },
   "somethingWentWrongMessage": "Đã có lỗi xảy ra.",
-  "cardCountLabel": "{count, plural, other{{count} thẻ}}"
+  "cardCountLabel": "{count, plural, other{{count} thẻ}}",
+  "reviewModeTitle": "Ôn tập",
+  "studyExitLabel": "Thoát",
+  "studyProgressLabel": "{current} trên {total}",
+  "meaningLabel": "Nghĩa",
+  "reviewPreviousLabel": "Trước",
+  "reviewNextLabel": "Tiếp",
+  "reviewFinishLabel": "Hoàn thành",
+  "reviewNoSessionMessage": "Không có phiên học nào đang diễn ra."
 }
