@@ -343,7 +343,45 @@ case); `.valueOrNull` banned (use `.asData?.value`); gate analyze is
 
 **Parity-pipeline reality:** the <3% bar needs the study route + `parity_fixtures`
 + a Playwright spec + `flutter build web` (tool/parity harness exists and is
-runnable: Playwright installed, `build_web.mjs`). **Next priority: wire the study
-route + start entry + a Review parity fixture and actually RUN the parity harness
-to get a real Review % (or record a pipeline blocker) — validate the pipeline
-end-to-end before building the other 4 mode screens unmeasured.**
+runnable: Playwright installed, `build_web.mjs`). Study route + dispatcher landed
+(270a1b1), making Review reachable.
+
+## ⛔ HARD STOP — web build blocker (needs owner decision)
+
+Ran the parity web build (`tool/parity/build_web.mjs` → `flutter build web
+--release --target=lib/app/dev/parity_main.dart`). It **fails to compile**:
+`dart2js` cannot represent 64-bit integer literals in JavaScript —
+
+```
+lib/core/random/deterministic_random.dart:12  0x9E3779B97F4A7C15  (1.6, shipped)
+lib/core/random/deterministic_random.dart:13  0x2545F4914F6CDD1D  (1.6, shipped)
+lib/domain/study_modes/round_order_policy.dart:27  0xcbf29ce484222325 (mine, 5.5.3)
+```
+
+**Diagnosis:** `DeterministicRandom`/`deterministicShuffle` (wave 1.6) uses
+xorshift64* with >2^53 literals + 64-bit shifts — web-incompatible. It was
+**used only by nothing** until now, so it was tree-shaken out of the web build
+(that's why library/first-run parity compiled). The study wave made it **live**
+(`round_order_policy` → `deterministicShuffle`), surfacing the pre-existing bug.
+This blocks **the parity web build AND any Flutter-web release**, not just parity.
+
+**Why this is an owner decision, not a unilateral fix:** unblocking needs
+web-safe integer arithmetic (32-bit split multiply / a mulberry32-style PRNG) in
+`deterministic_random.dart` — foundational 1.6 code. That **changes the produced
+sequences**, breaking `deterministic_random_test`'s asserted values
+(`[5,6,2,0,4,3,1,7]`, …) and **resetting the documented "persisted orders replay
+byte-identically forever" contract**. Nothing is persisted in production yet, so
+now is the *safe* time to reset it — but it's a foundational, repo-wide
+determinism decision (and `round_order_policy`'s FNV seed needs the same
+web-safe rewrite).
+
+**Decision requested:** OK to re-architect `DeterministicRandom` + `roundOrderSeed`
+to web-safe integer math (accepting the determinism-value reset + updating the
+1.6 tests to property-based)? On approval I implement it, then the whole UI
+parity pipeline unblocks. Until then, **all UI kit-parity measurement is blocked**
+(can't build web), so no `<3%` can be measured for any study screen.
+
+**Everything else is unaffected:** the MemoX gate (`node tool/verify/run.mjs`)
+does not build web, so all 32 commits are gate-green; the app runs on native.
+Study screens can keep being built (widget-tested) but not parity-measured until
+this is resolved.
