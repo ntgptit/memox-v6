@@ -262,6 +262,8 @@
     "description": "Open-deck (WBS 5.2.4B) copy."
   },
   "createDeckTitle": "Tạo deck",
+  "renameDeckTitle": "Đổi tên deck",
+  "renameDeckLabel": "Đổi tên",
   "@createDeckTitle": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
   },

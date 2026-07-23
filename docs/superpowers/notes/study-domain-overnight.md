@@ -1,5 +1,23 @@
 # Study-wave domain — overnight autonomous run
 
+## ⚑ 6.1 reset-deck-progress — data-layer gap (deferred; not a guess)
+reset-deck-progress.md §1 requires an **atomic** reset of every card's SRS
+progress in a deck scope ("Reset atomic cho confirmed scope"; "No partial reset")
+— Leaf = direct cards, Parent = descendant subtree. But:
+- `LearningProgressRepository.resetCard(cardId, {newProgressId, at})` is per-card;
+- `FlashcardRepository` exposes only direct-deck queries (`watchByDeck` /
+  `pageByDeck`) — no **subtree**-all-cards id list;
+- there is no atomic batch-reset op.
+A use-case-side `resetCard`-per-card loop would be non-atomic (a mid-loop failure
+leaves a partial reset), violating the spec, and the Parent case has no subtree
+card query at all. So reset-progress needs a DATA-LAYER slice first: a
+`decks.drift` query for a subtree's card ids + an atomic
+`resetSubtreeProgress(deckId, {...})` repo/DAO op (one transaction). Deferred to a
+data-layer package rather than shipping a spec-violating non-atomic reset. The
+rename/move/delete use cases (06e5e36 / ab7ae21 / 1937552) are done; 6.1 proceeds
+to the deck-settings UI (wiring rename + delete).
+
+
 ## ✅ MILESTONE (2026-07-23): study wave functionally complete — PR #99 ready for review
 The full newLearning pipeline (WBS 5.4 → 5.7.4) is built, gate-green, and pushed
 (`feat/study-domain`, 77 commits, tip `48ca4f7`). PR #99 title/body updated +

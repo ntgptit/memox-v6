@@ -326,6 +326,14 @@
   "@createDeckTitle": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
   },
+  "renameDeckTitle": "Rename deck",
+  "@renameDeckTitle": {
+    "description": "Rename-deck dialog title (WBS 6.1)."
+  },
+  "renameDeckLabel": "Rename",
+  "@renameDeckLabel": {
+    "description": "Deck app-bar action that opens the rename dialog (WBS 6.1)."
+  },
   "insideLibraryLabel": "Inside Library",
   "@insideLibraryLabel": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."

@@ -7,6 +7,7 @@ import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/rename_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_start_notifier.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
@@ -18,6 +19,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
@@ -41,6 +43,18 @@ class DeckDetailScreen extends ConsumerWidget {
         title: deck.value?.name ?? '',
         onBack: () => context.backFromDeck(),
         backLabel: l10n.backLabel,
+        actions: <Widget>[
+          if (deck.value case final d?)
+            MxIconButton.toolbar(
+              icon: Symbols.edit_rounded,
+              semanticLabel: l10n.renameDeckLabel,
+              onPressed: () => showRenameDeckDialog(
+                context,
+                deckId: d.id,
+                currentName: d.name,
+              ),
+            ),
+        ],
       ),
       scrollable: false,
       body: _DeckDetailBody(deckId: deckId),
