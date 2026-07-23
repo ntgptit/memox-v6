@@ -422,5 +422,16 @@
   "fillCheckLabel": "Kiểm tra",
   "fillHelpLabel": "Trợ giúp",
   "fillHintMessage": "Gợi ý: {count} ký tự, bắt đầu bằng {start}",
-  "fillAnswerRevealLabel": "Đáp án: {answer}"
+  "fillAnswerRevealLabel": "Đáp án: {answer}",
+  "studyResultTitle": "Kết quả",
+  "studyResultCompleteTitle": "Hoàn thành phiên học",
+  "studyResultReviewedText": "Bạn đã ôn {count} thẻ trong phiên này.",
+  "studyResultCardsLabel": "thẻ",
+  "studyResultCorrectLabel": "đúng",
+  "studyResultContinueLabel": "Tiếp tục học",
+  "studyResultDoneLabel": "Xong",
+  "studyFinalizingLabel": "Đang hoàn tất…",
+  "studyFinalizeErrorTitle": "Không thể lưu kết quả",
+  "studyFinalizeErrorMessage": "Phiên học đã xong nhưng chưa cập nhật được lịch ôn. Hãy thử lại để phiên này được tính.",
+  "studyRetryLabel": "Thử lại"
 }

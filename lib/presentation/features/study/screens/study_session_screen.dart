@@ -7,6 +7,8 @@ import 'package:memox_v6/presentation/features/study/screens/fill_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/guess_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/recall_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/review_screen.dart';
+import 'package:memox_v6/presentation/features/study/screens/study_result_screen.dart';
+import 'package:memox_v6/presentation/features/study/viewmodels/study_result_notifier.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
@@ -29,6 +31,21 @@ class _StudyStageDispatch extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+
+    // Finalize once when the session completes.
+    ref.listen(studySessionRuntimeProvider, (_, next) {
+      if (next.asData?.value?.isComplete ?? false) {
+        ref.read(studyResultProvider.notifier).finalize();
+      }
+    });
+
+    // The result outlives the active session (finalize clears it), so show it
+    // whenever finalize has started, failed or produced a committed summary.
+    final result = ref.watch(studyResultProvider);
+    if (result.isLoading || result.hasError || result.asData?.value != null) {
+      return const StudyResultScreen();
+    }
+
     return MxAsyncBuilder<StudyRuntimeState?>(
       value: ref.watch(studySessionRuntimeProvider),
       loadingLabel: l10n.loadingLabel,
@@ -40,6 +57,8 @@ class _StudyStageDispatch extends ConsumerWidget {
             title: l10n.reviewNoSessionMessage,
           );
         }
+        // A completed session shows the result while finalize runs.
+        if (runtime.isComplete) return const StudyResultScreen();
         return switch (runtime.currentMode) {
           StudyModeType.review => const ReviewScreen(),
           StudyModeType.guess => const GuessScreen(),

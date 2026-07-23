@@ -604,5 +604,54 @@
         "type": "String"
       }
     }
+  },
+  "studyResultTitle": "Results",
+  "@studyResultTitle": {
+    "description": "Study Result screen title (WBS 5.6.13)."
+  },
+  "studyResultCompleteTitle": "Session complete",
+  "@studyResultCompleteTitle": {
+    "description": "Study Result hero title on a finished session."
+  },
+  "studyResultReviewedText": "You reviewed {count} cards this session.",
+  "@studyResultReviewedText": {
+    "description": "Study Result hero summary of how many cards were reviewed.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "studyResultCardsLabel": "cards",
+  "@studyResultCardsLabel": {
+    "description": "Label under the reviewed-count stat on the Study Result."
+  },
+  "studyResultCorrectLabel": "correct",
+  "@studyResultCorrectLabel": {
+    "description": "Label under the accuracy stat on the Study Result."
+  },
+  "studyResultContinueLabel": "Continue studying",
+  "@studyResultContinueLabel": {
+    "description": "Study Result primary action returning to the study entry."
+  },
+  "studyResultDoneLabel": "Done",
+  "@studyResultDoneLabel": {
+    "description": "Study Result secondary action returning to the library."
+  },
+  "studyFinalizingLabel": "Finalizing…",
+  "@studyFinalizingLabel": {
+    "description": "Shown while a completed session's results are being committed."
+  },
+  "studyFinalizeErrorTitle": "Couldn’t save your results",
+  "@studyFinalizeErrorTitle": {
+    "description": "Study Result finalize-error title."
+  },
+  "studyFinalizeErrorMessage": "Your session finished, but we couldn’t update your schedule. Retry so this session counts.",
+  "@studyFinalizeErrorMessage": {
+    "description": "Study Result finalize-error body."
+  },
+  "studyRetryLabel": "Retry",
+  "@studyRetryLabel": {
+    "description": "Retries a failed finalize on the Study Result."
   }
 }
