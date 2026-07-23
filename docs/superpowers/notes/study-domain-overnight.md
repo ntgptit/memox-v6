@@ -849,3 +849,69 @@ timeouts. Mitigations for the next iterations: run `node tool/verify/run.mjs`
 without backgrounding, kill stale dart/flutter_tester before gating, and for
 green-verified changes use `git commit --no-verify` (documented) when the hook
 only re-runs an already-passed gate.
+
+---
+
+## ⛔ RUN PAUSED — critical path is owner-decision-blocked (2026-07-23)
+
+After the session-start CTA (a08be31), the next planned package was "deck Study
+session-type eligibility" (auto-pick newLearning vs dueReview from deck counts).
+The backend audit turned this into a **spec conflict**, and a sweep of the whole
+remaining backlog found **no buildable package left** that does not either
+violate a spec, invent SRS/session semantics, or need an owner decision. Details:
+
+**Why the auto-pick is wrong.** `study-deck.md` §4–5 makes the session **type a
+user selection**: line 78 "session type … không được suy từ label màn hình"
+(must not be inferred), line 87 selecting a tile does not auto-start, line 97 no
+auto-switch of type when a selection is invalid. Deriving the type from
+new/due counts silently picks for the user — against the contract. The count
+source itself exists and is fine (`LoadStudyCandidatesUseCase` →
+`StudyCandidates{newCount,dueCount}`); the problem is the semantics, not the data.
+
+**The spec-correct surface has no kit shot.** The user-facing session-type picker
+(`New learning / Due review / Relearn / Practice` tiles + `Start session`,
+study-deck.md §5–7) has **no kit shot**. The kit's only `mode-picker` shots
+(`mode-picker--default/not-enough/scope-dropdown`) are explicitly the **Practice
+game picker** ("start a Practice Session … does not activate/schedule cards";
+not-enough = <5 distinct meanings). So building the session-type picker means
+inventing its composition → a design/owner decision.
+
+**Practice-start (to unblock the kit Practice picker) is blocked too.**
+`StartStudySessionUseCase._cardIdsFor` raises `unsupported-session-type` for
+practice/relearn, and `LearningProgressRepository` has **no scope-wide
+eligible-active-card query** (only due/new via `studyCandidatesInScope`). The
+practice card-source ("eligible scope do user chọn", §85) is underspecified.
+
+**Everything else is blocked (re-confirmed this iteration):**
+- 5.7.3 Start/continue handoffs, 5.7.4 first-learning E2E, 5.7.5 release gate — all
+  depend on the session-type picker/CTA **and** 5.6.12 (owner decision #3).
+- Today due-CTA real start → library-wide start scope (owner decision #6).
+- Today remaining states (not-studied / goal-met / streak-reset) and the
+  dashboard Goal/Streak/Recent sections → need Goal/Streak/time-studied
+  projections that do not exist (`load-today-dashboard.md` §7 "không tự tính").
+- 5.6.6 Match, 5.6.12 exit/resume, Recall durable timer → board/timer
+  session-state persistence (owner decision #3) + Recall countdown location (#4).
+- relearn start / Review-missed relearn → GAP-A (missed set / checkpoint source).
+- result/finalize goal+streak+time + StreakGoalCard → missing sources.
+
+### OWNER DECISIONS NEEDED to resume (blocking the first-learning release path)
+1. **Session-type picker surface** (NEW, #7): how does the user choose
+   `newLearning` vs `dueReview` (vs relearn/practice)? study-deck.md §5 specs the
+   tiles + Start lifecycle, but there is **no kit shot**. Either (a) provide a kit
+   shot for a session-type picker, or (b) approve building it to the business spec
+   with no parity gate (design-system components only), or (c) approve a minimal
+   non-picker rule (e.g. CTA defaults to newLearning, a separate "Review due"
+   entry for dueReview). Until then the deck **Study** CTA stays a documented
+   stand-in that starts `newLearning` only.
+2. **#3 board/timer session-state persistence** — blocks Match (5.6.6) and
+   exit/resume (5.6.12), which in turn block 5.7.3–5.7.5.
+3. **#6 library-wide start-review scope** — `StartStudySessionUseCase` is
+   deck-scoped; Today's due-CTA needs a library-wide start.
+4. **Practice card-source semantics** — which cards are practice-eligible in a
+   scope, and the scope-wide query to fetch them; unblocks practice-start and the
+   kit Practice mode-picker.
+5. Pre-existing open decisions still stand: #1 CJK harness font, #2 ProgressHeader
+   8px vs MxProgress 4px, #4 Recall countdown location, #5 Fill prompt-card.
+
+Branch tip `a08be31` is **full-gate green** (build_runner, format, analyze,
+flutter test). Loop stopped here rather than guess past a spec.
