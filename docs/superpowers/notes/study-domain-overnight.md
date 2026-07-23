@@ -395,3 +395,18 @@ parity pipeline unblocks. Until then, **all UI kit-parity measurement is blocked
 does not build web, so all 32 commits are gate-green; the app runs on native.
 Study screens can keep being built (widget-tested) but not parity-measured until
 this is resolved.
+
+## 🎯 Parity pipeline PROVEN end-to-end (777accb)
+
+First study screen measured against the kit. `parity fixture MX-VIS-050` (resumed
+newLearning session, school/학교) + `review.spec.ts` (resume deep-link to /study)
++ the harness (flow_lint + `flutter build web` + Playwright + diff). Fixed
+`deepLinkEntry` (fixture must be in the root query for `parity_main`). Review
+layout tuned to the kit (equal-height meaning/term cards).
+
+**Measured (evidence uncommitted):** Review **LIGHT PASS 2.94%** (<3% ✓);
+**DARK 4.04%** — near-miss, fine card-edge rendering in dark (library dark passes
+with the same MxCard, so it's position/height, not border-style). **Next: tune
+dark <3%** (card height ratio / shadow), then Review affordances, then the other
+4 mode screens (pipeline now repeatable). Parity value already paid off — it
+caught the bottom-bar (buttons→swipe hint) and card-height divergences.
