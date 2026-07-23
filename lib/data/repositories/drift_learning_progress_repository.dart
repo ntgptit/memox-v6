@@ -1,4 +1,5 @@
 import 'package:memox_v6/core/errors/app_failure.dart';
+import 'package:memox_v6/core/ids/id_generator.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/data/database/sqlite_error_mapper.dart';
 import 'package:memox_v6/data/mappers/progress_mapper.dart';
@@ -79,6 +80,32 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
           at.millisecondsSinceEpoch,
           at.millisecondsSinceEpoch,
         );
+      });
+    });
+  }
+
+  @override
+  Future<int> resetSubtreeProgress(
+    String deckId, {
+    required IdGenerator idGenerator,
+    required DateTime at,
+  }) {
+    return mapSqliteConflicts(entity: 'learning_progress', () async {
+      return _database.transaction(() async {
+        final cardIds = await _database.deckDao.subtreeCardIds(deckId).get();
+        final millis = at.millisecondsSinceEpoch;
+        for (final cardId in cardIds) {
+          await _database.learningProgressDao.deleteProgressByCard(cardId);
+          await _database.learningProgressDao.insertProgress(
+            idGenerator.newId(),
+            cardId,
+            0,
+            null,
+            millis,
+            millis,
+          );
+        }
+        return cardIds.length;
       });
     });
   }

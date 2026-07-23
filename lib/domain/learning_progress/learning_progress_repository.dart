@@ -1,3 +1,4 @@
+import 'package:memox_v6/core/ids/id_generator.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress.dart';
 import 'package:memox_v6/domain/study_session/study_attempt.dart';
 
@@ -29,6 +30,17 @@ abstract interface class LearningProgressRepository {
   Future<void> resetCard(
     String cardId, {
     required String newProgressId,
+    required DateTime at,
+  });
+
+  /// Resets every card in a deck's subtree to Box 0 atomically (WBS 6.1;
+  /// `reset-deck-progress.md`) — `resetCard`'s effect applied across the whole
+  /// scope in one commit, so a failure leaves no partial reset. Only SRS
+  /// progress changes; content and hierarchy are untouched. Returns the number
+  /// of cards reset. [idGenerator] mints each fresh progress row's id.
+  Future<int> resetSubtreeProgress(
+    String deckId, {
+    required IdGenerator idGenerator,
     required DateTime at,
   });
 

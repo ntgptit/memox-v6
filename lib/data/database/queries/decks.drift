@@ -92,3 +92,14 @@ WITH RECURSIVE subtree (id) AS (
 )
 SELECT COUNT(*) AS deck_count FROM decks
 WHERE parent_id IN (SELECT id FROM subtree);
+
+-- The active card ids in a deck's whole subtree — the reset-progress scope
+-- (reset-deck-progress.md); Leaf = direct cards, Parent = descendant cards.
+subtreeCardIds:
+WITH RECURSIVE subtree (id) AS (
+  SELECT :deckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+)
+SELECT id FROM flashcards
+WHERE deck_id IN (SELECT id FROM subtree) AND deleted_at IS NULL;
