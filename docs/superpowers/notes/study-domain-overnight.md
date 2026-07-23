@@ -695,3 +695,34 @@ attempts, then `finalizeSession` (idempotent). Practice → no terminal SRS grad
 Goal/streak contribution computation may need its own audit; defer + record if it
 needs a subsystem not built. **Part 3:** the Study Result screen (kit shots exist,
 §10 wants <3% parity — the StudyShell fix applies).
+
+## 5.6.13 parts 2b — finalize backend COMPLETE (de4b998, 5c7afd7)
+
+- **2b-i (de4b998):** `StudySessionRepository.attempts(sessionId)` read (over the
+  existing `listAttemptsForSession` drift query + mapper). Resolved the terminal-
+  attempt `modeId` question: verified nothing interprets `attempt.modeId` as a
+  mode enum, so the aggregate terminal attempt carries the session's mode-plan id
+  as provenance; its idempotencyKey is the spec's `terminalOutcomeId`
+  (`terminal:<sessionId>:<cardId>`).
+- **2b-ii (5c7afd7):** `FinalizeStudySessionUseCase` — reads committed attempts →
+  aggregates one terminal grade per card → builds the summary → when
+  `scheduleSrs`, applies each card's outcome exactly once via
+  `ApplyTerminalOutcomeUseCase`, **branching on the card's CURRENT box** (Box 0 →
+  activate SRS8-001; Box 1–8 → applyGrade SRS8-003–024). Branching on the current
+  box is what makes finalize retry-safe: a retry of an already-activated card
+  takes the applyGrade path where the terminal idempotency key no-ops (SRS8-011),
+  so there is no double-schedule and no `already-activated` throw. Practice
+  (scheduleSrs false) finalizes without SRS (SRS8-027). Goal/streak contributions
+  deferred (null). Wired via `finalizeStudySessionUseCaseProvider`. 6 fake-based
+  tests (activation-once, Box2-wrong→Box1, Box2-correct→Box3, idempotent retry,
+  practice-no-SRS, incomplete-rejected). Gate green.
+
+**Finalize backend is complete.** Remaining for 5.6.13: **part 3 — the Study
+Result screen** (kit `study-result--{standard,goal-met,goal-missed,many-wrong,
+finalizing,finalize-error,retry-finalize}` shots exist; the StudyShell alignment
+fix applies so light-parity is achievable). The result screen renders the
+committed `StudySessionSummary` (reviewed/accuracy/missed) + Continue/Done/Review-
+missed next actions. Wiring the answer command to trigger finalize on
+`isComplete` and navigate to the result is a small integration step for part 3.
+Deferred still: goal/streak contribution computation; the `Review missed` →
+relearn-session start (GAP-A).
