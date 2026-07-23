@@ -67,9 +67,7 @@ void main() {
   );
 
   test('a new card finishing the pipeline activates to Box 1 once', () async {
-    final sessions = _FakeSessions(
-      attempts: [_attempt('c1', 'correct')],
-    );
+    final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
     final progress = _FakeProgress({'c1': _progressAt(box: 0)});
 
     final summary = await build(sessions, progress).call(completed(session()));
@@ -90,9 +88,10 @@ void main() {
     );
     final progress = _FakeProgress({'c1': _progressAt(box: 2)});
 
-    await build(sessions, progress).call(
-      completed(session(type: SessionType.dueReview)),
-    );
+    await build(
+      sessions,
+      progress,
+    ).call(completed(session(type: SessionType.dueReview)));
 
     expect(progress.boxOf('c1'), 1, reason: 'Box 2 wrong → Box 1 (SRS8-018)');
     expect(progress.lapsesOf('c1'), 1);
@@ -102,34 +101,39 @@ void main() {
     final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
     final progress = _FakeProgress({'c1': _progressAt(box: 2)});
 
-    await build(sessions, progress).call(
-      completed(session(type: SessionType.dueReview)),
-    );
+    await build(
+      sessions,
+      progress,
+    ).call(completed(session(type: SessionType.dueReview)));
 
     expect(progress.boxOf('c1'), 3, reason: 'Box 2 correct → Box 3 (SRS8-017)');
   });
 
-  test('a finalize retry schedules each card exactly once (idempotent)', () async {
-    final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
-    final progress = _FakeProgress({'c1': _progressAt(box: 0)});
-    final useCase = build(sessions, progress);
+  test(
+    'a finalize retry schedules each card exactly once (idempotent)',
+    () async {
+      final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
+      final progress = _FakeProgress({'c1': _progressAt(box: 0)});
+      final useCase = build(sessions, progress);
 
-    await useCase.call(completed(session()));
-    await useCase.call(completed(session()));
+      await useCase.call(completed(session()));
+      await useCase.call(completed(session()));
 
-    // The terminal idempotency key made the second apply a no-op: the card
-    // activated to Box 1 and did not advance again.
-    expect(progress.boxOf('c1'), 1);
-    expect(progress.applyCount, 1);
-  });
+      // The terminal idempotency key made the second apply a no-op: the card
+      // activated to Box 1 and did not advance again.
+      expect(progress.boxOf('c1'), 1);
+      expect(progress.applyCount, 1);
+    },
+  );
 
   test('a practice session schedules no SRS but still finalizes', () async {
     final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
     final progress = _FakeProgress({'c1': _progressAt(box: 2)});
 
-    await build(sessions, progress).call(
-      completed(session(type: SessionType.practice, scheduleSrs: false)),
-    );
+    await build(
+      sessions,
+      progress,
+    ).call(completed(session(type: SessionType.practice, scheduleSrs: false)));
 
     expect(progress.applyCount, 0, reason: 'no SRS scheduling for practice');
     expect(progress.boxOf('c1'), 2);
