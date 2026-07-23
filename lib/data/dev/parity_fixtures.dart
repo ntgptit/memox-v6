@@ -40,6 +40,7 @@ class ParityFixtures {
     'MX-VIS-049',
     'MX-VIS-050',
     'MX-VIS-051',
+    'MX-VIS-052',
   ];
 
   /// Seeds [id] over a reset database.
@@ -73,6 +74,9 @@ class ParityFixtures {
         return;
       case 'MX-VIS-051':
         await _seedActiveGuessSession();
+        return;
+      case 'MX-VIS-052':
+        await _seedActiveRecallSession();
         return;
       case 'MX-VIS-049':
         // The Card Editor journey starts at a true fresh install. The
@@ -310,6 +314,103 @@ class ParityFixtures {
       'fx-gs-session',
       2,
       guessRoundIndex,
+      0,
+      '[]',
+      '{}',
+      1,
+      fixedInstantMs,
+    );
+  }
+
+  /// An active newLearning session resumed into Recall, stage 3 (Review → Match →
+  /// Guess → Recall), card 1/5 — the kit `recall-mode` states (WBS 5.6.8). The
+  /// current card is the shot's `친구` / `friend`. The spec reveals the answer
+  /// (tap Show) to reach the stable `recall-mode--revealed` state before
+  /// capturing, since the before-reveal countdown ticks. Seeded as data (session,
+  /// five card snapshots, the round order and the recall-stage checkpoint) so
+  /// navigating to the study route resumes into Recall without a start flow.
+  Future<void> _seedActiveRecallSession() async {
+    await _seedActivePair();
+    await _database.deckDao.insertDeck(
+      'fx-rc-deck',
+      'fx-lp-1',
+      null,
+      'People',
+      'people',
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+
+    const cards = <(String, String, String)>[
+      ('fx-rc-c0', '친구', 'friend'),
+      ('fx-rc-c1', '가족', 'family'),
+      ('fx-rc-c2', '이웃', 'neighbor'),
+      ('fx-rc-c3', '동료', 'colleague'),
+      ('fx-rc-c4', '손님', 'guest'),
+    ];
+    for (final (id, term, meaning) in cards) {
+      await _database.flashcardDao.insertFlashcard(
+        id,
+        'fx-rc-deck',
+        term,
+        term,
+        meaning,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+      await _database.learningProgressDao.insertProgress(
+        'p-$id',
+        id,
+        0,
+        null,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+    }
+
+    await _database.studySessionDao.insertSession(
+      'fx-rc-session',
+      'newLearning',
+      'fx-rc-deck',
+      'subtree',
+      'active',
+      1,
+      fixedInstantMs,
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+    for (var i = 0; i < cards.length; i++) {
+      final (id, term, meaning) = cards[i];
+      await _database.sessionSnapshotDao.insertSessionCard(
+        'sc-$id',
+        'fx-rc-session',
+        id,
+        i,
+        term,
+        meaning,
+        1,
+        0,
+        0,
+        fixedInstantMs,
+      );
+    }
+    // Recall is stage index 3; its round carries a distinct session-global round
+    // index. The checkpoint and its round order share it so the loader resolves
+    // this order for stage 3, card 0.
+    const recallRoundIndex = 4;
+    await _database.sessionSnapshotDao.insertRoundOrder(
+      'fx-rc-order',
+      'fx-rc-session',
+      recallRoundIndex,
+      1,
+      jsonEncode(cards.map((card) => card.$1).toList()),
+      fixedInstantMs,
+    );
+    await _database.sessionCheckpointDao.upsertCheckpoint(
+      'fx-rc-checkpoint',
+      'fx-rc-session',
+      3,
+      recallRoundIndex,
       0,
       '[]',
       '{}',
