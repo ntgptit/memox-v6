@@ -7,6 +7,7 @@ import 'package:memox_v6/presentation/features/today/routes/today_routes.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
 import 'package:memox_v6/presentation/features/flashcard/routes/flashcard_routes.dart';
 import 'package:memox_v6/presentation/features/language_pair/routes/language_pair_routes.dart';
+import 'package:memox_v6/presentation/features/search/routes/search_routes.dart';
 import 'package:memox_v6/presentation/features/study/routes/study_routes.dart';
 
 /// Builds a fresh router. Production resolves it through
@@ -74,6 +75,7 @@ GoRouter createAppRouter({
       ...deckDetailRoutes(),
       ...flashcardRoutes(),
       ...studyRoutes(),
+      ...searchRoutes(),
     ],
     errorBuilder: (context, state) => const RouteNotFoundScreen(),
   );

@@ -30,4 +30,7 @@ abstract final class RoutePaths {
   /// The active study session (WBS 5.6). Top-level, full-screen: it covers the
   /// tab bar and shows the current stage's mode screen.
   static const String study = '/study';
+
+  /// Library search (WBS 10.2). Top-level, full-screen over the tab bar.
+  static const String search = '/search';
 }

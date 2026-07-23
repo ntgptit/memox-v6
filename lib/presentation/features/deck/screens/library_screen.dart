@@ -12,6 +12,7 @@ import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_deck_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
@@ -36,7 +37,16 @@ class LibraryScreen extends StatelessWidget {
     // owns the persistent tab bar for every root destination. The FAB is
     // its own consumer so the shell stays template-only.
     return MxScaffold(
-      appBar: MxContextualAppBar(title: l10n.libraryTitle),
+      appBar: MxContextualAppBar(
+        title: l10n.libraryTitle,
+        actions: <Widget>[
+          MxIconButton.toolbar(
+            icon: Symbols.search_rounded,
+            semanticLabel: l10n.searchLabel,
+            onPressed: () => context.pushSearch(),
+          ),
+        ],
+      ),
       scrollable: false,
       fab: const _LibraryFab(),
       body: const _LibraryBody(),

@@ -42,6 +42,9 @@ extension AppNavigation on BuildContext {
   void pushDeckDetail(String deckId) =>
       GoRouter.of(this).push(RoutePaths.deckDetail(deckId));
 
+  /// Opens Library search (WBS 10.2).
+  void pushSearch() => GoRouter.of(this).push(RoutePaths.search);
+
   /// Pushes the Card Editor for creating a card in [deckId].
   void pushNewCard(String deckId) =>
       GoRouter.of(this).push(RoutePaths.newCard(deckId));

@@ -220,6 +220,22 @@
   "@studyModesLabel": {
     "description": "Settings entry + title for the Practice mode preferences (WBS 8.3)."
   },
+  "searchLabel": "Search",
+  "@searchLabel": {
+    "description": "Library search action + screen title (WBS 10.2)."
+  },
+  "searchPlaceholder": "Search decks and cards",
+  "@searchPlaceholder": {
+    "description": "Library search input placeholder (WBS 10.2)."
+  },
+  "searchPromptMessage": "Search your decks and cards by name.",
+  "@searchPromptMessage": {
+    "description": "Neutral prompt shown before any search query (WBS 10.2)."
+  },
+  "searchNoResultsMessage": "No decks or cards match your search.",
+  "@searchNoResultsMessage": {
+    "description": "Shown when a search returns no hits (WBS 10.2)."
+  },
   "modeDefaultLabel": "Default",
   "@modeDefaultLabel": {
     "description": "Badge marking the default Practice mode (WBS 8.3)."
