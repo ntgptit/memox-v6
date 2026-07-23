@@ -263,6 +263,7 @@
   },
   "createDeckTitle": "Tạo deck",
   "renameDeckTitle": "Đổi tên deck",
+  "deckSettingsLabel": "Tuỳ chọn deck",
   "renameDeckLabel": "Đổi tên",
   "deleteDeckLabel": "Xoá",
   "moveDeckLabel": "Chuyển ra Thư viện",

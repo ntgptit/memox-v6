@@ -97,7 +97,9 @@ void main() {
     await tester.pumpWidget(app(RoutePaths.deckDetail('child')));
     await pumpStreams(tester);
 
-    await tester.tap(find.byIcon(Symbols.drive_file_move_rounded));
+    await tester.tap(find.byIcon(Symbols.more_vert_rounded));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Move to Library'));
     await pumpStreams(tester);
 
     expect(find.text('Move “Child”?'), findsOneWidget);
@@ -113,6 +115,9 @@ void main() {
     await tester.pumpWidget(app(RoutePaths.deckDetail('root')));
     await pumpStreams(tester);
 
+    await tester.tap(find.byIcon(Symbols.more_vert_rounded));
+    await pumpStreams(tester);
+    expect(find.text('Move to Library'), findsNothing);
     expect(find.byIcon(Symbols.drive_file_move_rounded), findsNothing);
 
     await disposeAndFlushStreams(tester);

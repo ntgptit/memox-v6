@@ -330,6 +330,10 @@
   "@renameDeckTitle": {
     "description": "Rename-deck dialog title (WBS 6.1)."
   },
+  "deckSettingsLabel": "Deck options",
+  "@deckSettingsLabel": {
+    "description": "Deck app-bar overflow action that opens the deck-settings action sheet (WBS 6.1)."
+  },
   "renameDeckLabel": "Rename",
   "@renameDeckLabel": {
     "description": "Deck app-bar action that opens the rename dialog (WBS 6.1)."

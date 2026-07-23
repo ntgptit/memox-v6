@@ -105,7 +105,9 @@ void main() {
     await tester.pumpWidget(app());
     await pumpStreams(tester);
 
-    await tester.tap(find.byIcon(Symbols.restart_alt_rounded));
+    await tester.tap(find.byIcon(Symbols.more_vert_rounded));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Reset progress'));
     await pumpStreams(tester);
 
     expect(find.text('Reset learning progress?'), findsOneWidget);
@@ -121,7 +123,9 @@ void main() {
     await tester.pumpWidget(app());
     await pumpStreams(tester);
 
-    await tester.tap(find.byIcon(Symbols.restart_alt_rounded));
+    await tester.tap(find.byIcon(Symbols.more_vert_rounded));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Reset progress'));
     await pumpStreams(tester);
     await tester.tap(find.text('Keep progress'));
     await pumpStreams(tester);

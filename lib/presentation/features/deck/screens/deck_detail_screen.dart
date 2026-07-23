@@ -7,6 +7,7 @@ import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_settings_sheet.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/delete_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/move_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/rename_deck_dialog.dart';
@@ -47,47 +48,46 @@ class DeckDetailScreen extends ConsumerWidget {
         onBack: () => context.backFromDeck(),
         backLabel: l10n.backLabel,
         actions: <Widget>[
-          if (deck.value case final d?) ...<Widget>[
+          if (deck.value case final d?)
             MxIconButton.toolbar(
-              icon: Symbols.edit_rounded,
-              semanticLabel: l10n.renameDeckLabel,
-              onPressed: () => showRenameDeckDialog(
-                context,
-                deckId: d.id,
-                currentName: d.name,
-              ),
+              icon: Symbols.more_vert_rounded,
+              semanticLabel: l10n.deckSettingsLabel,
+              onPressed: () => _openDeckSettings(context, d),
             ),
-            if (d.parentId != null)
-              MxIconButton.toolbar(
-                icon: Symbols.drive_file_move_rounded,
-                semanticLabel: l10n.moveDeckLabel,
-                onPressed: () => showMoveToRootDialog(
-                  context,
-                  deckId: d.id,
-                  deckName: d.name,
-                ),
-              ),
-            MxIconButton.toolbar(
-              icon: Symbols.restart_alt_rounded,
-              semanticLabel: l10n.resetDeckProgressLabel,
-              onPressed: () => showResetDeckProgressDialog(
-                context,
-                deckId: d.id,
-                deckName: d.name,
-              ),
-            ),
-            MxIconButton.toolbar(
-              icon: Symbols.delete_rounded,
-              semanticLabel: l10n.deleteDeckLabel,
-              onPressed: () =>
-                  showDeleteDeckDialog(context, deckId: d.id, deckName: d.name),
-            ),
-          ],
         ],
       ),
       scrollable: false,
       body: _DeckDetailBody(deckId: deckId),
     );
+  }
+}
+
+/// Opens the deck-settings sheet, then the dialog for the chosen lifecycle
+/// action (WBS 6.1). The deck is captured from the app bar's watched value, so
+/// each dialog gets the current id + name.
+Future<void> _openDeckSettings(BuildContext context, Deck deck) async {
+  final action = await showDeckSettingsSheet(
+    context,
+    hasParent: deck.parentId != null,
+  );
+  if (!context.mounted || action == null) return;
+  switch (action) {
+    case DeckSettingsAction.rename:
+      await showRenameDeckDialog(
+        context,
+        deckId: deck.id,
+        currentName: deck.name,
+      );
+    case DeckSettingsAction.move:
+      await showMoveToRootDialog(context, deckId: deck.id, deckName: deck.name);
+    case DeckSettingsAction.resetProgress:
+      await showResetDeckProgressDialog(
+        context,
+        deckId: deck.id,
+        deckName: deck.name,
+      );
+    case DeckSettingsAction.delete:
+      await showDeleteDeckDialog(context, deckId: deck.id, deckName: deck.name);
   }
 }
 

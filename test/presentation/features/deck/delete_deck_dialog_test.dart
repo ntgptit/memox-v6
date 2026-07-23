@@ -86,7 +86,9 @@ void main() {
     await tester.pumpWidget(app());
     await pumpStreams(tester);
 
-    await tester.tap(find.byIcon(Symbols.delete_rounded));
+    await tester.tap(find.byIcon(Symbols.more_vert_rounded));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Delete'));
     await pumpStreams(tester);
 
     expect(find.text('Delete “Korean”?'), findsOneWidget);
@@ -107,7 +109,9 @@ void main() {
     await tester.pumpWidget(app());
     await pumpStreams(tester);
 
-    await tester.tap(find.byIcon(Symbols.delete_rounded));
+    await tester.tap(find.byIcon(Symbols.more_vert_rounded));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Delete'));
     await pumpStreams(tester);
     await tester.tap(find.text('Keep deck'));
     await pumpStreams(tester);

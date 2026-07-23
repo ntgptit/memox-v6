@@ -79,7 +79,9 @@ void main() {
     await tester.pumpWidget(app());
     await pumpStreams(tester);
 
-    await tester.tap(find.byIcon(Symbols.edit_rounded));
+    await tester.tap(find.byIcon(Symbols.more_vert_rounded));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Rename'));
     await pumpStreams(tester);
 
     // The dialog opens pre-filled with the current name.
@@ -120,7 +122,9 @@ void main() {
     await tester.pumpWidget(app());
     await pumpStreams(tester);
 
-    await tester.tap(find.byIcon(Symbols.edit_rounded));
+    await tester.tap(find.byIcon(Symbols.more_vert_rounded));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Rename'));
     await pumpStreams(tester);
     await tester.enterText(find.byType(TextField), 'Japanese');
     await pumpStreams(tester);
