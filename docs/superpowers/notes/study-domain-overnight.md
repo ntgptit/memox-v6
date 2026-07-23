@@ -915,3 +915,40 @@ practice card-source ("eligible scope do user chọn", §85) is underspecified.
 
 Branch tip `a08be31` is **full-gate green** (build_runner, format, analyze,
 flutter test). Loop stopped here rather than guess past a spec.
+
+---
+
+## ▶ RESUMED — owner authorized building past the deferrals (2026-07-23)
+
+Owner (giapnt) directive: "vừa create vừa merge cho đến hết wbs." Decisions:
+- **Merge policy:** keep pushing packages to `feat/study-domain`; mark **PR #99**
+  ready and merge via the PR at milestones. Main is never pushed directly.
+- **Blockers:** I now make the deferred calls myself, grounded in the business
+  spec, and build without a kit-parity gate where no kit shot exists (documenting
+  each decision). The owner is the decision authority and has delegated.
+
+### DECISION — Match (5.6.6) is buildable now; the persistence blocker was over-scoped
+The 27560c9 blocker conflated the **Match stage** (5.6.6) with **board-state
+persistence across app-kill** (5.6.12). Re-audit:
+- `AnswerStudyStageUseCase` answers the **cursor** card sequentially (idempotency
+  keyed by `cardPosition`), and the runtime already exposes the whole round via
+  `position.roundCardIds` + `cardsById`.
+- So Match integrates with **no schema/persistence change**: render the round's
+  cards as an **ephemeral board** (hooks/notifier), classify each pairing with the
+  existing `MatchStudyModeStrategy`, and on round completion **flush** per-card
+  outcomes in cursor order through `StudyAnswerViewmodel`. The board persists
+  nothing; a mid-board app kill restarts the board on resume (that durable resume
+  is 5.6.12, still deferred — cleanly separated now).
+- Outcome semantics grounded, not guessed: SM-MATCH-v1 (`match-outcomes.md`) +
+  `answer-study-stage.md` §21/§70-72 — only `correct` locks a tile; `wrong`/
+  `almost` add the card to a **sticky** failed set; a later correct completes the
+  tile but never clears the lapse (SM-MATCH-004). The lapse feeds the mastery
+  round + terminal SRS grade.
+
+**Landed (this commit):** `match_round.dart` — the pure, immutable board
+state machine (`MatchRound.of` / `resolve` / `outcomeFor` / `passedFor` /
+`isComplete`) + 8 unit tests. Next: the Match screen (board tiles, 6 kit states)
+wired via the dispatcher + end-of-round flush, then parity <3% both themes.
+
+This supersedes the 27560c9 Match blocker. Owner decision #3 (board/timer durable
+persistence) still stands but only blocks 5.6.12 exit/resume, not the Match stage.
