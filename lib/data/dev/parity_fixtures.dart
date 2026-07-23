@@ -41,6 +41,7 @@ class ParityFixtures {
     'MX-VIS-050',
     'MX-VIS-051',
     'MX-VIS-052',
+    'MX-VIS-053',
   ];
 
   /// Seeds [id] over a reset database.
@@ -77,6 +78,9 @@ class ParityFixtures {
         return;
       case 'MX-VIS-052':
         await _seedActiveRecallSession();
+        return;
+      case 'MX-VIS-053':
+        await _seedActiveFillSession();
         return;
       case 'MX-VIS-049':
         // The Card Editor journey starts at a true fresh install. The
@@ -411,6 +415,105 @@ class ParityFixtures {
       'fx-rc-session',
       3,
       recallRoundIndex,
+      0,
+      '[]',
+      '{}',
+      1,
+      fixedInstantMs,
+    );
+  }
+
+  /// An active newLearning session resumed into Fill, stage 4 (Review → Match →
+  /// Guess → Recall → Fill), card 1/5 — the kit `fill-mode--waiting` state (WBS
+  /// 5.6.9). The prompt shows the meaning `friend`; the learner types the term.
+  /// The waiting state shows only Latin content (meaning + placeholder), so it is
+  /// free of the CJK-term cap. Seeded as data (session, five card snapshots, the
+  /// round order and the fill-stage checkpoint) so navigating to the study route
+  /// resumes into Fill without a start flow.
+  Future<void> _seedActiveFillSession() async {
+    await _seedActivePair();
+    await _database.deckDao.insertDeck(
+      'fx-fl-deck',
+      'fx-lp-1',
+      null,
+      'Words',
+      'words',
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+
+    // The term (typed answer) is never shown in the waiting state; the meaning is
+    // the prompt. Latin content keeps the compared state renderable in the
+    // offline harness.
+    const cards = <(String, String, String)>[
+      ('fx-fl-c0', 'chingu', 'friend'),
+      ('fx-fl-c1', 'gajok', 'family'),
+      ('fx-fl-c2', 'iut', 'neighbor'),
+      ('fx-fl-c3', 'dongryo', 'colleague'),
+      ('fx-fl-c4', 'sonnim', 'guest'),
+    ];
+    for (final (id, term, meaning) in cards) {
+      await _database.flashcardDao.insertFlashcard(
+        id,
+        'fx-fl-deck',
+        term,
+        term,
+        meaning,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+      await _database.learningProgressDao.insertProgress(
+        'p-$id',
+        id,
+        0,
+        null,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+    }
+
+    await _database.studySessionDao.insertSession(
+      'fx-fl-session',
+      'newLearning',
+      'fx-fl-deck',
+      'subtree',
+      'active',
+      1,
+      fixedInstantMs,
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+    for (var i = 0; i < cards.length; i++) {
+      final (id, term, meaning) = cards[i];
+      await _database.sessionSnapshotDao.insertSessionCard(
+        'sc-$id',
+        'fx-fl-session',
+        id,
+        i,
+        term,
+        meaning,
+        1,
+        0,
+        0,
+        fixedInstantMs,
+      );
+    }
+    // Fill is stage index 4; the checkpoint and its round order share the round
+    // index so the loader resolves this order for stage 4, card 0.
+    const fillRoundIndex = 5;
+    await _database.sessionSnapshotDao.insertRoundOrder(
+      'fx-fl-order',
+      'fx-fl-session',
+      fillRoundIndex,
+      1,
+      jsonEncode(cards.map((card) => card.$1).toList()),
+      fixedInstantMs,
+    );
+    await _database.sessionCheckpointDao.upsertCheckpoint(
+      'fx-fl-checkpoint',
+      'fx-fl-session',
+      4,
+      fillRoundIndex,
       0,
       '[]',
       '{}',
