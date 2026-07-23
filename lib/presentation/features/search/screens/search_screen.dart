@@ -111,6 +111,17 @@ class _ResultRow extends StatelessWidget {
 
   final SearchResult result;
 
+  void _open(BuildContext context) {
+    // Hand off to the owning object's contract (open-search-result.md §2): a
+    // deck opens its detail, a card opens the card editor in its deck.
+    switch (result.type) {
+      case SearchResultType.deck:
+        context.pushDeckDetail(result.deckId);
+      case SearchResultType.card:
+        context.pushEditCard(result.deckId, result.id);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final icon = result.type == SearchResultType.deck
@@ -118,8 +129,7 @@ class _ResultRow extends StatelessWidget {
         : Symbols.style;
     return MxTappable(
       semanticLabel: result.displayText,
-      // Both open in their deck: a deck opens itself, a card opens its owner.
-      onTap: () => context.pushDeckDetail(result.deckId),
+      onTap: () => _open(context),
       child: Row(
         children: [
           const MxGap.s3(),
