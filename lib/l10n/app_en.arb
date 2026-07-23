@@ -359,6 +359,53 @@
   "@moveDeckConfirmLabel": {
     "description": "Confirm action on the move-deck dialog (move-deck.md §4)."
   },
+  "resetDeckProgressLabel": "Reset progress",
+  "@resetDeckProgressLabel": {
+    "description": "Deck app-bar action that opens the reset-progress confirm (WBS 6.1)."
+  },
+  "resetDeckProgressTitle": "Reset learning progress?",
+  "@resetDeckProgressTitle": {
+    "description": "Reset-progress confirm dialog title (reset-deck-progress.md §4)."
+  },
+  "resetDeckProgressBody": "This will reset progress for {cardCount, plural, =1{1 card} other{{cardCount} cards}} in “{deckName}”. Your cards and nested decks will stay in place.",
+  "@resetDeckProgressBody": {
+    "description": "Reset impact for a Leaf deck (reset-deck-progress.md §4).",
+    "placeholders": {
+      "cardCount": {
+        "type": "int"
+      },
+      "deckName": {
+        "type": "String"
+      }
+    }
+  },
+  "resetDeckProgressParentBody": "This will reset progress for {cardCount, plural, =1{1 card} other{{cardCount} cards}} across {deckCount, plural, =1{1 nested deck} other{{deckCount} nested decks}} in “{deckName}”. Your cards stay in place.",
+  "@resetDeckProgressParentBody": {
+    "description": "Reset impact for a Parent deck (reset-deck-progress.md §4).",
+    "placeholders": {
+      "cardCount": {
+        "type": "int"
+      },
+      "deckCount": {
+        "type": "int"
+      },
+      "deckName": {
+        "type": "String"
+      }
+    }
+  },
+  "resetDeckProgressNothingBody": "There’s no learning progress to reset in this deck yet.",
+  "@resetDeckProgressNothingBody": {
+    "description": "Nothing-to-reset state (reset-deck-progress.md §3)."
+  },
+  "resetDeckProgressKeepLabel": "Keep progress",
+  "@resetDeckProgressKeepLabel": {
+    "description": "Safe action on the reset-progress confirm (WBS 6.1)."
+  },
+  "resetDeckProgressConfirmLabel": "Reset progress",
+  "@resetDeckProgressConfirmLabel": {
+    "description": "Destructive confirm on the reset-progress dialog (WBS 6.1)."
+  },
   "deleteDeckTitle": "Delete “{deckName}”?",
   "@deleteDeckTitle": {
     "description": "Delete-deck confirm dialog title (WBS 6.1).",

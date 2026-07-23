@@ -10,6 +10,7 @@ import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.d
 import 'package:memox_v6/presentation/features/deck/widgets/delete_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/move_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/rename_deck_dialog.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/reset_deck_progress_dialog.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_start_notifier.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
@@ -66,6 +67,15 @@ class DeckDetailScreen extends ConsumerWidget {
                   deckName: d.name,
                 ),
               ),
+            MxIconButton.toolbar(
+              icon: Symbols.restart_alt_rounded,
+              semanticLabel: l10n.resetDeckProgressLabel,
+              onPressed: () => showResetDeckProgressDialog(
+                context,
+                deckId: d.id,
+                deckName: d.name,
+              ),
+            ),
             MxIconButton.toolbar(
               icon: Symbols.delete_rounded,
               semanticLabel: l10n.deleteDeckLabel,
