@@ -303,6 +303,8 @@
     }
   },
   "newCardTitle": "Th\u1ebb m\u1edbi",
+  "editCardTitle": "S\u1eeda th\u1ebb",
+  "cardNotFoundMessage": "Th\u1ebb n\u00e0y kh\u00f4ng c\u00f2n kh\u1ea3 d\u1ee5ng.",
   "@newCardTitle": {
     "description": "Card Editor (kit flashcard-editor, WBS 5.3.2)."
   },

@@ -46,6 +46,10 @@ extension AppNavigation on BuildContext {
   void pushNewCard(String deckId) =>
       GoRouter.of(this).push(RoutePaths.newCard(deckId));
 
+  /// Opens the Card Editor in edit mode for an existing card (WBS 6.3).
+  void pushEditCard(String deckId, String cardId) =>
+      GoRouter.of(this).push(RoutePaths.editCard(deckId, cardId));
+
   /// Pops one level, falling back to the Library root.
   void backFromDeck() {
     final router = GoRouter.of(this);

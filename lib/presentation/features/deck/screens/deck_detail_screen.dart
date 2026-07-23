@@ -253,7 +253,7 @@ class _DeckBranch extends StatelessWidget {
             const MxGap.s4(),
             _StudyButton(deckId: deck.id),
             const MxGap.s6(),
-            _LeafBranch(directCards: directCards),
+            _LeafBranch(deckId: deck.id, directCards: directCards),
             const MxGap.s6(),
           ],
         ),
@@ -361,8 +361,9 @@ class _EmptyBranch extends StatelessWidget {
 }
 
 class _LeafBranch extends StatelessWidget {
-  const _LeafBranch({required this.directCards});
+  const _LeafBranch({required this.deckId, required this.directCards});
 
+  final String deckId;
   final List<Flashcard> directCards;
 
   @override
@@ -377,27 +378,33 @@ class _LeafBranch extends StatelessWidget {
         ),
         const MxGap.s3(),
         for (final card in directCards)
-          Row(
-            children: [
-              const MxGap.s3(),
-              const MxIcon(icon: Symbols.style),
-              const MxGap.s3(),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    MxText(card.term, role: MxTextRole.subtitle),
-                    MxText(
-                      card.primaryMeaning,
-                      role: MxTextRole.caption,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+          // Tapping a card opens the editor in edit mode (WBS 6.3).
+          MxTappable(
+            semanticLabel: card.term,
+            onTap: () => context.pushEditCard(deckId, card.id),
+            child: Row(
+              children: [
+                const MxGap.s3(),
+                const MxIcon(icon: Symbols.style),
+                const MxGap.s3(),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      MxText(card.term, role: MxTextRole.subtitle),
+                      MxText(
+                        card.primaryMeaning,
+                        role: MxTextRole.caption,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const MxGap.s3(),
-            ],
+                const MxIcon(icon: Symbols.chevron_right),
+                const MxGap.s3(),
+              ],
+            ),
           ),
         const MxGap.s6(),
         // Add card lands with the 5.3 flashcard flow.

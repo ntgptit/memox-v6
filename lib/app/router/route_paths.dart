@@ -20,6 +20,13 @@ abstract final class RoutePaths {
 
   static String newCard(String deckId) => '/deck/$deckId/new-card';
 
+  /// Card Editor path template for editing an existing card (WBS 6.3).
+  static const String editCardPattern =
+      '/deck/:${RouteParams.deckId}/card/:${RouteParams.cardId}/edit';
+
+  static String editCard(String deckId, String cardId) =>
+      '/deck/$deckId/card/$cardId/edit';
+
   /// The active study session (WBS 5.6). Top-level, full-screen: it covers the
   /// tab bar and shows the current stage's mode screen.
   static const String study = '/study';

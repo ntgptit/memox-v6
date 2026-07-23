@@ -3,6 +3,7 @@ import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
 import 'package:memox_v6/domain/flashcard/card_text.dart';
 import 'package:memox_v6/domain/flashcard/edit_flashcard_result.dart';
+import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/domain/flashcard/flashcard_repository.dart';
 
 /// Edits a card's own content (WBS 5.3.1C; `edit-flashcard.md`).
@@ -23,6 +24,15 @@ class EditFlashcardUseCase {
   final FlashcardRepository _cards;
   final DeckRepository _decks;
   final AppClock _clock;
+
+  /// Loads the card to edit with its current content version
+  /// (edit-flashcard.md §3 "Load content version"); null when the card is
+  /// missing or already deleted (§8 not-found).
+  Future<Flashcard?> loadCard(String cardId) async {
+    final card = await _cards.findById(cardId);
+    if (card == null || card.isDeleted) return null;
+    return card;
+  }
 
   Future<EditFlashcardResult> call({
     required String cardId,

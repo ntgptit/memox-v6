@@ -49,6 +49,18 @@ void main() {
     );
   }
 
+  Widget editApp(String cardId) {
+    return ProviderScope(
+      overrides: [appDatabaseProvider.overrideWithValue(database)],
+      child: MaterialApp(
+        theme: AppTheme.light(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: CardEditorScreen(deckId: 'd1', cardId: cardId),
+      ),
+    );
+  }
+
   Future<void> pumpEditor(WidgetTester tester) async {
     for (var i = 0; i < 10; i++) {
       await tester.pump(const Duration(milliseconds: 50));
@@ -243,5 +255,73 @@ void main() {
     expect(find.text('New card'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
+  });
+
+  group('edit mode (WBS 6.3; edit-flashcard.md)', () {
+    Future<void> seedCard() async {
+      await database.flashcardDao.insertFlashcard(
+        'c1',
+        'd1',
+        '안녕',
+        '안녕',
+        'hi',
+        0,
+        0,
+      );
+    }
+
+    testWidgets('prefills the card and keeps a clean Save disabled', (
+      tester,
+    ) async {
+      await seedCard();
+      await tester.pumpWidget(editApp('c1'));
+      await pumpEditor(tester);
+
+      expect(find.text('Edit card'), findsOneWidget);
+      // Two fields only — tags are the manage-card-tags flow, not shown here.
+      expect(find.byType(TextField), findsNWidgets(2));
+      final termField = tester.widget<TextField>(find.byType(TextField).at(0));
+      final meaningField = tester.widget<TextField>(
+        find.byType(TextField).at(1),
+      );
+      expect(termField.controller?.text, '안녕');
+      expect(meaningField.controller?.text, 'hi');
+      // A clean edit cannot save (edit-flashcard.md §6).
+      expect(saveButton(tester).onPressed, isNull);
+
+      await disposeAndFlushStreams(tester);
+    });
+
+    testWidgets('editing content rewrites the card and bumps the version', (
+      tester,
+    ) async {
+      await seedCard();
+      await tester.pumpWidget(editApp('c1'));
+      await pumpEditor(tester);
+
+      await tester.enterText(find.byType(TextField).at(1), 'hello');
+      await tester.pump();
+      expect(saveButton(tester).onPressed, isNotNull);
+
+      await tester.tap(find.text('Save'));
+      await pumpEditor(tester);
+
+      final row = await database.flashcardDao
+          .findFlashcardById('c1')
+          .getSingle();
+      expect(row.primaryMeaning, 'hello');
+      expect(row.contentVersion, 2);
+
+      await disposeAndFlushStreams(tester);
+    });
+
+    testWidgets('a deleted card shows the not-found notice', (tester) async {
+      await tester.pumpWidget(editApp('ghost'));
+      await pumpEditor(tester);
+
+      expect(find.text('This card is no longer available.'), findsOneWidget);
+
+      await disposeAndFlushStreams(tester);
+    });
   });
 }

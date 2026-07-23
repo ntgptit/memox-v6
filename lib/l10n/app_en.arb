@@ -481,6 +481,14 @@
   "@newCardTitle": {
     "description": "Card Editor (kit flashcard-editor, WBS 5.3.2)."
   },
+  "editCardTitle": "Edit card",
+  "@editCardTitle": {
+    "description": "Card Editor title in edit mode (WBS 6.3; edit-flashcard.md §4)."
+  },
+  "cardNotFoundMessage": "This card is no longer available.",
+  "@cardNotFoundMessage": {
+    "description": "Shown when the card to edit was deleted (WBS 6.3; edit-flashcard.md §8)."
+  },
   "deckContextLabel": "Deck",
   "@deckContextLabel": {
     "description": "Card Editor deck-context pill (WBS 5.3.2)."
