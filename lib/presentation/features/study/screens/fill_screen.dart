@@ -131,7 +131,9 @@ class _FillStage extends HookConsumerWidget {
             readOnly: graded,
             textInputAction: TextInputAction.done,
             onSubmitted: (_) {
-              if (!graded && answer.canSubmit) _check(ref, answer.value, hintShown);
+              if (!graded && answer.canSubmit) {
+                _check(ref, answer.value, hintShown);
+              }
             },
           ),
           if (hintShown && !graded) ...<Widget>[

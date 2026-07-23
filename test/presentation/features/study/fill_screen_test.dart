@@ -20,14 +20,16 @@ void main() {
   final now = DateTime.utc(2026, 7, 23, 19);
 
   setUp(() {
-    final view = TestWidgetsFlutterBinding.ensureInitialized().platformDispatcher
+    final view = TestWidgetsFlutterBinding.ensureInitialized()
+        .platformDispatcher
         .views
         .first;
     view.physicalSize = const Size(1200, 2200);
     view.devicePixelRatio = 1.0;
   });
   tearDown(() {
-    final view = TestWidgetsFlutterBinding.ensureInitialized().platformDispatcher
+    final view = TestWidgetsFlutterBinding.ensureInitialized()
+        .platformDispatcher
         .views
         .first;
     view.resetPhysicalSize();
@@ -74,7 +76,9 @@ void main() {
 
   Widget wrap() => ProviderScope(
     overrides: [
-      studySessionRuntimeProvider.overrideWith((ref) => Future.value(runtime())),
+      studySessionRuntimeProvider.overrideWith(
+        (ref) => Future.value(runtime()),
+      ),
     ],
     child: MaterialApp(
       theme: AppTheme.light(),
@@ -84,7 +88,9 @@ void main() {
     ),
   );
 
-  testWidgets('waiting shows the meaning, input and Check/Help', (tester) async {
+  testWidgets('waiting shows the meaning, input and Check/Help', (
+    tester,
+  ) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 

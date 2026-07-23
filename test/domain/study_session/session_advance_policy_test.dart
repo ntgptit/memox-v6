@@ -97,4 +97,34 @@ void main() {
   test('currentCardId points at the cursor while in a round', () {
     expect(pos(order: <String>['x', 'y'], cursor: 1).currentCardId, 'y');
   });
+
+  // WBS 5.6.11 — mastery rounds: the failed set is deduped and retry rounds
+  // repeat with no limit until a round finishes clean.
+
+  test('a card already in the failed set is not duplicated on a later fail', () {
+    // Defensive dedup: if the cursor card is already failed (e.g. a checkpoint
+    // restored mid-round), failing it again keeps a single entry.
+    final next = advance(
+      pos(order: <String>['a', 'b'], cursor: 0, failed: <String>['a']),
+      passed: false,
+    );
+    expect(next.failedCardIds, <String>['a']);
+  });
+
+  test('mastery retry rounds repeat with no limit until a clean round', () {
+    // A card that keeps failing spawns round after round in the same stage; the
+    // round index climbs and the failed card stays the sole member.
+    var position = pos(order: <String>['a'], round: 1, cursor: 0);
+    for (var round = 2; round <= 5; round++) {
+      position = advance(position, passed: false);
+      expect(position.stageIndex, 0, reason: 'still the same mastery stage');
+      expect(position.roundIndex, round);
+      expect(position.roundCardIds, <String>['a']);
+      expect(position.cardPosition, 0);
+      expect(position.phase, SessionPhase.inRound);
+    }
+    // Only a clean round finally advances to the next stage.
+    final done = advance(position, passed: true);
+    expect(done.stageIndex, 1);
+  });
 }
