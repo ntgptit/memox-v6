@@ -1,5 +1,32 @@
 # Study-wave domain — overnight autonomous run
 
+## ✅ MILESTONE (2026-07-23): study wave functionally complete — PR #99 ready for review
+The full newLearning pipeline (WBS 5.4 → 5.7.4) is built, gate-green, and pushed
+(`feat/study-domain`, 77 commits, tip `48ca4f7`). PR #99 title/body updated +
+marked **ready for review** (base `main`; NOT merged — the merge is gated below).
+
+**Done + gate-green:** 5.4–5.5 domain (SRS/progress + mode strategies), 5.6
+runtime (advance machine, runtime read-model, atomic answer+checkpoint, start
+use case), all five mode screens (Review/Match/Guess/Recall/Fill) wired to the
+dispatcher, 5.6.6 Match (round machine + ephemeral board + flush), 5.6.11 mastery
+rounds, 5.6.13 finalize + Study Result, 5.6.14 test pyramid, 5.7.1–5.7.2 Today,
+session-start UI (StudyStart + deck Study button), and the 5.7.4 first-learning
+pipeline integration test (drives all five stages to completion).
+
+**Merge gated on the owner (surfaced in PR #99):**
+- CJK font (#1) — offline parity build has no CJK font; Match/Guess/Recall/Fill
+  CJK parity unmeasurable. Add an OFL CJK font to unblock.
+- Audit release status = BLOCKED — 13 open P1 evidence items (responsive/i18n/
+  tooling), Design-System/Localization-owned, not code in this PR.
+- Owner decisions: session-type picker surface, library-wide start (#6), 5.6.12
+  durable resume (#3), practice-start, Recall durable timer (#4).
+
+Autonomous study-wave backlog is EXHAUSTED (all remaining items need the owner).
+Per the WBS, subsequent waves ship independently, so the loop proceeds to section
+6 (6.1 deck metadata/lifecycle) which is technically buildable on the existing
+deck domain.
+
+
 ## ⚑ Match parity (5.6.6) — BLOCKED on the CJK font (#1); functional Match is done + gate-green (1652724)
 The Match kit shots (`match-mode--{playing,selected,correct,wrong,almost,complete}`)
 render the **entire right column in Korean** (사랑/학교/음식/시간/친구) — half the
