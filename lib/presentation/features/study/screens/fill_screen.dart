@@ -107,7 +107,9 @@ class _FillStage extends HookConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  MxSectionLabel(text: StringUtils.upperCased(l10n.meaningLabel)),
+                  MxSectionLabel(
+                    text: StringUtils.upperCased(l10n.meaningLabel),
+                  ),
                   const MxGap.s2(),
                   MxText(
                     card.meaning,

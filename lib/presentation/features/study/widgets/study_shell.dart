@@ -89,7 +89,17 @@ class StudyShell extends StatelessWidget {
           ),
           const MxGap.s6(),
           Expanded(child: body),
-          if (bottomBar != null) ...<Widget>[const MxGap.s6(), bottomBar],
+          // Kit `.app__body`: the bottom action reserves the bottom-nav band
+          // (space-11) plus a space-6 gap and then reclaims that band for the
+          // thumb-zone control (kit `marginBottom: -bottom-nav-height`), so the
+          // control sits space-6 above the safe-area bottom and the stage body
+          // above it is bounded, not stretched into the reserved band.
+          if (bottomBar != null) ...<Widget>[
+            const MxGap.s11(),
+            const MxGap.s6(),
+            bottomBar,
+            const MxGap.s6(),
+          ],
         ],
       ),
     );
