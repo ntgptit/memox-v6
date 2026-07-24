@@ -58,7 +58,7 @@ List<Override> parityOverridesFor(String fixtureId) {
 }
 
 /// Renders the Study Result standard state with the kit's committed summary
-/// (24 reviewed, 21 correct → 88%).
+/// (24 reviewed, 21 correct → 88%, 6:30 active, a 12-day streak at 14/20 min).
 class _SeededStudyResult extends StudyResult {
   @override
   AsyncValue<StudySessionSummary?> build() =>
@@ -67,6 +67,12 @@ class _SeededStudyResult extends StudyResult {
           reviewedCount: 24,
           correctCount: 21,
           missedCardIds: <String>['m1', 'm2', 'm3'],
+          durationActiveMs: 390000,
+          goalStatus: StudyResultGoalStatus(
+            streakDays: 12,
+            goalDoneMinutes: 14,
+            goalTargetMinutes: 20,
+          ),
         ),
       );
 }

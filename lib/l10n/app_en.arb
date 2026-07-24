@@ -956,11 +956,48 @@
   "@studyResultCorrectLabel": {
     "description": "Label under the accuracy stat on the Study Result."
   },
-  "studyResultContinueLabel": "Continue studying",
+  "studyResultTimeLabel": "min",
+  "@studyResultTimeLabel": {
+    "description": "Label under the study-time stat on the Study Result."
+  },
+  "studyResultReviewMistakesLabel": "Review mistakes",
+  "@studyResultReviewMistakesLabel": {
+    "description": "Study Result link that starts a relearn of the missed cards."
+  },
+  "studyResultStreakDaysLabel": "{count} days",
+  "@studyResultStreakDaysLabel": {
+    "description": "Study Result streak-card headline day count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "studyResultStreakCaptionLabel": "day streak",
+  "@studyResultStreakCaptionLabel": {
+    "description": "Study Result streak-card caption under the day count."
+  },
+  "studyResultGoalTitleLabel": "Today's goal",
+  "@studyResultGoalTitleLabel": {
+    "description": "Study Result streak-card goal-progress row title."
+  },
+  "studyResultGoalProgressLabel": "{done}/{total} min",
+  "@studyResultGoalProgressLabel": {
+    "description": "Study Result streak-card goal progress, minutes done over target.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "studyResultContinueLabel": "Keep studying",
   "@studyResultContinueLabel": {
     "description": "Study Result primary action returning to the study entry."
   },
-  "studyResultDoneLabel": "Done",
+  "studyResultDoneLabel": "Back to library",
   "@studyResultDoneLabel": {
     "description": "Study Result secondary action returning to the library."
   },

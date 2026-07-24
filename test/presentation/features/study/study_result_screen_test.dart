@@ -31,6 +31,7 @@ void main() {
             reviewedCount: 5,
             correctCount: 4,
             missedCardIds: <String>['c5'],
+            durationActiveMs: 390000,
           ),
         ),
       ),
@@ -40,8 +41,40 @@ void main() {
     expect(find.text('Session complete'), findsOneWidget);
     expect(find.text('5'), findsOneWidget); // reviewed count stat
     expect(find.text('80%'), findsOneWidget); // 4/5 accuracy
-    expect(find.widgetWithText(MxButton, 'Continue studying'), findsOneWidget);
-    expect(find.widgetWithText(MxButton, 'Done'), findsOneWidget);
+    expect(find.text('6:30'), findsOneWidget); // active-time stat
+    expect(find.text('Review mistakes'), findsOneWidget); // missed cards → link
+    expect(find.widgetWithText(MxButton, 'Keep studying'), findsOneWidget);
+    expect(find.widgetWithText(MxButton, 'Back to library'), findsOneWidget);
+  });
+
+  testWidgets('the streak card shows when the session has a goal status', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      wrap(
+        const AsyncData<StudySessionSummary?>(
+          StudySessionSummary(
+            reviewedCount: 24,
+            correctCount: 21,
+            missedCardIds: <String>[],
+            durationActiveMs: 390000,
+            goalStatus: StudyResultGoalStatus(
+              streakDays: 12,
+              goalDoneMinutes: 14,
+              goalTargetMinutes: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('12 days'), findsOneWidget);
+    expect(find.text('day streak'), findsOneWidget);
+    expect(find.text("Today's goal"), findsOneWidget);
+    expect(find.text('14/20 min'), findsOneWidget);
+    // No missed cards → no Review mistakes link.
+    expect(find.text('Review mistakes'), findsNothing);
   });
 
   testWidgets('a zero-card summary renders 0% without dividing by zero', (
