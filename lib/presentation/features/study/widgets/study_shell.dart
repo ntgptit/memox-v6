@@ -77,6 +77,7 @@ class StudyShell extends StatelessWidget {
                 child: MxProgress(
                   value: progress,
                   semanticLabel: progressSemanticLabel,
+                  prominent: true,
                 ),
               ),
               const MxGap.s3(),

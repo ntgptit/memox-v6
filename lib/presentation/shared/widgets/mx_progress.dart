@@ -21,22 +21,33 @@ import 'package:memox_v6/core/theme/tokens/app_strokes.dart';
 ///
 /// Public API:
 /// - value: 0..1 fraction; omit for the indeterminate bar.
+/// - prominent: kit study/game `ProgressHeader` bar — 8px on a translucent
+///   `border` track (vs the default 4px `surface-muted` `.progress` bar).
 /// - `MxProgress.spinner(...)`: the inline rotating ring.
 /// - semanticLabel: required localized announcement.
 ///
 /// States:
 /// determinate, indeterminate, spinner.
 class MxProgress extends StatelessWidget {
-  const MxProgress({super.key, this.value, required this.semanticLabel})
-    : _spinner = false;
+  const MxProgress({
+    super.key,
+    this.value,
+    required this.semanticLabel,
+    this.prominent = false,
+  }) : _spinner = false;
 
   const MxProgress.spinner({super.key, required this.semanticLabel})
     : value = null,
+      prominent = false,
       _spinner = true;
 
   /// Progress fraction in `[0, 1]`; `null` renders indeterminate motion.
   final double? value;
   final String semanticLabel;
+
+  /// The taller study/game bar (kit `ProgressBar` height 8, `border` track).
+  final bool prominent;
+
   final bool _spinner;
 
   @override
@@ -66,9 +77,9 @@ class MxProgress extends StatelessWidget {
         borderRadius: AppBorderRadii.full,
         child: LinearProgressIndicator(
           value: value,
-          minHeight: AppSpacing.space1,
+          minHeight: prominent ? AppSpacing.space2 : AppSpacing.space1,
           color: colors.primary,
-          backgroundColor: colors.surfaceMuted,
+          backgroundColor: prominent ? colors.border : colors.surfaceMuted,
         ),
       ),
     );
