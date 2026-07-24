@@ -59,10 +59,11 @@ class MxProgress extends StatelessWidget {
       return Semantics(
         label: semanticLabel,
         child: SizedBox(
-          width: AppIconSizes.md,
-          height: AppIconSizes.md,
+          // Kit `.progress__spinner`: icon-size-lg (28) at stroke-focus (3).
+          width: AppIconSizes.lg,
+          height: AppIconSizes.lg,
           child: CircularProgressIndicator(
-            strokeWidth: AppStrokes.emphasis,
+            strokeWidth: AppStrokes.focus,
             color: colors.primary,
             backgroundColor: colors.surfaceMuted,
           ),
