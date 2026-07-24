@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/core/theme/tokens/app_border_radii.dart';
+import 'package:memox_v6/core/theme/tokens/app_icon_sizes.dart';
 import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
@@ -75,7 +76,12 @@ class MxFab extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              MxIcon(icon: icon, color: colors.onPrimary),
+              // Kit `.fab` glyph is icon-size-lg (28), not the MxIcon default.
+              MxIcon(
+                icon: icon,
+                size: AppIconSizes.lg,
+                color: colors.onPrimary,
+              ),
               if (label != null) ...[
                 const MxGap.s2(),
                 Text(

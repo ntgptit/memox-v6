@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/core/theme/tokens/app_border_radii.dart';
+import 'package:memox_v6/core/theme/tokens/app_icon_sizes.dart';
 import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
@@ -54,9 +55,14 @@ class MxContextPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          MxIcon(icon: icon, color: colors.primary),
+          // Kit deck-context glyph is icon-size-sm (18); role label is
+          // font-size-sm (caption) in the tertiary tone.
+          MxIcon(icon: icon, size: AppIconSizes.sm, color: colors.primary),
           const MxGap.s2(),
-          Text(label, style: styles.body.copyWith(color: colors.textSecondary)),
+          Text(
+            label,
+            style: styles.caption.copyWith(color: colors.textTertiary),
+          ),
           const MxGap.s2(),
           Flexible(
             child: Text(

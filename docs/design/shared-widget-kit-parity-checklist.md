@@ -26,7 +26,7 @@
 |---|---|---|---|---|
 | B1 | `MxButton` | `.btn` | ✅ | 1:1 mọi variant/size/màu 2 theme |
 | B2 | `MxIconButton` | `.icon-btn` | 🔧/⚠️ | disabled 0.55 ✅; **glyph 24/20 hoãn** (kit dùng font-size token, guard chặn) |
-| B3 | `MxFab` | `.fab` | ⚠️ | **icon 22 vs lg=28** (fix sạch); hover→primary-strong + press-scale thiếu; không có `.fab--accent` |
+| B3 | `MxFab` | `.fab` | 🔧 | icon→lg(28) ✅; còn hover→primary-strong + press-scale (state, Low); không có `.fab--accent` |
 | B4 | `MxLink` | `.link` | ✅ | 1:1 |
 | B5 | `MxChip` | `.chip` | ⚠️ | idle **trong suốt** vs `surface` đục; text `text` vs `text-secondary`; weight 400 vs 600; padding 12 vs 16; height inflate; thiếu variant accent/ghost/disabled |
 | B6 | `MxTappable` | states | ⚠️ | overlay hover/pressed/focus màu khớp; **thiếu press-scale**; focus ring vẽ trong thay vì halo ngoài (Low) |
@@ -44,9 +44,9 @@
 | # | Widget | Kit | Status | Ghi chú |
 |---|---|---|---|---|
 | D1 | `MxContextualAppBar` | `.cappbar` | ⚠️ | gap lead→title 8 vs 12; context-line 112 vs 56; caption role; nền/title khớp |
-| D2 | `MxBottomNav` | `.bottom-nav` | ⚠️ | **icon 22 vs lg=28** (HIGH, fix sạch); **active icon `FILL 1`** thiếu; còn lại 1:1 |
+| D2 | `MxBottomNav` | `.bottom-nav` | 🔧 | icon→lg(28) ✅; còn **active icon `FILL 1`** (cần MxIcon `fill` param) |
 | D3 | `MxBreadcrumb` | `.breadcrumb` | ✅ | style tĩnh 1:1; crumb tap-target làm cao hàng ~48px (a11y tradeoff) |
-| D4 | `MxContextPill` | deck-context pill | ⚠️ | **icon 22 vs sm=18**; role-label 15 vs 13 + `text-tertiary` (fix sạch); container/value 1:1 |
+| D4 | `MxContextPill` | deck-context pill | 🔧 | icon→sm(18) + role-label caption/text-tertiary ✅ |
 | D5 | `MxSearchDock` | search dock | ✅ | 1:1 (shadow/radius/bg) |
 
 ## E. Feedback / content
@@ -57,7 +57,7 @@
 | E3 | `MxEmptyState` | `EmptyState` | ✅ | 1:1 (tile lg, title lg/extrabold/tight, gap s4, padding s7) |
 | E4 | `MxSectionHeader` | `.section-head` | ✅ | 1:1 (title md/bold/tight, caption, action) |
 | E5 | `MxList` | list container | ✅ | 1:1 (separator space-3) |
-| E6 | `MxDeckCard` | deck row | ⚠️ | struct 1:1; **status due→`on-warning-soft` (không `warning`), up-to-date→`on-success-soft`; weight 600 vs 700** (light-only, fix sạch) |
+| E6 | `MxDeckCard` | deck row | 🔧 | status màu → on-warning-soft/on-success-soft ✅; weight 600 vs 700 còn (Low) |
 
 ## F. Layout / scaffold
 | # | Widget | Kit | Status | Ghi chú |
@@ -65,7 +65,7 @@
 | F1 | `MxScaffold` | `MxScaffold`/`.app` | ⚠️ | slot ok; body-inset qua ContentShell |
 | F2 | `MxContentShell` | `.app__body` | ⚠️ | chỉ gutter ngang; thiếu padding top-s4/bottom-(nav+s6)/gap-s6 — mỗi màn tự cuộn |
 | F3 | `MxListScaffold`/`Form`/`Study` | shells | ⚠️ | width-caps + list rhythm 1:1; **list thiếu clearance FAB/nav** (Med chức năng) |
-| F4 | `MxFormFooter` | SaveBar | ⚠️ | **nền `bg` vs kit `surface`** (Med); padding-top s4 vs s3; thiếu gutter/gap (fix sạch) |
+| F4 | `MxFormFooter` | SaveBar | 🔧 | nền → surface + padding-top s3 ✅; gutter/gap do parent cấp |
 
 ## G. Overlays
 | # | Widget | Kit | Status | Ghi chú |
