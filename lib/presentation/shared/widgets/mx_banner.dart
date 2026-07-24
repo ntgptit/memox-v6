@@ -103,7 +103,8 @@ class MxBanner extends StatelessWidget {
                 if (title != null)
                   Text(title, style: styles.button.copyWith(color: fg)),
                 if (body != null) ...[
-                  if (title != null) const MxGap.s1(),
+                  // Kit `.banner__content` gap is space-05.
+                  if (title != null) const MxGap.s05(),
                   MxText(body, role: MxTextRole.caption, color: fg),
                 ],
               ],

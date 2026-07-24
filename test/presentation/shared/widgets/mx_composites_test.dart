@@ -116,10 +116,10 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      // Uppercase title (overline role) and the selected check.
+      // Uppercase SectionLabel title and the primary `check` on the selected row.
       expect(find.text('CARD SOURCE'), findsOneWidget);
-      final check = tester.widget<Icon>(find.byIcon(Symbols.check_circle));
-      expect(check.color, AppColors.light.accent);
+      final check = tester.widget<Icon>(find.byIcon(Symbols.check));
+      expect(check.color, AppColors.light.primary);
 
       await tester.tap(find.text('All cards'));
       await tester.pumpAndSettle();

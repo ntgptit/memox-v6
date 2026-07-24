@@ -7,7 +7,6 @@ import 'package:memox_v6/core/theme/tokens/app_strokes.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// A filter / choice chip (kit `MxChip`).
 ///
@@ -52,8 +51,11 @@ class MxChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final styles = context.textStyles;
     final icon = this.icon;
-    final foreground = selected ? colors.onPrimarySoft : colors.text;
+    // Kit `.chip`: idle is an opaque `surface` pill with `text-secondary`
+    // semibold text; selected is the primary-soft tint.
+    final foreground = selected ? colors.onPrimarySoft : colors.textSecondary;
 
     return MxTappable(
       onTap: onTap,
@@ -61,7 +63,7 @@ class MxChip extends StatelessWidget {
       borderRadius: AppBorderRadii.full,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: selected ? colors.primarySoft : null,
+          color: selected ? colors.primarySoft : colors.surface,
           borderRadius: AppBorderRadii.full,
           border: selected
               ? null
@@ -69,7 +71,7 @@ class MxChip extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.space3,
+            horizontal: AppSpacing.space4,
             vertical: AppSpacing.space2,
           ),
           child: Row(
@@ -79,7 +81,7 @@ class MxChip extends StatelessWidget {
                 MxIcon(icon: icon, size: AppIconSizes.sm, color: foreground),
                 const MxGap.s2(),
               ],
-              MxText(label, role: MxTextRole.caption, color: foreground),
+              Text(label, style: styles.fieldLabel.copyWith(color: foreground)),
             ],
           ),
         ),

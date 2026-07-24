@@ -28,7 +28,7 @@
 | B2 | `MxIconButton` | `.icon-btn` | 🔧/⚠️ | disabled 0.55 ✅; **glyph 24/20 hoãn** (kit dùng font-size token, guard chặn) |
 | B3 | `MxFab` | `.fab` | 🔧 | icon→lg(28) ✅; còn hover→primary-strong + press-scale (state, Low); không có `.fab--accent` |
 | B4 | `MxLink` | `.link` | ✅ | 1:1 |
-| B5 | `MxChip` | `.chip` | ⚠️ | idle **trong suốt** vs `surface` đục; text `text` vs `text-secondary`; weight 400 vs 600; padding 12 vs 16; height inflate; thiếu variant accent/ghost/disabled |
+| B5 | `MxChip` | `.chip` | 🔧 | idle→`surface`/`text-secondary`/`fieldLabel`(semibold)/padding s4 ✅; height min-touch 48 (a11y) + thiếu variant accent/ghost/disabled còn |
 | B6 | `MxTappable` | states | ⚠️ | overlay hover/pressed/focus màu khớp; **thiếu press-scale**; focus ring vẽ trong thay vì halo ngoài (Low) |
 
 ## C. Inputs
@@ -37,7 +37,7 @@
 | C1 | `MxFieldScaffold` | `field-group`/`.field` | 🔧 | label→fieldLabel; boxed padding s3 |
 | C2 | `MxTextField` | `.field`/`InputBox` | ⚠️ | vs `.field` ok; **không phải drop-in fill InputBox** (96/center/xl-extrabold) |
 | C3 | `MxTextArea` | `.field--multiline` | ✅ | core 1:1; label-nudge + focus-corner Low |
-| C4 | `MxSearchField` | search dock/field | ⚠️ | box tĩnh 1:1; **focus = border inset thay vì halo ngoài** (Med); border trong suốt luôn inset 3px; thêm nút clear + caret primary (Low) |
+| C4 | `MxSearchField` | search dock/field | 🔧 | focus ring → foregroundDecoration (không inset content) ✅; nút clear + caret primary còn (Low, product choice) |
 | C5 | `MxSelectRow` | select row | ✅ | static 1:1; expand-glyph size + pointer-hover Low |
 
 ## D. Navigation / chrome
@@ -52,8 +52,8 @@
 ## E. Feedback / content
 | # | Widget | Kit | Status | Ghi chú |
 |---|---|---|---|---|
-| E1 | `MxBanner` | `.banner` | ⚠️ | tone/màu 2 theme 1:1; **action canh giữa** (Med) + gap tiêu-đề s1 vs s05 (Low) |
-| E2 | `MxActionCallout` | `ActionCallout` | ⚠️ | **tiêu đề role subtitle(20) vs base/bold(15)** (Med); vài gap; single-row icon 22 vs ~15 (verify) |
+| E1 | `MxBanner` | `.banner` | 🔧 | gap tiêu-đề → s05 ✅; action canh giữa còn (cần IntrinsicHeight, chỉ ảnh hưởng banner nhiều dòng) |
+| E2 | `MxActionCallout` | `ActionCallout` | 🔧 | tiêu đề → base/bold ✅; body→action gap s3, dismiss gap s3 ✅; single-row icon (verify, chưa) |
 | E3 | `MxEmptyState` | `EmptyState` | ✅ | 1:1 (tile lg, title lg/extrabold/tight, gap s4, padding s7) |
 | E4 | `MxSectionHeader` | `.section-head` | ✅ | 1:1 (title md/bold/tight, caption, action) |
 | E5 | `MxList` | list container | ✅ | 1:1 (separator space-3) |
@@ -71,7 +71,7 @@
 | # | Widget | Kit | Status | Ghi chú |
 |---|---|---|---|---|
 | G1 | `MxSheet` | `.sheet` (frozen) / legacy | ✅⚠️ | **1:1 với `.sheet` FROZEN**; khác shot LEGACY (bg/handle/title) → **cần quyết định target** |
-| G2 | `MxSelectSheet` | `SelectSheet`/`MenuItem` | ⚠️ | title role sm/bold vs overline; row v-pad s3 vs s2; label 600 vs 400; check `check`/primary vs `check_circle`/accent |
+| G2 | `MxSelectSheet` | `SelectSheet`/`MenuItem` | 🔧 | title→SectionLabel(sm/bold); row v-pad s3; icon-gap s4; check `check`/primary ✅; label weight 600 còn (thiếu MxText role base/semibold) |
 | G3 | `MxDialog` | `.dialog` (frozen) / legacy | ⚠️ | **title xl(24) vs frozen md(17)/legacy lg(20) + tight** (HIGH); body màu `text` vs `text-secondary` |
 | G4 | `MxConfirmDialog` | `ConfirmDialog` legacy | ⚠️ | **shot legacy = centered + `MxIconTile` lg**; Flutter = left + `MxIcon` nhỏ → **cần quyết định frozen vs legacy** |
 
