@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
+import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/domain/study_modes/mode_outcome.dart';
 import 'package:memox_v6/domain/study_modes/strategies/fill_study_mode_strategy.dart';
 import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
@@ -101,11 +102,13 @@ class _FillStage extends HookConsumerWidget {
         children: <Widget>[
           Expanded(
             child: MxCard(
+              // Kit `FillMode.jsx`: the meaning card centers an uppercase MEANING
+              // label above the term with a space-2 internal gap.
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  MxSectionLabel(text: l10n.meaningLabel),
-                  const MxGap.s3(),
+                  MxSectionLabel(text: StringUtils.upperCased(l10n.meaningLabel)),
+                  const MxGap.s2(),
                   MxText(
                     card.meaning,
                     role: MxTextRole.title,
@@ -121,7 +124,8 @@ class _FillStage extends HookConsumerWidget {
             role: MxTextRole.caption,
             color: context.colors.textSecondary,
           ),
-          const MxGap.s3(),
+          // Kit `.app__body` rhythm: a space-6 gap between the label and input.
+          const MxGap.s6(),
           MxTextField(
             controller: answer.controller,
             placeholder: l10n.fillAnswerPlaceholder,
