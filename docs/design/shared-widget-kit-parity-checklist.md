@@ -12,7 +12,7 @@
 | # | Widget | Kit | Status | Ghi chú |
 |---|---|---|---|---|
 | A1 | `MxText` | type-scale | ⚠️ | thiếu role: term 3xl/**bold**, hero lg/**extrabold**, streak md/**extrabold**, row-title base/**bold**; overline weight 400 vs kit 700 |
-| A2 | `MxIcon` | Symbols, `--icon-size-*` | ✅ | primitive 1:1 (18/22/28/32, màu, axes). **NHƯNG rất nhiều caller quên truyền `size` → dính md=22** (xem B3/D2/D4…) |
+| A2 | `MxIcon` | Symbols, `--icon-size-*` | ✅ | primitive 1:1 (18/22/28/32, màu, axes) + `filled` (FILL 1) cho selected-state |
 | A3 | `MxCard` | `.card` | ✅ | 1:1 mọi variant 2 theme |
 | A4 | `MxIconTile` | `.icon-tile` | ✅ | 1:1 mọi tone/size |
 | A5 | `MxBadge` | `.badge` | 🔧 | thêm `tone`; caps-tracking Low còn (guard chặn raw `letterSpacing:0`) |
@@ -26,10 +26,10 @@
 |---|---|---|---|---|
 | B1 | `MxButton` | `.btn` | ✅ | 1:1 mọi variant/size/màu 2 theme |
 | B2 | `MxIconButton` | `.icon-btn` | 🔧/⚠️ | disabled 0.55 ✅; **glyph 24/20 hoãn** (kit dùng font-size token, guard chặn) |
-| B3 | `MxFab` | `.fab` | 🔧 | icon→lg(28) ✅; còn hover→primary-strong + press-scale (state, Low); không có `.fab--accent` |
+| B3 | `MxFab` | `.fab` | 🔧 | icon→lg(28) + press-scale .94 ✅; còn hover→primary-strong (Low); không có `.fab--accent` |
 | B4 | `MxLink` | `.link` | ✅ | 1:1 |
 | B5 | `MxChip` | `.chip` | 🔧 | idle→`surface`/`text-secondary`/`fieldLabel`(semibold)/padding s4 ✅; height min-touch 48 (a11y) + thiếu variant accent/ghost/disabled còn |
-| B6 | `MxTappable` | states | ⚠️ | overlay hover/pressed/focus màu khớp; **thiếu press-scale**; focus ring vẽ trong thay vì halo ngoài (Low) |
+| B6 | `MxTappable` | states | 🔧 | overlay màu khớp + `pressedScale` opt-in (btn .97/fab .94/icon-btn .9) ✅; focus ring vẽ trong thay vì halo ngoài (Low) |
 
 ## C. Inputs
 | # | Widget | Kit | Status | Ghi chú |
@@ -44,7 +44,7 @@
 | # | Widget | Kit | Status | Ghi chú |
 |---|---|---|---|---|
 | D1 | `MxContextualAppBar` | `.cappbar` | ⚠️ | gap lead→title 8 vs 12; context-line 112 vs 56; caption role; nền/title khớp |
-| D2 | `MxBottomNav` | `.bottom-nav` | 🔧 | icon→lg(28) ✅; còn **active icon `FILL 1`** (cần MxIcon `fill` param) |
+| D2 | `MxBottomNav` | `.bottom-nav` | ✅ | icon→lg(28) + active `FILL 1` ✅ — 1:1 |
 | D3 | `MxBreadcrumb` | `.breadcrumb` | ✅ | style tĩnh 1:1; crumb tap-target làm cao hàng ~48px (a11y tradeoff) |
 | D4 | `MxContextPill` | deck-context pill | 🔧 | icon→sm(18) + role-label caption/text-tertiary ✅ |
 | D5 | `MxSearchDock` | search dock | ✅ | 1:1 (shadow/radius/bg) |

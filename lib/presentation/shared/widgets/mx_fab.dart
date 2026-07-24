@@ -60,6 +60,8 @@ class MxFab extends StatelessWidget {
       onTap: onPressed,
       borderRadius: round ? AppBorderRadii.full : AppBorderRadii.xl,
       semanticLabel: semanticLabel ?? label,
+      // Kit `.fab:active { transform: scale(0.94) }`.
+      pressedScale: 0.94,
       child: ExcludeSemantics(
         child: Container(
           height: AppSpacing.fabSize,

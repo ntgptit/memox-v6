@@ -184,6 +184,8 @@ class _MxButtonState extends State<MxButton> {
       onTap: widget.onPressed,
       borderRadius: AppBorderRadii.control,
       semanticLabel: widget.label,
+      // Kit `.btn:active { transform: scale(0.97) }`.
+      pressedScale: 0.97,
       child: ExcludeSemantics(
         child: Center(
           child: Ink(

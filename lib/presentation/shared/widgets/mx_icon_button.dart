@@ -100,6 +100,8 @@ class MxIconButton extends StatelessWidget {
       onTap: onPressed,
       borderRadius: AppBorderRadii.full,
       semanticLabel: semanticLabel,
+      // Kit `.icon-btn:active { transform: scale(0.9) }`.
+      pressedScale: 0.9,
       child: Center(
         child: Container(
           width: visual,

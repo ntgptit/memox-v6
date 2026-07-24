@@ -146,9 +146,12 @@ class _NavItem extends StatelessWidget {
                   borderRadius: AppBorderRadii.pill,
                 ),
                 child: MxIcon(
-                  // Kit `.bottom-nav__item` glyph is icon-size-lg (28).
+                  // Kit `.bottom-nav__item` glyph is icon-size-lg (28); the
+                  // active destination fills (`FILL 1`) so selection reads
+                  // beyond color.
                   icon: item.icon,
                   size: AppIconSizes.lg,
+                  filled: active,
                   color: active ? colors.onPrimarySoft : colors.textSecondary,
                 ),
               ),
