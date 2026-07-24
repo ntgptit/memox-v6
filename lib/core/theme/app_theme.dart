@@ -98,7 +98,7 @@ abstract final class AppTheme {
       brightness: brightness,
       colorScheme: colorScheme,
       fontFamily: AppTypography.fontFamily,
-      fontFamilyFallback: AppTypography.fontFamilyFallback,
+      fontFamilyFallback: AppTypography.textFamilyFallback,
       scaffoldBackgroundColor: tokens.bg,
       canvasColor: tokens.bg,
       dividerColor: tokens.divider,

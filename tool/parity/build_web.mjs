@@ -41,6 +41,7 @@ const requiredOutputs = [
   'assets/AssetManifest.bin',
   'assets/FontManifest.json',
   'assets/assets/fonts/PlusJakartaSans-Variable.ttf',
+  'assets/assets/fonts/NotoSansKR-Subset.ttf',
 ];
 const missingOutputs = requiredOutputs.filter(
   (path) => !existsSync(join(output, ...path.split('/'))),

@@ -115,6 +115,13 @@ flutter:
     - family: Plus Jakarta Sans
       fonts:
         - asset: assets/fonts/PlusJakartaSans-Variable.ttf
+    # CJK coverage for the offline build: the primary family carries no Hangul,
+    # and CanvasKit's remote Noto fallback cannot fetch with --no-web-resources-cdn,
+    # so Korean terms render as tofu. This OFL Noto Sans KR subset (Latin + Hangul
+    # jamo/syllables) is the bundled CJK fallback named in `cjkFamilyFallback`.
+    - family: Noto Sans KR
+      fonts:
+        - asset: assets/fonts/NotoSansKR-Subset.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

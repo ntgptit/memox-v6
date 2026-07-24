@@ -28,7 +28,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   // otherwise leak into every role field the kit leaves at default.
   static const TextStyle _base = TextStyle(
     fontFamily: AppTypography.fontFamily,
-    fontFamilyFallback: AppTypography.fontFamilyFallback,
+    fontFamilyFallback: AppTypography.textFamilyFallback,
     letterSpacing: AppTypography.letterSpacingNormalEm,
     height: AppTypography.lineHeightNormal,
   );
