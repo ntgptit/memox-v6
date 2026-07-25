@@ -59,6 +59,34 @@ WHERE d.language_pair_id = :languagePairId AND d.parent_id IS NULL
 GROUP BY d.id
 ORDER BY d.normalized_name, d.id;
 
+-- The same row as watchRootDeckSummaries, scoped to one parent's direct
+-- children — the deck-detail Parent branch renders the identical deck card
+-- the Library root does, so it needs the identical counters.
+--
+-- Direct cards only, matching the root query. A child that is itself a
+-- Parent therefore reports its own direct cards rather than its subtree;
+-- that is the same open Library display-contract question the root query
+-- records, and answering it differently here would make the two lists
+-- disagree about what a number on a deck card means.
+watchChildDeckSummaries:
+SELECT d.*,
+  COUNT(DISTINCT CASE WHEN f.deleted_at IS NULL THEN f.id END) AS card_count,
+  COUNT(DISTINCT CASE
+    WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      AND learning_progress.box BETWEEN 1 AND 7
+      AND learning_progress.due_at IS NOT NULL
+      AND learning_progress.due_at <= CAST(:nowUtc AS INTEGER)
+      THEN f.id END) AS due_count,
+  COUNT(DISTINCT CASE
+    WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      AND learning_progress.box = 0 THEN f.id END) AS new_count
+FROM decks d
+LEFT JOIN flashcards f ON f.deck_id = d.id
+LEFT JOIN learning_progress ON learning_progress.card_id = f.id
+WHERE d.parent_id = :parentId
+GROUP BY d.id
+ORDER BY d.normalized_name, d.id;
+
 watchChildDecks:
 SELECT * FROM decks WHERE parent_id = :parentId
 ORDER BY normalized_name, id;

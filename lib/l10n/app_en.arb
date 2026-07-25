@@ -752,6 +752,15 @@
   "@cancelLabel": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
   },
+  "decksSectionLabel": "Decks",
+  "@decksSectionLabel": {
+    "description": "Deck-detail Parent branch section label over the child deck list (kit subdeck-list DECKS)."
+  },
+  "deckScopeSummary": "{cardTotal, plural, =1{1 card} other{{cardTotal} cards}} · {dueCount} due",
+  "@deckScopeSummary": {
+    "description": "Parent branch section summary: subtree card total and due count (kit `DECKS · 217 cards · 23 due`).",
+    "placeholders": { "cardTotal": { "type": "int" }, "dueCount": { "type": "int" } }
+  },
   "parentDeckSummary": "{deckCount} nested decks · {cardTotal} cards",
   "@parentDeckSummary": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C).",

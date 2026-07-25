@@ -1,5 +1,6 @@
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -16,6 +17,16 @@ Future<Deck?> deckDetail(Ref ref, {required String deckId}) {
 @riverpod
 Stream<List<Deck>> deckChildren(Ref ref, {required String deckId}) {
   return ref.watch(openDeckUseCaseProvider).childrenOf(deckId);
+}
+
+/// The Parent branch's child rows, with the same counters the Library root
+/// shows (WBS 5.4.2 read model on the deck-detail scope).
+@riverpod
+Stream<List<DeckSummary>> deckChildSummaries(
+  Ref ref, {
+  required String deckId,
+}) {
+  return ref.watch(openDeckUseCaseProvider).childSummariesOf(deckId);
 }
 
 @riverpod

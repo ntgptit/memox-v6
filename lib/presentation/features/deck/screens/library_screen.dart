@@ -6,11 +6,11 @@ import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_summary_row.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_deck_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
@@ -117,7 +117,10 @@ class _LibraryBody extends ConsumerWidget {
                   : MxList(
                       children: [
                         for (final summary in visible)
-                          _DeckRow(summary: summary),
+                          DeckSummaryRow(
+                            summary: summary,
+                            onTap: () => context.goDeckDetail(summary.deck.id),
+                          ),
                       ],
                     ),
               const MxGap.s6(),
@@ -257,46 +260,6 @@ class _LibraryEmptyState extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _DeckRow extends StatelessWidget {
-  const _DeckRow({required this.summary});
-
-  final DeckSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
-    // Kit deck-card status: due outranks new outranks up-to-date, and a
-    // deck with no cards shows only its count.
-    final (status, statusTone) = switch (summary) {
-      _ when summary.dueCount > 0 => (
-        l10n.cardsDueLabel(summary.dueCount),
-        MxDeckStatusTone.due,
-      ),
-      _ when summary.newCount > 0 => (
-        l10n.cardsNewLabel(summary.newCount),
-        MxDeckStatusTone.isNew,
-      ),
-      _ when summary.cardCount > 0 => (
-        l10n.deckUpToDateLabel,
-        MxDeckStatusTone.upToDate,
-      ),
-      _ => (null, null),
-    };
-
-    // Kit shared DeckCard: default deck glyph `style`, accent tile,
-    // "N cards" meta with the toned study status.
-    return MxDeckCard(
-      icon: Symbols.style_rounded,
-      title: summary.deck.name,
-      meta: l10n.cardsCountLabel(summary.cardCount),
-      status: status,
-      statusTone: statusTone,
-      onTap: () => context.goDeckDetail(summary.deck.id),
     );
   }
 }

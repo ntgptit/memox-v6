@@ -36,6 +36,27 @@ extension DeckRowMapper on db.Deck {
   );
 }
 
+/// The child-scoped summary row carries the same columns as the root one,
+/// but drift generates a distinct result class per query, so the mapping is
+/// repeated rather than shared.
+extension ChildDeckSummaryRowMapper on db.WatchChildDeckSummariesResult {
+  DeckSummary toDomain() => DeckSummary(
+    deck: Deck(
+      id: id,
+      languagePairId: languagePairId,
+      parentId: parentId,
+      name: name,
+      normalizedName: normalizedName,
+      description: description,
+      createdAt: utcDateTime(createdAt),
+      updatedAt: utcDateTime(updatedAt),
+    ),
+    cardCount: cardCount,
+    dueCount: dueCount,
+    newCount: newCount,
+  );
+}
+
 extension DeckSummaryRowMapper on db.WatchRootDeckSummariesResult {
   DeckSummary toDomain() => DeckSummary(
     deck: Deck(

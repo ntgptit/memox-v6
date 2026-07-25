@@ -4,6 +4,10 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_section_header.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_list.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_summary_row.dart';
+import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
@@ -478,29 +482,41 @@ class _ParentBranch extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final subtreeCards = ref.watch(deckSubtreeCardsProvider(deckId: deck.id));
+    final summaries = ref.watch(deckChildSummariesProvider(deckId: deck.id));
+    // Counters arrive with the summaries; until they resolve the branch
+    // still lists the decks it already has, so it never blanks on refresh.
+    final rows =
+        summaries.asData?.value ??
+        <DeckSummary>[
+          for (final child in childDecks)
+            DeckSummary(deck: child, cardCount: 0),
+        ];
+    final dueTotal = rows.fold<int>(
+      0,
+      (total, summary) => total + summary.dueCount,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        MxText(
-          l10n.parentDeckSummary(childDecks.length, subtreeCards.value ?? 0),
-          role: MxTextRole.caption,
+        // Kit `subdeck-list`: a DECKS section label carrying the scope's
+        // card total and due count, over the same deck cards the Library
+        // root renders.
+        MxSectionHeader(
+          title: l10n.decksSectionLabel,
+          caption: l10n.deckScopeSummary(subtreeCards.value ?? 0, dueTotal),
         ),
         const MxGap.s3(),
-        for (final child in childDecks)
-          MxTappable(
-            semanticLabel: child.name,
-            onTap: () => context.pushDeckDetail(child.id),
-            child: Row(
-              children: [
-                const MxGap.s3(),
-                const MxIcon(icon: Symbols.folder),
-                const MxGap.s3(),
-                Expanded(child: MxText(child.name, role: MxTextRole.subtitle)),
-                const MxIcon(icon: Symbols.chevron_right),
-                const MxGap.s3(),
-              ],
-            ),
-          ),
+        MxList(
+          children: <Widget>[
+            for (final row in rows)
+              DeckSummaryRow(
+                summary: row,
+                // Push, so Back walks up to this parent rather than out to
+                // the Library.
+                onTap: () => context.pushDeckDetail(row.deck.id),
+              ),
+          ],
+        ),
         const MxGap.s6(),
         MxButton(
           label: l10n.createDeckLabel,

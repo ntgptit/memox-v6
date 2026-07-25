@@ -445,6 +445,8 @@
   "@cancelLabel": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C)."
   },
+  "decksSectionLabel": "Bộ thẻ con",
+  "deckScopeSummary": "{cardTotal, plural, =1{1 thẻ} other{{cardTotal} thẻ}} · {dueCount} đến hạn",
   "parentDeckSummary": "{deckCount} deck con · {cardTotal} thẻ",
   "@parentDeckSummary": {
     "description": "Create-deck dialog / parent summary copy (WBS 5.2.4C).",

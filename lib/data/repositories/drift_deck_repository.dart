@@ -69,6 +69,16 @@ class DriftDeckRepository implements DeckRepository {
   }
 
   @override
+  Stream<List<domain.DeckSummary>> watchChildSummaries(String parentId) {
+    // Same subscription-time due-ness contract as watchRootSummaries.
+    final nowUtc = _clock.nowUtc().millisecondsSinceEpoch.toString();
+    return _database.deckDao
+        .watchChildDeckSummaries(nowUtc, parentId)
+        .watch()
+        .map((rows) => rows.map((row) => row.toDomain()).toList());
+  }
+
+  @override
   Stream<List<domain.Deck>> watchChildren(String parentId) {
     return _database.deckDao
         .watchChildDecks(parentId)
