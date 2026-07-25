@@ -14,6 +14,7 @@ import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
@@ -85,15 +86,21 @@ class _MatchStage extends ConsumerWidget {
         progressSemanticLabel: l10n.studyProgressLabel(total, total),
         onBack: () => Navigator.of(context).maybePop(),
         backLabel: l10n.studyExitLabel,
+        // Kit `match-mode/complete`: the round-complete frame is one
+        // `EmptyState` carrying its own action, tone success. `Next round`
+        // was a sticky `bottomBar` instead, which put it ~470 logical below
+        // the copy it belongs to and gave the celebration a primary tile
+        // rather than the success one the kit tones it.
         body: MxEmptyState(
           icon: Symbols.celebration_rounded,
+          tone: MxIconTileTone.success,
           title: l10n.matchRoundCompleteTitle,
           body: l10n.matchRoundCompleteBody,
-        ),
-        bottomBar: MxButton(
-          icon: Symbols.arrow_forward_rounded,
-          label: l10n.matchNextRoundLabel,
-          onPressed: flushing ? null : () => _flush(ref),
+          action: MxButton(
+            icon: Symbols.arrow_forward_rounded,
+            label: l10n.matchNextRoundLabel,
+            onPressed: flushing ? null : () => _flush(ref),
+          ),
         ),
       );
     }
