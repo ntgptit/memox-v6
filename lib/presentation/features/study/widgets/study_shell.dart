@@ -90,13 +90,19 @@ class StudyShell extends StatelessWidget {
           ),
           const MxGap.s6(),
           Expanded(child: body),
-          // Kit `.app__body`: the bottom action reserves the bottom-nav band
-          // (space-11) plus a space-6 gap and then reclaims that band for the
-          // thumb-zone control (kit `marginBottom: -bottom-nav-height`), so the
-          // control sits space-6 above the safe-area bottom and the stage body
-          // above it is bounded, not stretched into the reserved band.
+          // Kit `.app__body` reserves the bottom-nav band below its content
+          // (`padding-bottom: nav + space-6`) and then hands it straight back
+          // to the thumb-zone control (`marginBottom: -bottom-nav-height`),
+          // so the band costs the stage nothing and the control ends up
+          // space-6 above the safe-area bottom.
+          //
+          // This used to reserve the band with a `space-11` gap and never
+          // reclaim it, which is not the same thing: the study routes are
+          // top-level and carry no bottom nav, so those 80px were pure empty
+          // space between the stage and the control. Measured against
+          // `review-mode--browsing`, it left both cards ~38px shorter than the
+          // kit's while the control itself sat in the right place.
           if (bottomBar != null) ...<Widget>[
-            const MxGap.s11(),
             const MxGap.s6(),
             bottomBar,
             const MxGap.s6(),
