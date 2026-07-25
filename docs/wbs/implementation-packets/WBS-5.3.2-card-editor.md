@@ -152,10 +152,38 @@ the edit variant, so the journey now matches what it is being compared against.
 **Note the earlier claim in this packet — "the dark residual is colour, not
 composition" — was wrong on both counts.**
 
-**Remaining child-B scope:** `submit-success` and the dirty-discard overlay.
-The kit has **ten** editor states; the register now carries **four**.
-`submit-success` needs a product decision first — the kit keeps the user in the
-editor with Save reading "Done", while this app pops back to the deck.
+**`MX-VIS-058` validation — PASS, 2.14% light / 2.44% dark.** Child A's state,
+never tracked until now. A required field reports its error once *touched*,
+never on arrival — a pristine form must not greet the user with two complaints
+— so the only production path to the kit's both-errors frame is the one a user
+takes: type into each field, then clear it. Loading the form cannot reach it.
+
+The capture needed focus parked on the inert deck-context pill first.
+`fillField` blurs with Tab, and in this form Tab lands on the *next* text
+field, so a caret kept blinking and `expectStableCapture` rightly refused three
+disagreeing settles. Worth knowing for the remaining states: any editor capture
+that ends on a text field needs the same treatment.
+
+**The dirty-discard overlay has no shot, and should not get one.** The kit's
+JSX header names `discard-confirm` in its list of ten states, but there is no
+`flashcard-editor--discard-confirm` shot and the state matrix in
+`specs/flashcard-editor.md` never mentions discard. The ten shots that do exist
+match the spec matrix exactly — and include `keyboard-open`, which that same
+JSX header omits. The header comment is the odd one out, not the shot set.
+
+The behaviour is covered where it belongs, by widget test: *"a dirty close asks
+before discarding"* asserts the confirm dialog and the Keep-editing path.
+Nothing to measure, nothing missing.
+
+**Child B is complete except `submit-success`,** which is a product decision
+rather than a build: the kit keeps the user in the editor with Save reading
+"Done", while this app pops back to the deck on success. The two cannot both be
+right, and the kit shot cannot be reached from behaviour the app does not have.
+
+The register now carries **five** of the kit's ten editor states
+(`create`, `duplicate`, `submitting`, `submit-error`, `validation`). The
+remaining five — `edit`, `additional-translation`, `audio-generating`,
+`keyboard-open`, `submit-success` — are child C's, plus that decision.
 
 ## Acceptance and test procedure
 

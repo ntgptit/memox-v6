@@ -46,6 +46,7 @@ class ParityFixtures {
     'MX-VIS-055',
     'MX-VIS-056',
     'MX-VIS-057',
+    'MX-VIS-058',
     'MX-VIS-050',
     'MX-VIS-051',
     'MX-VIS-052',
@@ -114,6 +115,7 @@ class ParityFixtures {
       case 'MX-VIS-055':
       case 'MX-VIS-056':
       case 'MX-VIS-057':
+      case 'MX-VIS-058':
         // The Card Editor journeys start at a true fresh install. The
         // Playwright spec creates the Language Pair and Deck through the
         // production first-run UI before entering the Flashcard flow.
