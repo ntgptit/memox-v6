@@ -510,13 +510,13 @@ yet measured under this gate.
 | MX-VIS-034 | Deck detail — empty branch | Default | `empty-deck--default` | Blocked — add-card CTA enabled (5.3.2); measured 9.68% light / 13.58% dark |
 | MX-VIS-035 | Deck detail — empty branch | Create nested dialog | `empty-deck--create-nested-dialog` | Blocked — byte-identical to `create-deck-dialog--nested`; fold into MX-VIS-026 |
 | MX-VIS-036 | Deck detail — parent branch | Loaded | `subdeck-list--loaded` | Blocked — breadcrumb (6.2), SRS counters (5.4.2), play affordance, app-bar search (5.x) |
-| MX-VIS-037 | Deck detail — parent branch | Loading | `subdeck-list--loading` | Blocked — skeleton/shimmer primitive does not exist; plus breadcrumb (6.2) |
+| MX-VIS-037 | Deck detail — parent branch | Loading | `subdeck-list--loading` | Pending — **both blockers cleared, composition built, not yet measured.** The breadcrumb shipped with `6.2`; the missing skeleton/shimmer primitive is now `MxSkeleton`, and the parent branch renders the kit `SubdeckList.jsx` loading composition (40px filter pill over four deck rows, each a round 40 tile beside a 60%/40% line pair). Which of the two loading compositions appears is derived from the resolved child decks. Needs a `?fixture=` precondition + a Playwright spec before a ratio exists |
 | MX-VIS-038 | Deck detail — parent branch | Error | `subdeck-list--error` | Pending — **actionable**: only the app-bar search/overflow glyphs diverge |
 | MX-VIS-039 | Deck detail — parent branch | Not found | `subdeck-list--not-found` | Pending — **actionable**: no blockers; needs the kit icon-tile + title composition |
 | MX-VIS-040 | Deck detail — parent branch | Dense | `subdeck-list--dense` | Blocked — same as MX-VIS-036 |
 | MX-VIS-041 | Deck detail — parent branch | Deep hierarchy | `subdeck-list--deep` | Blocked — collapsed breadcrumb is the point of the shot (6.2); plus MX-VIS-036 set |
 | MX-VIS-042 | Deck detail — leaf branch | Loaded | `flashcard-list--loaded` | Blocked — filter chips (10.2), SRS counters/badges (5.4.2), breadcrumb (6.2) |
-| MX-VIS-043 | Deck detail — leaf branch | Loading | `flashcard-list--loading` | Pending — actionable once a skeleton/shimmer primitive exists |
+| MX-VIS-043 | Deck detail — leaf branch | Loading | `flashcard-list--loading` | Pending — **primitive shipped, composition built, not yet measured.** `MxSkeleton` exists and the leaf branch renders the kit `FlashcardList.jsx` loading composition (44px filter pill over five card rows, each a 45%/65% line pair beside a 56×22 badge pill, no leading tile). Needs a `?fixture=` precondition + a Playwright spec before a ratio exists |
 | MX-VIS-044 | Deck detail — leaf branch | Error | `flashcard-list--error` | Pending — **actionable**: needs the centered error composition instead of the inline banner |
 | MX-VIS-045 | Deck detail — leaf branch | Minimum data | `flashcard-list--minimum-data` | Blocked — same as MX-VIS-042 |
 | MX-VIS-046 | Deck detail — leaf branch | Dense | `flashcard-list--dense` | Blocked — same as MX-VIS-042; shot is near-identical to `--loaded`, consider merging |
