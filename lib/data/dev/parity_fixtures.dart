@@ -39,6 +39,7 @@ class ParityFixtures {
     'MX-VIS-014',
     'MX-VIS-015',
     'MX-VIS-018',
+    'MX-VIS-034',
     'MX-VIS-036',
     'MX-VIS-037',
     'MX-VIS-043',
@@ -81,6 +82,9 @@ class ParityFixtures {
         return;
       case 'MX-VIS-018':
         await _seedActivePair();
+        return;
+      case 'MX-VIS-034':
+        await _seedEmptyDeck();
         return;
       case 'MX-VIS-036':
         await _seedLoadedParentDeck();
@@ -289,6 +293,21 @@ class ParityFixtures {
   /// behind `flashcard-list--loading` (`MX-VIS-043`). Having no children
   /// is the load-bearing part: it is what resolves the branch to Leaf and
   /// selects the kit's card-row loading composition.
+  /// An active pair and one deck holding nothing at all — the content-choice
+  /// state, where a deck has not yet become a Leaf or a Parent.
+  Future<void> _seedEmptyDeck() async {
+    await _seedActivePair();
+    await _database.deckDao.insertDeck(
+      'fx-empty',
+      'fx-lp-1',
+      null,
+      'Numbers & counting',
+      'numbers & counting',
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+  }
+
   Future<void> _seedLeafDeck() async {
     await _seedActivePair();
     await _database.deckDao.insertDeck(

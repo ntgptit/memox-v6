@@ -89,3 +89,21 @@ warnings distinguished "fifteen rules enforcing" from "fifteen rules asleep".
 When a rule's scope is edited, re-run the guard and confirm the
 `rule_without_targets` count went *down*. A rule is enforcing only when it has
 targets.
+
+
+## Stale blockers, 2026-07-26
+
+The dormant-rule audit has a sibling. A `Blocked — needs X` note is a claim
+about a moment, and it keeps reading as current long after `X` ships. Nothing
+re-checks it, so the row stays parked and the state stays unmeasured.
+
+`MX-VIS-034` sat at "Blocked — add-card CTA enabled (5.3.2); measured 9.68% /
+13.58%". `5.3.2` child A shipped that CTA; the row was never revisited, and the
+state had **no parity spec at all**, so nothing would ever have re-measured it.
+Written and measured on 2026-07-26: **1.50% light / 2.08% dark**. It had been
+passing, unnoticed, for as long as the CTA had existed.
+
+The check is cheap and worth repeating whenever a WBS row closes: list every
+unmeasured `MX-VIS-*`, pull the WBS ids out of its status, and ask whether
+those ids are still open. `tool/verify/parity_census.mjs` guarantees each row
+*says* something; it cannot tell whether what it says is still true.
