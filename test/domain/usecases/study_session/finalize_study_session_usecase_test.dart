@@ -204,7 +204,7 @@ LearningProgress _progressAt({required int box}) => LearningProgress(
   cardId: 'c1',
   box: box,
   dueAt: box == 0 ? null : DateTime.utc(2026, 7, 24),
-  policyId: Srs8BoxPolicy.policyId,
+  policyId: leitner8BoxPolicyId,
   policyVersion: 1,
   revision: 0,
   repetitionCount: 0,

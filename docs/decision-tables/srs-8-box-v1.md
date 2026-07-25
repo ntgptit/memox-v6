@@ -33,4 +33,20 @@ Source policy: [SRS Policy v1](../business/learning-progress/srs-8-box-policy.md
 | SRS8-027 | Practice terminal outcome | Finalize | History only | Unchanged |
 | SRS8-028 | Unknown `policyId` | Apply | Typed policy error | Unchanged |
 
+## Coverage gap — Box 7 + `wrong` (found 2026-07-25, WBS 5.4.3)
+
+The table above states 15 of the 16 `(box 1..8, grade)` transitions.
+**Box 7 with `wrong` has no row**, while the header calls
+`SRS8-001..028` the complete v1 executable contract.
+
+The behaviour itself is not in doubt: §5 of the source policy gives
+`wrong → max(currentBox - 1, 1)`, so Box 7 demotes to Box 6 with
+`nowUtc + 60d`. `test/domain/learning_progress/srs_8_box_policy_test.dart`
+covers it as a case derived from §5 rather than from a row ID, and an
+exhaustiveness assertion in that suite is what surfaced the omission.
+
+Recorded rather than resolved: assigning it an ID is the decision-table
+owner's call, since ID allocation is part of the frozen contract other
+documents cite. Either add the row or record the omission as intended.
+
 Migration contract: v1 initial creation stores `policyId=leitner-8-box-v1`. A future policy requires a new policy ID, explicit old→new mapping, dry-run impact counts, atomic migration, rollback/recovery and fixture tests for every source state. No in-place reinterpretation of persisted v1 history.

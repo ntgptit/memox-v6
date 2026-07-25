@@ -9,71 +9,62 @@ import 'package:memox_v6/domain/study_session/study_attempt.dart';
 /// 003–012, 017–024, 028). The atomic Attempt+Progress write itself lives in
 /// the data layer; this use case only decides the next state.
 ///
-/// It reads the card's current progress, validates its policy id (SRS8-028),
-/// computes the next box/due with the pure [Srs8BoxPolicy], derives counters
-/// (§8: a terminal grade increments repetitions, a `wrong` grade also
-/// increments lapses; activation leaves counters untouched), then persists the
-/// evidence and the new schedule through
+/// It reads the card's current progress and hands it to the pure
+/// [Srs8BoxPolicy], which owns every decision: the policy-id guard
+/// (SRS8-028), the box/due math, and the §8 counters (a terminal grade
+/// increments repetitions, a `wrong` grade also increments lapses;
+/// activation leaves both untouched). This use case then persists the
+/// evidence and the returned schedule through
 /// [LearningProgressRepository.applyScheduledOutcome] — whose idempotency key
 /// makes a replay a no-op (SRS8-011) and whose guarded revision raises a typed
-/// [ConflictFailure] on a concurrent write (SRS8-012). This use case computes
-/// no schedule itself; the box, due date and counters always arrive from the
-/// policy.
+/// [ConflictFailure] on a concurrent write (SRS8-012). Nothing here computes a
+/// box, a due date or a counter.
 class ApplyTerminalOutcomeUseCase {
   const ApplyTerminalOutcomeUseCase({
     required LearningProgressRepository repository,
-    Srs8BoxPolicy policy = const Srs8BoxPolicy(),
-  }) : _repository = repository,
-       _policy = policy;
+  }) : _repository = repository;
 
   final LearningProgressRepository _repository;
-  final Srs8BoxPolicy _policy;
 
   /// Activate a completed new card: Box 0 → Box 1 (SRS8-001). Counters are
   /// untouched — activation is not a graded repetition (§3 activation result).
+  ///
+  /// A card that has already left Box 0 is rejected by the policy with
+  /// `ValidationFailure(box, 'already-activated')`.
   Future<void> activate({
     required StudyAttempt attempt,
     required DateTime nowUtc,
   }) async {
     final current = await _load(attempt.cardId);
-    if (current.box != Srs8BoxPolicy.newBox) {
-      throw ValidationFailure(field: 'box', code: 'already-activated');
-    }
-    final decision = _policy.activate(nowUtc: nowUtc);
     await _persist(
       current,
       attempt,
-      decision,
+      Srs8BoxPolicy.activate(current: current, nowUtc: nowUtc),
       nowUtc,
-      repetitionCount: current.repetitionCount,
-      lapseCount: current.lapseCount,
     );
   }
 
   /// Apply a binary terminal grade to an activated card in Box 1..8
-  /// (SRS8-003–009, 017–024). Repetitions always increment; a `wrong` grade
-  /// also increments lapses (§8).
+  /// (SRS8-003–009, 017–024).
+  ///
+  /// A Box 0 card is rejected by the policy with
+  /// `ValidationFailure(box, 'not-activated')` — activation has its own
+  /// precondition and its own entry point.
   Future<void> applyGrade({
     required StudyAttempt attempt,
     required SrsGrade grade,
     required DateTime nowUtc,
   }) async {
     final current = await _load(attempt.cardId);
-    if (current.box == Srs8BoxPolicy.newBox) {
-      throw ValidationFailure(field: 'box', code: 'not-activated');
-    }
-    final decision = _policy.applyGrade(
-      currentBox: current.box,
-      grade: grade,
-      nowUtc: nowUtc,
-    );
     await _persist(
       current,
       attempt,
-      decision,
+      Srs8BoxPolicy.applyTerminalGrade(
+        current: current,
+        grade: grade,
+        nowUtc: nowUtc,
+      ),
       nowUtc,
-      repetitionCount: current.repetitionCount + 1,
-      lapseCount: current.lapseCount + (grade == SrsGrade.wrong ? 1 : 0),
     );
   }
 
@@ -82,26 +73,25 @@ class ApplyTerminalOutcomeUseCase {
     if (current == null) {
       throw ValidationFailure(field: 'cardId', code: 'no-progress');
     }
-    if (current.policyId != Srs8BoxPolicy.policyId) {
-      throw ValidationFailure(field: 'policyId', code: 'unknown');
-    }
+    // The policy id itself is checked by the policy (SRS8-028) so that a
+    // future policy's rows cannot be reinterpreted under v1 rules.
     return current;
   }
 
+  /// `SrsSchedule.lastReviewedAt` and `srsActivatedAt` are computed by the
+  /// policy but have no schema-v1 column, so they are not persisted here.
   Future<void> _persist(
     LearningProgress current,
     StudyAttempt attempt,
-    SrsScheduleDecision decision,
-    DateTime nowUtc, {
-    required int repetitionCount,
-    required int lapseCount,
-  }) {
+    SrsSchedule schedule,
+    DateTime nowUtc,
+  ) {
     return _repository.applyScheduledOutcome(
       attempt: attempt,
-      newBox: decision.box,
-      newDueAt: decision.dueAt,
-      repetitionCount: repetitionCount,
-      lapseCount: lapseCount,
+      newBox: schedule.box,
+      newDueAt: schedule.dueAt,
+      repetitionCount: schedule.repetitionCount,
+      lapseCount: schedule.lapseCount,
       expectedRevision: current.revision,
       updatedAt: nowUtc,
     );
