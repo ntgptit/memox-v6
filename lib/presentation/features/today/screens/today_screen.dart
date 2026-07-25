@@ -22,8 +22,10 @@ import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 /// loading and load-error states.
 ///
 /// Scoped to the projection's primary CTA: the kit's Daily-goal card, the
-/// four-stat Today strip and the Recent-decks list are deferred (they need the
-/// goal/streak, time-studied and mastery sources that are not composed yet), and
+/// four-stat Today strip and the Recent-decks list are deferred. Two of the
+/// sources they needed now exist — `TodayProjection.dailyProgress` carries the
+/// goal and streak — but time-studied does not (`int-9`: the metric is
+/// specified, nothing captures the intervals) and mastery is uncomposed, and
 /// Start review currently opens the Library because no session-start UI command
 /// exists app-wide and `StartStudySessionUseCase` is deck-scoped (recorded gaps).
 ///

@@ -4,6 +4,8 @@ import 'package:memox_v6/domain/learning_progress/learning_progress_repository.d
 import 'package:memox_v6/domain/study_session/study_session_repository.dart';
 import 'package:memox_v6/domain/today/today_projection.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_goal/load_daily_progress_usecase.dart';
+import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
 
 /// Composes the Today entry projection (WBS 5.7.1; `load-today-dashboard.md`).
 ///
@@ -20,17 +22,23 @@ class LoadTodayProjectionUseCase {
     required DeckRepository decks,
     required SelectLanguagePairUseCase languagePairs,
     required AppClock clock,
+    LoadDailyProgressUseCase? dailyProgress,
   }) : _sessions = sessions,
        _progress = progress,
        _decks = decks,
        _languagePairs = languagePairs,
-       _clock = clock;
+       _clock = clock,
+       _dailyProgress = dailyProgress;
 
   final StudySessionRepository _sessions;
   final LearningProgressRepository _progress;
   final DeckRepository _decks;
   final SelectLanguagePairUseCase _languagePairs;
   final AppClock _clock;
+
+  /// Optional so existing constructions keep working; without it the
+  /// projection reports no goal, which is the card's not-shown state.
+  final LoadDailyProgressUseCase? _dailyProgress;
 
   Future<TodayProjection> call() async {
     final paused = await _sessions.watchActive().first;
@@ -48,10 +56,17 @@ class LoadTodayProjectionUseCase {
         ? TodayPrimaryAction.startReview
         : TodayPrimaryAction.caughtUp;
 
+    // Two of the three sources the kit's Daily-goal card needs now exist
+    // (goal + streak); time-studied does not, because nothing captures
+    // foreground-active intervals — see `int-9`.
+    final dailyProgress =
+        await _dailyProgress?.call() ?? const DailyProgressStatus.none();
+
     return TodayProjection(
       primaryAction: action,
       dueCount: dueCount,
       pausedSession: paused,
+      dailyProgress: dailyProgress,
     );
   }
 }

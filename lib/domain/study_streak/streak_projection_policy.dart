@@ -55,6 +55,23 @@ class LocalDay implements Comparable<LocalDay> {
       '${day.toString().padLeft(2, '0')}';
 }
 
+/// Parses a stored `YYYY-MM-DD` local date, or null when it is malformed.
+///
+/// Shared rather than duplicated per caller: a row that cannot be parsed is
+/// skipped instead of crashing the surface reading it, and
+/// `reconcile-streak-history.md` owns repairing it. Two copies of that rule
+/// would be two chances to disagree about what "malformed" means.
+LocalDay? parseLocalDay(String localDate) {
+  final parts = localDate.split('-');
+  if (parts.length != 3) return null;
+  final year = int.tryParse(parts[0]);
+  final month = int.tryParse(parts[1]);
+  final day = int.tryParse(parts[2]);
+  if (year == null || month == null || day == null) return null;
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  return LocalDay(year, month, day);
+}
+
 /// A record the projection refused to count (`calculate-current-streak.md` §4:
 /// "future invalid records bị loại và báo reconciliation issue").
 ///
