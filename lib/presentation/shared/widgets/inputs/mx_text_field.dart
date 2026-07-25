@@ -56,7 +56,11 @@ class MxTextField extends StatelessWidget {
     this.autofillHints,
     this.focusNode,
     this.textAlign = TextAlign.start,
+    this.labelAction,
   });
+
+  /// Optional control on the label line (kit `Field.labelAction`).
+  final Widget? labelAction;
 
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
@@ -98,6 +102,7 @@ class MxTextField extends StatelessWidget {
       autofillHints: autofillHints,
       focusNode: focusNode,
       textAlign: textAlign,
+      labelAction: labelAction,
     );
   }
 }

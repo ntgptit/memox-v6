@@ -61,9 +61,13 @@ class MxFieldScaffold extends StatefulWidget {
     this.autofillHints,
     this.focusNode,
     this.textAlign = TextAlign.start,
+    this.labelAction,
   });
 
   /// Lines the field occupies at rest, before anything is typed.
+  /// Optional control on the label line (kit `Field.labelAction`).
+  final Widget? labelAction;
+
   final int minLines;
 
   /// Growth cap; equal to [minLines] for a field that never grows.
@@ -224,23 +228,41 @@ class _MxFieldScaffoldState extends State<MxFieldScaffold> {
     // Support text stays OUTSIDE the merge: helper text is not part of the
     // field's name, and the error keeps its own live region so it is
     // announced when it appears rather than renaming the field.
+    Widget labelled = MergeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if (label != null) ...[_buildLabel(context, label), const MxGap.s2()],
+          input,
+        ],
+      ),
+    );
+
+    // Kit `Field.labelAction`: a control parked at the right end of the label
+    // line (the Meaning field's add-a-translation `+`).
+    //
+    // Overlaid rather than placed in a row with the label, for two reasons.
+    // It must stay *outside* the MergeSemantics above — that merge is what
+    // gives the input its accessible name, and it would otherwise swallow the
+    // button, which is the defect this scaffold already had once. And a row
+    // would narrow the input by the button's width, where the kit keeps the
+    // input full-bleed under a label line that the action merely sits on.
+    final labelAction = widget.labelAction;
+    if (labelAction != null && label != null) {
+      labelled = Stack(
+        children: <Widget>[
+          labelled,
+          Positioned(top: 0, right: 0, child: labelAction),
+        ],
+      );
+    }
+
     Widget group = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        MergeSemantics(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              if (label != null) ...[
-                _buildLabel(context, label),
-                const MxGap.s2(),
-              ],
-              input,
-            ],
-          ),
-        ),
+        labelled,
         if (support != null) ...[const MxGap.s2(), support],
       ],
     );
