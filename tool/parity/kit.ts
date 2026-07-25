@@ -136,6 +136,19 @@ export async function expectKitParity(
  * the same bytes. An unstable state is not gate-ready (parity DoD 4).
  */
 export async function expectStableCapture(page: Page): Promise<void> {
+  // Park the pointer off every control before capturing. Playwright's mouse
+  // starts at (0, 0) — which is exactly where the app bar's back button sits —
+  // so any spec that never clicks (the deep-link resume entries) captured that
+  // button in its hover state, while tap-through specs left the pointer
+  // wherever they last clicked. The kit shots are resting states, so a hover
+  // is a harness artefact rather than a difference worth measuring.
+  //
+  // The left gutter at mid-height is content-free on every screen here.
+  const viewport = page.viewportSize();
+  if (viewport) {
+    await page.mouse.move(2, Math.floor(viewport.height / 2));
+  }
+
   const captures: string[] = [];
   for (let attempt = 0; attempt < 3; attempt++) {
     await settle(page);
