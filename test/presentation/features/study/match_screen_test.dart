@@ -12,6 +12,7 @@ import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
 import 'package:memox_v6/domain/study_session/study_session.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/study/screens/match_screen.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_card.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 
 /// WBS 5.6.6 — the Match board (kit `match-mode`).
@@ -107,6 +108,53 @@ void main() {
     // Unlike Guess, every card contributes both a term and a meaning tile.
     for (final label in <String>['사랑', '학교', '음식', 'love', 'school', 'food']) {
       expect(find.text(label), findsOneWidget, reason: '$label tile missing');
+    }
+  });
+
+  // The board is symmetric: a learner may open a pair from either side. This
+  // shipped term-first only — `selectMeaning` returned early with no term
+  // selected, so a first tap on the meaning column did nothing at all: no
+  // selection, no feedback, no way to tell the tile was live. The kit's own
+  // `match-mode--selected` shot highlights a *meaning* tile as the first pick.
+  testWidgets('a meaning can be picked first and reads selected', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap(runtime()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('love'));
+    await tester.pumpAndSettle();
+
+    final tile = tester.widget<MxCard>(
+      find.ancestor(of: find.text('love'), matching: find.byType(MxCard)).first,
+    );
+    expect(tile.variant, MxCardVariant.primarySoft);
+  });
+
+  testWidgets('meaning-first closes a pair exactly as term-first does', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap(runtime()));
+    await tester.pumpAndSettle();
+
+    // 사랑 / love is a true pair; opening from the meaning side must resolve
+    // it, not sit inert waiting for a term to be chosen first.
+    await tester.tap(find.text('love'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('사랑'));
+    await tester.pumpAndSettle();
+
+    for (final label in <String>['love', '사랑']) {
+      final tile = tester.widget<MxCard>(
+        find
+            .ancestor(of: find.text(label), matching: find.byType(MxCard))
+            .first,
+      );
+      expect(
+        tile.variant,
+        MxCardVariant.primary,
+        reason: '$label should be locked by the resolved pair',
+      );
     }
   });
 

@@ -50,6 +50,7 @@ class MatchBoardState {
     required this.meanings,
     required this.round,
     required this.selectedTermId,
+    required this.selectedMeaningId,
     required this.flashCardId,
     required this.flashMeaningId,
     required this.flashOutcome,
@@ -63,6 +64,7 @@ class MatchBoardState {
       meanings = const <MatchMeaningTile>[],
       round = const MatchRound.empty(),
       selectedTermId = null,
+      selectedMeaningId = null,
       flashCardId = null,
       flashMeaningId = null,
       flashOutcome = null,
@@ -76,6 +78,11 @@ class MatchBoardState {
 
   /// The currently picked term (awaiting a meaning), or null.
   final String? selectedTermId;
+
+  /// The meaning picked first, when the learner starts from that side. A
+  /// matching board is symmetric — the kit's own `selected` shot highlights a
+  /// meaning tile — so either column may open a pair.
+  final String? selectedMeaningId;
 
   /// The term + meaning tiles of the last resolved pairing, tinted by
   /// [flashOutcome] until the next interaction (transient feedback, no timer).
@@ -94,6 +101,7 @@ class MatchBoardState {
   MatchBoardState _copyWith({
     MatchRound? round,
     Object? selectedTermId = _unset,
+    Object? selectedMeaningId = _unset,
     Object? flashCardId = _unset,
     Object? flashMeaningId = _unset,
     Object? flashOutcome = _unset,
@@ -108,6 +116,9 @@ class MatchBoardState {
       selectedTermId: selectedTermId == _unset
           ? this.selectedTermId
           : selectedTermId as String?,
+      selectedMeaningId: selectedMeaningId == _unset
+          ? this.selectedMeaningId
+          : selectedMeaningId as String?,
       flashCardId: flashCardId == _unset
           ? this.flashCardId
           : flashCardId as String?,
@@ -162,6 +173,7 @@ class MatchBoard extends _$MatchBoard {
       meanings: meanings,
       round: MatchRound.of(terms.map((t) => t.cardId)),
       selectedTermId: null,
+      selectedMeaningId: null,
       flashCardId: null,
       flashMeaningId: null,
       flashOutcome: null,
@@ -170,10 +182,19 @@ class MatchBoard extends _$MatchBoard {
   }
 
   /// Pick a term tile (ignored once it is locked); clears any stale flash.
+  ///
+  /// When a meaning is already waiting, this closes that pair instead of
+  /// opening a new one — the board reads the same in both directions.
   void selectTerm(String cardId) {
     if (state.round.isLocked(cardId)) return;
+    final pendingMeaning = state.selectedMeaningId;
+    if (pendingMeaning != null) {
+      _resolve(termId: cardId, meaningCardId: pendingMeaning);
+      return;
+    }
     state = state._copyWith(
       selectedTermId: cardId,
+      selectedMeaningId: null,
       flashCardId: null,
       flashMeaningId: null,
       flashOutcome: null,
@@ -184,10 +205,24 @@ class MatchBoard extends _$MatchBoard {
   /// first and the meaning's owner card to be unlocked; classifies via
   /// SM-MATCH-v1 and records a lapse's first pick for the flush.
   void selectMeaning(String meaningCardId) {
-    final termId = state.selectedTermId;
-    if (termId == null) return;
     if (state.round.isLocked(meaningCardId)) return;
+    final termId = state.selectedTermId;
+    // No term waiting: open the pair from this side rather than swallowing
+    // the tap. This used to `return` — half the board did nothing on a first
+    // touch, with no selection and no feedback to say why.
+    if (termId == null) {
+      state = state._copyWith(
+        selectedMeaningId: meaningCardId,
+        flashCardId: null,
+        flashMeaningId: null,
+        flashOutcome: null,
+      );
+      return;
+    }
+    _resolve(termId: termId, meaningCardId: meaningCardId);
+  }
 
+  void _resolve({required String termId, required String meaningCardId}) {
     final term = state.terms.firstWhere((t) => t.cardId == termId);
     final meaning = state.meanings.firstWhere((m) => m.cardId == meaningCardId);
     final outcome = _strategy
@@ -210,6 +245,7 @@ class MatchBoard extends _$MatchBoard {
       state = state._copyWith(
         round: nextRound,
         selectedTermId: null,
+        selectedMeaningId: null,
         flashCardId: termId,
         flashMeaningId: meaningCardId,
         flashOutcome: ModeOutcome.correct,
@@ -227,6 +263,7 @@ class MatchBoard extends _$MatchBoard {
     state = state._copyWith(
       round: nextRound,
       selectedTermId: null,
+      selectedMeaningId: null,
       flashCardId: termId,
       flashMeaningId: meaningCardId,
       flashOutcome: outcome,

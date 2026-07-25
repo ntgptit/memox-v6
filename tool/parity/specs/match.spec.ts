@@ -84,3 +84,67 @@ test('MX-VIS-063 selecting one tile marks it and waits for its pair', async ({
     route: '/study',
   });
 });
+
+// MX-VIS-064 · Match · correct
+// Master flow: docs/business/study-session/resume-study-session.md §3
+// Flow node: G["Open committed stage/card"] → H["Answer the stage"]
+test('MX-VIS-064 a matched pair reads correct', async ({ page }, testInfo) => {
+  await deepLinkEntry(page, {
+    masterFlow: 'docs/business/study-session/resume-study-session.md',
+    fixture: 'MX-VIS-064',
+    route: '/study',
+    justification:
+      'resume-study-session §3 begins by reopening an app that holds a committed active session; the study route is that flow’s entry node (open committed stage/card), and the Match stage is the committed checkpoint, not a bypass of the start flow.',
+  });
+
+  await expectRoute(page, '/study');
+  await expect(page.getByText('Match')).toBeVisible();
+
+  // The kit tones left index 1 with right index 0 — `love` + `사랑`, a true pair. Both sit at those positions here, so the feedback lands on the same tiles. The flash is held until the next interaction (no timer), so the frame is stable.
+  await tapControl(page, 'love');
+  await tapControl(page, '사랑');
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-064',
+    shot: 'match-mode--correct',
+    screen: 'Match',
+    state: 'correct',
+    masterFlow: 'docs/business/study-session/resume-study-session.md',
+    flowNode: 'G["Open committed stage/card"] → H["Answer the stage"]',
+    fixture: 'MX-VIS-064',
+    route: '/study',
+  });
+});
+
+// MX-VIS-065 · Match · wrong
+// Master flow: docs/business/study-session/resume-study-session.md §3
+// Flow node: G["Open committed stage/card"] → H["Answer the stage"]
+test('MX-VIS-065 a mismatched pair reads wrong', async ({ page }, testInfo) => {
+  await deepLinkEntry(page, {
+    masterFlow: 'docs/business/study-session/resume-study-session.md',
+    fixture: 'MX-VIS-065',
+    route: '/study',
+    justification:
+      'resume-study-session §3 begins by reopening an app that holds a committed active session; the study route is that flow’s entry node (open committed stage/card), and the Match stage is the committed checkpoint, not a bypass of the start flow.',
+  });
+
+  await expectRoute(page, '/study');
+  await expect(page.getByText('Match')).toBeVisible();
+
+  // The kit tones left index 1 with right index 1 — `love` + `학교`, which is not a pair. Same positions here.
+  await tapControl(page, 'love');
+  await tapControl(page, '학교');
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-065',
+    shot: 'match-mode--wrong',
+    screen: 'Match',
+    state: 'wrong',
+    masterFlow: 'docs/business/study-session/resume-study-session.md',
+    flowNode: 'G["Open committed stage/card"] → H["Answer the stage"]',
+    fixture: 'MX-VIS-065',
+    route: '/study',
+  });
+});
