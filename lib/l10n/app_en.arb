@@ -723,6 +723,27 @@
   "@createAnotherLabel": {
     "description": "Card Editor sticky footer toggle (WBS 5.3.2)."
   },
+  "dailyGoalLabel": "Daily goal",
+  "@dailyGoalLabel": {
+    "description": "Settings row + sheet title for the daily study goal (set-daily-study-goal.md)."
+  },
+  "dailyGoalEnabledLabel": "Track a daily goal",
+  "@dailyGoalEnabledLabel": {
+    "description": "Daily-goal sheet: the enable switch."
+  },
+  "dailyGoalEnabledBody": "Counts the cards you finish each day.",
+  "@dailyGoalEnabledBody": {
+    "description": "Daily-goal sheet: what enabling the goal does. The v1 unit is qualified Cards (metrics-v1)."
+  },
+  "dailyGoalTargetLabel": "Target",
+  "@dailyGoalTargetLabel": {
+    "description": "Daily-goal sheet: label above the target options."
+  },
+  "dailyGoalTargetOption": "{count, plural, =1{1 card} other{{count} cards}}",
+  "@dailyGoalTargetOption": {
+    "description": "Daily-goal sheet: one target option, in qualified Cards.",
+    "placeholders": { "count": { "type": "int" } }
+  },
   "saveLabel": "Save",
   "@saveLabel": {
     "description": "Card Editor primary CTA (WBS 5.3.2)."
