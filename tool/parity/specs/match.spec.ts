@@ -33,8 +33,8 @@ test('MX-VIS-062 resumes into the Match playing stage', async ({
 
   // Both sides of the board render — unlike Guess, where distractor terms are
   // never shown — so a term and a meaning are asserted before capturing.
-  await expect(page.getByText('먹다')).toBeVisible();
-  await expect(page.getByText('to sleep')).toBeVisible();
+  await expect(page.getByText('사랑')).toBeVisible();
+  await expect(page.getByText('school')).toBeVisible();
 
   await expectStableCapture(page);
   await expectKitParity(page, testInfo, {

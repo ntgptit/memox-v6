@@ -312,6 +312,15 @@ Rules:
   expiry. An undocumented bypass is a gate violation, not a judgement call.
 - Known-divergence entries (a kit shot showing a feature that has not shipped
   yet) are only valid when they name the WBS item that will close them.
+- **What the ratio cannot see (2026-07-26).** A pixel ratio is a measure of
+  *area*, so on a sparse screen it is nearly blind to structure. Measured, not
+  argued: `match-mode--playing` renders ten tiles on a light board. Reversing
+  the two columns wholesale — terms left instead of meanings — changed the
+  measured ratio by **0.00 percentage points**, and replacing all ten words
+  with the kit's own moved it **0.07pp**, against a 3% gate. The state passed
+  throughout. Treat a pass on a high-whitespace screen as evidence about
+  spacing and colour, not about composition; pin composition with a widget
+  test that asserts position, as `match_screen_test.dart` now does.
 - **Enforcement (2026-07-25).** The gate is machine-run, not attested. CI's
   `visual_parity` job fires whenever `scope` reports `visual_changes`, and the
   `gate` job requires it — skipped is accepted only when nothing visual
@@ -536,7 +545,7 @@ yet measured under this gate.
 | MX-VIS-052 | Recall | Revealed | `recall-mode--revealed` | **Playwright PASS — 0.94% light / 0.97% dark** |
 | MX-VIS-053 | Fill | Waiting | `fill-mode--waiting` | **Playwright PASS — 1.97% light / 2.16% dark** |
 | MX-VIS-054 | Study Result | Standard | `study-result--standard` | **Playwright PASS — 1.76% light / 2.37% dark** |
-| MX-VIS-062 | Match | Playing | `match-mode--playing` | **Playwright PASS — 1.50% light / 1.77% dark** (resume into the committed Match checkpoint). Match had no fixture, no spec and no census row while the other four modes had all three; the screen was correct all along |
+| MX-VIS-062 | Match | Playing | `match-mode--playing` | **Ratio passes — 1.43% light / 1.69% dark — but read the note.** Match had no fixture, spec, census row *or* widget test while the other four modes had all four. The first measurement passed at 1.50/1.77 while the board's **columns were reversed** (terms left, meanings right; the kit fixes meanings left). Swapping them back changed the ratio by **0.00pp**, and seeding the kit's own five pairs instead of unrelated verbs moved it only 0.07pp. Both are now correct on their merits. **Still divergent and not caught by the ratio:** the kit's app bar carries a `more_vert` overflow action this build does not render, and its back control is a bare arrow rather than a circular chip. See the §6.5 note on sparse-screen insensitivity |
 | MX-VIS-063 | Match | Selected | `match-mode--selected` | Composition built, **not yet measured** — reachable by tapping one tile from `MX-VIS-062`'s board; needs its own spec |
 | MX-VIS-064 | Match | Correct | `match-mode--correct` | Composition built, **not yet measured** — reachable by completing a pair; needs its own spec |
 | MX-VIS-065 | Match | Wrong | `match-mode--wrong` | Composition built, **not yet measured** — reachable by selecting two tiles of different pairs; needs its own spec |
