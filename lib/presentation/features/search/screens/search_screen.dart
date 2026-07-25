@@ -215,6 +215,20 @@ class _Results extends ConsumerWidget {
       value: results,
       loadingLabel: l10n.loadingLabel,
       errorTitle: l10n.somethingWentWrongMessage,
+      // `recover-search-failure.md` §3: the primary CTA on a recoverable
+      // search failure is Retry, and §1's objective is recovering "mà không
+      // buộc user nhập lại" — without making the learner type the query
+      // again. There was no retry at all, so a failed search could only be
+      // escaped by editing the query, which is exactly the re-entry the flow
+      // exists to avoid.
+      //
+      // Re-running is an invalidate rather than new state: the provider is
+      // keyed by query, so this reruns the latest query and nothing more
+      // (§4 "Rerun chỉ dùng latest query/filter token"). The failure is
+      // scoped to this list, so the field, filter and recent context are
+      // still on screen — §1's "Error giữ query, filters và recent context".
+      onRetry: () => ref.invalidate(searchResultsProvider(query: query)),
+      retryLabel: l10n.tryAgainLabel,
       data: (context, hits) {
         final shown = hits.where((hit) => _matchesFilter(filter, hit)).toList();
         if (shown.isEmpty) {
