@@ -152,7 +152,7 @@ the edit variant, so the journey now matches what it is being compared against.
 **Note the earlier claim in this packet — "the dark residual is colour, not
 composition" — was wrong on both counts.**
 
-**`MX-VIS-058` validation — PASS, 2.15% light / 2.46% dark.** Child A's state,
+**`MX-VIS-058` validation — PASS, 2.20% light / 2.51% dark.** Child A's state,
 never tracked until now. A required field reports its error once *touched*,
 never on arrival — a pristine form must not greet the user with two complaints
 — so the only production path to the kit's both-errors frame is the one a user

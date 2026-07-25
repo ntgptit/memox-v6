@@ -42,6 +42,7 @@ class CreateFlashcardUseCase {
     String? retryCardId,
     bool allowDuplicate = false,
     List<({String languageCode, String text})> translations = const [],
+    bool isHidden = false,
     List<String> tagIds = const [],
     List<CardAudioRef> audioRefs = const [],
   }) async {
@@ -78,7 +79,11 @@ class CreateFlashcardUseCase {
       term: displayTerm,
       primaryMeaning: displayMeaning,
       contentVersion: 1,
-      isHidden: false,
+      // A card can be created already hidden (kit
+      // `flashcard-editor/visibility`, inside More options): captured now,
+      // studied later. It was hard-coded visible, so the editor had no way
+      // to express that.
+      isHidden: isHidden,
       deletedAt: null,
       createdAt: now,
       updatedAt: now,

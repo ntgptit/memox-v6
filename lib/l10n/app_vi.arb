@@ -385,6 +385,14 @@
   "@addTagsPlaceholder": {
     "description": "Card Editor tags placeholder (WBS 5.3.2)."
   },
+  "hideDuringStudyLabel": "Ẩn khi học",
+  "@hideDuringStudyLabel": {
+    "description": "Card Editor: the advanced visibility switch inside More options (WBS 6.5; hide-flashcard.md)."
+  },
+  "hideDuringStudyBody": "Không xuất hiện trong phiên học và ôn tập.",
+  "@hideDuringStudyBody": {
+    "description": "Card Editor: supporting copy under the visibility switch, naming what hiding actually does (WBS 6.5)."
+  },
   "moreOptionsLabel": "T\u00f9y ch\u1ecdn kh\u00e1c",
   "@moreOptionsLabel": {
     "description": "Card Editor progressive disclosure (WBS 5.3.2)."
