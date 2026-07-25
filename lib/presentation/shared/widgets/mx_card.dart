@@ -7,7 +7,18 @@ import 'package:memox_v6/core/theme/tokens/app_strokes.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 
 /// Surface variants of the kit `.card` contract.
-enum MxCardVariant { elevated, flat, muted, primary, primarySoft }
+enum MxCardVariant {
+  elevated,
+  flat,
+  muted,
+  primary,
+  primarySoft,
+
+  /// Outcome tints, each with the kit's emphasis border in the matching
+  /// role colour — the Match tile's `correct` and `wrong` skins.
+  successSoft,
+  errorSoft,
+}
 
 /// Padding steps of the kit `.card` contract.
 enum MxCardPadding { sm, md, lg }
@@ -105,6 +116,18 @@ class _MxCardState extends State<MxCard> {
         colors.onPrimarySoft,
         const <BoxShadow>[],
         null,
+      ),
+      MxCardVariant.successSoft => (
+        colors.successSoft,
+        colors.onSuccessSoft,
+        const <BoxShadow>[],
+        Border.all(color: colors.success, width: AppStrokes.emphasis),
+      ),
+      MxCardVariant.errorSoft => (
+        colors.errorSoft,
+        colors.onErrorSoft,
+        const <BoxShadow>[],
+        Border.all(color: colors.error, width: AppStrokes.emphasis),
       ),
     };
 
