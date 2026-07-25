@@ -321,6 +321,12 @@ Rules:
   throughout. Treat a pass on a high-whitespace screen as evidence about
   spacing and colour, not about composition; pin composition with a widget
   test that asserts position, as `match_screen_test.dart` now does.
+  `tool/parity/structure_report.mjs` ranks every measured state by ink-profile
+  correlation — the share of non-background pixels per column and per row —
+  which moves when an arrangement changes even though the area barely does. It
+  is a report, not a gate: a legitimately different fixture lowers the number
+  without anything being wrong. It found `int-5` (the study app bar) on its
+  first run, from two states that were passing the ratio comfortably.
 - **Enforcement (2026-07-25).** The gate is machine-run, not attested. CI's
   `visual_parity` job fires whenever `scope` reports `visual_changes`, and the
   `gate` job requires it — skipped is accepted only when nothing visual
