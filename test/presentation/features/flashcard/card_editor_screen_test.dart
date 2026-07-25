@@ -157,6 +157,95 @@ void main() {
     await disposeAndFlushStreams(tester);
   });
 
+  // `manage-card-translations.md` §2 lists the entry points as "Create/Edit
+  // Card -> Add translation", and the kit's `FlashcardEditor.jsx` hangs the
+  // `+` off the Meaning label with no mode gate. It shipped gated on edit, so
+  // a card being created had no route to a translation: the learner had to
+  // save the card, leave, reopen it and edit. The parity ratio could not catch
+  // it — a missing 24px icon is far below the 3% threshold, and MX-VIS-049
+  // passes at 1.19% without it.
+  testWidgets('the translation slot is reachable while creating a card', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await pumpEditor(tester);
+
+    expect(
+      find.byIcon(Symbols.add_rounded),
+      findsWidgets,
+      reason: 'create mode must offer the add-translation control',
+    );
+
+    await discloseTranslations(tester);
+
+    // Term, Meaning, Translation, Tags — the kit's order.
+    expect(find.byType(TextField), findsNWidgets(4));
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  testWidgets('a translation typed while creating is saved with the card', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await pumpEditor(tester);
+
+    await tester.enterText(find.byType(TextField).at(0), '안녕');
+    await tester.enterText(find.byType(TextField).at(1), 'hello');
+    await discloseTranslations(tester);
+    await tester.enterText(find.byType(TextField).at(2), 'xin chào');
+    await tester.pump();
+
+    await tester.tap(find.text('Save'));
+    await pumpEditor(tester);
+
+    final cards = await database.flashcardDao
+        .pageFlashcardsByDeck('d1', 50, 0)
+        .get();
+    final translations = await database.flashcardDao
+        .listTranslationsForCard(cards.single.id)
+        .get();
+    expect(
+      translations.map((t) => t.translationText),
+      <String>['xin chào'],
+      reason: 'the draft must be written once the card exists',
+    );
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  // The slot's `close` clears as well as hides. Reopening it must not
+  // resurrect dismissed text, which would attach a translation the learner
+  // explicitly threw away.
+  testWidgets('dismissing the translation slot discards its draft', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await pumpEditor(tester);
+
+    await tester.enterText(find.byType(TextField).at(0), '안녕');
+    await tester.enterText(find.byType(TextField).at(1), 'hello');
+    await discloseTranslations(tester);
+    await tester.enterText(find.byType(TextField).at(2), 'xin chào');
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Symbols.close_rounded));
+    await pumpEditor(tester);
+
+    await tester.tap(find.text('Save'));
+    await pumpEditor(tester);
+
+    final cards = await database.flashcardDao
+        .pageFlashcardsByDeck('d1', 50, 0)
+        .get();
+    final translations = await database.flashcardDao
+        .listTranslationsForCard(cards.single.id)
+        .get();
+    expect(translations, isEmpty);
+
+    await disposeAndFlushStreams(tester);
+  });
+
   testWidgets('save creates the card with resolved tags and pops', (
     tester,
   ) async {
@@ -195,6 +284,8 @@ void main() {
 
     await tester.enterText(find.byType(TextField).at(0), '안녕');
     await tester.enterText(find.byType(TextField).at(1), 'hello');
+    await discloseTranslations(tester);
+    await tester.enterText(find.byType(TextField).at(2), 'xin chào');
     await tester.pump();
     await tester.tap(find.text('Save'));
     await pumpEditor(tester);
@@ -203,6 +294,9 @@ void main() {
     expect(find.text('New card'), findsOneWidget);
     final termField = tester.widget<TextField>(find.byType(TextField).at(0));
     expect(termField.controller?.text, isEmpty);
+    // The translation slot closes with the rest of the form: a slot left open
+    // and populated would attach the previous card's translation to the next.
+    expect(find.byType(TextField), findsNWidgets(3));
 
     final cards = await database.flashcardDao
         .pageFlashcardsByDeck('d1', 50, 0)

@@ -41,7 +41,7 @@ class CreateFlashcardUseCase {
     required String primaryMeaning,
     String? retryCardId,
     bool allowDuplicate = false,
-    List<CardTranslation> translations = const [],
+    List<({String languageCode, String text})> translations = const [],
     List<String> tagIds = const [],
     List<CardAudioRef> audioRefs = const [],
   }) async {
@@ -83,10 +83,27 @@ class CreateFlashcardUseCase {
       createdAt: now,
       updatedAt: now,
     );
+    // Translations arrive as raw text, not as built rows: their `cardId` is
+    // the id minted just above, so a caller could not fill it in. Building
+    // them here also keeps them inside the same atomic commit as the card —
+    // writing them afterwards would leave a card stored with its translation
+    // missing if the second write failed, and a retry would then create a
+    // duplicate card.
+    final rows = <CardTranslation>[
+      for (final (index, translation) in translations.indexed)
+        CardTranslation(
+          id: _idGenerator.newId(),
+          cardId: card.id,
+          languageCode: translation.languageCode,
+          text: validateCardText(translation.text, field: 'translation'),
+          displayOrder: index,
+        ),
+    ];
+
     await _cards.createCard(
       NewCardContent(
         card: card,
-        translations: translations,
+        translations: rows,
         tagIds: tagIds,
         audioRefs: audioRefs,
       ),

@@ -289,11 +289,22 @@ test('MX-VIS-058 clearing a required field shows its inline error', async ({
   await expect(page.getByText('Enter a term.')).toBeVisible();
   await expect(page.getByText('Enter a meaning.')).toBeVisible();
 
-  // Move focus off the text fields before capturing. `fillField` blurs with
-  // Tab, and in this form Tab lands on the *next* text field — so a caret
-  // keeps blinking and three consecutive settles never agree. The deck
-  // context pill is inert text, so clicking it parks focus harmlessly.
+  // Move focus off the form before capturing. `fillField` blurs with Tab, and
+  // in this form Tab lands on the *next* focusable control — so a caret keeps
+  // blinking and three consecutive settles never agree. The deck context pill
+  // is inert text, so clicking it parks focus harmlessly.
   await page.getByText('Beginner Grammar').first().click({ force: true });
+
+  // ...and then drop focus outright. Clicking inert text stops the caret but
+  // leaves the previously focused control focused, which only became visible
+  // once the Meaning label gained its `+`: Tab reached the button and it drew
+  // a focus ring the kit's resting shot has no reason to show. The ring is
+  // correct behaviour captured at the wrong moment — the same lesson as the
+  // pointer parked in `expectStableCapture`, one input device over.
+  await page.evaluate(() => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) active.blur();
+  });
 
   await expectStableCapture(page);
   await expectKitParity(page, testInfo, {

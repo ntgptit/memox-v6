@@ -10,7 +10,6 @@ import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/domain/study_session/session_summary_policy.dart';
 import 'package:memox_v6/domain/flashcard/card_audio_ref.dart';
-import 'package:memox_v6/domain/flashcard/card_translation.dart';
 import 'package:memox_v6/domain/flashcard/create_flashcard_result.dart';
 import 'package:memox_v6/domain/usecases/flashcard/create_flashcard_usecase.dart';
 import 'package:memox_v6/domain/flashcard/edit_flashcard_result.dart';
@@ -162,7 +161,7 @@ class _HangingCreateFlashcardUseCase extends CreateFlashcardUseCase {
     required String primaryMeaning,
     String? retryCardId,
     bool allowDuplicate = false,
-    List<CardTranslation> translations = const [],
+    List<({String languageCode, String text})> translations = const [],
     List<String> tagIds = const [],
     List<CardAudioRef> audioRefs = const [],
   }) {

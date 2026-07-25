@@ -137,6 +137,10 @@ class _CardEditorForm extends HookConsumerWidget {
       initial: editingCard?.primaryMeaning ?? '',
     );
     final tagsInput = useMxTextValue();
+    // Create mode has no card to hang a translation off yet, so the slot is a
+    // draft the save writes once the card exists. Edit mode manages real rows
+    // through `CardTranslationsSection` and leaves this unused.
+    final translationDraft = useMxTextValue();
     final createAnother = useState(false);
     final termTouched = useState(false);
     // Kit progressive disclosure: the resting form is Term -> Meaning ->
@@ -154,7 +158,8 @@ class _CardEditorForm extends HookConsumerWidget {
       }
       return term.controller.text.isNotEmpty ||
           meaning.controller.text.isNotEmpty ||
-          tagsInput.controller.text.isNotEmpty;
+          tagsInput.controller.text.isNotEmpty ||
+          translationDraft.controller.text.isNotEmpty;
     }
 
     void syncDraftState() {
@@ -174,6 +179,11 @@ class _CardEditorForm extends HookConsumerWidget {
         term.controller.clear();
         meaning.controller.clear();
         tagsInput.controller.clear();
+        // The next card starts from the resting form, translation slot closed
+        // — leaving the previous card's translation in an open slot would
+        // silently attach it to the new one.
+        translationDraft.controller.clear();
+        translationsOpen.value = false;
         ref.read(cardEditorSaveViewmodelProvider.notifier).reset();
         return;
       }
@@ -215,6 +225,11 @@ class _CardEditorForm extends HookConsumerWidget {
             primaryMeaning: meaning.controller.text,
             rawTagLabels: _tagLabelsOf(tagsInput.controller.text),
             allowDuplicate: allowDuplicate,
+            draftTranslation: translationDraft.controller.text,
+            // Read off the already-watched context rather than threaded
+            // through every call site: `submit` is declared outside the async
+            // builder that resolves `editor`.
+            meaningLanguageCode: editorContext.value?.meaningLanguageCode,
           );
     }
 
@@ -323,20 +338,25 @@ class _CardEditorForm extends HookConsumerWidget {
                       label: l10n.meaningFieldLabel(editor.meaningLanguageName),
                       boxed: true,
                       requiredField: true,
-                      labelAction: isEdit
-                          ? MxIconButton(
-                              icon: Symbols.add_rounded,
-                              // Distinct from the section's own "Add
-                              // translation" button: this one reveals the
-                              // slot, that one commits what was typed into
-                              // it, and two controls on a screen must not
-                              // answer to the same name.
-                              semanticLabel: l10n.showTranslationFieldLabel,
-                              onPressed: isSubmitting
-                                  ? null
-                                  : () => translationsOpen.value = true,
-                            )
-                          : null,
+                      // Unconditional, as in the kit: `FlashcardEditor.jsx`
+                      // hangs this `+` off the Meaning label with no mode
+                      // gate, and `manage-card-translations.md` §2 lists the
+                      // entry points as "Create/Edit Card -> Add
+                      // translation". It shipped gated on `isEdit`, so a card
+                      // being created had no route to a translation at all —
+                      // the learner had to save, reopen and edit.
+                      labelAction: MxIconButton(
+                        icon: Symbols.add_rounded,
+                        // Distinct from the section's own "Add
+                        // translation" button: this one reveals the
+                        // slot, that one commits what was typed into
+                        // it, and two controls on a screen must not
+                        // answer to the same name.
+                        semanticLabel: l10n.showTranslationFieldLabel,
+                        onPressed: isSubmitting
+                            ? null
+                            : () => translationsOpen.value = true,
+                      ),
                       placeholder: l10n.enterMeaningPlaceholder,
                       errorText: meaningTouched.value && !meaning.canSubmit
                           ? l10n.enterMeaningError
@@ -348,6 +368,34 @@ class _CardEditorForm extends HookConsumerWidget {
                       },
                     ),
                     const MxGap.s6(),
+                    // The create-mode translation slot, revealed by the `+`
+                    // above and ordered as the kit orders it: Term -> Meaning
+                    // -> Translation -> Tags. Its `close` action clears the
+                    // draft as well as hiding it, so a slot reopened later
+                    // starts empty rather than resurrecting text the learner
+                    // dismissed.
+                    if (!isEdit && translationsOpen.value) ...[
+                      MxTextField(
+                        controller: translationDraft.controller,
+                        label: l10n.addTranslationLabel,
+                        boxed: true,
+                        placeholder: l10n.addTranslationPlaceholder,
+                        enabled: !isSubmitting,
+                        labelAction: MxIconButton(
+                          icon: Symbols.close_rounded,
+                          semanticLabel: l10n.removeTranslationLabel,
+                          onPressed: isSubmitting
+                              ? null
+                              : () {
+                                  translationDraft.controller.clear();
+                                  translationsOpen.value = false;
+                                  syncDraftState();
+                                },
+                        ),
+                        onChanged: (_) => syncDraftState(),
+                      ),
+                      const MxGap.s6(),
+                    ],
                     // Tags are create-only here; editing a card's tags is the
                     // manage-card-tags flow (WBS 6.4).
                     if (!isEdit) ...[
