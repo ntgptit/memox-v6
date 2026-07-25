@@ -218,10 +218,11 @@ whose dependencies are not Done.
 
 | Status | WBS | Reason / next action |
 | --- | --- | --- |
-| Done | `0.1–0.6`, `1.1–1.6`, `1.9`, `2.1–2.10`, `3.1–3.7`, `3.9–3.10`, `4.1` | Durable evidence is in the work-item register. Wave 2 (token→theme→responsive) is closed. |
-| **Ready** | `P0.1` | **Active workstream.** Phase 0 — Historical Visual Parity Audit (§7 Phase 0). Owner directive 2026-07-19. |
-| **Halted** | All UI rows of `5.3.2+`, `5.6.*`, `5.7.*`, `6.*`–`16.*` | **STOP RULE (owner, 2026-07-19):** no new UI/screen work package is promoted to `Ready` until Phase 0 exits (`P0.6`). Non-UI rows (domain, data, policy) may proceed. `5.3.2` (Card Editor) is explicitly halted at Phase 0. |
-| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. Gates 4.10 and 3.12 PASSED (2026-07-19). 5.1 block complete (2026-07-19). 5.2 Deck block complete (2026-07-19). |
+| Done | `0.1–0.6`, `1.1–1.11`, `2.1–2.10`, `3.1–3.7`, `3.9–3.10`, `3.12`, `4.1–4.10`, `5.1.1–5.1.3`, `5.2.1–5.2.6`, `5.3.1`, `P0.3` | Durable evidence is in the work-item register. Wave 2 (token→theme→responsive) is closed; the `4.10` foundation gate and the `3.12` minimal-`Mx*` gate both PASSED (2026-07-19). `5.1.2`, `5.2.1` and `5.2.3` were reopened on 2026-07-20 for `MX-VIS-005`/`014`/`015` and re-closed on 2026-07-21 with those states measured. |
+| **In progress** | `P0.2`, `P0.4`, `P0.5`, `3.15`, `5.3.2` (child A Done), `int-2` | Phase 0 now closes per vertical slice (owner, 2026-07-20). The **onboarding slice closed 2026-07-21**: 11 `MX-VIS-*` IDs × 2 themes measured, 22/22 PASS, worst 1.93%. `5.3.2` children B and C are pending; `int-2` records Library chrome that landed ahead of its owning `5.4.2`/`10.2` rows. |
+| **Blocked** | `P0.1`, `P0.6` | `P0.1` stays open while 5 census rows await a kit-owner decision (`003`, `006`, `007`, `008`, `024`) and `013`/`027` are recorded structurally unreachable. `P0.6` cannot close while its first DoD clause is unmet: **the parity suite does not run in the consolidated verifier.** `tool/verify/run.mjs` has no parity step in any mode, and `.github/workflows/ci.yml` has no parity or Playwright job — `tool/verify/ci_scope.mjs` emits a `visual_changes` output that no job consumes, so the §6.5 merge gate is run by hand rather than machine-enforced. |
+| **Halted** | All UI rows of `5.6.*`, `5.7.*`, `6.*`–`16.*` | **STOP RULE (owner, 2026-07-19), as amended 2026-07-20:** no new UI/screen work package is promoted to `Ready` until its own slice closes under `P0.6`. Non-UI rows (domain, data, policy) may proceed. |
+| Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. PROCESS RULE (owner, 2026-07-19): no screen-changing PR merges without kit-parity evidence <3%. Next: `5.3.2` children B/C, then `5.4.1`–`5.4.2` — the SRS read model the Library status line already renders against but cannot populate (see `int-2` in the register). |
 
 Sequencing note (2026-07-19): `1.7` (developer fixtures) and `1.10` (shared
 test infrastructure) declare only wave-1 dependencies, but their deliverables
@@ -491,8 +492,8 @@ yet measured under this gate.
 | MX-VIS-016 | First-run deck setup (step 2) | Success handoff | `create-deck-firstrun--success` | Blocked — the shot is Library loaded; same as MX-VIS-020 |
 | MX-VIS-017 | First-run | Import branch | `create-deck-firstrun--import-branch` | Blocked — import flow (13.1) |
 | MX-VIS-018 | Library | Empty | `library--empty` | **Playwright PASS — 1.43% light / 1.93% dark** (fresh launch → Today → tap Library tab → empty branch; capture at `Q`, PASS only after Create deck commits and the deck replaces the empty state) |
-| MX-VIS-019 | Library | Loading | `library--loading` | Blocked — FilterRow skeleton + app-bar search/avatar (10.2, 5.x, 9.x) |
-| MX-VIS-020 | Library | Loaded list | `library--loaded` | Blocked — FilterRow + SRS counters (10.2, 5.4.2) |
+| MX-VIS-019 | Library | Loading | `library--loading` | Blocked — FilterRow **row** landed 2026-07-22 (`int-2`); still needs its skeleton variant plus app-bar search/avatar (10.2, 5.x, 9.x) |
+| MX-VIS-020 | Library | Loaded list | `library--loaded` | Blocked — FilterRow, FAB and A-Z sort landed 2026-07-22 (`int-2`); the deck-card **SRS counters still cannot render any value but zero** — see the slice audit below. Owning row stays `5.4.2` (with `5.4.1`) |
 | MX-VIS-021 | Library | First-deck callout | `library--first-deck-created` | **Superseded (owner, 2026-07-21).** First-run success returns to the plain Library deck list (`create-deck.md` §7) — no callout. Success parity is the Library-with-decks state (`library--deck-created` / MX-VIS-020 class), not this callout shot; kit shot retained for reference only. |
 | MX-VIS-022 | Library | Callout dismissed | `library--first-deck-created-dismissed` | **Superseded (owner, 2026-07-21)** — see MX-VIS-021; the dismissed state no longer exists either. |
 | MX-VIS-023 | Library | Dense list | `library--dense` | Blocked — same as MX-VIS-020 |
@@ -590,6 +591,31 @@ specifies:
 Actionable without any further feature work, after this audit: `004`, `009`,
 `010`, `011`, `012`, `013`, `038`, `039`, `044`, and `043` once a
 skeleton/shimmer primitive exists.
+
+#### Slice audit, 2026-07-22 — Library chrome shipped ahead of its domain
+
+PR #98 brought the Library list toward `library--loaded`: the FilterRow
+(scope / filters / sort) on a new shared `MxChip`, the FAB, A-Z sort, and a
+per-deck due/new status line on `MxDeckCard`. The chrome is real; **the status
+line has no data path.**
+
+`decks.drift` `watchRootDeckSummaries` derives `new_count` from
+`learning_progress.id IS NULL` and `due_count` from `due_at <= :nowUtc`. But
+`drift_flashcard_repository.dart:70` writes a Box-0 progress row with a null
+`due_at` inside the same transaction that creates the card, so no card can ever
+satisfy `new_count`; and the only writer of `due_at` is the SRS policy from
+`5.4.3`/`5.4.4`, which is not built, so no card can satisfy `due_count` either.
+Every deck renders "up to date", in every state the app can actually reach.
+
+The two covering tests (`library_screen_test.dart:109` and `:134`) seed
+`flashcardDao`/`learningProgressDao` directly, so they assert against rows the
+production write path cannot produce. Under §9.9 and the FD-13 reachability
+clause this is presentation ahead of its domain, not a closed state.
+
+Resolution belongs to `5.4.1` — "New" is the Box-0 state per `5.4.3`, so the
+query must read `box = 0`, not a missing progress row — and to `5.4.2`, which
+owns the due/new/relearn queue policy. Recorded as `int-2` in the register;
+`MX-VIS-019`/`020`/`023` stay Blocked on it.
 
 Responsive checks at `360×800`, `393×852` and `412×915` run for every ID as
 overflow/reachability assertions only — they never replace the `390×780`
