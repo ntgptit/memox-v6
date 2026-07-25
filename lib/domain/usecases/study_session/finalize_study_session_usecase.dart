@@ -16,6 +16,11 @@ import 'package:memox_v6/domain/study_session/study_session_repository.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/apply_terminal_outcome_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_streak/record_streak_day_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_goal/track_daily_goal_usecase.dart';
+import 'package:memox_v6/domain/study_streak/streak_repository.dart';
+import 'package:memox_v6/domain/study_streak/streak_projection_policy.dart';
+import 'package:memox_v6/domain/study_streak/streak_day.dart';
+import 'package:memox_v6/domain/study_goal/daily_goal_contribution.dart';
+import 'package:memox_v6/core/time/app_time_zone.dart';
 
 /// Closes a completed study session (WBS 5.6.13; `finalize-study-session.md`).
 ///
@@ -43,6 +48,9 @@ class FinalizeStudySessionUseCase {
     required IdGenerator idGenerator,
     RecordStreakDayUseCase? recordStreakDay,
     TrackDailyGoalUseCase? trackDailyGoal,
+    StreakRepository? streaks,
+    AppTimeZone? timeZone,
+    StreakProjectionPolicy streakPolicy = const StreakProjectionPolicy(),
     SessionModePlanResolver planResolver = const SessionModePlanResolver(),
     SessionTerminalGradePolicy gradePolicy = const SessionTerminalGradePolicy(),
     SessionSummaryPolicy summaryPolicy = const SessionSummaryPolicy(),
@@ -53,6 +61,9 @@ class FinalizeStudySessionUseCase {
        _idGenerator = idGenerator,
        _recordStreakDay = recordStreakDay,
        _trackDailyGoal = trackDailyGoal,
+       _streaks = streaks,
+       _timeZone = timeZone,
+       _streakPolicy = streakPolicy,
        _planResolver = planResolver,
        _gradePolicy = gradePolicy,
        _summaryPolicy = summaryPolicy;
@@ -70,6 +81,13 @@ class FinalizeStudySessionUseCase {
   /// Same contract as [_recordStreakDay]: optional, and never able to fail the
   /// session it is reporting on.
   final TrackDailyGoalUseCase? _trackDailyGoal;
+
+  /// Read back so the result can report the streak the session just extended.
+  /// Optional alongside the two writers: a caller that supplies neither gets a
+  /// summary with no goal status, exactly as before.
+  final StreakRepository? _streaks;
+  final AppTimeZone? _timeZone;
+  final StreakProjectionPolicy _streakPolicy;
   final SessionModePlanResolver _planResolver;
   final SessionTerminalGradePolicy _gradePolicy;
   final SessionSummaryPolicy _summaryPolicy;
@@ -131,10 +149,11 @@ class FinalizeStudySessionUseCase {
     // Its own try rather than sharing the streak's: the two projections are
     // independent, and a streak-store failure must not also cost the day's
     // goal progress.
+    var contribution = const DailyGoalContribution.inactive();
     final trackDailyGoal = _trackDailyGoal;
     if (trackDailyGoal != null) {
       try {
-        await trackDailyGoal(
+        contribution = await trackDailyGoal(
           qualifiedCardCount: summary.reviewedCount,
           finalizedAt: now,
         );
@@ -144,7 +163,58 @@ class FinalizeStudySessionUseCase {
       }
     }
 
-    return summary;
+    return summary.withGoalStatus(await _goalStatus(contribution, now));
+  }
+
+  /// The streak + goal card's content, read back from what was just written.
+  ///
+  /// Null unless there is an active goal to report against: the card shows
+  /// today's target, so with no goal configured there is nothing to show. The
+  /// streak is derived rather than counted incrementally, because
+  /// `calculate-current-streak.md` makes the projection a read over the day
+  /// records — nothing stores a running total to drift.
+  Future<StudyResultGoalStatus?> _goalStatus(
+    DailyGoalContribution contribution,
+    DateTime now,
+  ) async {
+    if (!contribution.isActive) return null;
+
+    final streaks = _streaks;
+    final timeZone = _timeZone;
+    if (streaks == null || timeZone == null) return null;
+
+    try {
+      final today = timeZone.localDayOf(now);
+      // The whole history: `longest` needs it, and a current run has no bound
+      // this could safely assume.
+      final days = await streaks.daysBetween('0000-01-01', today.toString());
+      final projection = _streakPolicy.project(
+        days: days.map(_localDayOf).whereType<LocalDay>(),
+        effectiveDay: today,
+      );
+      return StudyResultGoalStatus(
+        streakDays: projection.current,
+        goalDoneCards: contribution.currentAmount,
+        goalTargetCards: contribution.target,
+      );
+    } on Object {
+      // Same rule as the writes: a summary without its streak card is a worse
+      // result screen, not a failed session.
+      return null;
+    }
+  }
+
+  /// Stored days carry their date as `YYYY-MM-DD` text; a row that cannot be
+  /// parsed is skipped rather than crashing the result, and
+  /// `reconcile-streak-history.md` owns repairing it.
+  LocalDay? _localDayOf(StreakDay day) {
+    final parts = day.localDate.split('-');
+    if (parts.length != 3) return null;
+    final year = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final dayOfMonth = int.tryParse(parts[2]);
+    if (year == null || month == null || dayOfMonth == null) return null;
+    return LocalDay(year, month, dayOfMonth);
   }
 
   Future<void> _scheduleCard(

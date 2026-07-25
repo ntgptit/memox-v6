@@ -20,6 +20,10 @@ import 'package:memox_v6/domain/usecases/study_streak/record_streak_day_usecase.
 import 'package:memox_v6/domain/study_streak/streak_repository.dart';
 import 'package:memox_v6/domain/study_streak/streak_day.dart';
 import 'package:memox_v6/core/time/app_time_zone.dart';
+import 'package:memox_v6/domain/usecases/study_goal/track_daily_goal_usecase.dart';
+import 'package:memox_v6/domain/study_goal/study_goal_repository.dart';
+import 'package:memox_v6/domain/study_goal/goal_day_progress.dart';
+import 'package:memox_v6/domain/study_goal/daily_goal.dart';
 
 /// WBS 5.6.13 — the finalize orchestration (`finalize-study-session.md`,
 /// `srs-8-box-v1.md`): aggregate terminal grades, schedule SRS exactly once and
@@ -98,6 +102,71 @@ void main() {
     expect(summary.reviewedCount, 1);
     expect(sessions.finalized, hasLength(1));
     expect(sessions.finalized.single.state, SessionState.completed);
+  });
+
+  // `int-8`: the result screen's streak card had never been fed by anything —
+  // `StudyResultGoalStatus` was built only in the `MX-VIS-054` parity override.
+  // This is the read-back that finally puts real values on the summary.
+  test('the summary reports the streak this session extended', () async {
+    final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
+    final progress = _FakeProgress({'c1': _progressAt(box: 0)});
+    final streaks = _RecordingStreaks(<String>['2026-07-22', '2026-07-23']);
+    final goals = _FakeGoals(target: 5);
+    const zone = FixedOffsetTimeZone(id: 'UTC', offset: Duration.zero);
+
+    final summary = await FinalizeStudySessionUseCase(
+      sessions: sessions,
+      progress: progress,
+      applyTerminalOutcome: ApplyTerminalOutcomeUseCase(repository: progress),
+      clock: _FixedClock(now),
+      idGenerator: _SeqIds(),
+      recordStreakDay: RecordStreakDayUseCase(
+        streaks: streaks,
+        timeZone: zone,
+        idGenerator: _SeqIds(),
+      ),
+      trackDailyGoal: TrackDailyGoalUseCase(
+        goals: goals,
+        timeZone: zone,
+        idGenerator: _SeqIds(),
+      ),
+      streaks: streaks,
+      timeZone: zone,
+    )(completed(session()));
+
+    final status = summary.goalStatus;
+    expect(status, isNotNull);
+    // The 22nd and 23rd were already qualified; finalizing on the 24th (the
+    // fixed test clock) makes three consecutive days.
+    expect(status!.streakDays, 3);
+    expect(status.goalDoneCards, 1);
+    expect(status.goalTargetCards, 5);
+  });
+
+  test('no configured goal leaves the summary without a streak card', () async {
+    final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
+    final progress = _FakeProgress({'c1': _progressAt(box: 0)});
+    final streaks = _RecordingStreaks(const <String>[]);
+    const zone = FixedOffsetTimeZone(id: 'UTC', offset: Duration.zero);
+
+    final summary = await FinalizeStudySessionUseCase(
+      sessions: sessions,
+      progress: progress,
+      applyTerminalOutcome: ApplyTerminalOutcomeUseCase(repository: progress),
+      clock: _FixedClock(now),
+      idGenerator: _SeqIds(),
+      trackDailyGoal: TrackDailyGoalUseCase(
+        goals: _FakeGoals(target: null),
+        timeZone: zone,
+        idGenerator: _SeqIds(),
+      ),
+      streaks: streaks,
+      timeZone: zone,
+    )(completed(session()));
+
+    // The card shows today's target; with no goal there is nothing to show.
+    expect(summary.goalStatus, isNull);
+    expect(summary.reviewedCount, 1);
   });
 
   test('a new card finishing the pipeline activates to Box 1 once', () async {
@@ -358,4 +427,85 @@ class _ExplodingStreaks implements StreakRepository {
 
   @override
   Future<int> countDays() async => 0;
+}
+
+/// A streak store seeded with prior qualified days, recording new ones.
+class _RecordingStreaks implements StreakRepository {
+  _RecordingStreaks(List<String> seeded)
+    : days = <StreakDay>[
+        for (final date in seeded)
+          StreakDay(
+            id: date,
+            localDate: date,
+            timezoneId: 'UTC',
+            qualifiedSource: 'seed',
+            sourceVersion: 1,
+          ),
+      ];
+
+  final List<StreakDay> days;
+
+  @override
+  Future<void> recordDay(StreakDay day, {required DateTime recordedAt}) async {
+    if (days.any((stored) => stored.localDate == day.localDate)) return;
+    days.add(day);
+  }
+
+  @override
+  Future<List<StreakDay>> daysBetween(String from, String to) async => days
+      .where(
+        (d) =>
+            d.localDate.compareTo(from) >= 0 && d.localDate.compareTo(to) <= 0,
+      )
+      .toList();
+
+  @override
+  Future<int> countDays() async => days.length;
+}
+
+/// A goal store with an optional configured target.
+class _FakeGoals implements StudyGoalRepository {
+  _FakeGoals({required this.target});
+
+  final int? target;
+  final Map<String, GoalDayProgress> buckets = <String, GoalDayProgress>{};
+
+  @override
+  Future<DailyGoal?> latestGoal() async {
+    final target = this.target;
+    if (target == null) return null;
+    return DailyGoal(
+      id: 'g1',
+      isEnabled: true,
+      targetCardCount: target,
+      effectiveFromLocalDate: '2026-01-01',
+      timezoneId: 'UTC',
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026),
+    );
+  }
+
+  @override
+  Future<GoalDayProgress?> dayProgress(String localDate) async =>
+      buckets[localDate];
+
+  @override
+  Future<void> recordDayProgress(GoalDayProgress progress) async {
+    buckets[progress.localDate] = progress;
+  }
+
+  @override
+  Stream<GoalDayProgress?> watchDayProgress(String localDate) =>
+      Stream<GoalDayProgress?>.value(buckets[localDate]);
+
+  @override
+  Future<void> createGoal(DailyGoal goal) async {}
+
+  @override
+  Future<void> updateGoal(
+    String goalId, {
+    required bool isEnabled,
+    required int targetCardCount,
+    required DateTime updatedAt,
+  }) async {}
 }

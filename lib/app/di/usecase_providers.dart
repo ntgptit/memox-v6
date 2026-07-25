@@ -296,6 +296,8 @@ FinalizeStudySessionUseCase finalizeStudySessionUseCase(Ref ref) {
     idGenerator: ref.watch(idGeneratorProvider),
     recordStreakDay: ref.watch(recordStreakDayUseCaseProvider),
     trackDailyGoal: ref.watch(trackDailyGoalUseCaseProvider),
+    streaks: ref.watch(streakRepositoryProvider),
+    timeZone: ref.watch(appTimeZoneProvider),
   );
 }
 
