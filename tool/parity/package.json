@@ -7,6 +7,7 @@
     "build": "node build_web.mjs",
     "lint:flows": "node flow_lint.mjs",
     "report": "node report.mjs",
+    "gate": "node gate.mjs",
     "test": "playwright test",
     "parity": "node run.mjs",
     "demo:first-card": "node run.mjs --id MX-VIS-049 --theme light --headed --slow-mo 300 --hold 4000"
