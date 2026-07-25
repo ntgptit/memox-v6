@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { settle } from './kit';
 
 /**
@@ -180,6 +180,28 @@ export async function fillField(
   // editor once the field takes focus, so searching first finds nothing.
   await semanticField.click({ force: true });
 
+  // When the field's label is merged into its own semantics node — the
+  // correct shape — the node `getByRole` selected IS the engine editor, so
+  // there is nothing to search for. The overlap search below only applies
+  // when the two are genuinely different elements, which is still the case
+  // for a multiline field (Flutter overlays a separate `textarea`).
+  //
+  // This check is not an optimization. The search deliberately rejects a
+  // candidate that is neither inset nor unlabelled, and a correctly-labelled
+  // single-line editor is exactly that, so without this branch it finds
+  // nothing. The search used to succeed only because a wrapper node claimed
+  // to be the text field and gave the real input something larger to be
+  // inset within; see `MxFieldScaffold`.
+  const selfIsEditor = await semanticField.evaluate(
+    (node) =>
+      (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA') &&
+      node.getAttribute('data-semantics-role') === 'text-field',
+  );
+  if (selfIsEditor) {
+    await typeInto(page, semanticField, value, blur);
+    return;
+  }
+
   const fieldBox = await semanticField.boundingBox();
   expect(fieldBox, 'Flutter text field must have a hit-testable box').not.toBeNull();
   const candidates = page.locator(
@@ -210,7 +232,16 @@ export async function fillField(
     editorIndex,
     'Flutter engine editor must overlap the selected semantics field',
   ).toBeGreaterThanOrEqual(0);
-  const editor = candidates.nth(editorIndex);
+  await typeInto(page, candidates.nth(editorIndex), value, blur);
+}
+
+/** Trusted keyboard entry into a resolved Flutter engine editor. */
+async function typeInto(
+  page: Page,
+  editor: Locator,
+  value: string,
+  blur: boolean,
+): Promise<void> {
   await editor.press('Control+A');
   await editor.press('Backspace');
   await editor.pressSequentially(value);

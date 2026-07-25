@@ -63,6 +63,21 @@ async function submitDeckAndExpectLibrary(
   await expect(page.getByText(name)).toBeVisible();
 }
 
+/**
+ * Asserts a field still holds [value] after focus has moved elsewhere.
+ *
+ * Flutter Web only syncs a field's text into its DOM node while that field
+ * is focused, so reading the value straight after pressing a button always
+ * sees an empty string. Clicking the field back into focus is what a user
+ * would do to inspect it, and it is the only way the browser can observe
+ * the retained draft.
+ */
+async function expectRetainedValue(page: Page, value: string): Promise<void> {
+  const field = page.getByRole('textbox', { name: /Deck name/i });
+  await field.click({ force: true });
+  await expect(field).toHaveValue(value);
+}
+
 // MX-VIS-004 · First-run language (step 1) · Complete selection
 // Master flow: docs/business/deck/create-deck.md §3
 // Flow node: E["Step 1 · Learning setup"]
@@ -209,9 +224,7 @@ test('MX-VIS-012 keeps the draft and offers a retry when create fails', async ({
   // The promise the banner makes — "your information is still here" — is
   // the part worth asserting: the typed name survived, and the CTA now
   // names the retry rather than repeating the original action.
-  await expect(page.getByRole('textbox', { name: /Deck name/i })).toHaveValue(
-    KIT_DECK_NAME,
-  );
+  await expectRetainedValue(page, KIT_DECK_NAME);
   await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible();
   await holdDemoFrame(page);
 });
@@ -330,11 +343,20 @@ test('MX-VIS-014 rejects a deck name past the limit and keeps it', async ({
   await fillField(page, /Deck name/i, KIT_LONG_DECK_NAME, { blur: false });
   await tapControl(page, 'Create deck');
 
-  // A field error is merged into the field's own accessible name, unlike
-  // the step-1 message which is a sibling node — so this asserts what a
-  // screen reader would announce for the field itself.
+  // The error is its own live region, so it is announced when it appears
+  // rather than being concatenated into the field's accessible name — a
+  // name is what the field IS, not what is currently wrong with it. This
+  // used to assert the merged-into-the-name shape, which only held because
+  // `MxFieldScaffold` wrapped the whole group in a second text-field node.
+  // `.last()` because the message briefly exists twice: Flutter posts it
+  // into the polite live region to announce it, then clears that node
+  // again, so only the rendered span is stable enough to assert on.
   await expect(
-    page.getByRole('textbox', { name: /Use a shorter deck name\./ }),
+    page.getByText('Use a shorter deck name.').last(),
+  ).toBeVisible();
+  // The field keeps its own clean name alongside the error.
+  await expect(
+    page.getByRole('textbox', { name: /Deck name/i }),
   ).toBeVisible();
 
   await expectStableCapture(page);
@@ -350,9 +372,7 @@ test('MX-VIS-014 rejects a deck name past the limit and keeps it', async ({
   });
 
   // The rejection keeps what was typed, and shortening it recovers.
-  await expect(page.getByRole('textbox', { name: /Deck name/i })).toHaveValue(
-    KIT_LONG_DECK_NAME,
-  );
+  await expectRetainedValue(page, KIT_LONG_DECK_NAME);
   await fillField(page, /Deck name/i, KIT_DECK_NAME, { blur: false });
   await submitDeckAndExpectLibrary(page, KIT_DECK_NAME);
   await holdDemoFrame(page);

@@ -210,12 +210,37 @@ class _MxFieldScaffoldState extends State<MxFieldScaffold> {
 
     final support = _buildSupport(context);
 
+    // The label and the input are merged into the field's OWN semantics
+    // node, so the visible label becomes its accessible name and the node
+    // that carries the name is the same one that carries the typed value.
+    //
+    // Wrapping the whole group in `Semantics(textField: true)` instead —
+    // which is what this used to do — produces a second node claiming to be
+    // the field. That wrapper holds no value and shadows the real input, so
+    // a screen reader reads the name twice (once from the wrapper's label,
+    // once from the label widget merged into it) and never announces what
+    // has been typed.
+    //
+    // Support text stays OUTSIDE the merge: helper text is not part of the
+    // field's name, and the error keeps its own live region so it is
+    // announced when it appears rather than renaming the field.
     Widget group = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        if (label != null) ...[_buildLabel(context, label), const MxGap.s2()],
-        input,
+        MergeSemantics(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (label != null) ...[
+                _buildLabel(context, label),
+                const MxGap.s2(),
+              ],
+              input,
+            ],
+          ),
+        ),
         if (support != null) ...[const MxGap.s2(), support],
       ],
     );
@@ -224,12 +249,7 @@ class _MxFieldScaffoldState extends State<MxFieldScaffold> {
       group = Opacity(opacity: AppOpacities.opacityDisabled, child: group);
     }
 
-    return Semantics(
-      textField: true,
-      enabled: widget.enabled,
-      label: label ?? widget.placeholder,
-      child: group,
-    );
+    return group;
   }
 
   /// Kit `SectionLabel` treatment (s1 top/left nudge), with the required
@@ -244,6 +264,13 @@ class _MxFieldScaffoldState extends State<MxFieldScaffold> {
         left: AppSpacing.space1,
       ),
       child: Text.rich(
+        // The label merges into the field's semantics node, so the star is
+        // dropped from the accessible name — it would otherwise be read out
+        // as "star" after the field name. Required-ness therefore reaches a
+        // screen reader only through the error that fires on submit; a
+        // dedicated required flag is a follow-up (Flutter exposes none, so
+        // it needs a localized word from the caller).
+        semanticsLabel: label,
         // Kit `field-group__label`: sm/semibold (fieldLabel), not the bold,
         // wide-tracked section label.
         TextSpan(
