@@ -185,6 +185,38 @@ The register now carries **five** of the kit's ten editor states
 remaining five — `edit`, `additional-translation`, `audio-generating`,
 `keyboard-open`, `submit-success` — are child C's, plus that decision.
 
+## Child C — measured before building
+
+`MX-VIS-059` edit — **7.00% light / 7.54% dark, blocked on this child's own
+scope.** Measuring first turns "edit mode, translations, audio" from a scope
+line into an itemised list of what is actually missing.
+
+The journey builds the kit's own card — term 안녕하세요, meaning "Hello
+(formal)", tags `#TOPIK_I` / `#인사` — and reopens it for edit, so the content
+matches and the residual is structural. Three surfaces account for it:
+
+| kit draws | this build has |
+| --- | --- |
+| a trailing **audio** control inside the Term field | no audio affordance (CF-05) |
+| a **`+`** beside the Meaning label to add a translation | a separate "ADDITIONAL TRANSLATIONS" section with an "Add translation" row (CF-06) |
+| tags as **chips** | a free-text tags field |
+
+Adding the kit's content moved the number 6.76% → 7.00%, which is the right
+signal to read carefully rather than revert: matching the card made the *tags*
+mismatch bigger, because a populated free-text field diverges from chips more
+than an empty one does. The journey keeps the kit's card — it is the card this
+state is being compared against, and the residual should be structural rather
+than partly incidental.
+
+**Prefill is correct and was never in doubt after the capture:** both stored
+values are painted in the render. The `toHaveValue` assertion that first failed
+was a harness limit, not a defect — on CanvasKit the labelled proxy carries
+only what the engine editor has *typed*, so a controller filled before the
+field was focused reads empty in the DOM while the canvas paints it. The
+controllers are covered by the widget test "prefills the card and keeps a clean
+Save disabled". Any future spec asserting prefilled content needs the same
+care.
+
 ## Acceptance and test procedure
 
 `AC-WBS-5.3.2-01`: the editor creates learnable cards atomically in

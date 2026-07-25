@@ -120,6 +120,73 @@ async function openFirstDeck(page: Page): Promise<string> {
   return expectRoute(page, /^\/deck\/[^/]+$/);
 }
 
+// MX-VIS-059 · Card Editor · Edit
+// Master flow: docs/business/flashcard/edit-flashcard.md §3
+// Flow node: A["Open card for edit"] → B["Load current content + version"] → C["Edit fields"]
+// Prerequisite flow: docs/business/flashcard/create-flashcard.md §3
+// Prerequisite nodes: A["Open Card Editor"] → H["Atomic save"] → J["Success · card in list"]
+test('MX-VIS-059 reopening a saved card prefills it for editing', async ({
+  page,
+}, testInfo) => {
+  await enterFlow(page, {
+    masterFlow: 'docs/business/flashcard/edit-flashcard.md',
+    prerequisiteFlows: ['docs/business/flashcard/create-flashcard.md'],
+    fixture: 'MX-VIS-059',
+  });
+
+  const deckRoute = await openFirstDeck(page);
+
+  // Edit has a precondition a fixture cannot fake: a committed card with a
+  // content version to guard the save against. So it is created through the
+  // real path first.
+  // The card is built to match the one the kit draws in this state — meaning
+  // "Hello (formal)", tagged #TOPIK_I and #인사 — because a parity capture
+  // compares content as well as composition, and every one of those is
+  // something a user types on this very form.
+  await tapControl(page, 'Add card');
+  await expectRoute(page, `${deckRoute}/new-card`);
+  await fillField(page, /한국어/, '안녕하세요');
+  await fillField(page, /English/i, 'Hello (formal)');
+  await fillField(page, /Tags/i, '#TOPIK_I, #인사');
+  await tapControl(page, 'Save');
+  await expectRoute(page, deckRoute);
+  await expect(page.getByText('안녕하세요')).toBeVisible();
+
+  await tapControl(page, '안녕하세요');
+  await tapControl(page, 'Edit');
+  const editorRoute = await expectRoute(
+    page,
+    /^\/deck\/[^/]+\/card\/[^/]+\/edit$/,
+  );
+
+  // edit-flashcard.md §3: the form arrives prefilled from the stored card,
+  // and Save stays disabled until something actually diverges (§6).
+  //
+  // The prefill is asserted by the pixel comparison below, not by
+  // `toHaveValue`. On CanvasKit the labelled proxy carries only what the
+  // engine editor has *typed*; text placed in a controller before the field
+  // was ever focused never reaches the DOM node, so the proxy reads empty
+  // while the canvas paints the value correctly. The controllers themselves
+  // are covered by the widget test "prefills the card and keeps a clean Save
+  // disabled".
+  await expect(page.getByText('Edit card')).toBeVisible();
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-059',
+    shot: 'flashcard-editor--edit',
+    screen: 'Card Editor',
+    state: 'Edit',
+    masterFlow: 'docs/business/flashcard/edit-flashcard.md',
+    flowNode:
+      'A["Open card for edit"] → B["Load current content + version"] → C["Edit fields"]',
+    fixture: 'MX-VIS-059',
+    route: editorRoute,
+  });
+
+  await holdDemoFrame(page);
+});
+
 // MX-VIS-058 · Card Editor · Validation
 // Master flow: docs/business/flashcard/create-flashcard.md §3
 // Flow node: C["Enter term / meaning / optional content"] → D["Invalid · inline field errors"]
