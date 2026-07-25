@@ -208,3 +208,85 @@ test('MX-VIS-036 opens a parent deck onto its child list', async ({
   await expectRoute(page, '/deck/fx-loaded');
   await expectDeckRow(page, 'Greetings & introductions');
 });
+
+// MX-VIS-038 · Deck detail — parent branch · Error
+// Master flow: docs/business/deck/browse-nested-decks.md §3
+// Flow node: M["Root destination · tap Library tab"] → N["Load root decks của active pair"] → O{"Root load result"} → S["Library · root deck list"] → A["Open Parent"] → B["Load path + direct children + aggregate counts"] → C{"Result"} -- "Error" --> E["Load failure"]
+test('MX-VIS-038 shows the parent branch failure when the child read breaks', async ({
+  page,
+}, testInfo) => {
+  // Same seeded data as the loading state: the deck resolves and only the
+  // child read fails, so what renders is the production failure path.
+  await enterFlow(page, {
+    masterFlow: 'docs/business/deck/browse-nested-decks.md',
+    fixture: 'MX-VIS-038',
+  });
+
+  await tapControl(page, 'Library');
+  await expectRoute(page, '/library');
+  await expectDeckRow(page, 'Korean TOPIK I');
+
+  await tapControl(page, 'Korean TOPIK I');
+  await expectRoute(page, '/deck/fx-parent');
+
+  // C → E: the kit's centred failure, not the async builder's inline banner.
+  // Asserting the copy is what distinguishes this from the loading skeleton —
+  // the two earlier attempts captured the skeleton and only the ratio said so.
+  await expect(page.getByText('Couldn’t load decks')).toBeVisible();
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-038',
+    shot: 'subdeck-list--error',
+    screen: 'Deck detail — parent branch',
+    state: 'Error',
+    masterFlow: 'docs/business/deck/browse-nested-decks.md',
+    flowNode:
+      'M["Root destination · tap Library tab"] → N["Load root decks của active pair"] → O{"Root load result"} → S["Library · root deck list"] → A["Open Parent"] → B["Load path + direct children + aggregate counts"] → C{"Result"} -- "Error" --> E["Load failure"]',
+    fixture: 'MX-VIS-038',
+    route: '/deck/fx-parent',
+  });
+
+  // A failure must not be a trap either: the app bar still returns to root.
+  await tapControl(page, 'Back');
+  await expectRoute(page, '/library');
+  await expectDeckRow(page, 'Korean TOPIK I');
+});
+
+// MX-VIS-044 · Deck detail — leaf branch · Error
+// Master flow: docs/business/deck/browse-nested-decks.md §3
+// Flow node: M["Root destination · tap Library tab"] → N["Load root decks của active pair"] → O{"Root load result"} → S["Library · root deck list"] → A["Open Parent"] → B["Load path + direct children + aggregate counts"] → C{"Result"} -- "Leaf" --> K["Card list"] → L["Load failure"]
+test('MX-VIS-044 shows the leaf branch failure when the card read breaks', async ({
+  page,
+}, testInfo) => {
+  await enterFlow(page, {
+    masterFlow: 'docs/business/deck/browse-nested-decks.md',
+    fixture: 'MX-VIS-044',
+  });
+
+  await tapControl(page, 'Library');
+  await expectRoute(page, '/library');
+  await expectDeckRow(page, 'Numbers & counting');
+
+  await tapControl(page, 'Numbers & counting');
+  await expectRoute(page, '/deck/fx-leaf');
+
+  await expect(page.getByText('Couldn’t load cards')).toBeVisible();
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-044',
+    shot: 'flashcard-list--error',
+    screen: 'Deck detail — leaf branch',
+    state: 'Error',
+    masterFlow: 'docs/business/deck/browse-nested-decks.md',
+    flowNode:
+      'M["Root destination · tap Library tab"] → N["Load root decks của active pair"] → O{"Root load result"} → S["Library · root deck list"] → A["Open Parent"] → B["Load path + direct children + aggregate counts"] → C{"Result"} -- "Leaf" --> K["Card list"] → L["Load failure"]',
+    fixture: 'MX-VIS-044',
+    route: '/deck/fx-leaf',
+  });
+
+  await tapControl(page, 'Back');
+  await expectRoute(page, '/library');
+  await expectDeckRow(page, 'Numbers & counting');
+});

@@ -57,6 +57,8 @@ class ParityFixtures {
     'MX-VIS-065',
     'MX-VIS-066',
     'MX-VIS-067',
+    'MX-VIS-038',
+    'MX-VIS-044',
     'MX-VIS-051',
     'MX-VIS-052',
     'MX-VIS-053',
@@ -96,9 +98,13 @@ class ParityFixtures {
         await _seedLoadedParentDeck();
         return;
       case 'MX-VIS-037':
+      // The failure states need the same data as the loading ones: the deck
+      // resolves, and only the child read breaks.
+      case 'MX-VIS-038':
         await _seedParentDeck();
         return;
       case 'MX-VIS-043':
+      case 'MX-VIS-044':
         await _seedLeafDeck();
         return;
       case 'MX-VIS-062':
