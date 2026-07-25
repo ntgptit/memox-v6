@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { enterFlow, expectRoute, tapControl } from '../flows';
 import { expectKitParity, expectStableCapture } from '../kit';
 
@@ -8,6 +8,19 @@ import { expectKitParity, expectStableCapture } from '../kit';
 // in-flight contract MX-VIS-011 uses. The child-deck stream still
 // resolves, which is what lets the screen tell the two kit compositions
 // apart.
+
+/**
+ * Asserts a deck row for [name] is on screen.
+ *
+ * A deck row carries a trailing study action, which makes it a parent
+ * semantics node rather than a leaf — Flutter Web then exposes the row's
+ * name as an `aria-label` instead of as rendered text, so `getByText`
+ * finds nothing. Matching the accessible name is also what this harness
+ * asserts everywhere else: it is what a screen reader announces.
+ */
+async function expectDeckRow(page: Page, name: string): Promise<void> {
+  await expect(page.getByRole('button', { name }).first()).toBeVisible();
+}
 
 // MX-VIS-037 · Deck detail — parent branch · Loading
 // Master flow: docs/business/deck/browse-nested-decks.md §3
@@ -28,7 +41,7 @@ test('MX-VIS-037 reaches the parent branch while its cards are still loading', a
   await expectRoute(page, '/library');
 
   // O → S: the seeded root deck is listed.
-  await expect(page.getByText('Korean TOPIK I')).toBeVisible();
+  await expectDeckRow(page, 'Korean TOPIK I');
 
   // S → A → B: opening the deck starts the load. The card stream never
   // emits, so the screen holds at B.
@@ -62,7 +75,7 @@ test('MX-VIS-037 reaches the parent branch while its cards are still loading', a
   // observable terminal outcome for this branch.
   await tapControl(page, 'Back');
   await expectRoute(page, '/library');
-  await expect(page.getByText('Korean TOPIK I')).toBeVisible();
+  await expectDeckRow(page, 'Korean TOPIK I');
 });
 
 // MX-VIS-043 · Deck detail — leaf branch · Loading
@@ -81,7 +94,7 @@ test('MX-VIS-043 reaches the leaf branch while its cards are still loading', asy
   await tapControl(page, 'Library');
   await expectRoute(page, '/library');
 
-  await expect(page.getByText('Numbers & counting')).toBeVisible();
+  await expectDeckRow(page, 'Numbers & counting');
 
   await tapControl(page, 'Numbers & counting');
   await expectRoute(page, '/deck/fx-leaf');
@@ -104,5 +117,5 @@ test('MX-VIS-043 reaches the leaf branch while its cards are still loading', asy
 
   await tapControl(page, 'Back');
   await expectRoute(page, '/library');
-  await expect(page.getByText('Numbers & counting')).toBeVisible();
+  await expectDeckRow(page, 'Numbers & counting');
 });

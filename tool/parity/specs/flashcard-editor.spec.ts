@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import {
   enterFlow,
   expectRoute,
@@ -7,6 +7,19 @@ import {
   tapControl,
 } from '../flows';
 import { expectKitParity, expectStableCapture } from '../kit';
+
+/**
+ * Asserts a deck row for [name] is on screen.
+ *
+ * A deck row carries a trailing study action, which makes it a parent
+ * semantics node rather than a leaf — Flutter Web then exposes the row's
+ * name as an `aria-label` instead of as rendered text, so `getByText`
+ * finds nothing. Matching the accessible name is also what this harness
+ * asserts everywhere else: it is what a screen reader announces.
+ */
+async function expectDeckRow(page: Page, name: string): Promise<void> {
+  await expect(page.getByRole('button', { name }).first()).toBeVisible();
+}
 
 // MX-VIS-049 · Card Editor · Create
 // Master flow: docs/business/flashcard/create-flashcard.md §3
@@ -41,7 +54,7 @@ test('MX-VIS-049 fresh launch creates the first Deck and saves the first Card', 
   await fillField(page, /Deck name/i, 'Beginner Grammar');
   await tapControl(page, 'Create deck');
   await expectRoute(page, '/library');
-  await expect(page.getByText('Beginner Grammar')).toBeVisible();
+  await expectDeckRow(page, 'Beginner Grammar');
   // The first-deck callout that used to carry an `Open deck` action was
   // superseded (owner, 2026-07-21, MX-VIS-021): first-run success now
   // returns to the plain Library deck list per `create-deck.md` §7, so the
