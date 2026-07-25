@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,7 +19,9 @@ import { fileURLToPath } from 'node:url';
  * 3. A row is neither measured nor carries a recorded reason for not being
  *    measured — the census hole `P0.6` exists to close. An ID nobody can say
  *    anything about reads exactly like one that is fine.
- * 4. Evidence exists for an id the register never lists. This is the mirror of
+ * 4. A row points at a kit shot that does not exist — a typo or a renamed
+ *    shot, which makes the row unmeasurable while still reading as complete.
+ * 5. Evidence exists for an id the register never lists. This is the mirror of
  *    (3) and it actually happened: `MX-VIS-050`-`054` were measured by the
  *    suite for weeks while missing from the register, so their figures lived
  *    only in run notes. Checking rows against evidence cannot see that; only
@@ -38,6 +40,15 @@ const registerPath = join(
 );
 const summaryPath = join(repoRoot, 'evidence', 'parity', 'summary.json');
 const gapsPath = join(repoRoot, 'tool', 'parity', 'known-gaps.json');
+const shotsPath = join(
+  repoRoot,
+  'docs',
+  'design',
+  'MemoX Design System_v4',
+  'ui_kits',
+  'memox-app',
+  'shots',
+);
 
 /** Status prefixes that state, explicitly, why a row carries no measurement. */
 const ACCOUNTED_UNMEASURED = [
@@ -59,7 +70,7 @@ const rows = readFileSync(registerPath, 'utf8')
   .map((line) => {
     const cells = line.split('|').map((cell) => cell.trim());
     // | id | screen | state | kit reference | status |
-    return { id: cells[1], status: cells[5] ?? '' };
+    return { id: cells[1], kitReference: cells[4] ?? '', status: cells[5] ?? '' };
   });
 
 if (rows.length === 0) {
@@ -95,6 +106,29 @@ const isAccounted = (status) => {
   const plain = status.replaceAll('*', '').trim().toLowerCase();
   return ACCOUNTED_UNMEASURED.some((prefix) => plain.startsWith(prefix));
 };
+
+// Kit shots, stripped of their theme suffix — the name a row references.
+const shots = existsSync(shotsPath)
+  ? new Set(
+      readdirSync(shotsPath)
+        .filter((file) => file.endsWith('.png'))
+        .map((file) => file.replace(/--(light|dark)\.png$/, '')),
+    )
+  : new Set();
+
+const referenced = new Set();
+const danglingShots = [];
+for (const row of rows) {
+  const reference = row.kitReference.replaceAll('`', '').trim();
+  // A row may declare that the kit has no shot for its state — those read
+  // "*no kit reference*" and are held to the accounted-status rule instead.
+  if (reference === '' || reference === '—') continue;
+  if (/no kit reference/i.test(reference)) continue;
+  referenced.add(reference);
+  if (shots.size > 0 && !shots.has(reference)) {
+    danglingShots.push(`${row.id} references \`${reference}\`, which has no shot`);
+  }
+}
 
 const contradicted = [];
 const unrecordedFailures = [];
@@ -142,9 +176,20 @@ if (
   contradicted.length === 0 &&
   unrecordedFailures.length === 0 &&
   unaccounted.length === 0 &&
-  unlisted.length === 0
+  unlisted.length === 0 &&
+  danglingShots.length === 0
 ) {
   process.stdout.write(`${report}. Every row is accounted for.\n`);
+  if (shots.size > 0) {
+    // Informational, not a gate. Most unenumerated shots belong to features
+    // that do not exist yet, which `P0.1` does not ask for — it enumerates
+    // every *implemented* screen. Printed on every run so the census's true
+    // coverage stays visible instead of being rediscovered.
+    process.stdout.write(
+      `Kit shot coverage: ${referenced.size}/${shots.size} shots have a row ` +
+        `(${shots.size - referenced.size} without one).\n`,
+    );
+  }
 } else {
   if (contradicted.length > 0) {
     process.stderr.write(
@@ -155,6 +200,14 @@ if (
     process.stderr.write(
       `\nRows reporting a failure the parity gate does not know about:\n` +
         `${bullet(unrecordedFailures)}\n`,
+    );
+  }
+  if (danglingShots.length > 0) {
+    process.stderr.write(
+      `
+Rows referencing a kit shot that does not exist:
+${bullet(danglingShots)}
+`,
     );
   }
   if (unlisted.length > 0) {
