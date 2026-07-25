@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
 import 'package:go_router/go_router.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/app/router/route_paths.dart';
@@ -125,7 +126,10 @@ void main() {
     await tester.pumpWidget(app());
     await pumpStreams(tester);
 
-    expect(find.text('Create deck'), findsOneWidget);
+    // Create-a-nested-deck lives in the shell FAB now, as the kit draws it,
+    // so it is a labelled action rather than a full-width button.
+    expect(find.byType(MxFab), findsOneWidget);
+    expect(find.bySemanticsLabel('Create deck'), findsWidgets);
     expect(find.text('Add card'), findsNothing);
     expect(find.text('Create nested deck'), findsNothing);
 

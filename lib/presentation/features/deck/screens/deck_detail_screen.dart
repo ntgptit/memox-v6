@@ -12,6 +12,7 @@ import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_loading_skeletons.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_quick_study_action.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_settings_sheet.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/delete_deck_dialog.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/move_deck_dialog.dart';
@@ -20,16 +21,14 @@ import 'package:memox_v6/presentation/features/deck/widgets/reset_deck_progress_
 import 'package:memox_v6/presentation/features/flashcard/viewmodels/card_lifecycle_viewmodel.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_settings_sheet.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/move_card_sheet.dart';
-import 'package:memox_v6/presentation/features/study/viewmodels/study_start_notifier.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
-import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
-import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
@@ -78,6 +77,7 @@ class DeckDetailScreen extends ConsumerWidget {
         ],
       ),
       scrollable: false,
+      fab: _CreateNestedDeckFab(deckId: deckId),
       body: _DeckDetailBody(deckId: deckId),
     );
   }
@@ -121,6 +121,11 @@ class _DeckDetailBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final deck = ref.watch(deckDetailProvider(deckId: deckId));
+
+    // Mounted once for the screen. The deck-level Study CTA used to host
+    // this listener; with it gone the row bolts still need somewhere for
+    // their success to navigate from, and it must not be per row.
+    listenForQuickStudyStart(ref, context);
 
     return MxAsyncBuilder<Deck?>(
       value: deck,
@@ -183,7 +188,12 @@ class _DeckContent extends ConsumerWidget {
         data: (context, directCards) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _DeckBreadcrumb(deckId: deck.id),
+            // The Empty branch draws neither trail nor FAB: it is a focused
+            // "decide what goes in here" surface whose actions are inline,
+            // and the kit `empty-deck` shot shows both absent. The Parent
+            // and Leaf shots show both present.
+            if (childDecks.isNotEmpty || directCards.isNotEmpty)
+              _DeckBreadcrumb(deckId: deck.id),
             Expanded(
               child: _DeckBranch(
                 deck: deck,
@@ -211,8 +221,11 @@ class _DeckBreadcrumb extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final chain = ref.watch(deckBreadcrumbProvider(deckId: deckId)).value;
-    // Hide until resolved, and for a root deck (the chain is just the deck).
-    if (chain == null || chain.length < 2) return const SizedBox.shrink();
+    // Hide only until the chain resolves. A root deck still shows
+    // `Library › <deck>`: both kit deck shots draw the trail at every level,
+    // and the crumb is the only way back to the Library from a deck reached
+    // by a push rather than a tab change (owner, 2026-07-25).
+    if (chain == null || chain.isEmpty) return const SizedBox.shrink();
 
     final items = <MxBreadcrumbItem>[
       MxBreadcrumbItem(
@@ -264,8 +277,6 @@ class _DeckBranch extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const MxGap.s4(),
-            _StudyButton(deckId: deck.id),
-            const MxGap.s6(),
             _ParentBranch(deck: deck, childDecks: childDecks),
             const MxGap.s6(),
           ],
@@ -278,8 +289,6 @@ class _DeckBranch extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const MxGap.s4(),
-            _StudyButton(deckId: deck.id),
-            const MxGap.s6(),
             _LeafBranch(deckId: deck.id, directCards: directCards),
             const MxGap.s6(),
           ],
@@ -287,51 +296,6 @@ class _DeckBranch extends StatelessWidget {
       );
     }
     return _EmptyBranch(deck: deck);
-  }
-}
-
-/// The deck-scoped Study entry (WBS 5.6.1/2; `study-deck.md`). It commands
-/// [StudyStart] over the deck subtree; start eligibility (no eligible cards, a
-/// due queue already caught up) and a conflicting active session surface as the
-/// inline failure, and a committed session navigates to `/study`, where the
-/// dispatcher resumes it into its first stage. Placed above both content
-/// branches; the empty deck has nothing to study.
-class _StudyButton extends ConsumerWidget {
-  const _StudyButton({required this.deckId});
-
-  final String deckId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final startState = ref.watch(studyStartProvider);
-
-    listenMxAction(ref, studyStartProvider, onSuccess: () => context.goStudy());
-
-    final isStarting = startState is AsyncLoading<void>;
-    final failure = MxActionErrors.failureOf(startState);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        MxButton(
-          label: l10n.deckStudyLabel,
-          icon: Symbols.play_arrow_rounded,
-          block: true,
-          onPressed: isStarting
-              ? null
-              : () =>
-                    ref.read(studyStartProvider.notifier).start(deckId: deckId),
-        ),
-        if (failure != null) ...[
-          const MxGap.s2(),
-          MxText(
-            MxActionErrors.messageOf(failure, l10n),
-            role: MxTextRole.caption,
-          ),
-        ],
-      ],
-    );
   }
 }
 
@@ -528,17 +492,45 @@ class _ParentBranch extends ConsumerWidget {
               ),
           ],
         ),
-        const MxGap.s6(),
-        MxButton(
-          label: l10n.createDeckLabel,
-          block: true,
-          onPressed: () => showCreateDeckDialog(
-            context,
-            parentDeckId: deck.id,
-            parentDeckName: deck.name,
-          ),
-        ),
       ],
+    );
+  }
+}
+
+/// Create-a-nested-deck, in the shell FAB the kit puts it in rather than a
+/// full-width button at the end of the list (owner, 2026-07-25).
+///
+/// It is its own consumer so the screen shell stays template-only, and it
+/// only appears once the deck has resolved — there is no parent to nest
+/// under before that.
+class _CreateNestedDeckFab extends ConsumerWidget {
+  const _CreateNestedDeckFab({required this.deckId});
+
+  final String deckId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final deck = ref.watch(deckDetailProvider(deckId: deckId)).value;
+    if (deck == null) return const SizedBox.shrink();
+
+    // Hidden on the Empty branch, which offers Create nested deck inline —
+    // see the branch note in `_DeckContent`.
+    final hasChildren =
+        ref.watch(deckChildrenProvider(deckId: deckId)).value?.isNotEmpty ??
+        false;
+    final hasCards =
+        ref.watch(deckCardsProvider(deckId: deckId)).value?.isNotEmpty ?? false;
+    if (!hasChildren && !hasCards) return const SizedBox.shrink();
+
+    return MxFab(
+      icon: Symbols.add_rounded,
+      semanticLabel: l10n.createDeckLabel,
+      onPressed: () => showCreateDeckDialog(
+        context,
+        parentDeckId: deck.id,
+        parentDeckName: deck.name,
+      ),
     );
   }
 }
