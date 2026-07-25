@@ -242,9 +242,21 @@ class _MatchTile extends StatelessWidget {
       variant: variant,
       onTap: onTap,
       semanticLabel: label,
+      // Kit `match-mode/components/Tile.jsx` centres its label on both axes.
+      // The trailing feedback glyph is this build's addition, not the kit's:
+      // WBS 5.6.6 requires non-colour cues, and the kit conveys correct/wrong
+      // by tone alone. It sits outside the centred text so a tile without one
+      // centres exactly.
       child: Row(
         children: <Widget>[
-          Expanded(child: MxText(label, role: MxTextRole.body, maxLines: 2)),
+          Expanded(
+            child: MxText(
+              label,
+              role: MxTextRole.body,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+            ),
+          ),
           ?feedbackIcon,
         ],
       ),
