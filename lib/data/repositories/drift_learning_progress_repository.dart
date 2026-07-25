@@ -228,11 +228,4 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
         .get();
     return rows.map((row) => row.toDomain()).toList();
   }
-
-  @override
-  Future<int> countDue(DateTime nowUtc) {
-    return _database.learningProgressDao
-        .countDueProgress(nowUtc.millisecondsSinceEpoch)
-        .getSingle();
-  }
 }

@@ -137,12 +137,10 @@ void main() {
       final due = await database.learningProgressDao
           .pageDueProgress(100, 10, 0)
           .get();
+      // The hidden card is excluded here, which is the whole point of the
+      // filter; the unscoped `countDueProgress` that asserted the same thing
+      // was removed with `countDue`.
       expect(due.map((row) => row.cardId), ['c1']);
-
-      final count = await database.learningProgressDao
-          .countDueProgress(100)
-          .getSingle();
-      expect(count, 1);
     });
   });
 

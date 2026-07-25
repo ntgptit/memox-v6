@@ -140,16 +140,12 @@ class _FakeSessions implements StudySessionRepository {
 
 /// Counts due cards **per language pair**, the way the scoped SQL does.
 ///
-/// `countDue` deliberately throws: it is the unscoped read Today used to call,
-/// and nothing on this screen should reach for it again.
+/// The unscoped `countDue` this screen used to call no longer exists on the
+/// port at all, so there is nothing left to reach for by mistake.
 class _FakeProgress implements LearningProgressRepository {
   _FakeProgress(this._due, {this.otherPairDue = 0});
   final int _due;
   final int otherPairDue;
-
-  @override
-  Future<int> countDue(DateTime nowUtc) async =>
-      throw StateError('Today must use the pair-scoped count');
 
   @override
   Future<StudyQueueCounts> countLibraryQueues(

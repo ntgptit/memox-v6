@@ -96,15 +96,6 @@ WHERE learning_progress.box BETWEEN 1 AND 7
 ORDER BY learning_progress.due_at, learning_progress.id
 LIMIT :limit OFFSET :offset;
 
-countDueProgress:
-SELECT COUNT(*) AS due_count FROM learning_progress
-INNER JOIN flashcards ON flashcards.id = learning_progress.card_id
-WHERE learning_progress.box BETWEEN 1 AND 7
-  AND learning_progress.due_at IS NOT NULL
-  AND learning_progress.due_at <= :nowUtc
-  AND flashcards.deleted_at IS NULL
-  AND flashcards.is_hidden = 0;
-
 -- Scoped queue counts (§5). A Leaf answers for its direct cards and a
 -- Parent aggregates its descendant Leaves through the same recursive
 -- walk, so an Empty deck answers zero rather than being special-cased.

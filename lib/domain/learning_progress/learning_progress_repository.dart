@@ -102,6 +102,4 @@ abstract interface class LearningProgressRepository {
     required int limit,
     required int offset,
   });
-
-  Future<int> countDue(DateTime nowUtc);
 }

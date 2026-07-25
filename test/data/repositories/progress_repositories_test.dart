@@ -401,7 +401,6 @@ void main() {
         offset: 0,
       );
       expect(due.single.cardId, 'c1');
-      expect(await progress.countDue(epoch.add(const Duration(minutes: 1))), 1);
     });
   });
 

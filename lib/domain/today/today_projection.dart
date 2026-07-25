@@ -37,7 +37,11 @@ class TodayProjection {
 
   final TodayPrimaryAction primaryAction;
 
-  /// Library-wide count of cards due for review (from `countDue`).
+  /// Cards due for review in the **active pair** (from
+  /// `LoadStudyQueueCountsUseCase.forLibrary`).
+  ///
+  /// Pair-scoped like the rest of this projection. It read an unscoped count
+  /// once, which advertised review work from decks the Library does not show.
   final int dueCount;
 
   /// The resumable active session, or `null` when none is in progress.
