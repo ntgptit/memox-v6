@@ -166,29 +166,50 @@ test('MX-VIS-056 a save in flight freezes the form and shows Saving', async ({
 });
 
 // MX-VIS-057 · Card Editor · Submit error
-// Master flow: docs/business/flashcard/create-flashcard.md §3
-// Flow node: H["Atomic save"] → I["Save failure · draft retained · retry"]
-test('MX-VIS-057 a failed save keeps the draft and offers retry', async ({
+// Master flow: docs/business/flashcard/edit-flashcard.md §3
+// Flow node: D["Save edited card"] → F["Save failure · edits retained · retry"]
+// Prerequisite flow: docs/business/flashcard/create-flashcard.md §3
+// Prerequisite nodes: A["Open Card Editor"] → H["Atomic save"] → J["Success · card in list"]
+test('MX-VIS-057 a failed edit keeps the changes and offers retry', async ({
   page,
 }, testInfo) => {
   await enterFlow(page, {
-    masterFlow: 'docs/business/flashcard/create-flashcard.md',
+    masterFlow: 'docs/business/flashcard/edit-flashcard.md',
+    prerequisiteFlows: ['docs/business/flashcard/create-flashcard.md'],
     fixture: 'MX-VIS-057',
   });
 
   const deckRoute = await openFirstDeck(page);
-  await tapControl(page, 'Add card');
-  const editorRoute = `${deckRoute}/new-card`;
-  await expectRoute(page, editorRoute);
 
+  // The kit draws this state in the *edit* variant — its app bar reads "Edit
+  // card", because the kit gives "New card" only to the create view. So the
+  // journey saves a card first and then re-opens it, rather than failing a
+  // create and comparing a "New card" bar against an "Edit card" shot.
+  await tapControl(page, 'Add card');
+  await expectRoute(page, `${deckRoute}/new-card`);
   await fillField(page, /한국어/, '안녕하세요');
   await fillField(page, /English/i, 'Hello');
   await tapControl(page, 'Save');
+  await expectRoute(page, deckRoute);
+  await expect(page.getByText('안녕하세요')).toBeVisible();
 
-  // create-flashcard.md §6: a failed save is recoverable in place — the
-  // editor stays open, the banner explains, and the typed draft survives.
-  await expect(page.getByRole('textbox', { name: /한국어/ })).toHaveValue(
-    '안녕하세요',
+  // Tapping a card row opens its lifecycle sheet; `Edit` is the control,
+  // `Edit card` is the screen title it leads to.
+  await tapControl(page, '안녕하세요');
+  await tapControl(page, 'Edit');
+  const editorRoute = await expectRoute(
+    page,
+    /^\/deck\/[^/]+\/card\/[^/]+\/edit$/,
+  );
+  await expect(page.getByText('Edit card')).toBeVisible();
+
+  await fillField(page, /English/i, 'Hi there');
+  await tapControl(page, 'Save');
+
+  // edit-flashcard.md: a failed save is recoverable in place — the editor
+  // stays open, the banner explains, and the edited draft survives.
+  await expect(page.getByRole('textbox', { name: /English/i })).toHaveValue(
+    'Hi there',
   );
   await expectRoute(page, editorRoute);
 
@@ -198,8 +219,9 @@ test('MX-VIS-057 a failed save keeps the draft and offers retry', async ({
     shot: 'flashcard-editor--submit-error',
     screen: 'Card Editor',
     state: 'Submit error',
-    masterFlow: 'docs/business/flashcard/create-flashcard.md',
-    flowNode: 'H["Atomic save"] → I["Save failure · draft retained · retry"]',
+    masterFlow: 'docs/business/flashcard/edit-flashcard.md',
+    flowNode:
+      'D["Save edited card"] → F["Save failure · edits retained · retry"]',
     fixture: 'MX-VIS-057',
     route: editorRoute,
   });
