@@ -66,6 +66,13 @@ UPDATE learning_progress SET
   repetition_count = :repetitionCount,
   lapse_count = :lapseCount,
   last_terminal_attempt_id = :lastTerminalAttemptId,
+  -- Both arrive from the policy, never computed here. `srs_activated_at` is
+  -- written on every terminal grade rather than only on activation because
+  -- the policy returns the card's existing value unchanged after Box 1, so
+  -- rewriting it is a no-op — and a legacy row whose value is NULL keeps
+  -- NULL instead of acquiring a fabricated activation instant.
+  srs_activated_at = :srsActivatedAt,
+  last_reviewed_at = :lastReviewedAt,
   updated_at = :updatedAt
 WHERE card_id = :cardId AND revision = :expectedRevision;
 

@@ -89,6 +89,8 @@ void main() {
         newDueAt: epoch.add(const Duration(days: 1)),
         repetitionCount: 1,
         lapseCount: 0,
+        srsActivatedAt: epoch,
+        lastReviewedAt: epoch,
         expectedRevision: 0,
         updatedAt: epoch,
       );
@@ -105,6 +107,8 @@ void main() {
         newDueAt: epoch.add(const Duration(days: 2)),
         repetitionCount: 2,
         lapseCount: 0,
+        srsActivatedAt: epoch,
+        lastReviewedAt: epoch,
         expectedRevision: 1,
         updatedAt: epoch,
       );
@@ -112,6 +116,68 @@ void main() {
       final afterReplay = await progress.findByCard('c1');
       expect(afterReplay?.box, 1);
       expect(afterReplay?.revision, 1);
+    });
+
+    // Schema v2 (WBS 5.4.4). Both instants used to be computed by the policy
+    // and dropped on the way to the store; this is the round trip that says
+    // they arrive.
+    test('stores both SRS timestamps and reads them back', () async {
+      final activated = epoch.add(const Duration(days: 3));
+      final reviewed = epoch.add(const Duration(days: 10));
+
+      await progress.applyScheduledOutcome(
+        attempt: attempt('a1'),
+        newBox: 2,
+        newDueAt: reviewed.add(const Duration(days: 3)),
+        repetitionCount: 1,
+        lapseCount: 0,
+        srsActivatedAt: activated,
+        lastReviewedAt: reviewed,
+        expectedRevision: 0,
+        updatedAt: reviewed,
+      );
+
+      final stored = await progress.findByCard('c1');
+      expect(stored?.srsActivatedAt, activated);
+      expect(stored?.lastReviewedAt, reviewed);
+    });
+
+    // The activation instant is fixed at Box 1 and never moves, so a later
+    // grade must not overwrite it with its own `now`.
+    test('a later grade advances the review but not the activation', () async {
+      final activated = epoch.add(const Duration(days: 3));
+      final firstReview = epoch.add(const Duration(days: 3));
+      final secondReview = epoch.add(const Duration(days: 20));
+
+      await progress.applyScheduledOutcome(
+        attempt: attempt('a1'),
+        newBox: 1,
+        newDueAt: firstReview.add(const Duration(days: 1)),
+        repetitionCount: 1,
+        lapseCount: 0,
+        srsActivatedAt: activated,
+        lastReviewedAt: firstReview,
+        expectedRevision: 0,
+        updatedAt: firstReview,
+      );
+      await progress.applyScheduledOutcome(
+        // A distinct idempotency key: this is a second grade, not a replay of
+        // the first. Sharing `k1` would be deduped, which is the contract.
+        attempt: attempt('a2', key: 'k2'),
+        newBox: 2,
+        newDueAt: secondReview.add(const Duration(days: 3)),
+        repetitionCount: 2,
+        lapseCount: 0,
+        srsActivatedAt: activated,
+        lastReviewedAt: secondReview,
+        expectedRevision: 1,
+        updatedAt: secondReview,
+      );
+
+      final stored = await progress.findByCard('c1');
+      expect(stored?.box, 2);
+      expect(stored?.srsActivatedAt, activated);
+      expect(stored?.lastReviewedAt, secondReview);
     });
 
     // SRS8-012: a different outcome on a stale progress revision is a typed
@@ -124,6 +190,8 @@ void main() {
           newDueAt: epoch.add(const Duration(days: 1)),
           repetitionCount: 1,
           lapseCount: 0,
+          srsActivatedAt: epoch,
+          lastReviewedAt: epoch,
           expectedRevision: 9,
           updatedAt: epoch,
         ),
@@ -153,6 +221,8 @@ void main() {
         newDueAt: epoch.add(const Duration(days: 3)),
         repetitionCount: 3,
         lapseCount: 1,
+        srsActivatedAt: epoch,
+        lastReviewedAt: epoch,
         expectedRevision: 0,
         updatedAt: epoch,
       );
@@ -178,6 +248,8 @@ void main() {
         newDueAt: epoch,
         repetitionCount: 1,
         lapseCount: 0,
+        srsActivatedAt: epoch,
+        lastReviewedAt: epoch,
         expectedRevision: 0,
         updatedAt: epoch,
       );

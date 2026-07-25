@@ -12,7 +12,7 @@ void main() {
   // must add exact 24h multiples regardless of wall-clock (§6, day = 24h).
   final now = DateTime.utc(2026, 3, 8, 17, 43, 11);
 
-  LearningProgress progressAt(int box) {
+  LearningProgress progressAt(int box, {DateTime? srsActivatedAt}) {
     return LearningProgress(
       id: 'progress-1',
       cardId: 'card-1',
@@ -28,6 +28,8 @@ void main() {
       repetitionCount: 0,
       lapseCount: 0,
       lastTerminalAttemptId: null,
+      srsActivatedAt: srsActivatedAt,
+      lastReviewedAt: null,
       createdAt: now,
       updatedAt: now,
     );

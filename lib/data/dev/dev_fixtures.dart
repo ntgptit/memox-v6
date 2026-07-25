@@ -237,12 +237,17 @@ class DevFixtures {
 
   Future<void> _seedDueCard() async {
     await _seedMinimum();
+    // Activated two days ago, reviewed then, and so due one day ago — the
+    // Box 1 interval is one day, so those three instants have to line up for
+    // the fixture to describe a card the scheduler could actually have made.
     await _database.learningProgressDao.updateProgressGuarded(
       1,
       _now - _dayMs,
       1,
       0,
       null,
+      _now - (2 * _dayMs),
+      _now - (2 * _dayMs),
       _now,
       'fix-card',
       0,

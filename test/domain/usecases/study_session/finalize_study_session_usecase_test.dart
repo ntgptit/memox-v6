@@ -199,20 +199,23 @@ StudyAttempt _attempt(String cardId, String outcome) => StudyAttempt(
   createdAt: DateTime.utc(2026, 7, 24, 8),
 );
 
-LearningProgress _progressAt({required int box}) => LearningProgress(
-  id: 'p',
-  cardId: 'c1',
-  box: box,
-  dueAt: box == 0 ? null : DateTime.utc(2026, 7, 24),
-  policyId: leitner8BoxPolicyId,
-  policyVersion: 1,
-  revision: 0,
-  repetitionCount: 0,
-  lapseCount: 0,
-  lastTerminalAttemptId: null,
-  createdAt: DateTime.utc(2026, 7, 1),
-  updatedAt: DateTime.utc(2026, 7, 1),
-);
+LearningProgress _progressAt({required int box, DateTime? srsActivatedAt}) =>
+    LearningProgress(
+      id: 'p',
+      cardId: 'c1',
+      box: box,
+      dueAt: box == 0 ? null : DateTime.utc(2026, 7, 24),
+      policyId: leitner8BoxPolicyId,
+      policyVersion: 1,
+      revision: 0,
+      repetitionCount: 0,
+      lapseCount: 0,
+      lastTerminalAttemptId: null,
+      srsActivatedAt: srsActivatedAt,
+      lastReviewedAt: null,
+      createdAt: DateTime.utc(2026, 7, 1),
+      updatedAt: DateTime.utc(2026, 7, 1),
+    );
 
 class _FixedClock implements AppClock {
   _FixedClock(this._now);
@@ -273,6 +276,8 @@ class _FakeProgress implements LearningProgressRepository {
     required DateTime? newDueAt,
     required int repetitionCount,
     required int lapseCount,
+    required DateTime? srsActivatedAt,
+    required DateTime lastReviewedAt,
     required int expectedRevision,
     required DateTime updatedAt,
   }) async {
@@ -294,6 +299,10 @@ class _FakeProgress implements LearningProgressRepository {
       repetitionCount: repetitionCount,
       lapseCount: lapseCount,
       lastTerminalAttemptId: attempt.id,
+      // Stored, not dropped: the fake has to round-trip what the real store
+      // now keeps, or a regression that stops writing them would pass here.
+      srsActivatedAt: srsActivatedAt,
+      lastReviewedAt: lastReviewedAt,
       createdAt: current.createdAt,
       updatedAt: updatedAt,
     );
