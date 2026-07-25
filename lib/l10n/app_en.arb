@@ -653,6 +653,10 @@
   "@additionalTranslationsLabel": {
     "description": "Header of the extra-meanings section in the card editor (WBS 6.4)."
   },
+  "showTranslationFieldLabel": "Add another meaning",
+  "@showTranslationFieldLabel": {
+    "description": "Card Editor: the control on the Meaning label that reveals the additional-translation slot. Deliberately distinct from addTranslationLabel, which names the control that commits a typed translation — two controls on one screen must not share an accessible name."
+  },
   "addTranslationLabel": "Add translation",
   "@addTranslationLabel": {
     "description": "Adds an additional translation to the card (WBS 6.4)."

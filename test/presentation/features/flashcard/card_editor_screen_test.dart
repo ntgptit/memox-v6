@@ -76,7 +76,11 @@ void main() {
   /// translation slot one tap away behind the Meaning label's `+`, so a test
   /// that wants the slot has to ask for it the way a user does.
   Future<void> discloseTranslations(WidgetTester tester) async {
-    await tester.tap(find.bySemanticsLabel('Add translation').first);
+    // Targeted by icon rather than accessible name: while the slot is
+    // hidden the Meaning label's `+` is the only add glyph on screen, and
+    // its name reaches the tree through `MxTappable`, which
+    // `find.bySemanticsLabel` does not see.
+    await tester.tap(find.byIcon(Symbols.add_rounded).first);
     await pumpEditor(tester);
   }
 

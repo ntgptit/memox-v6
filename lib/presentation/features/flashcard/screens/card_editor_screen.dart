@@ -326,7 +326,12 @@ class _CardEditorForm extends HookConsumerWidget {
                       labelAction: isEdit
                           ? MxIconButton(
                               icon: Symbols.add_rounded,
-                              semanticLabel: l10n.addTranslationLabel,
+                              // Distinct from the section's own "Add
+                              // translation" button: this one reveals the
+                              // slot, that one commits what was typed into
+                              // it, and two controls on a screen must not
+                              // answer to the same name.
+                              semanticLabel: l10n.showTranslationFieldLabel,
                               onPressed: isSubmitting
                                   ? null
                                   : () => translationsOpen.value = true,

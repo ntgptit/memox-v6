@@ -120,6 +120,72 @@ async function openFirstDeck(page: Page): Promise<string> {
   return expectRoute(page, /^\/deck\/[^/]+$/);
 }
 
+// MX-VIS-060 · Card Editor · Additional translation
+// Master flow: docs/business/flashcard/manage-card-translations.md §3
+// Flow node: A["Open card translations"] → B["Add translation"] → C["Persisted · listed"]
+// Prerequisite flow: docs/business/flashcard/create-flashcard.md §3
+// Prerequisite nodes: A["Open Card Editor"] → H["Atomic save"] → J["Success · card in list"]
+test('MX-VIS-060 a translation added under Meaning persists and lists', async ({
+  page,
+}, testInfo) => {
+  await enterFlow(page, {
+    masterFlow: 'docs/business/flashcard/manage-card-translations.md',
+    prerequisiteFlows: ['docs/business/flashcard/create-flashcard.md'],
+    fixture: 'MX-VIS-060',
+  });
+
+  const deckRoute = await openFirstDeck(page);
+
+  await tapControl(page, 'Add card');
+  await expectRoute(page, `${deckRoute}/new-card`);
+  await fillField(page, /한국어/, '안녕하세요');
+  await fillField(page, /English/i, 'Hello');
+  await fillField(page, /Tags/i, '#TOPIK_I, #인사');
+  await tapControl(page, 'Save');
+  await expectRoute(page, deckRoute);
+  await expect(page.getByText('안녕하세요')).toBeVisible();
+
+  await tapControl(page, '안녕하세요');
+  await tapControl(page, 'Edit');
+  const editorRoute = await expectRoute(
+    page,
+    /^\/deck\/[^/]+\/card\/[^/]+\/edit$/,
+  );
+
+  // Disclosed the way a user reaches it — the `+` on the Meaning label —
+  // because the kit keeps the resting form Term → Meaning → Tags. That
+  // control is named "Add another meaning" and the one that commits a typed
+  // translation is named "Add translation": they are different actions and
+  // must not share an accessible name.
+  await tapControl(page, 'Add another meaning');
+  await fillField(page, /Add translation/i, 'Xin chào');
+  await tapControl(page, 'Add translation');
+
+  await expect(page.getByText('Xin chào')).toBeVisible();
+
+  // Same reason as MX-VIS-059: the kit leaves Save at full strength in this
+  // view, while this app disables it until the *card content* diverges — and
+  // a translation persists on its own, so adding one leaves the form clean.
+  // Amending the meaning to the shot's text makes the comparison like-for-
+  // like instead of a dimmed control against an enabled one.
+  await fillField(page, /English/i, 'Hello (formal)');
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-060',
+    shot: 'flashcard-editor--additional-translation',
+    screen: 'Card Editor',
+    state: 'Additional translation',
+    masterFlow: 'docs/business/flashcard/manage-card-translations.md',
+    flowNode:
+      'A["Open card translations"] → B["Add translation"] → C["Persisted · listed"]',
+    fixture: 'MX-VIS-060',
+    route: editorRoute,
+  });
+
+  await holdDemoFrame(page);
+});
+
 // MX-VIS-059 · Card Editor · Edit
 // Master flow: docs/business/flashcard/edit-flashcard.md §3
 // Flow node: A["Open card for edit"] → B["Load current content + version"] → C["Edit fields"]
