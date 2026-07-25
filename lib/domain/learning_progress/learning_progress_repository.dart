@@ -1,5 +1,7 @@
 import 'package:memox_v6/core/ids/id_generator.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress.dart';
+import 'package:memox_v6/domain/learning_progress/study_candidates.dart';
+import 'package:memox_v6/domain/learning_progress/study_queue_counts.dart';
 import 'package:memox_v6/domain/study_session/study_attempt.dart';
 
 /// Learning Progress repository port (WBS 4.6B).
@@ -14,9 +16,24 @@ import 'package:memox_v6/domain/study_session/study_attempt.dart';
 ///
 /// `resetCard` is operation 6: progress returns to Box 0 with no due
 /// date and cleared counters without touching card content.
-import 'package:memox_v6/domain/learning_progress/study_candidates.dart';
-
+///
+/// `initialiseNew` is the WBS 5.4.1 entry point: insert-if-absent then
+/// read back, in one transaction, so it always answers with the state
+/// the store holds — the one it just created, or the one that was
+/// already there. It never overwrites, which is what keeps a repeat
+/// call from resetting a learned card.
 abstract interface class LearningProgressRepository {
+  /// Ensures [cardId] has a current progress row and returns it.
+  ///
+  /// Idempotent by card id: an existing row is returned untouched,
+  /// including its box, due date, counters and revision. [progressId]
+  /// is only used when this call is the one that inserts.
+  Future<LearningProgress> initialiseNew(
+    String cardId, {
+    required String progressId,
+    required DateTime at,
+  });
+
   Future<void> applyScheduledOutcome({
     required StudyAttempt attempt,
     required int newBox,
@@ -46,16 +63,6 @@ abstract interface class LearningProgressRepository {
 
   Future<LearningProgress?> findByCard(String cardId);
 
-  /// Idempotent New-state initialisation / safe repair (5.4.1,
-  /// `initialise-card-progress.md`): returns the card's current progress, or
-  /// creates a New state (Box 0, no due) when none exists. Never resets an
-  /// existing state; a missing card creates no orphan (the card_id FK).
-  Future<LearningProgress> ensureInitialProgress({
-    required String id,
-    required String cardId,
-    required DateTime nowUtc,
-  });
-
   /// Read-only due + new study queues for a deck scope (5.4.2,
   /// `surface-due-cards.md`): the recursive subtree of [scopeDeckId], each
   /// eligible card classified once (New = Box 0/no due; Due = Box 1..7 with
@@ -63,6 +70,24 @@ abstract interface class LearningProgressRepository {
   /// soonest-first. Never mutates progress.
   Future<StudyCandidates> studyCandidatesInScope({
     required String scopeDeckId,
+    required DateTime nowUtc,
+  });
+
+  /// Eligible due/new counts for a deck scope (WBS 5.4.2).
+  ///
+  /// A Leaf answers for its direct cards, a Parent aggregates its
+  /// descendant Leaves, and an Empty deck answers zero. Hidden and
+  /// soft-deleted cards are excluded. Read-only: no queue query
+  /// mutates progress or a due instant.
+  Future<StudyQueueCounts> countDeckQueues(
+    String deckId, {
+    required DateTime nowUtc,
+  });
+
+  /// The same counts across every deck of one language pair — the
+  /// Dashboard scope.
+  Future<StudyQueueCounts> countLibraryQueues(
+    String languagePairId, {
     required DateTime nowUtc,
   });
 

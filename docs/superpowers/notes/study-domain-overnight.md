@@ -153,6 +153,12 @@ new / "Up to date" for fresh cards). This data-layer query
 `box = 0 AND due_at IS NULL`. Left untouched here (out of 5.4.2 scope, touches
 merged Library code) — needs an owner OK.
 
+**✅ RESOLVED on `main` (2026-07-25, PR #101 / `015343e`, tracked as `int-2`):**
+`watchRootDeckSummaries.new_count` now reads New as `box = 0`, and
+`library_screen_test` was rewritten to build its cards through
+`CreateFlashcardUseCase` (the old fixture seeded a no-progress-row card, which
+is what hid the defect). Pulled onto this branch by the `origin/main` merge.
+
 **Next:** 5.4.3 — Leitner 8-box scheduling policy.
 
 ---

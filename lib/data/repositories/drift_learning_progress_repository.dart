@@ -6,6 +6,7 @@ import 'package:memox_v6/data/mappers/progress_mapper.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress_repository.dart';
 import 'package:memox_v6/domain/learning_progress/study_candidates.dart';
+import 'package:memox_v6/domain/learning_progress/study_queue_counts.dart';
 import 'package:memox_v6/domain/study_session/study_attempt.dart';
 
 /// Drift-backed [LearningProgressRepository] (WBS 4.6B).
@@ -59,6 +60,38 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
         if (applied == 0) {
           throw ConflictFailure(code: 'revision', entity: 'learning_progress');
         }
+      });
+    });
+  }
+
+  @override
+  Future<LearningProgress> initialiseNew(
+    String cardId, {
+    required String progressId,
+    required DateTime at,
+  }) {
+    return mapSqliteConflicts(entity: 'learning_progress', () async {
+      return _database.transaction(() async {
+        await _database.learningProgressDao.insertNewProgressIfAbsent(
+          progressId,
+          cardId,
+          at.millisecondsSinceEpoch,
+          at.millisecondsSinceEpoch,
+        );
+        // Read back inside the same transaction: the insert is
+        // OR IGNORE, so this is what distinguishes "created" from
+        // "already there" — and either way the caller gets the stored
+        // state, never a locally built one.
+        final row = await _database.learningProgressDao
+            .findProgressByCard(cardId)
+            .getSingleOrNull();
+        if (row == null) {
+          throw ConflictFailure(
+            code: 'progress-missing',
+            entity: 'learning_progress',
+          );
+        }
+        return row.toDomain();
       });
     });
   }
@@ -119,34 +152,6 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
   }
 
   @override
-  Future<LearningProgress> ensureInitialProgress({
-    required String id,
-    required String cardId,
-    required DateTime nowUtc,
-  }) async {
-    // Idempotent: an existing state is returned untouched (never reset).
-    final existing = await findByCard(cardId);
-    if (existing != null) return existing;
-
-    final ms = nowUtc.millisecondsSinceEpoch;
-    await mapSqliteConflicts(
-      entity: 'learning_progress',
-      () => _database.learningProgressDao.initialiseCardProgress(
-        id,
-        cardId,
-        ms,
-        ms,
-      ),
-    );
-
-    final created = await findByCard(cardId);
-    if (created != null) return created;
-    // `OR IGNORE` skipped without an existing row means the card was absent
-    // (FK) — surface it rather than fabricate a state.
-    throw StateError('ensureInitialProgress produced no row for card $cardId');
-  }
-
-  @override
   Future<StudyCandidates> studyCandidatesInScope({
     required String scopeDeckId,
     required DateTime nowUtc,
@@ -163,6 +168,33 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
       (row.isNew ? fresh : due).add(row.cardId);
     }
     return StudyCandidates(dueCardIds: due, newCardIds: fresh);
+  }
+
+  @override
+  Future<StudyQueueCounts> countDeckQueues(
+    String deckId, {
+    required DateTime nowUtc,
+  }) async {
+    // drift types this bound variable as text, so the query CASTs it
+    // back to the integer epoch it compares against.
+    final row = await _database.learningProgressDao
+        .countDeckQueues(deckId, nowUtc.millisecondsSinceEpoch.toString())
+        .getSingle();
+    return StudyQueueCounts(dueCount: row.dueCount, newCount: row.newCount);
+  }
+
+  @override
+  Future<StudyQueueCounts> countLibraryQueues(
+    String languagePairId, {
+    required DateTime nowUtc,
+  }) async {
+    final row = await _database.learningProgressDao
+        .countLibraryQueues(
+          nowUtc.millisecondsSinceEpoch.toString(),
+          languagePairId,
+        )
+        .getSingle();
+    return StudyQueueCounts(dueCount: row.dueCount, newCount: row.newCount);
   }
 
   @override

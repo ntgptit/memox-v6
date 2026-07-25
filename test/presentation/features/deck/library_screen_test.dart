@@ -7,10 +7,15 @@ import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/app/router/route_paths.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
+import 'package:memox_v6/data/repositories/drift_flashcard_repository.dart';
+import 'package:memox_v6/domain/flashcard/create_flashcard_result.dart';
+import 'package:memox_v6/domain/usecases/flashcard/create_flashcard_usecase.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
+
+import '../../../support/sequential_ids.dart';
 
 void main() {
   late db.AppDatabase database;
@@ -141,47 +146,54 @@ void main() {
       0,
       0,
     );
-    // c0: never studied → new. c1: scheduled in the past → due. c2: boxed
-    // with no due date → neither (up to date).
-    await database.flashcardDao.insertFlashcard(
-      'c0',
-      'd1',
-      'a',
-      'a',
-      'm',
-      0,
-      0,
+
+    // Cards arrive through the production write path, which commits a
+    // Box-0 progress row with the card (initialise-card-progress.md §1).
+    // The earlier version of this test inserted a card with *no* progress
+    // row and called it new — a state the app cannot produce, which is
+    // what let the always-zero counter defect (`int-2`) through.
+    final cards = DriftFlashcardRepository(database);
+    final decks = DriftDeckRepository(database, const SystemClock());
+    final create = CreateFlashcardUseCase(
+      cards: cards,
+      decks: decks,
+      idGenerator: SequentialIdGenerator(prefix: 'card'),
+      clock: const SystemClock(),
     );
-    await database.flashcardDao.insertFlashcard(
-      'c1',
-      'd1',
-      'b',
-      'b',
-      'm',
+    Future<String> add(String term) async {
+      final result =
+          await create(deckId: 'd1', term: term, primaryMeaning: 'm')
+              as FlashcardCreated;
+      return result.card.id;
+    }
+
+    await add('a'); // stays Box 0 → new
+    final due = await add('b');
+    final mastered = await add('c');
+
+    // Box 1 scheduled in the past → due; Box 8 → mastered, in no queue.
+    await database.learningProgressDao.updateProgressGuarded(
+      1,
+      1,
+      1,
       0,
-      0,
-    );
-    await database.learningProgressDao.insertProgress('p1', 'c1', 1, 1, 0, 0);
-    await database.flashcardDao.insertFlashcard(
-      'c2',
-      'd1',
-      'c',
-      'c',
-      'm',
-      0,
-      0,
-    );
-    await database.learningProgressDao.insertProgress(
-      'p2',
-      'c2',
-      8,
       null,
       0,
+      due,
+      0,
+    );
+    await database.learningProgressDao.updateProgressGuarded(
+      8,
+      null,
+      1,
+      0,
+      null,
+      0,
+      mastered,
       0,
     );
 
-    final repo = DriftDeckRepository(database, const SystemClock());
-    final summaries = await repo.watchRootSummaries('lp1').first;
+    final summaries = await decks.watchRootSummaries('lp1').first;
     final korean = summaries.singleWhere((s) => s.deck.id == 'd1');
 
     expect(korean.cardCount, 3);

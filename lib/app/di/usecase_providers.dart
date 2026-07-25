@@ -6,7 +6,6 @@ import 'package:memox_v6/domain/usecases/study_session/finalize_study_session_us
 import 'package:memox_v6/domain/usecases/today/load_today_projection_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/start_study_session_usecase.dart';
-import 'package:memox_v6/domain/usecases/learning_progress/initialise_card_progress_usecase.dart';
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
@@ -26,6 +25,8 @@ import 'package:memox_v6/domain/usecases/flashcard/manage_card_audio_usecase.dar
 import 'package:memox_v6/domain/usecases/flashcard/manage_card_tags_usecase.dart';
 import 'package:memox_v6/domain/usecases/flashcard/manage_card_translations_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/create_language_pair_usecase.dart';
+import 'package:memox_v6/domain/usecases/learning_progress/initialise_card_progress_usecase.dart';
+import 'package:memox_v6/domain/usecases/learning_progress/load_study_queue_counts_usecase.dart';
 import 'package:memox_v6/domain/usecases/onboarding/dismiss_first_run_usecase.dart';
 import 'package:memox_v6/domain/usecases/preferences/restore_default_preferences_usecase.dart';
 import 'package:memox_v6/domain/usecases/search/recent_searches_usecase.dart';
@@ -184,6 +185,25 @@ CreateFlashcardUseCase createFlashcardUseCase(Ref ref) {
 }
 
 @riverpod
+InitialiseCardProgressUseCase initialiseCardProgressUseCase(Ref ref) {
+  return InitialiseCardProgressUseCase(
+    cards: ref.watch(flashcardRepositoryProvider),
+    progress: ref.watch(learningProgressRepositoryProvider),
+    idGenerator: ref.watch(idGeneratorProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+LoadStudyQueueCountsUseCase loadStudyQueueCountsUseCase(Ref ref) {
+  return LoadStudyQueueCountsUseCase(
+    progress: ref.watch(learningProgressRepositoryProvider),
+    decks: ref.watch(deckRepositoryProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
 ManageCardTranslationsUseCase manageCardTranslationsUseCase(Ref ref) {
   return ManageCardTranslationsUseCase(
     cards: ref.watch(flashcardRepositoryProvider),
@@ -234,14 +254,6 @@ MoveFlashcardUseCase moveFlashcardUseCase(Ref ref) {
   return MoveFlashcardUseCase(
     cards: ref.watch(flashcardRepositoryProvider),
     decks: ref.watch(deckRepositoryProvider),
-    clock: ref.watch(appClockProvider),
-  );
-}
-
-@riverpod
-InitialiseCardProgressUseCase initialiseCardProgressUseCase(Ref ref) {
-  return InitialiseCardProgressUseCase(
-    repository: ref.watch(learningProgressRepositoryProvider),
     clock: ref.watch(appClockProvider),
   );
 }
