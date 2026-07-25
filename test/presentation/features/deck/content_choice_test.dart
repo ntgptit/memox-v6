@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
 import 'package:go_router/go_router.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
@@ -108,6 +109,15 @@ void main() {
     expect(find.text('Add card'), findsOneWidget);
     expect(find.text('Create nested deck'), findsNothing);
     expect(find.text('Import cards'), findsNothing);
+
+    // Present is not the same as usable. This control shipped disabled —
+    // `onPressed: null` behind a stale "lands with the 5.3 flashcard flow"
+    // comment — so a deck accepted its first card and no others, and the
+    // assertion above passed the whole time.
+    final addCard = tester.widget<MxButton>(
+      find.widgetWithText(MxButton, 'Add card'),
+    );
+    expect(addCard.onPressed, isNotNull, reason: 'Add card must be actionable');
 
     await disposeAndFlushStreams(tester);
   });

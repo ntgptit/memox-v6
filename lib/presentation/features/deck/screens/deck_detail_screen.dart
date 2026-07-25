@@ -442,8 +442,14 @@ class _LeafBranch extends ConsumerWidget {
             ),
           ),
         const MxGap.s6(),
-        // Add card lands with the 5.3 flashcard flow.
-        MxButton(label: l10n.addCardLabel, block: true, onPressed: null),
+        // The same entry point the empty deck offers. It was left disabled
+        // pending the 5.3 flashcard flow, which landed with 5.3.2 child A —
+        // so until now a deck accepted its first card and no others.
+        MxButton(
+          label: l10n.addCardLabel,
+          block: true,
+          onPressed: () => context.pushNewCard(deckId),
+        ),
       ],
     );
   }
