@@ -295,6 +295,9 @@ try {
       'node',
       ['tool/verify/parity_census.mjs'],
     );
+    // Same shape and the same cost: a static read of the ARB against the
+    // sources, so it belongs beside the census rather than in CI.
+    command('l10n string usage', 'node', ['tool/verify/l10n_usage.mjs']);
 
     const guardRoot = join(repoRoot, 'tools', 'code-verification-guard');
     const guardTests = [
