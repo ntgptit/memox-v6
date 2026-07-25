@@ -53,15 +53,39 @@ by habit rather than enforced:
 `performance.retained_async_state_requires_skeleton`, which named two renamed
 paths and an API (`MxRetainedAsyncState`) the app does not have.
 
+**Restated rather than repointed** (`code-verification-guard-v2#4` and `#5`) —
+these could not be fixed by editing a path, because the defect was in what the
+rule was asking, not where it looked:
+
+| Rule | The actual defect | How it was restated |
+| --- | --- | --- |
+| `layer_naming.repository_interface_file_suffix` / `_class_suffix` | assumed a dedicated `lib/domain/repositories/**`; this repo keeps each port beside its aggregate, so there was no folder to scope to | read backwards: scan all of `lib/domain/**` *except* `*_repository.dart` and flag any `abstract interface class …Repository` found there. Same intent, no folder needed |
+| `architecture.centralized_shared_preferences_provider` | scoped to `core_di` (= `lib/app/di/**`) and then excluded `lib/app/di/*_providers.dart` — every file there matches that exclude, so the rule erased its own scope | scoped to `dart_lib` minus the app DI. A ban on calling something *outside* one place must look everywhere but that place |
+| `action_density.no_large_button_in_card_surface` | inherited from memox-v4: matched `MxButtonSize.large`, but v6's enum is `sm \| md \| lg`. Its scope also listed `*_card/_list/_tile.dart` and a `features/dashboard/`, none of which exist here | pattern now `MxButtonSize.lg`; scope gained `*_row.dart`, the suffix MemoX actually uses (`deck_summary_row.dart` renders `MxDeckCard`) |
+
 **Left dormant on purpose — each needs a decision, not a path:**
 
 | Rule | Why it cannot simply be repointed |
 | --- | --- |
-| `layer_naming.repository_interface_file_suffix` / `_class_suffix` | assume a dedicated `lib/domain/repositories/**`. This repo keeps each interface beside its aggregate, per the AGENTS.md rule against per-feature triplets, so there is no folder to scope to and a `lib/domain/**` scope would fail every model file. The rule needs to key off file content. |
 | `layer_naming.migration_file_prefix` | expects one file per schema version (`v8_*.dart`); this repo uses a single `app_migrations.dart`. Repointing would fail the build on a structural choice, not a naming slip. |
 | `coding.flashcard_editor_no_part_of` | names a screen that no longer exists. |
-| `architecture.centralized_shared_preferences_provider`, both `action_density.*` | carry no include block at all — a different defect from a stale path. |
 
-The submodule pointer is not bumped until those two PRs are reviewed: the guard
-is shared with other consumers, so activating rules for everyone is not a
-side effect this repo should cause on its own.
+**Disabled outright:** `action_density.no_full_width_button_in_card_surface`
+matched a `fullWidth` parameter that appears nowhere in `lib/` — v6 lets the
+parent's layout decide width. Left `enabled: true` it would report
+`rule_without_targets` forever, which reads like coverage while enforcing
+nothing; `enabled: false` with a reason is the honest state. Re-enable if
+`MxButton` ever gains an explicit full-width affordance.
+
+### Why a dormant rule is worse than no rule
+
+None of these fifteen fixes changed a line of production code — the tree already
+complied with every one. That is exactly why the outage lasted: a rule whose
+scope matches no file **does not fail**. It emits a warning and passes. Every
+verifier run in this branch's history printed those warnings, and they were read
+past, because a green gate below them said the code was fine. Only the count of
+warnings distinguished "fifteen rules enforcing" from "fifteen rules asleep".
+
+When a rule's scope is edited, re-run the guard and confirm the
+`rule_without_targets` count went *down*. A rule is enforcing only when it has
+targets.
