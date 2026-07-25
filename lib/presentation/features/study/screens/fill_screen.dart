@@ -11,6 +11,7 @@ import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/fill_answer_notifier.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_answer_viewmodel.dart';
+import 'package:memox_v6/presentation/features/study/viewmodels/study_language_provider.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 import 'package:memox_v6/presentation/features/study/widgets/study_shell.dart';
 import 'package:memox_v6/presentation/shared/hooks/mx_text_hooks.dart';
@@ -79,6 +80,13 @@ class _FillStage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Deck-driven labels: the kit names the language the prompt asks for, so a
+    // learner with two active pairs knows which script is wanted. A pair that
+    // will not resolve falls back to the unqualified copy rather than
+    // rendering an empty parenthesis.
+    final languages = ref
+        .watch(studyLanguageContextProvider(deckId: runtime.session.deckId))
+        .value;
     final l10n = AppLocalizations.of(context);
     final answer = useMxTextSubmitState();
     final outcome = ref.watch(fillFeedbackProvider(card.cardId));
@@ -122,7 +130,9 @@ class _FillStage extends HookConsumerWidget {
           ),
           const MxGap.s6(),
           MxText(
-            l10n.fillTypeTermLabel,
+            languages != null && languages.hasTermLanguage
+                ? l10n.fillTypeTermInLanguageLabel(languages.termLanguageName)
+                : l10n.fillTypeTermLabel,
             role: MxTextRole.caption,
             color: context.colors.textSecondary,
           ),
@@ -130,7 +140,11 @@ class _FillStage extends HookConsumerWidget {
           const MxGap.s6(),
           MxTextField(
             controller: answer.controller,
-            placeholder: l10n.fillAnswerPlaceholder,
+            placeholder: languages != null && languages.hasTermLanguage
+                ? l10n.fillAnswerInLanguagePlaceholder(
+                    languages.termLanguageName,
+                  )
+                : l10n.fillAnswerPlaceholder,
             boxed: true,
             textAlign: TextAlign.center,
             enabled: !graded,

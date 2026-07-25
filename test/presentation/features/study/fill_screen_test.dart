@@ -12,6 +12,7 @@ import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
 import 'package:memox_v6/domain/study_session/study_session.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/study/screens/fill_screen.dart';
+import 'package:memox_v6/presentation/features/study/viewmodels/study_language_provider.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 
 /// WBS 5.6.9 — Fill compares the typed term against the accepted answer under
@@ -74,11 +75,15 @@ void main() {
     ),
   );
 
-  Widget wrap() => ProviderScope(
+  Widget wrap({StudyLanguageContext? languages}) => ProviderScope(
     overrides: [
       studySessionRuntimeProvider.overrideWith(
         (ref) => Future.value(runtime()),
       ),
+      if (languages != null)
+        studyLanguageContextProvider(
+          deckId: 'd1',
+        ).overrideWith((ref) => Future.value(languages)),
     ],
     child: MaterialApp(
       theme: AppTheme.light(),
@@ -87,6 +92,42 @@ void main() {
       home: const FillScreen(),
     ),
   );
+
+  // The kit requires deck-driven language labels — "Type the term (Korean)",
+  // not "Type the term" — so a learner with two active pairs can tell which
+  // script the prompt wants.
+  testWidgets('the prompt names the deck term language', (tester) async {
+    await tester.pumpWidget(
+      wrap(
+        languages: const StudyLanguageContext(
+          termLanguageName: '한국어',
+          meaningLanguageName: 'English',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Type the term (한국어)'), findsOneWidget);
+    expect(find.text('Type the term'), findsNothing);
+  });
+
+  testWidgets('an unresolved pair falls back to the plain prompt', (
+    tester,
+  ) async {
+    // Empty rather than absent: the deck or its pair failed to resolve. The
+    // unqualified copy is correct here — "Type the term ()" would not be.
+    await tester.pumpWidget(
+      wrap(
+        languages: const StudyLanguageContext(
+          termLanguageName: '',
+          meaningLanguageName: '',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Type the term'), findsOneWidget);
+  });
 
   testWidgets('waiting shows the meaning, input and Check/Help', (
     tester,

@@ -497,6 +497,8 @@
   "recallTimeoutFeedback": "Hết giờ · Quên",
   "fillModeTitle": "Điền",
   "fillTypeTermLabel": "Nhập từ",
+  "fillTypeTermInLanguageLabel": "Nhập từ ({language})",
+  "fillAnswerInLanguagePlaceholder": "Nhập từ {language}…",
   "fillAnswerPlaceholder": "Nhập câu trả lời…",
   "fillCheckLabel": "Kiểm tra",
   "fillHelpLabel": "Trợ giúp",
