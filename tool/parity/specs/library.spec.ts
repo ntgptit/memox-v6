@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import {
   enterFlow,
   expectRoute,
@@ -7,6 +7,19 @@ import {
   tapControl,
 } from '../flows';
 import { expectKitParity, expectStableCapture } from '../kit';
+
+/**
+ * Asserts a deck row for [name] is on screen.
+ *
+ * A deck row carries a trailing study action, which makes it a parent
+ * semantics node rather than a leaf — Flutter Web then exposes the row's
+ * name as an `aria-label` instead of as rendered text, so `getByText`
+ * finds nothing. Matching the accessible name is also what this harness
+ * asserts everywhere else: it is what a screen reader announces.
+ */
+async function expectDeckRow(page: Page, name: string): Promise<void> {
+  await expect(page.getByRole('button', { name }).first()).toBeVisible();
+}
 
 // MX-VIS-018 · Library · Empty
 // Master flow: docs/business/deck/browse-nested-decks.md §3
@@ -80,7 +93,7 @@ test('MX-VIS-018 reaches the empty Library from a root destination', async ({
   await submit.click();
 
   await expect(nameField).toHaveCount(0);
-  await expect(page.getByText('Beginner Grammar')).toBeVisible();
+  await expectDeckRow(page, 'Beginner Grammar');
   await expect(page.getByText('Build your learning library')).toBeHidden();
   await expectRoute(page, '/library');
   await holdDemoFrame(page);

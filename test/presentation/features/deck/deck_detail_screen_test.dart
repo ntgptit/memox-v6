@@ -11,6 +11,8 @@ import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_quick_study_action.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_summary_row.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 void main() {
@@ -225,6 +227,72 @@ void main() {
     expect(find.text('Decks'), findsOneWidget);
     expect(find.textContaining('1 due'), findsWidgets);
     expect(find.text('Asia'), findsOneWidget);
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  testWidgets('a child row starts a session for that deck, not the parent', (
+    tester,
+  ) async {
+    await database.deckDao.insertDeck(
+      'asia',
+      'lp1',
+      'root',
+      'Asia',
+      'asia',
+      0,
+      0,
+    );
+    // Five cards with distinct meanings, each with its Box-0 progress row:
+    // a newLearning session needs five distinct meanings for the Guess
+    // stage, and a card seeded without progress is a state the app cannot
+    // produce (the create path writes both in one transaction).
+    const seeded = <(String, String, String)>[
+      ('c1', 'hello', 'xin chào'),
+      ('c2', 'goodbye', 'tạm biệt'),
+      ('c3', 'please', 'làm ơn'),
+      ('c4', 'thanks', 'cảm ơn'),
+      ('c5', 'sorry', 'xin lỗi'),
+    ];
+    for (final (id, term, meaning) in seeded) {
+      await database.flashcardDao.insertFlashcard(
+        id,
+        'asia',
+        term,
+        term,
+        meaning,
+        0,
+        0,
+      );
+      await database.learningProgressDao.insertProgress(
+        'p-$id',
+        id,
+        0,
+        null,
+        0,
+        0,
+      );
+    }
+
+    await tester.pumpWidget(app('root'));
+    await pumpDeck(tester);
+
+    final bolt = find.descendant(
+      of: find.byType(DeckSummaryRow),
+      matching: find.byType(DeckQuickStudyAction),
+    );
+    expect(bolt, findsOneWidget);
+
+    await tester.tap(bolt);
+    await pumpDeck(tester);
+
+    // The session that starts is scoped to the CHILD deck — opening the
+    // parent first is exactly what the bolt exists to skip.
+    final started = await database.studySessionDao
+        .watchActiveSession()
+        .getSingleOrNull();
+    expect(started, isNotNull);
+    expect(started!.deckId, 'asia');
 
     await disposeAndFlushStreams(tester);
   });

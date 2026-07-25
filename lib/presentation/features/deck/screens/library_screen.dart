@@ -6,6 +6,7 @@ import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_quick_study_action.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_summary_row.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
@@ -80,6 +81,11 @@ class _LibraryBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final roots = ref.watch(libraryRootDecksProvider);
+
+    // Mounted once for the whole list: every row's bolt dispatches the same
+    // app-wide start command, so a per-row listener would navigate once per
+    // visible row on a single success.
+    listenForQuickStudyStart(ref, context);
 
     return MxAsyncBuilder<List<DeckSummary>>(
       value: roots,

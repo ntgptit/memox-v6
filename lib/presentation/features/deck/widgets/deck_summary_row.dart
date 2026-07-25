@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_quick_study_action.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_deck_card.dart';
 
 /// One deck row on a list surface — the kit's shared `DeckCard`.
@@ -51,6 +52,15 @@ class DeckSummaryRow extends StatelessWidget {
       meta: l10n.cardsCountLabel(summary.cardCount),
       status: status,
       statusTone: statusTone,
+      // Kit deck row: a bolt that starts a session for this deck without
+      // opening it. The screen showing these rows mounts
+      // `listenForQuickStudyStart` once so the start navigates.
+      //
+      // A nested control turns the row from a leaf semantics node into a
+      // parent one, which moves its accessible name from text content onto
+      // `aria-label`. Anything locating a deck row must therefore match on
+      // the accessible name, not on rendered text.
+      trailing: DeckQuickStudyAction(deckId: summary.deck.id),
       onTap: onTap,
     );
   }

@@ -60,7 +60,7 @@ async function submitDeckAndExpectLibrary(
 ): Promise<void> {
   await tapControl(page, 'Create deck');
   await expectRoute(page, '/library');
-  await expect(page.getByText(name)).toBeVisible();
+  await expectDeckRow(page, name);
 }
 
 /**
@@ -76,6 +76,19 @@ async function expectRetainedValue(page: Page, value: string): Promise<void> {
   const field = page.getByRole('textbox', { name: /Deck name/i });
   await field.click({ force: true });
   await expect(field).toHaveValue(value);
+}
+
+/**
+ * Asserts a deck row for [name] is on screen.
+ *
+ * A deck row carries a trailing study action, which makes it a parent
+ * semantics node rather than a leaf — Flutter Web then exposes the row's
+ * name as an `aria-label` instead of as rendered text, so `getByText`
+ * finds nothing. Matching the accessible name is also what this harness
+ * asserts everywhere else: it is what a screen reader announces.
+ */
+async function expectDeckRow(page: Page, name: string): Promise<void> {
+  await expect(page.getByRole('button', { name }).first()).toBeVisible();
 }
 
 // MX-VIS-004 · First-run language (step 1) · Complete selection
