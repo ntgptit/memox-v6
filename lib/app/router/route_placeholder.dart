@@ -5,6 +5,7 @@ import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/settings/viewmodels/restore_defaults_viewmodel.dart';
 import 'package:memox_v6/presentation/features/settings/widgets/appearance_sheet.dart';
+import 'package:memox_v6/presentation/features/settings/widgets/daily_goal_sheet.dart';
 import 'package:memox_v6/presentation/features/settings/widgets/mode_preferences_sheet.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
@@ -78,6 +79,11 @@ class ProfilePlaceholderScreen extends ConsumerWidget {
             leading: const Icon(Symbols.tune_rounded),
             title: Text(l10n.studyModesLabel),
             onTap: () => showModePreferencesSheet(context),
+          ),
+          ListTile(
+            leading: const Icon(Symbols.flag_rounded),
+            title: Text(l10n.dailyGoalLabel),
+            onTap: () => showDailyGoalSheet(context),
           ),
           ListTile(
             leading: const Icon(Symbols.settings_backup_restore_rounded),

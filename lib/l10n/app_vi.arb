@@ -401,6 +401,14 @@
   "@createAnotherLabel": {
     "description": "Card Editor sticky footer toggle (WBS 5.3.2)."
   },
+  "dailyGoalLabel": "Mục tiêu hằng ngày",
+  "dailyGoalEnabledLabel": "Theo dõi mục tiêu hằng ngày",
+  "dailyGoalEnabledBody": "Đếm số thẻ bạn hoàn thành mỗi ngày.",
+  "dailyGoalTargetLabel": "Mục tiêu",
+  "dailyGoalTargetOption": "{count} thẻ",
+  "@dailyGoalTargetOption": {
+    "placeholders": { "count": { "type": "int" } }
+  },
   "saveLabel": "L\u01b0u",
   "@saveLabel": {
     "description": "Card Editor primary CTA (WBS 5.3.2)."
