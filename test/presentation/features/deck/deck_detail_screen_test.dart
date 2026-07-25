@@ -328,8 +328,13 @@ void main() {
     await tester.pumpWidget(app('missing'));
     await pumpDeck(tester);
 
-    expect(find.text('This deck is no longer available.'), findsOneWidget);
+    // Kit `subdeck-list--not-found`: a warning tile with a safe exit, and an
+    // app bar stripped of its actions — there is nothing left to search or
+    // configure once the deck is gone.
+    expect(find.text('This deck no longer exists'), findsOneWidget);
     expect(find.text('Back to Library'), findsOneWidget);
+    expect(find.bySemanticsLabel('Search'), findsNothing);
+    expect(find.bySemanticsLabel('Deck options'), findsNothing);
 
     await disposeAndFlushStreams(tester);
   });

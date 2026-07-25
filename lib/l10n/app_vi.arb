@@ -276,6 +276,11 @@
       }
     }
   },
+  "deckNotFoundTitle": "Bộ thẻ này không còn tồn tại",
+  "deckNotFoundBody": "Có thể nó đã bị xoá hoặc chuyển ở thiết bị khác. Quay lại thư viện để học tiếp.",
+  "deckLoadErrorTitle": "Không tải được bộ thẻ",
+  "cardLoadErrorTitle": "Không tải được thẻ",
+  "loadErrorBody": "Đã có lỗi xảy ra. Kiểm tra kết nối và thử lại.",
   "deckNotFoundMessage": "Deck này không còn tồn tại.",
   "@deckNotFoundMessage": {
     "description": "Open-deck (WBS 5.2.4B) copy."
