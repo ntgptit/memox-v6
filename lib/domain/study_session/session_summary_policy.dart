@@ -60,6 +60,18 @@ class StudySessionSummary {
   final StudyResultGoalStatus? goalStatus;
 
   int get missedCount => missedCardIds.length;
+
+  /// The same summary carrying [status]. The counts are already derived from
+  /// committed evidence by the time the goal projections are read back, so
+  /// this attaches rather than recomputes.
+  StudySessionSummary withGoalStatus(StudyResultGoalStatus? status) =>
+      StudySessionSummary(
+        reviewedCount: reviewedCount,
+        correctCount: correctCount,
+        missedCardIds: missedCardIds,
+        durationActiveMs: durationActiveMs,
+        goalStatus: status,
+      );
 }
 
 /// Builds a [StudySessionSummary] from a session's committed mode outcomes
