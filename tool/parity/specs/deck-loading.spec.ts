@@ -22,6 +22,48 @@ async function expectDeckRow(page: Page, name: string): Promise<void> {
   await expect(page.getByRole('button', { name }).first()).toBeVisible();
 }
 
+// MX-VIS-034 · Deck detail — empty branch · Default
+// Master flow: docs/business/deck/browse-nested-decks.md §3
+// Flow node: S["Deck listed"] → A["Open deck"] → C["Empty deck · content choice"]
+test('MX-VIS-034 an empty deck offers the content choice', async ({
+  page,
+}, testInfo) => {
+  // Seeded: an active pair and one deck holding nothing — a deck that has not
+  // yet become a Leaf or a Parent, which is what this state is.
+  await enterFlow(page, {
+    masterFlow: 'docs/business/deck/browse-nested-decks.md',
+    fixture: 'MX-VIS-034',
+  });
+
+  await tapControl(page, 'Library');
+  await expectRoute(page, '/library');
+  await expectDeckRow(page, 'Numbers & counting');
+
+  await tapControl(page, 'Numbers & counting');
+  await expectRoute(page, '/deck/fx-empty');
+
+  // Arrival, then the choice itself: all three affordances are offered while
+  // the deck is still empty (ADR-001 — the first content added decides Leaf
+  // vs Parent, so before that nothing is ruled out).
+  await expect(
+    page.getByRole('button', { name: 'Deck options' }),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add card' })).toBeVisible();
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-034',
+    shot: 'empty-deck--default',
+    screen: 'Deck detail — empty branch',
+    state: 'Default',
+    masterFlow: 'docs/business/deck/browse-nested-decks.md',
+    flowNode:
+      'S["Deck listed"] → A["Open deck"] → C["Empty deck · content choice"]',
+    fixture: 'MX-VIS-034',
+    route: '/deck/fx-empty',
+  });
+});
+
 // MX-VIS-037 · Deck detail — parent branch · Loading
 // Master flow: docs/business/deck/browse-nested-decks.md §3
 // Flow node: M["Root destination · tap Library tab"] → N["Load root decks của active pair"] → O{"Root load result"} → S["Library · root deck list"] → A["Open Parent"] → B["Load path + direct children + aggregate counts"]
