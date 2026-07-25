@@ -4,13 +4,14 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_section_header.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_list.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_summary_row.dart';
 import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_list_controls.dart';
+import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_loading_skeletons.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_quick_study_action.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_settings_sheet.dart';
@@ -455,31 +456,43 @@ class _ParentBranch extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final subtreeCards = ref.watch(deckSubtreeCardsProvider(deckId: deck.id));
     final summaries = ref.watch(deckChildSummariesProvider(deckId: deck.id));
     // Counters arrive with the summaries; until they resolve the branch
     // still lists the decks it already has, so it never blanks on refresh.
-    final rows =
+    final controls = ref.watch(libraryControlsViewmodelProvider(deck.id));
+    final loaded =
         summaries.asData?.value ??
         <DeckSummary>[
           for (final child in childDecks)
             DeckSummary(deck: child, cardCount: 0),
         ];
-    final dueTotal = rows.fold<int>(
-      0,
-      (total, summary) => total + summary.dueCount,
-    );
+    final rows =
+        loaded
+            .where(
+              (row) => switch (controls.status) {
+                LibraryStatusFilter.all => true,
+                LibraryStatusFilter.due => row.dueCount > 0,
+                LibraryStatusFilter.isNew => row.newCount > 0,
+              },
+            )
+            .toList()
+          ..sort(
+            (a, b) => controls.sort == LibrarySort.az
+                ? a.deck.normalizedName.compareTo(b.deck.normalizedName)
+                : b.deck.normalizedName.compareTo(a.deck.normalizedName),
+          );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Kit `subdeck-list`: a DECKS section label carrying the scope's
-        // card total and due count, over the same deck cards the Library
-        // root renders.
-        MxSectionHeader(
-          title: l10n.decksSectionLabel,
-          caption: l10n.deckScopeSummary(subtreeCards.value ?? 0, dueTotal),
-        ),
+        // Kit `SubdeckList.jsx` renders the Library's own FilterRow over the
+        // child list (`crumbs + filter + list`), keyed to this deck so its
+        // filter and sort are independent of the Library's.
+        //
+        // The kit SHOT for this state draws a `DECKS · N cards · N due`
+        // section here instead, with no chips. Owner ruling (2026-07-25):
+        // the JSX is the source of truth, so this row follows it and the
+        // state waits on the shot being regenerated.
+        DeckListControls(scopeId: deck.id),
         const MxGap.s3(),
         MxList(
           children: <Widget>[

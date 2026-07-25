@@ -140,8 +140,9 @@ test('MX-VIS-036 opens a parent deck onto its child list', async ({
   await tapControl(page, 'Korean TOPIK I');
   await expectRoute(page, '/deck/fx-loaded');
 
-  // C → D: the child list, with the aggregate the kit puts over it.
-  await expect(page.getByText('217 cards · 23 due')).toBeVisible();
+  // C → D: the child list, under the same FilterRow the Library root shows
+  // (kit `SubdeckList.jsx` renders `crumbs + filter + list`).
+  await expect(page.getByRole('button', { name: 'A–Z' })).toBeVisible();
   await expectDeckRow(page, 'Greetings & introductions');
 
   await expectStableCapture(page);
