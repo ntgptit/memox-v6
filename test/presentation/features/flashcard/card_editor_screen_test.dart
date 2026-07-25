@@ -10,6 +10,7 @@ import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/flashcard/screens/card_editor_screen.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_translations_section.dart';
+import 'package:memox_v6/presentation/shared/widgets/inputs/mx_switch.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 
 void main() {
@@ -83,6 +84,47 @@ void main() {
     // `find.bySemanticsLabel` does not see.
     await tester.tap(find.byIcon(Symbols.add_rounded).first);
     await pumpEditor(tester);
+  }
+
+  /// Opens the advanced disclosure.
+  ///
+  /// It sits at the foot of a scrolling form, below the fold on this
+  /// viewport, so a bare `tap` hit-tests against whatever is on screen and
+  /// silently does nothing.
+  /// Gives the form a viewport tall enough to hold it without scrolling.
+  ///
+  /// The advanced disclosure and its switch sit at the foot of the form, off
+  /// the default 600px-tall test view. Scrolling them into place is not enough
+  /// on its own: `ensureVisible` stops as soon as the target is technically in
+  /// view, and a tap at that position can land on a neighbouring widget while
+  /// `warnIfMissed` stays silent — the hit test *did* find something, just not
+  /// the target. A taller view removes the geometry from the question.
+  void useTallViewport(WidgetTester tester) {
+    tester.view.physicalSize = const Size(1200, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+  }
+
+  Future<void> openMoreOptions(WidgetTester tester) async {
+    await tester.tap(find.text('More options'));
+    await tester.pumpAndSettle();
+  }
+
+  /// Taps the visibility switch and proves it actually flipped.
+  ///
+  /// Asserting the flip rather than trusting the tap: this control sits at the
+  /// foot of a scrolling form behind a sticky footer, exactly where a tap can
+  /// silently hit the wrong widget.
+  Future<void> toggleHide(WidgetTester tester) async {
+    final before = tester.widget<MxSwitch>(find.byType(MxSwitch)).value;
+    await tester.tap(find.byType(MxSwitch));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<MxSwitch>(find.byType(MxSwitch)).value,
+      !before,
+      reason: 'the tap did not reach the switch',
+    );
   }
 
   Future<void> disposeAndFlushStreams(WidgetTester tester) async {
@@ -242,6 +284,56 @@ void main() {
         .listTranslationsForCard(cards.single.id)
         .get();
     expect(translations, isEmpty);
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  // Kit `flashcard-editor/more-toggle` + `flashcard-editor/visibility`
+  // (WBS 6.5; `hide-flashcard.md`). The whole hide path already existed —
+  // column, query, repository, use case, viewmodel, and every due/study query
+  // excluding hidden cards — with no way to reach it from the editor. Even the
+  // `moreOptionsLabel` string was already in the ARB, unused.
+  testWidgets('advanced options stay collapsed until asked for', (
+    tester,
+  ) async {
+    useTallViewport(tester);
+    await tester.pumpWidget(app());
+    await pumpEditor(tester);
+
+    expect(find.text('More options'), findsOneWidget);
+    expect(
+      find.text('Hide during study'),
+      findsNothing,
+      reason: 'every kit shot draws the disclosure collapsed',
+    );
+
+    await openMoreOptions(tester);
+
+    expect(find.text('Hide during study'), findsOneWidget);
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  testWidgets('a card can be created already hidden', (tester) async {
+    useTallViewport(tester);
+    await tester.pumpWidget(app());
+    await pumpEditor(tester);
+
+    await tester.enterText(find.byType(TextField).at(0), '안녕');
+    await tester.enterText(find.byType(TextField).at(1), 'hello');
+    await openMoreOptions(tester);
+    await toggleHide(tester);
+
+    await tester.tap(find.text('Save'));
+    await pumpEditor(tester);
+
+    final cards = await database.flashcardDao
+        .pageFlashcardsByDeck('d1', 50, 0)
+        .get();
+    // Capture now, study later. The create path hard-coded visible *and* the
+    // insert omitted the column entirely, so this was unreachable however the
+    // form was filled in. (Drift returns the raw column, hence 1 not true.)
+    expect(cards.single.isHidden, 1);
 
     await disposeAndFlushStreams(tester);
   });
@@ -607,6 +699,29 @@ void main() {
       await pumpEditor(tester);
 
       expect(await tagNames(), isEmpty);
+
+      await disposeAndFlushStreams(tester);
+    });
+
+    // On a stored card the toggle is its own action, not part of the draft:
+    // `hide-flashcard.md` §1 makes it idempotent and needs no confirm, and it
+    // must not wait on Save — which in edit mode stays disabled until the
+    // *content* is dirty, so a deferred toggle could never be committed.
+    testWidgets('toggling hide commits immediately on a stored card', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      await seedCard();
+      await tester.pumpWidget(editApp('c1'));
+      await pumpEditor(tester);
+
+      await openMoreOptions(tester);
+      await toggleHide(tester);
+
+      final card = await database.flashcardDao
+          .findFlashcardById('c1')
+          .getSingleOrNull();
+      expect(card?.isHidden, 1);
 
       await disposeAndFlushStreams(tester);
     });

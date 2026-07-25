@@ -79,6 +79,7 @@ class CardEditorSaveViewmodel extends _$CardEditorSaveViewmodel {
     bool allowDuplicate = false,
     String? draftTranslation,
     String? meaningLanguageCode,
+    bool isHidden = false,
   }) async {
     state = const AsyncLoading<void>();
     state = await AsyncValue.guard(() async {
@@ -112,6 +113,7 @@ class CardEditorSaveViewmodel extends _$CardEditorSaveViewmodel {
             allowDuplicate: allowDuplicate,
             tagIds: tagIds,
             translations: translations,
+            isHidden: isHidden,
           );
       // Candidates are a review decision, not an error: the banner
       // surface owns them (resolve-duplicate-flashcard.md).

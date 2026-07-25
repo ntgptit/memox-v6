@@ -162,6 +162,7 @@ class _HangingCreateFlashcardUseCase extends CreateFlashcardUseCase {
     String? retryCardId,
     bool allowDuplicate = false,
     List<({String languageCode, String text})> translations = const [],
+    bool isHidden = false,
     List<String> tagIds = const [],
     List<CardAudioRef> audioRefs = const [],
   }) {

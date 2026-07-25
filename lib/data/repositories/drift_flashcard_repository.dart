@@ -37,6 +37,20 @@ class DriftFlashcardRepository implements FlashcardRepository {
           card.createdAt.millisecondsSinceEpoch,
           card.updatedAt.millisecondsSinceEpoch,
         );
+        // `insertFlashcard` does not carry `is_hidden`, so the row lands on
+        // the schema default (visible) and a card created hidden was stored
+        // visible. That never showed while create hard-coded `isHidden:
+        // false`; the editor's visibility switch is the first caller able to
+        // set it. Applied here rather than widened into the insert because the
+        // insert's positional signature has 50-odd call sites, and this runs
+        // inside the same transaction — the row is never observable visible.
+        if (card.isHidden) {
+          await _database.flashcardDao.setFlashcardHidden(
+            1,
+            card.updatedAt.millisecondsSinceEpoch,
+            card.id,
+          );
+        }
         for (final translation in content.translations) {
           await _database.flashcardDao.insertTranslation(
             translation.id,

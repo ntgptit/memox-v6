@@ -5,6 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
+import 'package:memox_v6/presentation/features/flashcard/widgets/card_editor_chrome.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_tags_section.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_translations_section.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
@@ -15,15 +16,16 @@ import 'package:memox_v6/presentation/shared/layouts/mx_form_footer.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
+import 'package:memox_v6/presentation/features/flashcard/viewmodels/card_lifecycle_viewmodel.dart';
+import 'package:memox_v6/presentation/shared/widgets/inputs/mx_switch.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_context_pill.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_disclosure.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_setting_row.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 import 'package:memox_v6/core/utils/string_utils.dart';
 
@@ -142,6 +144,12 @@ class _CardEditorForm extends HookConsumerWidget {
     // through `CardTranslationsSection` and leaves this unused.
     final translationDraft = useMxTextValue();
     final createAnother = useState(false);
+    final moreOptionsOpen = useState(false);
+    // Seeded from the card in edit mode, false in create. The displayed state
+    // is local in *both* modes on purpose: the editor reads its card through a
+    // one-shot provider, so re-reading after a hide would rebuild this form
+    // and throw away the term/meaning the user is part-way through typing.
+    final hidden = useState(editingCard?.isHidden ?? false);
     final termTouched = useState(false);
     // Kit progressive disclosure: the resting form is Term -> Meaning ->
     // Tags, and the translation slot is one tap away behind the Meaning
@@ -159,7 +167,8 @@ class _CardEditorForm extends HookConsumerWidget {
       return term.controller.text.isNotEmpty ||
           meaning.controller.text.isNotEmpty ||
           tagsInput.controller.text.isNotEmpty ||
-          translationDraft.controller.text.isNotEmpty;
+          translationDraft.controller.text.isNotEmpty ||
+          hidden.value;
     }
 
     void syncDraftState() {
@@ -184,6 +193,7 @@ class _CardEditorForm extends HookConsumerWidget {
         // silently attach it to the new one.
         translationDraft.controller.clear();
         translationsOpen.value = false;
+        hidden.value = false;
         ref.read(cardEditorSaveViewmodelProvider.notifier).reset();
         return;
       }
@@ -226,6 +236,7 @@ class _CardEditorForm extends HookConsumerWidget {
             rawTagLabels: _tagLabelsOf(tagsInput.controller.text),
             allowDuplicate: allowDuplicate,
             draftTranslation: translationDraft.controller.text,
+            isHidden: hidden.value,
             // Read off the already-watched context rather than threaded
             // through every call site: `submit` is declared outside the async
             // builder that resolves `editor`.
@@ -265,7 +276,7 @@ class _CardEditorForm extends HookConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const MxGap.s4(),
-                    _DeckContextPill(deckName: editor.deck.name),
+                    CardDeckContextPill(deckName: editor.deck.name),
                     const MxGap.s6(),
                     if (duplicates != null && duplicates.isNotEmpty) ...[
                       MxBanner.stacked(
@@ -425,6 +436,48 @@ class _CardEditorForm extends HookConsumerWidget {
                       CardTagsSection(cardId: editingCard.id),
                       const MxGap.s6(),
                     ],
+                    // Kit `flashcard-editor/more-toggle`: the advanced options
+                    // sit behind a disclosure so the resting form stays Term
+                    // -> Meaning -> Tags. Collapsed in every kit shot, which
+                    // is why only the toggle shows at rest.
+                    MxDisclosure(
+                      label: l10n.moreOptionsLabel,
+                      open: moreOptionsOpen.value,
+                      onToggle: () =>
+                          moreOptionsOpen.value = !moreOptionsOpen.value,
+                      child: MxSettingRow(
+                        title: l10n.hideDuringStudyLabel,
+                        body: l10n.hideDuringStudyBody,
+                        trailing: MxSwitch(
+                          value: hidden.value,
+                          semanticLabel: l10n.hideDuringStudyLabel,
+                          // In edit the switch acts on a stored card, so it
+                          // commits straight away like every other card action
+                          // (`hide-flashcard.md`: the toggle is idempotent and
+                          // needs no confirm). In create there is no card yet,
+                          // so it rides along with Save.
+                          onChanged: isSubmitting
+                              ? null
+                              : (value) {
+                                  hidden.value = value;
+                                  if (!isEdit) {
+                                    syncDraftState();
+                                    return;
+                                  }
+                                  ref
+                                      .read(
+                                        cardLifecycleCommandViewmodelProvider
+                                            .notifier,
+                                      )
+                                      .setCardHidden(
+                                        cardId: editingCard.id,
+                                        hidden: value,
+                                      );
+                                },
+                        ),
+                      ),
+                    ),
+                    const MxGap.s6(),
                   ],
                 ),
               ),
@@ -432,7 +485,7 @@ class _CardEditorForm extends HookConsumerWidget {
             MxFormFooter(
               children: [
                 if (!isEdit) ...[
-                  _CreateAnotherToggle(
+                  CardCreateAnotherToggle(
                     value: createAnother.value,
                     onChanged: isSubmitting
                         ? null
@@ -464,63 +517,5 @@ class _CardEditorForm extends HookConsumerWidget {
         .map((token) => token.startsWith('#') ? token.substring(1) : token)
         .where((token) => token.isNotEmpty)
         .toList();
-  }
-}
-
-/// Kit `flashcard-editor/deck-context`: the shared context pill,
-/// start-aligned like the kit (never stretched).
-class _DeckContextPill extends StatelessWidget {
-  const _DeckContextPill({required this.deckName});
-
-  final String deckName;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
-    return Row(
-      children: [
-        Flexible(
-          child: MxContextPill(
-            icon: Symbols.folder_rounded,
-            label: l10n.deckContextLabel,
-            value: deckName,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Kit sticky-footer toggle: create another card after saving.
-class _CreateAnotherToggle extends StatelessWidget {
-  const _CreateAnotherToggle({required this.value, required this.onChanged});
-
-  final bool value;
-  final ValueChanged<bool>? onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final onChanged = this.onChanged;
-
-    return MxTappable(
-      onTap: onChanged == null ? null : () => onChanged(!value),
-      semanticLabel: l10n.createAnotherLabel,
-      child: Row(
-        children: [
-          const MxGap.s1(),
-          MxIcon(
-            icon: value
-                ? Symbols.check_box_rounded
-                : Symbols.check_box_outline_blank_rounded,
-          ),
-          const MxGap.s3(),
-          Expanded(
-            child: MxText(l10n.createAnotherLabel, role: MxTextRole.body),
-          ),
-        ],
-      ),
-    );
   }
 }
