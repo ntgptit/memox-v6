@@ -321,6 +321,13 @@ Rules:
   throughout. Treat a pass on a high-whitespace screen as evidence about
   spacing and colour, not about composition; pin composition with a widget
   test that asserts position, as `match_screen_test.dart` now does.
+  A counterweight, from the same screen: the Match tile's height was 72
+  logical against the kit's 116, and correcting it took four states from
+  1.43-16.00% to 0.44-1.26% at once. The ratio is not weak on *geometry* — a
+  wrong size moves a lot of area. It is weak on arrangement and on small
+  coloured detail. When a state is close but not closing, measure the tile
+  boundaries before adjusting a tint: reading rows off both images found this
+  in one pass, after point-sampling colours had pointed the wrong way.
   Two further measurements, both 0.00pp: reversing the Match columns, and
   removing a hover state the harness had been capturing on every deep-link
   entry (Playwright's pointer starts at (0,0), which is the back button).
@@ -555,10 +562,10 @@ yet measured under this gate.
 | MX-VIS-052 | Recall | Revealed | `recall-mode--revealed` | **Playwright PASS — 0.94% light / 0.97% dark** |
 | MX-VIS-053 | Fill | Waiting | `fill-mode--waiting` | **Playwright PASS — 2.08% light / 2.28% dark** (was 1.97 / 2.16). The prompt and placeholder are now deck-driven per the kit's rule — "Type the term (한국어)", "Nhập từ 한국어…" — where they read "Type the term" / "Type your answer…". The ratio rose 0.11pp because **the kit contradicts itself on which language name to use**: this shot writes the English exonym ("Korean"), while `flashcard-editor--create` writes the native name ("Term · 한국어") and passes at 0.82% doing so. The app follows one convention — `nativeName`, as `cardEditorContext` already did — rather than matching each shot's wording. Row correlation is unmoved at 0.393; the remaining gap is the progress denominator (fixture size) and the `more_vert` overflow of `int-5` |
 | MX-VIS-054 | Study Result | Standard | `study-result--standard` | **Playwright PASS — 1.76% light / 2.37% dark** |
-| MX-VIS-062 | Match | Playing | `match-mode--playing` | **Ratio passes — 1.43% light / 1.69% dark — but read the note.** Match had no fixture, spec, census row *or* widget test while the other four modes had all four. The first measurement passed at 1.50/1.77 while the board's **columns were reversed** (terms left, meanings right; the kit fixes meanings left). Swapping them back changed the ratio by **0.00pp**, and seeding the kit's own five pairs instead of unrelated verbs moved it only 0.07pp. Both are now correct on their merits. **Still divergent and not caught by the ratio:** the kit's app bar carries a `more_vert` overflow action this build does not render, and its back control is a bare arrow rather than a circular chip. See the §6.5 note on sparse-screen insensitivity |
-| MX-VIS-063 | Match | Selected | `match-mode--selected` | **Light PASS 1.65% / dark FAIL 3.41%.** It measured 1.65 / 2.96 on 2026-07-26 and that pass was hollow: selecting a meaning did nothing but move focus, so the "selected" tile was an unstyled tile with a focus ring. With selection actually rendering, dark crosses the gate on the tile tone — see `MX-VIS-064` |
-| MX-VIS-064 | Match | Correct | `match-mode--correct` | **Measured 10.67% light / 3.99% dark**, from 16.00 / 11.57. The kit's `Tile.jsx` tone map now applies — `success-soft` for a correct pair, `error-soft` for wrong, and a matched tile renders hidden at full height so the board keeps its shape. Residual is tile geometry: the kit's tiles are taller and its board fills the screen where this one ends two-thirds down, so no row aligns |
-| MX-VIS-065 | Match | Wrong | `match-mode--wrong` | **Measured 12.85% light / 4.86% dark**, from 12.07 / 4.03 — the tone map did not help this state. Same tile-geometry residual as `MX-VIS-064`; with rows misaligned, sampling colours point-by-point compares different tiles, so this needs a row-aligned comparison rather than more spot checks |
+| MX-VIS-062 | Match | Playing | `match-mode--playing` | **Playwright PASS — 0.44% light / 0.48% dark** |
+| MX-VIS-063 | Match | Selected | `match-mode--selected` | **Playwright PASS — 0.52% light / 1.06% dark** (resume into Match, tap the second left-hand tile) |
+| MX-VIS-064 | Match | Correct | `match-mode--correct` | **Playwright PASS — 0.70% light / 0.76% dark**, from 16.00 / 11.57. Two fixes: the kit's tone map (`success-soft`, and a matched tile leaves the board), then the tile height — `min-height: size-xl + space-5` = 116 logical against this build's 72. The height was the dominant term |
+| MX-VIS-065 | Match | Wrong | `match-mode--wrong` | **Playwright PASS — 1.14% light / 1.26% dark**, from 12.07 / 4.03 |
 | MX-VIS-066 | Match | Almost | `match-mode--almost` | Composition built, **not yet measured** — the near-miss cue (`SM-MATCH-*` classification); needs its own spec |
 | MX-VIS-067 | Match | Round complete | `match-mode--complete` | Composition built, **not yet measured** — reachable by clearing every pair; needs its own spec |
 | MX-VIS-055 | Card Editor | Duplicate | `flashcard-editor--duplicate` | **Playwright PASS — 1.97% light / 2.20% dark** (fresh launch → first-use Create Deck → open deck → save first Card → **Add card again** with the same term → duplicate review). No fixture override: the duplicate is produced by the real create path, because detection reads the normalized content that path writes. Reaching it at all required the disabled leaf-deck `Add card` fix (PR #126) |

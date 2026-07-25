@@ -293,6 +293,11 @@ class _MatchTile extends StatelessWidget {
   Widget _card(BuildContext context) {
     return MxCard(
       variant: variant,
+      // Kit `Tile.jsx`: `min-height: calc(size-xl + space-5)`. Without it the
+      // tile shrank to its content and the board ended two-thirds down the
+      // screen where the kit's fills it — 72 logical against the kit's 116,
+      // measured off the shots.
+      minHeight: MxCard.matchTileMinHeight,
       onTap: onTap,
       semanticLabel: label,
       // Kit `match-mode/components/Tile.jsx` centres its label on both axes.
