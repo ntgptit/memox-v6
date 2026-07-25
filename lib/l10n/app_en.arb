@@ -847,6 +847,22 @@
   "@reviewModeTitle": {
     "description": "Study Review stage title (WBS 5.6.5)."
   },
+  "studyExitTitle": "Leave this session?",
+  "@studyExitTitle": {
+    "description": "Study exit confirm title (exit-study-session.md §4)."
+  },
+  "studyExitBody": "Your saved answers will be here when you return. The current unfinished answer may need to be entered again.",
+  "@studyExitBody": {
+    "description": "Study exit confirm body. Names both halves: committed answers survive, the in-progress one may not."
+  },
+  "studyExitKeepLabel": "Keep studying",
+  "@studyExitKeepLabel": {
+    "description": "Study exit confirm: the safe choice, and the primary in a focused context (§4)."
+  },
+  "studyExitConfirmLabel": "Save and exit",
+  "@studyExitConfirmLabel": {
+    "description": "Study exit confirm: leaves the session resumable rather than discarding it."
+  },
   "studyExitLabel": "Exit",
   "@studyExitLabel": {
     "description": "Back/exit action in the study shell."
