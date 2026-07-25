@@ -34,7 +34,8 @@ enum MxBannerTone { info, success, warning, error, accent }
 /// - action: optional trailing control (retry link/button).
 ///
 /// Variants:
-/// See [MxBannerTone].
+/// See [MxBannerTone] for tone, and [MxBanner.stacked] for the decision
+/// layout.
 class MxBanner extends StatelessWidget {
   const MxBanner({
     super.key,
@@ -42,10 +43,30 @@ class MxBanner extends StatelessWidget {
     this.title,
     this.body,
     this.action,
-  }) : assert(
+  }) : stackedActions = null,
+       assert(
          title != null || body != null,
          'MxBanner needs a title, a body, or both',
        );
+
+  /// The decision layout: one regular-weight message, then a row of controls
+  /// on its own line at the padding edge (kit
+  /// `flashcard-editor/dup-warning`).
+  ///
+  /// A separate layout rather than a wide [action], because the two differ in
+  /// more than arrangement: the message is body copy rather than a bold
+  /// title, and the controls start at the container edge instead of indented
+  /// past the glyph. The kit keeps this shape distinct for the same reason —
+  /// its `ActionCallout` note calls the stacked two-button banner a different
+  /// shape from the callout's trailing action.
+  const MxBanner.stacked({
+    super.key,
+    required this.tone,
+    required String message,
+    required List<Widget> this.stackedActions,
+  }) : title = null,
+       body = message,
+       action = null;
 
   final MxBannerTone tone;
 
@@ -54,6 +75,9 @@ class MxBanner extends StatelessWidget {
   final String? title;
   final String? body;
   final Widget? action;
+
+  /// Non-null only for [MxBanner.stacked].
+  final List<Widget>? stackedActions;
 
   @override
   Widget build(BuildContext context) {
@@ -86,12 +110,70 @@ class MxBanner extends StatelessWidget {
     };
     final title = this.title;
     final body = this.body;
+    final stackedActions = this.stackedActions;
+
+    // Both are non-null together by construction — `MxBanner.stacked` sets
+    // the message as `body` — but reading them as a guarded pair keeps the
+    // branch free of a non-null assertion.
+    if (stackedActions != null && body != null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.space4,
+          vertical: AppSpacing.space3,
+        ),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: AppBorderRadii.control,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MxIcon(icon: icon, color: fg),
+                const MxGap.s2(),
+                Expanded(
+                  child: MxText(body, role: MxTextRole.caption, color: fg),
+                ),
+              ],
+            ),
+            const MxGap.s3(),
+            // `Align` is load-bearing: a banner is stretched by the column it
+            // sits in, so a row of intrinsic-width controls centres itself in
+            // the leftover space unless pinned to the edge.
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: stackedActions,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.space4),
       decoration: BoxDecoration(color: bg, borderRadius: AppBorderRadii.card),
+      // Kit `ActionCallout` has two layouts, and which one applies is decided
+      // by the title, not by the action:
+      //
+      // - untitled: one centered row, the action trailing the text.
+      // - titled:   icon + a column of title / body / action, the action
+      //             *inside* the column, below the body.
+      //
+      // Every titled banner used to take the untitled shape, so the action sat
+      // beside the `Expanded` text and took its intrinsic width first. A wide
+      // action then starved the message: the duplicate-card banner's two
+      // buttons squeezed its text into a ~90px column that wrapped to one word
+      // per line and grew the banner to four times its height.
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: title != null
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
           MxIcon(icon: icon, color: fg),
           const MxGap.s3(),
@@ -107,10 +189,14 @@ class MxBanner extends StatelessWidget {
                   if (title != null) const MxGap.s05(),
                   MxText(body, role: MxTextRole.caption, color: fg),
                 ],
+                if (title != null && action != null) ...[
+                  const MxGap.s2(),
+                  ?action,
+                ],
               ],
             ),
           ),
-          if (action != null) ...[const MxGap.s3(), ?action],
+          if (title == null && action != null) ...[const MxGap.s3(), ?action],
         ],
       ),
     );
