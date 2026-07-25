@@ -16,6 +16,10 @@ import 'package:memox_v6/domain/study_session/study_session.dart';
 import 'package:memox_v6/domain/study_session/study_session_repository.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/apply_terminal_outcome_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/finalize_study_session_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_streak/record_streak_day_usecase.dart';
+import 'package:memox_v6/domain/study_streak/streak_repository.dart';
+import 'package:memox_v6/domain/study_streak/streak_day.dart';
+import 'package:memox_v6/core/time/app_time_zone.dart';
 
 /// WBS 5.6.13 — the finalize orchestration (`finalize-study-session.md`,
 /// `srs-8-box-v1.md`): aggregate terminal grades, schedule SRS exactly once and
@@ -66,6 +70,35 @@ void main() {
     clock: _FixedClock(now),
     idGenerator: _SeqIds(),
   );
+
+  // `record-streak-day.md` §1: "Ghi streak không được rollback Study Session
+  // đã thành công." The session is already durable by the time the streak is
+  // offered the event, so a storage failure there must cost a streak day —
+  // which reconciliation can rebuild from session history — and never the
+  // finished session, which nothing can rebuild.
+  test('a failing streak write does not fail the finalized session', () async {
+    final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
+    final progress = _FakeProgress({'c1': _progressAt(box: 0)});
+
+    final usecase = FinalizeStudySessionUseCase(
+      sessions: sessions,
+      progress: progress,
+      applyTerminalOutcome: ApplyTerminalOutcomeUseCase(repository: progress),
+      clock: _FixedClock(now),
+      idGenerator: _SeqIds(),
+      recordStreakDay: RecordStreakDayUseCase(
+        streaks: _ExplodingStreaks(),
+        timeZone: const FixedOffsetTimeZone(id: 'UTC', offset: Duration.zero),
+        idGenerator: _SeqIds(),
+      ),
+    );
+
+    final summary = await usecase(completed(session()));
+
+    expect(summary.reviewedCount, 1);
+    expect(sessions.finalized, hasLength(1));
+    expect(sessions.finalized.single.state, SessionState.completed);
+  });
 
   test('a new card finishing the pipeline activates to Box 1 once', () async {
     final sessions = _FakeSessions(attempts: [_attempt('c1', 'correct')]);
@@ -310,4 +343,19 @@ class _FakeProgress implements LearningProgressRepository {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// A streak store that fails every write, for the isolation test above.
+class _ExplodingStreaks implements StreakRepository {
+  @override
+  Future<void> recordDay(StreakDay day, {required DateTime recordedAt}) async {
+    throw StateError('streak store unavailable');
+  }
+
+  @override
+  Future<List<StreakDay>> daysBetween(String from, String to) async =>
+      const <StreakDay>[];
+
+  @override
+  Future<int> countDays() async => 0;
 }

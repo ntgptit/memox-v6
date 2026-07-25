@@ -14,6 +14,7 @@ import 'package:memox_v6/domain/study_session/study_attempt.dart';
 import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
 import 'package:memox_v6/domain/study_session/study_session_repository.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/apply_terminal_outcome_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_streak/record_streak_day_usecase.dart';
 
 /// Closes a completed study session (WBS 5.6.13; `finalize-study-session.md`).
 ///
@@ -39,6 +40,7 @@ class FinalizeStudySessionUseCase {
     required ApplyTerminalOutcomeUseCase applyTerminalOutcome,
     required AppClock clock,
     required IdGenerator idGenerator,
+    RecordStreakDayUseCase? recordStreakDay,
     SessionModePlanResolver planResolver = const SessionModePlanResolver(),
     SessionTerminalGradePolicy gradePolicy = const SessionTerminalGradePolicy(),
     SessionSummaryPolicy summaryPolicy = const SessionSummaryPolicy(),
@@ -47,6 +49,7 @@ class FinalizeStudySessionUseCase {
        _applyTerminalOutcome = applyTerminalOutcome,
        _clock = clock,
        _idGenerator = idGenerator,
+       _recordStreakDay = recordStreakDay,
        _planResolver = planResolver,
        _gradePolicy = gradePolicy,
        _summaryPolicy = summaryPolicy;
@@ -56,6 +59,10 @@ class FinalizeStudySessionUseCase {
   final ApplyTerminalOutcomeUseCase _applyTerminalOutcome;
   final AppClock _clock;
   final IdGenerator _idGenerator;
+
+  /// Optional so the many existing constructions of this use case keep
+  /// working; when absent the streak simply is not offered the session.
+  final RecordStreakDayUseCase? _recordStreakDay;
   final SessionModePlanResolver _planResolver;
   final SessionTerminalGradePolicy _gradePolicy;
   final SessionSummaryPolicy _summaryPolicy;
@@ -92,6 +99,27 @@ class FinalizeStudySessionUseCase {
       terminalState: SessionState.completed,
       finalizedAt: now,
     );
+
+    // Offered only after the session is committed, and never allowed to undo
+    // it: `record-streak-day.md` §1 — "Ghi streak không được rollback Study
+    // Session đã thành công". A storage failure here loses a streak day, which
+    // reconciliation can rebuild from session history (§4); letting it
+    // propagate would instead lose the finished session, which nothing can.
+    final recordStreakDay = _recordStreakDay;
+    if (recordStreakDay != null) {
+      try {
+        await recordStreakDay(
+          sessionId: session.id,
+          sessionType: session.type,
+          qualifiedCardCount: summary.reviewedCount,
+          finalizedAt: now,
+        );
+      } on Object {
+        // Swallowed deliberately, and narrowly: the session is already
+        // durable, and the caller asked to finalize a session, not to record a
+        // streak.
+      }
+    }
 
     return summary;
   }

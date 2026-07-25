@@ -1,17 +1,20 @@
-/// A calendar day that qualified for the streak, as a local date.
+/// A local calendar date — `metrics-v1`'s `localDayId`, formatted `YYYY-MM-DD`.
+///
+/// Distinct from [StreakDay] in `streak_day.dart`, which is the stored record
+/// (id, timezone, source). This is the date value the policy reasons over.
 ///
 /// Deliberately not a `DateTime`: the boundary spec
 /// (`handle-streak-boundary.md`) forbids deriving days from elapsed 24-hour
 /// spans, and an instant invites exactly that. The record is the *date* the
 /// activity belonged to in the timezone it happened in, which the recorder
 /// resolves once and stores.
-class StreakDay implements Comparable<StreakDay> {
-  const StreakDay(this.year, this.month, this.day);
+class LocalDay implements Comparable<LocalDay> {
+  const LocalDay(this.year, this.month, this.day);
 
   /// The local date of [instant] in whatever zone it is already expressed in.
   /// Callers hold the timezone; this only drops the time-of-day.
-  factory StreakDay.of(DateTime instant) =>
-      StreakDay(instant.year, instant.month, instant.day);
+  factory LocalDay.of(DateTime instant) =>
+      LocalDay(instant.year, instant.month, instant.day);
 
   final int year;
   final int month;
@@ -20,27 +23,27 @@ class StreakDay implements Comparable<StreakDay> {
   /// The next calendar day. `DateTime` does the month/year rollover, and
   /// because both sides are built at noon UTC a DST shift cannot move the
   /// result onto a neighbouring date.
-  StreakDay get next {
+  LocalDay get next {
     final moved = DateTime.utc(
       year,
       month,
       day,
       12,
     ).add(const Duration(days: 1));
-    return StreakDay(moved.year, moved.month, moved.day);
+    return LocalDay(moved.year, moved.month, moved.day);
   }
 
   int get _ordinal => year * 10000 + month * 100 + day;
 
   @override
-  int compareTo(StreakDay other) => _ordinal.compareTo(other._ordinal);
+  int compareTo(LocalDay other) => _ordinal.compareTo(other._ordinal);
 
-  bool operator <(StreakDay other) => _ordinal < other._ordinal;
-  bool operator >(StreakDay other) => _ordinal > other._ordinal;
+  bool operator <(LocalDay other) => _ordinal < other._ordinal;
+  bool operator >(LocalDay other) => _ordinal > other._ordinal;
 
   @override
   bool operator ==(Object other) =>
-      other is StreakDay && other._ordinal == _ordinal;
+      other is LocalDay && other._ordinal == _ordinal;
 
   @override
   int get hashCode => _ordinal;
@@ -60,7 +63,7 @@ class StreakDay implements Comparable<StreakDay> {
 class StreakReconciliationIssue {
   const StreakReconciliationIssue({required this.day, required this.reason});
 
-  final StreakDay day;
+  final LocalDay day;
   final String reason;
 
   @override
@@ -87,7 +90,7 @@ class StreakProjection {
 
   /// The most recent qualified day, or null when there is no history. Explains
   /// the current state without exposing the mutable source.
-  final StreakDay? lastQualifiedDay;
+  final LocalDay? lastQualifiedDay;
 
   /// Lets a stored projection be identified and rebuilt when the rules change.
   final int formulaVersion;
@@ -109,24 +112,23 @@ class StreakProjectionPolicy {
 
   /// How far past the last qualified day the current run survives.
   ///
-  /// **Assumption, flagged rather than buried.** `calculate-current-streak.md`
-  /// §1 says the current streak ends "tại hôm nay hoặc ngày gần nhất theo
-  /// grace policy đã chốt" — it defers to an agreed grace policy that no
-  /// document in `docs/business/**` actually states a length for. One day is
-  /// the value that makes the phrase mean anything: with zero, a run would
-  /// read broken from midnight until the user studied again, so "hôm nay hoặc
-  /// ngày gần nhất" would collapse to "hôm nay". It lives here as one named
-  /// constant so the owner can settle it in a single place.
+  /// `metrics-v1` settles this: "`currentStreak` is consecutive qualified
+  /// local-day ids ending today, **or ending yesterday when today has no
+  /// qualifying event yet**. A gap before yesterday yields zero."
+  ///
+  /// `calculate-current-streak.md` §1 only defers to "grace policy đã chốt"
+  /// without a length, which is why this looked unspecified at first; the
+  /// number lives in the statistics formulas, one directory over.
   static const int graceDays = 1;
 
   /// [days] may repeat, arrive unsorted, or contain dates after
   /// [effectiveDay]; all three are handled rather than rejected (§5).
   StreakProjection project({
-    required Iterable<StreakDay> days,
-    required StreakDay effectiveDay,
+    required Iterable<LocalDay> days,
+    required LocalDay effectiveDay,
   }) {
     final issues = <StreakReconciliationIssue>[];
-    final qualified = <StreakDay>{};
+    final qualified = <LocalDay>{};
 
     for (final day in days) {
       // A record dated after the effective day cannot have happened yet. It is

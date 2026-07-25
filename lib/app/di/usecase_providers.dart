@@ -36,6 +36,7 @@ import 'package:memox_v6/domain/usecases/preferences/set_mode_preferences_usecas
 import 'package:memox_v6/domain/usecases/language_pair/remove_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:memox_v6/domain/usecases/study_streak/record_streak_day_usecase.dart';
 
 part 'usecase_providers.g.dart';
 
@@ -291,6 +292,18 @@ FinalizeStudySessionUseCase finalizeStudySessionUseCase(Ref ref) {
     progress: ref.watch(learningProgressRepositoryProvider),
     applyTerminalOutcome: ref.watch(applyTerminalOutcomeUseCaseProvider),
     clock: ref.watch(appClockProvider),
+    idGenerator: ref.watch(idGeneratorProvider),
+    recordStreakDay: ref.watch(recordStreakDayUseCaseProvider),
+  );
+}
+
+/// Marks the local day a finalized qualifying session contributed to
+/// (`record-streak-day.md`).
+@riverpod
+RecordStreakDayUseCase recordStreakDayUseCase(Ref ref) {
+  return RecordStreakDayUseCase(
+    streaks: ref.watch(streakRepositoryProvider),
+    timeZone: ref.watch(appTimeZoneProvider),
     idGenerator: ref.watch(idGeneratorProvider),
   );
 }
