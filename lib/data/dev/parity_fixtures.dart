@@ -39,6 +39,7 @@ class ParityFixtures {
     'MX-VIS-014',
     'MX-VIS-015',
     'MX-VIS-018',
+    'MX-VIS-036',
     'MX-VIS-037',
     'MX-VIS-043',
     'MX-VIS-049',
@@ -74,6 +75,9 @@ class ParityFixtures {
         return;
       case 'MX-VIS-018':
         await _seedActivePair();
+        return;
+      case 'MX-VIS-036':
+        await _seedLoadedParentDeck();
         return;
       case 'MX-VIS-037':
         await _seedParentDeck();
@@ -196,6 +200,69 @@ class ParityFixtures {
         fixedInstantMs,
         fixedInstantMs,
       );
+    }
+  }
+
+  /// The kit `subdeck-list--loaded` scope: a parent whose five children
+  /// carry the shot's exact counts. Their card totals sum to the header's
+  /// `217 cards` and their due counts to `23 due`, so the aggregate line is
+  /// reproduced by the data rather than asserted separately.
+  Future<void> _seedLoadedParentDeck() async {
+    await _seedActivePair();
+    await _database.deckDao.insertDeck(
+      'fx-loaded',
+      'fx-lp-1',
+      null,
+      'Korean TOPIK I',
+      'korean topik i',
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+    // (id, name, cards, due, new) — ordered as the kit lists them. The
+    // repository orders children by normalized name, so each id is prefixed
+    // to hold the shot's order.
+    const children = <(String, String, int, int, int)>[
+      ('fx-l1', 'Greetings & introductions', 42, 8, 0),
+      ('fx-l2', 'Numbers & counting', 55, 0, 0),
+      ('fx-l3', 'Family & relationships', 38, 0, 6),
+      ('fx-l4', 'Food & dining', 47, 15, 0),
+      ('fx-l5', 'Directions & transport', 35, 0, 0),
+    ];
+    for (final (deckId, name, cards, due, fresh) in children) {
+      await _database.deckDao.insertDeck(
+        deckId,
+        'fx-lp-1',
+        'fx-loaded',
+        name,
+        '$deckId $name'.toLowerCase(),
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+      for (var index = 0; index < cards; index += 1) {
+        final cardId = '$deckId-c$index';
+        await _database.flashcardDao.insertFlashcard(
+          cardId,
+          deckId,
+          'term-$cardId',
+          'term-$cardId',
+          'meaning-$cardId',
+          fixedInstantMs,
+          fixedInstantMs,
+        );
+        // Box 1..7 with a past due date reads as due; box 0 reads as new;
+        // box 8 is mastered and sits in neither queue, which is what makes
+        // a deck show `Up to date`.
+        final isDue = index < due;
+        final isNew = !isDue && index < due + fresh;
+        await _database.learningProgressDao.insertProgress(
+          'p-$cardId',
+          cardId,
+          isDue ? 1 : (isNew ? 0 : 8),
+          isDue ? fixedInstantMs - 1 : null,
+          fixedInstantMs,
+          fixedInstantMs,
+        );
+      }
     }
   }
 
