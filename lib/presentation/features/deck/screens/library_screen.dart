@@ -6,6 +6,7 @@ import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_list_controls.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_quick_study_action.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_summary_row.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
@@ -19,8 +20,6 @@ import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_list.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
-import 'package:memox_v6/presentation/shared/bottom_sheets/mx_select_sheet.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_chip.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// Library root (WBS 5.2.4A, kit shell per 3.15B): the reactive
@@ -93,7 +92,9 @@ class _LibraryBody extends ConsumerWidget {
       errorTitle: l10n.somethingWentWrongMessage,
       data: (context, summaries) {
         if (summaries.isEmpty) return const _LibraryEmptyState();
-        final controls = ref.watch(libraryControlsViewmodelProvider);
+        final controls = ref.watch(
+          libraryControlsViewmodelProvider(DeckListControls.libraryScope),
+        );
         final visible =
             summaries
                 .where(
@@ -115,7 +116,7 @@ class _LibraryBody extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const MxGap.s4(),
-              const _LibraryControls(),
+              const DeckListControls(scopeId: DeckListControls.libraryScope),
               const MxGap.s4(),
               // A ternary (not `if/else`) keeps the guard's no-else rule.
               visible.isEmpty
@@ -158,76 +159,6 @@ class _NoMatch extends StatelessWidget {
         const MxGap.s6(),
       ],
     );
-  }
-}
-
-/// Kit `library/controls` (FilterRow): scope · filters · sort. The scope
-/// chip is static until multi-pair scoping lands; filters and sort drive
-/// [LibraryControlsViewmodel].
-class _LibraryControls extends ConsumerWidget {
-  const _LibraryControls();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final controls = ref.watch(libraryControlsViewmodelProvider);
-    final notifier = ref.read(libraryControlsViewmodelProvider.notifier);
-    final filtered = controls.status != LibraryStatusFilter.all;
-
-    return Row(
-      children: [
-        MxChip(label: l10n.libraryScopeAllLabel),
-        const Spacer(),
-        MxChip(
-          label: filtered
-              ? l10n.libraryFiltersActiveLabel(1)
-              : l10n.libraryFiltersLabel,
-          icon: Symbols.tune_rounded,
-          selected: filtered,
-          onTap: () =>
-              _openStatusSheet(context, l10n, controls.status, notifier),
-        ),
-        const MxGap.s2(),
-        MxChip(
-          label: controls.sort == LibrarySort.az
-              ? l10n.librarySortAzLabel
-              : l10n.librarySortZaLabel,
-          icon: Symbols.swap_vert_rounded,
-          onTap: notifier.toggleSort,
-        ),
-      ],
-    );
-  }
-
-  Future<void> _openStatusSheet(
-    BuildContext context,
-    AppLocalizations l10n,
-    LibraryStatusFilter current,
-    LibraryControlsViewmodel notifier,
-  ) async {
-    final picked = await showMxSelectSheet<LibraryStatusFilter>(
-      context,
-      title: l10n.libraryFilterTitle,
-      selected: current,
-      options: [
-        MxSelectOption(
-          key: LibraryStatusFilter.all,
-          icon: Symbols.stacks_rounded,
-          label: l10n.libraryScopeAllLabel,
-        ),
-        MxSelectOption(
-          key: LibraryStatusFilter.due,
-          icon: Symbols.schedule_rounded,
-          label: l10n.libraryFilterDueLabel,
-        ),
-        MxSelectOption(
-          key: LibraryStatusFilter.isNew,
-          icon: Symbols.fiber_new_rounded,
-          label: l10n.libraryFilterNewLabel,
-        ),
-      ],
-    );
-    if (picked != null) notifier.setStatus(picked);
   }
 }
 

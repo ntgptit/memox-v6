@@ -30,8 +30,12 @@ enum LibraryStatusFilter { all, due, isNew }
 /// separately from the reactive deck stream so toggling never re-queries.
 @riverpod
 class LibraryControlsViewmodel extends _$LibraryControlsViewmodel {
+  /// Keyed by the list it controls — `library` for the root, a deck id for a
+  /// nested list. The kit renders the same FilterRow on both surfaces under
+  /// different node prefixes, and one shared state would mean filtering the
+  /// Library also filtered every nested list behind it.
   @override
-  ({LibrarySort sort, LibraryStatusFilter status}) build() =>
+  ({LibrarySort sort, LibraryStatusFilter status}) build(String scopeId) =>
       (sort: LibrarySort.az, status: LibraryStatusFilter.all);
 
   void toggleSort() => state = (

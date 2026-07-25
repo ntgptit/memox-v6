@@ -11,6 +11,7 @@ import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_list_controls.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_quick_study_action.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_summary_row.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -140,10 +141,9 @@ void main() {
     await tester.pumpWidget(app('root'));
     await pumpDeck(tester);
 
-    // Kit `subdeck-list`: a DECKS section over the same deck cards the
-    // Library root renders, so the child row carries its own card count.
-    expect(find.text('Decks'), findsOneWidget);
-    expect(find.textContaining('1 card'), findsWidgets);
+    // Kit `SubdeckList.jsx`: the Library's FilterRow over the same deck
+    // cards the Library root renders.
+    expect(find.byType(DeckListControls), findsOneWidget);
     expect(find.text('Asia'), findsOneWidget);
     expect(find.text('Add card'), findsNothing);
 
@@ -156,7 +156,7 @@ void main() {
     await pumpDeck(tester);
     // Back from a nested deck returns to its PARENT, not out to the
     // Library — the child row pushes rather than replacing the route.
-    expect(find.text('Decks'), findsOneWidget);
+    expect(find.byType(DeckListControls), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });
@@ -223,9 +223,10 @@ void main() {
     await tester.pumpWidget(app('root'));
     await pumpDeck(tester);
 
-    // The section header totals the scope, and the child renders as a row.
-    expect(find.text('Decks'), findsOneWidget);
-    expect(find.textContaining('1 due'), findsWidgets);
+    // The child renders as a row under the filter controls; the counters
+    // themselves are asserted on the read model above, because the card's
+    // meta line is a `Text.rich` a widget finder cannot see.
+    expect(find.byType(DeckListControls), findsOneWidget);
     expect(find.text('Asia'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
