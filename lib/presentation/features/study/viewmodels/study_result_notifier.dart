@@ -3,6 +3,8 @@ import 'package:memox_v6/domain/study_session/session_summary_policy.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:memox_v6/domain/study_session/session_type.dart';
+import 'package:memox_v6/domain/study_session/session_scope.dart';
 
 part 'study_result_notifier.g.dart';
 
@@ -17,6 +19,15 @@ part 'study_result_notifier.g.dart';
 /// `AsyncData(summary)` = the result.
 @riverpod
 class StudyResult extends _$StudyResult {
+  /// The source session's scope, captured while finalizing.
+  ///
+  /// Relearn starts from this screen after the active session is gone, and a
+  /// session row needs a deck. The runtime that knows it is cleared by
+  /// finalize, so it is remembered here rather than re-derived from a session
+  /// that no longer exists.
+  String? _sourceDeckId;
+  SessionScope? _sourceScope;
+
   @override
   AsyncValue<StudySessionSummary?> build() =>
       const AsyncData<StudySessionSummary?>(null);
@@ -31,6 +42,9 @@ class StudyResult extends _$StudyResult {
     }
     final runtime = ref.read(studySessionRuntimeProvider).asData?.value;
     if (runtime == null || !runtime.isComplete) return;
+
+    _sourceDeckId = runtime.session.deckId;
+    _sourceScope = runtime.session.scope;
 
     state = const AsyncLoading<StudySessionSummary?>();
     StudySessionSummary? summary;
@@ -50,5 +64,33 @@ class StudyResult extends _$StudyResult {
   Future<void> retry() {
     state = const AsyncData<StudySessionSummary?>(null);
     return finalize();
+  }
+
+  /// Starts a relearn session over the cards this session got wrong
+  /// (`relearn-cards.md` §1: "Relearn là session mới do user explicit start
+  /// từ `Review missed`").
+  ///
+  /// Returns whether one started, so the caller only navigates when there is
+  /// something to navigate to. `Review mistakes` used to call `goStudy()` and
+  /// nothing else — it re-entered the route the result was already on, so the
+  /// missed cards were never relearned and the control did nothing at all.
+  Future<bool> startRelearn() async {
+    final summary = state.asData?.value;
+    final deckId = _sourceDeckId;
+    final scope = _sourceScope;
+    if (summary == null || deckId == null || scope == null) return false;
+    if (summary.missedCardIds.isEmpty) return false;
+
+    final action = await runMxAction(() async {
+      await ref
+          .read(startStudySessionUseCaseProvider)
+          .call(
+            deckId: deckId,
+            scope: scope,
+            type: SessionType.relearn,
+            relearnCardIds: summary.missedCardIds,
+          );
+    });
+    return action is! AsyncError;
   }
 }

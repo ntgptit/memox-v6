@@ -64,6 +64,66 @@ void main() {
 
   tearDown(() => database.close());
 
+  // `relearn-cards.md` §1: the queue is the committed terminal-wrong set of a
+  // finalized session, handed in explicitly — not selected from the scope.
+  // Starting one used to throw `unsupported-session-type`, which is why the
+  // result screen's `Review mistakes` control could do nothing but re-navigate.
+  test('relearn runs over the card set it is given', () async {
+    for (final meaning in <String>['one', 'two', 'three', 'four', 'five']) {
+      await newCard('c-$meaning', meaning);
+    }
+
+    final session = await useCase.call(
+      deckId: 'd1',
+      scope: SessionScope.subtree,
+      type: SessionType.relearn,
+      relearnCardIds: <String>['c-one', 'c-three'],
+    );
+
+    expect(session.type, SessionType.relearn);
+    expect(session.scheduleSrs, isTrue);
+
+    final snapshots = await DriftStudySessionRepository(
+      database,
+    ).cardSnapshots(session.id);
+    expect(
+      snapshots.map((s) => s.cardId).toSet(),
+      <String>{'c-one', 'c-three'},
+      reason: 'only the missed cards, not the whole scope',
+    );
+  });
+
+  test('a repeated card takes one queue position', () async {
+    for (final meaning in <String>['one', 'two']) {
+      await newCard('c-$meaning', meaning);
+    }
+
+    final session = await useCase.call(
+      deckId: 'd1',
+      scope: SessionScope.subtree,
+      type: SessionType.relearn,
+      relearnCardIds: <String>['c-one', 'c-one', 'c-two'],
+    );
+
+    final snapshots = await DriftStudySessionRepository(
+      database,
+    ).cardSnapshots(session.id);
+    expect(snapshots, hasLength(2));
+  });
+
+  test('relearn with no cards is rejected rather than empty', () async {
+    await newCard('c-one', 'one');
+
+    await expectLater(
+      useCase.call(
+        deckId: 'd1',
+        scope: SessionScope.subtree,
+        type: SessionType.relearn,
+      ),
+      throwsA(isA<ValidationFailure>()),
+    );
+  });
+
   test(
     'newLearning with five distinct meanings starts and snapshots',
     () async {
