@@ -96,24 +96,13 @@ test('MX-VIS-049 fresh launch creates the first Deck and saves the first Card', 
   await holdDemoFrame(page);
 });
 
-// MX-VIS-055 · Card Editor · Duplicate
-// Master flow: docs/business/flashcard/resolve-duplicate-flashcard.md §3
-// Flow node: A["Duplicate candidate"] → B["Compare draft/source and existing"] → C{"Decision"}
-// Prerequisite flow: docs/business/flashcard/create-flashcard.md §3
-// Prerequisite nodes: A["Open Card Editor"] → C["Enter term / meaning / optional content"] → D["Valid"] → F["Duplicate candidate found"]
-test('MX-VIS-055 a second card with an existing term raises the duplicate review', async ({
-  page,
-}, testInfo) => {
-  await enterFlow(page, {
-    masterFlow: 'docs/business/flashcard/resolve-duplicate-flashcard.md',
-    prerequisiteFlows: ['docs/business/flashcard/create-flashcard.md'],
-    fixture: 'MX-VIS-055',
-  });
-
-  // Same first-run prerequisite as MX-VIS-049: the duplicate state needs a
-  // deck that already holds the card being duplicated, and detection reads
-  // normalized content the real create path writes — so the first card is
-  // saved through production UI rather than seeded.
+/**
+ * Walks the first-run prerequisite up to an open, empty deck and returns its
+ * route. Shared by every Card Editor state: the editor's precondition is a
+ * Language Pair and a target Deck, and all three of these journeys build them
+ * through the production first-run UI rather than seeding them.
+ */
+async function openFirstDeck(page: Page): Promise<string> {
   await expectRoute(page, '/first-run');
   await tapControl(page, 'Create your first deck');
   await expectRoute(page, '/first-run/language');
@@ -128,7 +117,114 @@ test('MX-VIS-055 a second card with an existing term raises the duplicate review
   await expectRoute(page, '/library');
   await expectDeckRow(page, 'Beginner Grammar');
   await tapControl(page, 'Beginner Grammar');
-  const deckRoute = await expectRoute(page, /^\/deck\/[^/]+$/);
+  return expectRoute(page, /^\/deck\/[^/]+$/);
+}
+
+// MX-VIS-056 · Card Editor · Submitting
+// Master flow: docs/business/flashcard/create-flashcard.md §3
+// Flow node: A["Open Card Editor"] → C["Enter term / meaning / optional content"] → H["Atomic save"]
+test('MX-VIS-056 a save in flight freezes the form and shows Saving', async ({
+  page,
+}, testInfo) => {
+  await enterFlow(page, {
+    masterFlow: 'docs/business/flashcard/create-flashcard.md',
+    fixture: 'MX-VIS-056',
+  });
+
+  const deckRoute = await openFirstDeck(page);
+  await tapControl(page, 'Add card');
+  const editorRoute = `${deckRoute}/new-card`;
+  await expectRoute(page, editorRoute);
+
+  await fillField(page, /한국어/, '안녕하세요');
+  await fillField(page, /English/i, 'Hello');
+  await tapControl(page, 'Save');
+
+  // The write is pinned on a completer nothing resolves, so this frame is
+  // held rather than raced: the fields freeze and Save reads "Saving…".
+  //
+  // Exact match, not /Saving/i: the create-another toggle is announced as
+  // "Create another card after saving" and matches that pattern too.
+  await expect(
+    page.getByRole('button', { name: 'Saving…', exact: true }),
+  ).toBeVisible();
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-056',
+    shot: 'flashcard-editor--submitting',
+    screen: 'Card Editor',
+    state: 'Submitting',
+    masterFlow: 'docs/business/flashcard/create-flashcard.md',
+    flowNode:
+      'A["Open Card Editor"] → C["Enter term / meaning / optional content"] → H["Atomic save"]',
+    fixture: 'MX-VIS-056',
+    route: editorRoute,
+  });
+
+  await holdDemoFrame(page);
+});
+
+// MX-VIS-057 · Card Editor · Submit error
+// Master flow: docs/business/flashcard/create-flashcard.md §3
+// Flow node: H["Atomic save"] → I["Save failure · draft retained · retry"]
+test('MX-VIS-057 a failed save keeps the draft and offers retry', async ({
+  page,
+}, testInfo) => {
+  await enterFlow(page, {
+    masterFlow: 'docs/business/flashcard/create-flashcard.md',
+    fixture: 'MX-VIS-057',
+  });
+
+  const deckRoute = await openFirstDeck(page);
+  await tapControl(page, 'Add card');
+  const editorRoute = `${deckRoute}/new-card`;
+  await expectRoute(page, editorRoute);
+
+  await fillField(page, /한국어/, '안녕하세요');
+  await fillField(page, /English/i, 'Hello');
+  await tapControl(page, 'Save');
+
+  // create-flashcard.md §6: a failed save is recoverable in place — the
+  // editor stays open, the banner explains, and the typed draft survives.
+  await expect(page.getByRole('textbox', { name: /한국어/ })).toHaveValue(
+    '안녕하세요',
+  );
+  await expectRoute(page, editorRoute);
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-057',
+    shot: 'flashcard-editor--submit-error',
+    screen: 'Card Editor',
+    state: 'Submit error',
+    masterFlow: 'docs/business/flashcard/create-flashcard.md',
+    flowNode: 'H["Atomic save"] → I["Save failure · draft retained · retry"]',
+    fixture: 'MX-VIS-057',
+    route: editorRoute,
+  });
+
+  await holdDemoFrame(page);
+});
+
+// MX-VIS-055 · Card Editor · Duplicate
+// Master flow: docs/business/flashcard/resolve-duplicate-flashcard.md §3
+// Flow node: A["Duplicate candidate"] → B["Compare draft/source and existing"] → C{"Decision"}
+// Prerequisite flow: docs/business/flashcard/create-flashcard.md §3
+// Prerequisite nodes: A["Open Card Editor"] → C["Enter term / meaning / optional content"] → D["Valid"] → F["Duplicate candidate found"]
+test('MX-VIS-055 a second card with an existing term raises the duplicate review', async ({
+  page,
+}, testInfo) => {
+  await enterFlow(page, {
+    masterFlow: 'docs/business/flashcard/resolve-duplicate-flashcard.md',
+    prerequisiteFlows: ['docs/business/flashcard/create-flashcard.md'],
+    fixture: 'MX-VIS-055',
+  });
+
+  // The duplicate state needs a deck that already holds the card being
+  // duplicated, and detection reads normalized content the real create path
+  // writes — so the first card is saved through production UI, not seeded.
+  const deckRoute = await openFirstDeck(page);
 
   // First card: the one the duplicate will collide with.
   await tapControl(page, 'Add card');

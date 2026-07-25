@@ -9,6 +9,10 @@ import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/domain/study_session/session_summary_policy.dart';
+import 'package:memox_v6/domain/flashcard/card_audio_ref.dart';
+import 'package:memox_v6/domain/flashcard/card_translation.dart';
+import 'package:memox_v6/domain/flashcard/create_flashcard_result.dart';
+import 'package:memox_v6/domain/usecases/flashcard/create_flashcard_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/open_deck_usecase.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_result_notifier.dart';
@@ -43,6 +47,29 @@ List<Override> parityOverridesFor(String fixtureId) {
         (ref) => _FailingCreateDeckUseCase(
           decks: ref.watch(deckRepositoryProvider),
           pairs: ref.watch(languagePairRepositoryProvider),
+          idGenerator: ref.watch(idGeneratorProvider),
+          clock: ref.watch(appClockProvider),
+        ),
+      ),
+    ],
+    // The Card Editor's two in-flight/failed save states, the same shape as
+    // MX-VIS-011/012 one layer up: the deck and the card both reach the
+    // editor through the real journey, and only the final write is pinned.
+    'MX-VIS-056' => <Override>[
+      createFlashcardUseCaseProvider.overrideWith(
+        (ref) => _HangingCreateFlashcardUseCase(
+          cards: ref.watch(flashcardRepositoryProvider),
+          decks: ref.watch(deckRepositoryProvider),
+          idGenerator: ref.watch(idGeneratorProvider),
+          clock: ref.watch(appClockProvider),
+        ),
+      ),
+    ],
+    'MX-VIS-057' => <Override>[
+      createFlashcardUseCaseProvider.overrideWith(
+        (ref) => _FailingCreateFlashcardUseCase(
+          cards: ref.watch(flashcardRepositoryProvider),
+          decks: ref.watch(deckRepositoryProvider),
           idGenerator: ref.watch(idGeneratorProvider),
           clock: ref.watch(appClockProvider),
         ),
@@ -108,6 +135,65 @@ class _PendingCardsOpenDeckUseCase extends OpenDeckUseCase {
   @override
   Stream<List<Flashcard>> cardsOf(String deckId) =>
       StreamController<List<Flashcard>>().stream;
+}
+
+/// A card write that never completes, for `flashcard-editor--submitting`.
+///
+/// The editor freezes its fields and swaps Save for "Saving…" while the
+/// command is in flight, so pinning the command is what holds that frame
+/// still — the alternative is racing a real write that finishes in
+/// milliseconds.
+class _HangingCreateFlashcardUseCase extends CreateFlashcardUseCase {
+  const _HangingCreateFlashcardUseCase({
+    required super.cards,
+    required super.decks,
+    required super.idGenerator,
+    required super.clock,
+  });
+
+  @override
+  Future<CreateFlashcardResult> call({
+    required String deckId,
+    required String term,
+    required String primaryMeaning,
+    String? retryCardId,
+    bool allowDuplicate = false,
+    List<CardTranslation> translations = const [],
+    List<String> tagIds = const [],
+    List<CardAudioRef> audioRefs = const [],
+  }) {
+    return Completer<CreateFlashcardResult>().future;
+  }
+}
+
+/// A card write that always fails, for `flashcard-editor--submit-error`.
+///
+/// It throws rather than returning a validation result, so the draft stays
+/// intact behind the failure banner — which is the point of the state:
+/// `create-flashcard.md` requires the typed content to survive a failed save.
+class _FailingCreateFlashcardUseCase extends CreateFlashcardUseCase {
+  const _FailingCreateFlashcardUseCase({
+    required super.cards,
+    required super.decks,
+    required super.idGenerator,
+    required super.clock,
+  });
+
+  @override
+  Future<CreateFlashcardResult> call({
+    required String deckId,
+    required String term,
+    required String primaryMeaning,
+    String? retryCardId,
+    bool allowDuplicate = false,
+    List<CardTranslation> translations = const [],
+    List<String> tagIds = const [],
+    List<CardAudioRef> audioRefs = const [],
+  }) async {
+    throw const UnexpectedFailure(
+      cause: 'parity fixture: the card write path fails for MX-VIS-057',
+    );
+  }
 }
 
 /// A create path that never completes, for the submitting state.

@@ -268,7 +268,13 @@ class _CardEditorForm extends HookConsumerWidget {
                     if (failure != null) ...[
                       MxBanner(
                         tone: MxBannerTone.error,
-                        title: l10n.cardSaveFailedMessage,
+                        // `body`, not `title`: the kit draws this one as the
+                        // untitled inline banner — one regular-weight sentence
+                        // with Try again trailing it on the same row. Passing
+                        // it as a title made it a bold heading with the action
+                        // stacked underneath, which is the decision layout,
+                        // not the recoverable-failure one.
+                        body: l10n.cardSaveFailedMessage,
                         action: MxButton(
                           label: l10n.tryAgainLabel,
                           variant: MxButtonVariant.secondary,

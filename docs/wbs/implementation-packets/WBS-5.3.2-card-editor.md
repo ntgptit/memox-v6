@@ -104,11 +104,36 @@ so intrinsic-width buttons centre themselves in the leftover space unless
 pinned. Reverting on the measurement rather than defending the change is what
 found it.
 
-**Remaining child-B scope:** `submitting`, `submit-error` and `submit-success`
-still have no `MX-VIS` ids. The kit has **ten** editor states; the register now
-carries **two**. `submit-success` needs a decision first — the kit keeps the
-user in the editor with Save reading "Done", while this app pops back to the
-deck on success.
+**`MX-VIS-056` submitting — PASS, 1.02% light / 1.27% dark.** The write is
+pinned on a completer nothing resolves, the same shape as `MX-VIS-011` one
+layer up, so the frame is held rather than raced against a write that finishes
+in milliseconds. The editor already implemented the state faithfully — fields
+`enabled: !isSubmitting`, Save swapped for "Saving…" — so nothing needed
+building.
+
+**`MX-VIS-057` submit-error — light PASS 1.58%, dark 4.92% (over).** Measuring
+it found the error banner using the wrong layout: the call site passed the
+message as `title`, which is the *decision* shape (bold heading, action stacked
+beneath), where the kit draws a recoverable failure as the untitled inline
+banner — one regular-weight sentence with `Try again` trailing it on the same
+row. Correcting the call site moved it 3.36% → 1.58% light and 9.99% → 4.92%
+dark.
+
+The dark residual is colour, not composition: the same widget tree passes in
+light. That belongs to the dark-token sweep rather than to this row.
+
+**Finding for whoever closes these:** the kit's `--submitting` and
+`--submit-error` shots are both drawn in the **edit** variant — the app bar
+reads "Edit card", because the kit's JSX gives "New card" only to
+`view === 'create'`. Both journeys here are create. `MX-VIS-056` passes anyway,
+which puts that difference at roughly 1%, so it is not the dark blocker — but
+neither shot can reach zero from a create journey, and an edit-mode journey
+would need a failing *edit* write path alongside the create one.
+
+**Remaining child-B scope:** `submit-success` and the dirty-discard overlay.
+The kit has **ten** editor states; the register now carries **four**.
+`submit-success` needs a product decision first — the kit keeps the user in the
+editor with Save reading "Done", while this app pops back to the deck.
 
 ## Acceptance and test procedure
 
