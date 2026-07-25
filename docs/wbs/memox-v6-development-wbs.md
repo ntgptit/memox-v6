@@ -220,7 +220,7 @@ whose dependencies are not Done.
 | --- | --- | --- |
 | Done | `0.1–0.6`, `1.1–1.11`, `2.1–2.10`, `3.1–3.7`, `3.9–3.10`, `3.12`, `4.1–4.10`, `5.1.1–5.1.3`, `5.2.1–5.2.6`, `5.3.1`, `5.4.1–5.4.5`, `P0.3` | Durable evidence is in the work-item register. Wave 2 (token→theme→responsive) is closed; the `4.10` foundation gate and the `3.12` minimal-`Mx*` gate both PASSED (2026-07-19). `5.1.2`, `5.2.1` and `5.2.3` were reopened on 2026-07-20 for `MX-VIS-005`/`014`/`015` and re-closed on 2026-07-21 with those states measured. |
 | **In progress** | `P0.2`, `P0.4`, `P0.5`, `3.15`, `5.3.2` (child A Done), `int-2` | Phase 0 now closes per vertical slice (owner, 2026-07-20). The **onboarding slice closed 2026-07-21**: 11 `MX-VIS-*` IDs × 2 themes measured, 22/22 PASS, worst 1.93%. `5.3.2` children B and C are pending; `int-2` records Library chrome that landed ahead of its owning `5.4.2`/`10.2` rows. |
-| **Blocked** | `P0.1`, `P0.6` | `P0.1` stays open while 5 census rows await a kit-owner decision (`003`, `006`, `007`, `008`, `024`) and `013`/`027` are recorded structurally unreachable. `P0.6` cannot close while its first DoD clause is unmet: **the parity suite does not run in the consolidated verifier.** `tool/verify/run.mjs` has no parity step in any mode, and `.github/workflows/ci.yml` has no parity or Playwright job — `tool/verify/ci_scope.mjs` emits a `visual_changes` output that no job consumes, so the §6.5 merge gate is run by hand rather than machine-enforced. |
+| **Blocked** | `P0.1`, `P0.6` | `P0.1` stays open while 5 census rows await a kit-owner decision (`003`, `006`, `007`, `008`, `024`) and `013`/`027` are recorded structurally unreachable. `P0.6`'s first DoD clause — **the parity suite must be machine-enforced** — was met on 2026-07-25. `ci_scope.mjs` had emitted a `visual_changes` output since the verifier was built and no job consumed it, so the §6.5 rule that no screen-changing PR merges without <3% evidence was enforced by hand. CI now has a `visual_parity` job gated on that output, required by the `gate` job, uploading `evidence/parity/` on failure; and `tool/parity/gate.mjs` decides the verdict as a **ratchet** against `known-gaps.json` — any failure that is not a recorded gap fails, and so does any recorded gap that has started passing, so the list can only shrink. Both directions verified by mutation. Remaining `P0.6` clauses are unchanged. |
 | **Halted** | All UI rows of `5.6.*`, `5.7.*`, `6.*`–`16.*` | **STOP RULE (owner, 2026-07-19), as amended 2026-07-20:** no new UI/screen work package is promoted to `Ready` until its own slice closes under `P0.6`. Non-UI rows (domain, data, policy) may proceed. |
 | Blocked | All remaining implementation rows | Preserve dependency order; create/review the item packet immediately before promotion. PROCESS RULE (owner, 2026-07-19): no screen-changing PR merges without kit-parity evidence <3%. `5.4.4` and `5.4.5` **Done 2026-07-25** — the attempt/schedule transaction (schema v2 timestamps, concurrent-writer interleaving, exactly-once across restart) and the progress-test row, whose audit found five of its seven categories already covered by `5.4.2`–`5.4.4` and added the two that were not: the due boundary either side of equality, and the read-side timezone contract. Next: `5.3.2` children B/C, then `5.5.1` (canonical mode/evidence model). |
 
@@ -312,6 +312,14 @@ Rules:
   expiry. An undocumented bypass is a gate violation, not a judgement call.
 - Known-divergence entries (a kit shot showing a feature that has not shipped
   yet) are only valid when they name the WBS item that will close them.
+- **Enforcement (2026-07-25).** The gate is machine-run, not attested. CI's
+  `visual_parity` job fires whenever `scope` reports `visual_changes`, and the
+  `gate` job requires it — skipped is accepted only when nothing visual
+  changed. The verdict comes from `tool/parity/gate.mjs`, which reads the
+  measured summary against `tool/parity/known-gaps.json`: a failure that is not
+  a recorded gap fails the build, **and a recorded gap that has started passing
+  also fails it**, so the list can only shrink. Every gap entry must carry its
+  reason and appear in the MX-VIS register with the same one.
 
 #### Frozen test environment
 

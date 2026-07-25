@@ -74,6 +74,20 @@ const playwrightStatus = command(
   { allowFailure: true },
 );
 command('Parity evidence summary', 'node', ['report.mjs']);
-if (playwrightStatus !== 0) {
-  throw new Error(`Playwright parity failed with exit code ${playwrightStatus}`);
+
+// The verdict comes from `gate.mjs`, not from Playwright's exit code: five
+// state-themes are blocked on a kit contradiction or on shot content no
+// journey produces, and a raw non-zero would make the suite permanently red
+// and therefore permanently ignored. `gate.mjs` fails on any failure that is
+// not a recorded gap, and equally on any recorded gap that has started
+// passing.
+//
+// A single-state run (`--id`) is deliberately exempt: it measures one state
+// and cannot judge the suite, so its own exit code stands.
+if (id) {
+  if (playwrightStatus !== 0) {
+    throw new Error(`Playwright parity failed with exit code ${playwrightStatus}`);
+  }
+} else {
+  command('Parity gate (regressions vs recorded gaps)', 'node', ['gate.mjs']);
 }

@@ -178,10 +178,58 @@ jobs:
       - name: Run full canonical verifier
         run: node tool/verify/run.mjs
 
+  visual_parity:
+    name: Kit visual parity
+    # The §6.5 merge gate. `scope` has emitted `visual_changes` since the
+    # verifier was built; until now no job consumed it, so the rule that no
+    # screen-changing PR merges without <3% evidence was enforced by hand.
+    if: >-
+      github.event_name == 'pull_request' &&
+      needs.scope.outputs.visual_changes == 'true'
+    needs: scope
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.6'
+          cache: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tool/parity/package-lock.json
+
+      - name: Install parity harness
+        working-directory: tool/parity
+        run: npm ci
+
+      - name: Install Chromium
+        working-directory: tool/parity
+        run: npx playwright install --with-deps chromium
+
+      - name: Run kit visual parity
+        run: node tool/parity/run.mjs
+
+      # The diff and both captures are the whole point of a failure: without
+      # them a red gate says only "different", not "how".
+      - name: Upload parity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-evidence
+          path: evidence/parity/
+          retention-days: 14
+
   gate:
     name: CI Gate
     if: always() && github.event_name == 'pull_request'
-    needs: [scope, contracts, flutter_fast, full_canonical]
+    needs: [scope, contracts, flutter_fast, full_canonical, visual_parity]
     runs-on: ubuntu-latest
     steps:
       - name: Require the selected gates
@@ -192,6 +240,8 @@ jobs:
           FULL_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'full-ci') }}
           FULL_RESULT: ${{ needs.full_canonical.result }}
           SCOPE_RESULT: ${{ needs.scope.result }}
+          VISUAL_CHANGES: ${{ needs.scope.outputs.visual_changes }}
+          VISUAL_RESULT: ${{ needs.visual_parity.result }}
         run: |
           if [[ "$SCOPE_RESULT" != "success" || "$CONTRACTS_RESULT" != "success" ]]; then
             exit 1
@@ -199,6 +249,18 @@ jobs:
           if [[ "$FULL_LABEL" == "true" ]]; then
             [[ "$FULL_RESULT" == "success" ]]
             exit
+          fi
+          # A screen-changing PR must carry parity evidence (§6.5). When
+          # nothing visual changed the job is skipped, and skipped is the
+          # only non-success this accepts.
+          if [[ "$VISUAL_CHANGES" == "true" ]]; then
+            if [[ "$VISUAL_RESULT" != "success" ]]; then
+              echo "Visual changes present but the parity gate did not pass."
+              exit 1
+            fi
+          elif [[ "$VISUAL_RESULT" != "skipped" ]]; then
+            echo "Parity job ran without visual changes; scope resolution is wrong."
+            exit 1
           fi
           if [[ "$DOCS_ONLY" == "true" ]]; then
             [[ "$FAST_RESULT" == "skipped" ]]

@@ -1,0 +1,17 @@
+{
+  "$comment": [
+    "State-theme runs that are measured but cannot currently reach the <=3% gate,",
+    "each with the reason it is blocked and the row that owns it. This file is a",
+    "ratchet, not an excuse list: `gate.mjs` fails on any failure NOT listed here,",
+    "and equally on any entry here that has started passing, so the list can only",
+    "shrink. Every entry must also appear in the MX-VIS register in",
+    "docs/wbs/memox-v6-development-wbs.md with the same reason."
+  ],
+  "gaps": {
+    "MX-VIS-036--light": "Kit self-contradiction: SubdeckList.jsx renders crumbs + FilterRow + list, the shot draws a DECKS section and no filter chips. Owner ruling 2026-07-25 — JSX is the source of truth; parked until the shot is regenerated.",
+    "MX-VIS-036--dark": "Same as MX-VIS-036--light.",
+    "MX-VIS-037--light": "Same kit self-contradiction, loading branch: the shot is a skeleton of chrome the JSX never renders.",
+    "MX-VIS-037--dark": "Same as MX-VIS-037--light.",
+    "MX-VIS-057--dark": "The shot embeds an additional-translation row and tag content the journey does not create. Light passes at 1.72% from the identical widget tree; dark costs ~3x more because light-on-dark glyph edges carry larger per-pixel deltas."
+  }
+}
