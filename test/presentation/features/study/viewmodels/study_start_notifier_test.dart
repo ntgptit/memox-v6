@@ -103,6 +103,7 @@ class _FakeStart extends StartStudySessionUseCase {
   String? deckId;
   SessionScope? scope;
   SessionType? type;
+  List<String> relearnCardIds = const <String>[];
 
   @override
   Future<StudySession> call({
@@ -110,8 +111,10 @@ class _FakeStart extends StartStudySessionUseCase {
     required SessionScope scope,
     required SessionType type,
     StudyModeType? selectedMode,
+    List<String> relearnCardIds = const <String>[],
   }) async {
     calls++;
+    this.relearnCardIds = relearnCardIds;
     this.deckId = deckId;
     this.scope = scope;
     this.type = type;

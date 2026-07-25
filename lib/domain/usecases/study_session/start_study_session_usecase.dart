@@ -49,6 +49,7 @@ class StartStudySessionUseCase {
     required SessionScope scope,
     required SessionType type,
     StudyModeType? selectedMode,
+    List<String> relearnCardIds = const <String>[],
   }) async {
     final now = _clock.nowUtc();
     final candidates = await _progress.studyCandidatesInScope(
@@ -60,6 +61,7 @@ class StartStudySessionUseCase {
       type,
       candidates.newCardIds,
       candidates.dueCardIds,
+      relearnCardIds,
     );
     final eligibleCards = await _resolveEligibleCards(cardIds);
     final distinctMeanings = eligibleCards
@@ -105,9 +107,25 @@ class StartStudySessionUseCase {
     SessionType type,
     List<String> newCardIds,
     List<String> dueCardIds,
+    List<String> relearnCardIds,
   ) {
     if (type == SessionType.newLearning) return newCardIds;
     if (type == SessionType.dueReview) return dueCardIds;
+    // Relearn does not select from the scope's queues: its queue is the
+    // committed terminal-wrong set of a finalized session, handed in by the
+    // caller (`relearn-cards.md` §1 — "Relearn queue được tạo từ terminal
+    // outcomes đã commit của một session đã finalize"). Selecting by scope
+    // here would sweep in cards the source session never got wrong.
+    if (type == SessionType.relearn) {
+      if (relearnCardIds.isEmpty) {
+        throw ValidationFailure(field: 'relearnCardIds', code: 'required');
+      }
+      // Deduplicated in order: §1 caps a card at one queue position, and a
+      // retried start must not double it.
+      return <String>[
+        ...<String>{...relearnCardIds},
+      ];
+    }
     throw ValidationFailure(
       field: 'sessionType',
       code: 'unsupported-session-type',

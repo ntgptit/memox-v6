@@ -84,13 +84,13 @@ String _formatActiveTime(int milliseconds) {
   return '$minutes:${seconds.toString().padLeft(2, '0')}';
 }
 
-class _ResultBody extends StatelessWidget {
+class _ResultBody extends ConsumerWidget {
   const _ResultBody({required this.summary});
 
   final StudySessionSummary summary;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final accuracy = summary.reviewedCount == 0
         ? 0
@@ -172,7 +172,16 @@ class _ResultBody extends StatelessWidget {
               child: MxLink(
                 icon: Symbols.replay_rounded,
                 label: l10n.studyResultReviewMistakesLabel,
-                onTap: () => context.goStudy(),
+                // Starts a relearn session over the missed cards, then opens
+                // it. This called `goStudy()` alone, which re-entered the
+                // route the result was already on — the control rendered,
+                // took a tap, and did nothing.
+                onTap: () async {
+                  final started = await ref
+                      .read(studyResultProvider.notifier)
+                      .startRelearn();
+                  if (started && context.mounted) context.goStudy();
+                },
               ),
             ),
           ],
@@ -222,7 +231,6 @@ class _Stat extends StatelessWidget {
   }
 }
 
-/// The `Review mistakes` link (kit `study-result`, many-wrong branch). Starts a
 /// The streak + today's-goal card (kit `study-result` `StreakGoalCard.jsx`,
 /// "goal status when applicable" — `finalize-study-session.md` §4). A
 /// primary-soft card with an internal space-3 rhythm: the flame + streak row,
