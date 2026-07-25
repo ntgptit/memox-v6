@@ -177,9 +177,7 @@ class _MeaningColumn extends ConsumerWidget {
         for (final meaning in board.meanings) ...<Widget>[
           _MatchTile(
             label: meaning.meaning,
-            variant: board.round.isLocked(meaning.cardId)
-                ? MxCardVariant.primary
-                : MxCardVariant.flat,
+            variant: _meaningVariant(board, meaning.cardId),
             feedbackIcon: _feedbackFor(
               context,
               board,
@@ -195,6 +193,15 @@ class _MeaningColumn extends ConsumerWidget {
         ],
       ],
     );
+  }
+
+  /// Mirrors `_termVariant`: a meaning picked first reads selected, exactly as
+  /// a term does. It previously had no selected state at all, because a
+  /// meaning could not be picked first.
+  MxCardVariant _meaningVariant(MatchBoardState board, String cardId) {
+    if (board.round.isLocked(cardId)) return MxCardVariant.primary;
+    if (board.selectedMeaningId == cardId) return MxCardVariant.primarySoft;
+    return MxCardVariant.flat;
   }
 }
 
