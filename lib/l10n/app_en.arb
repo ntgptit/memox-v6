@@ -1032,9 +1032,9 @@
   "@studyResultGoalTitleLabel": {
     "description": "Study Result streak-card goal-progress row title."
   },
-  "studyResultGoalProgressLabel": "{done}/{total} min",
+  "studyResultGoalProgressLabel": "{done}/{total} cards",
   "@studyResultGoalProgressLabel": {
-    "description": "Study Result streak-card goal progress, minutes done over target.",
+    "description": "Study Result streak-card goal progress, qualified cards done over target (metrics-v1 fixes the v1 goal unit as Cards).",
     "placeholders": {
       "done": {
         "type": "int"

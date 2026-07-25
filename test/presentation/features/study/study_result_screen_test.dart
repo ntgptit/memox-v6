@@ -60,8 +60,8 @@ void main() {
             durationActiveMs: 390000,
             goalStatus: StudyResultGoalStatus(
               streakDays: 12,
-              goalDoneMinutes: 14,
-              goalTargetMinutes: 20,
+              goalDoneCards: 14,
+              goalTargetCards: 20,
             ),
           ),
         ),
@@ -72,7 +72,7 @@ void main() {
     expect(find.text('12 days'), findsOneWidget);
     expect(find.text('day streak'), findsOneWidget);
     expect(find.text("Today's goal"), findsOneWidget);
-    expect(find.text('14/20 min'), findsOneWidget);
+    expect(find.text('14/20 cards'), findsOneWidget);
     // No missed cards → no Review mistakes link.
     expect(find.text('Review mistakes'), findsNothing);
   });
