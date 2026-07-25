@@ -44,6 +44,9 @@ export default defineConfig({
     launchOptions: { slowMo },
   },
 
+  // NOTE: the `reducedMotion` above declares the intent, but it does not
+  // reach the page on its own — see `applyReducedMotion` in `flows.ts`,
+  // which is what actually emulates it.
   projects: [
     {
       name: 'light',

@@ -42,7 +42,11 @@ test('MX-VIS-049 fresh launch creates the first Deck and saves the first Card', 
   await tapControl(page, 'Create deck');
   await expectRoute(page, '/library');
   await expect(page.getByText('Beginner Grammar')).toBeVisible();
-  await tapControl(page, 'Open deck');
+  // The first-deck callout that used to carry an `Open deck` action was
+  // superseded (owner, 2026-07-21, MX-VIS-021): first-run success now
+  // returns to the plain Library deck list per `create-deck.md` §7, so the
+  // deck is opened from its row like any other.
+  await tapControl(page, 'Beginner Grammar');
   const deckRoute = await expectRoute(page, /^\/deck\/[^/]+$/);
 
   // Empty Deck → Add card enters create-flashcard.md at A. The production

@@ -34,7 +34,7 @@
 ## C. Inputs
 | # | Widget | Kit | Status | Ghi chú |
 |---|---|---|---|---|
-| C1 | `MxFieldScaffold` | `field-group`/`.field` | 🔧 | label→fieldLabel; boxed padding s3 |
+| C1 | `MxFieldScaffold` | `field-group`/`.field` | 🔧/⛔ | label→fieldLabel; boxed padding s3. **⛔ BUG (2026-07-25): the labelled group is wrapped in `Semantics(textField: true)`, so the whole label+input+helper column claims to BE the text field.** The visual label merges into the accessible name (`aria-label="Deck name↵Deck name *"`) and the group node, which carries no value, shadows the real input — a screen reader reads the name twice and never hears the typed text. Caught by the parity gate: `MX-VIS-012/014/015` fail `toHaveValue` because `getByRole('textbox')` resolves to the wrapper. Fix belongs on the input, not the group, and needs an a11y pass over every form |
 | C2 | `MxTextField` | `.field`/`InputBox` | ⚠️ | vs `.field` ok; **không phải drop-in fill InputBox** (96/center/xl-extrabold) |
 | C3 | `MxTextArea` | `.field--multiline` | ✅ | core 1:1; label-nudge + focus-corner Low |
 | C4 | `MxSearchField` | search dock/field | 🔧 | focus ring → foregroundDecoration (không inset content) ✅; nút clear + caret primary còn (Low, product choice) |
