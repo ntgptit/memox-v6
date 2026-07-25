@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/core/theme/tokens/app_border_radii.dart';
 import 'package:memox_v6/core/theme/tokens/app_motion.dart';
+import 'package:memox_v6/core/theme/tokens/app_sizes.dart';
 import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 import 'package:memox_v6/core/theme/tokens/app_strokes.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
@@ -61,6 +62,7 @@ class MxCard extends StatefulWidget {
     super.key,
     required this.child,
     this.variant = MxCardVariant.elevated,
+    this.minHeight,
     this.padding = MxCardPadding.md,
     this.onTap,
     this.semanticLabel,
@@ -68,6 +70,15 @@ class MxCard extends StatefulWidget {
 
   final Widget child;
   final MxCardVariant variant;
+
+  /// The Match tile's floor, `size-xl + space-5` (kit `Tile.jsx`). Exposed
+  /// here because the feature layer may not read raw tokens.
+  static const double matchTileMinHeight = AppSizes.sizeXl + AppSpacing.space5;
+
+  /// Floor for the card's height, for a surface the kit sizes rather than
+  /// letting content decide — the Match tile's
+  /// `min-height: calc(size-xl + space-5)`.
+  final double? minHeight;
   final MxCardPadding padding;
   final VoidCallback? onTap;
   final String? semanticLabel;
@@ -141,9 +152,13 @@ class _MxCardState extends State<MxCard> {
         ? elevations.shadowLg
         : shadows;
 
+    final minHeight = widget.minHeight;
     Widget surface = AnimatedContainer(
       duration: AppMotion.durationFast,
       curve: AppMotion.easeStandard,
+      constraints: minHeight == null
+          ? null
+          : BoxConstraints(minHeight: minHeight),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: AppBorderRadii.card,
