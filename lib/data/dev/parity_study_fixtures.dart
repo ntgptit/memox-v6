@@ -227,12 +227,16 @@ class ParityStudyFixtures {
       fixedInstantMs,
     );
 
+    // The kit's own board, pair for pair (`MatchMode.jsx`: LEFT = time, love,
+    // friend, food, school / RIGHT = 사랑, 학교, 음식, 시간, 친구). Seeding the
+    // same cards makes the comparison about composition rather than about
+    // which words happened to be chosen.
     const cards = <(String, String, String)>[
-      ('fx-mt-c0', '먹다', 'to eat'),
-      ('fx-mt-c1', '자다', 'to sleep'),
-      ('fx-mt-c2', '읽다', 'to read'),
-      ('fx-mt-c3', '쓰다', 'to write'),
-      ('fx-mt-c4', '걷다', 'to walk'),
+      ('fx-mt-c0', '사랑', 'love'),
+      ('fx-mt-c1', '학교', 'school'),
+      ('fx-mt-c2', '음식', 'food'),
+      ('fx-mt-c3', '시간', 'time'),
+      ('fx-mt-c4', '친구', 'friend'),
     ];
     for (final (id, term, meaning) in cards) {
       await _database.flashcardDao.insertFlashcard(

@@ -106,12 +106,16 @@ class _MatchStage extends ConsumerWidget {
       onBack: () => Navigator.of(context).maybePop(),
       backLabel: l10n.studyExitLabel,
       body: SingleChildScrollView(
+        // Meanings left, terms right — the kit's `MatchMode` fixes the sides
+        // (`LEFT = ['time','love',…]`, `RIGHT = ['사랑','학교',…]`). The two
+        // were reversed here, which no assertion caught: a matching board is
+        // functionally symmetric, so only the shot says which side is which.
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Expanded(child: _TermColumn(board: board)),
-            const MxGap.s2(),
             Expanded(child: _MeaningColumn(board: board)),
+            const MxGap.s2(),
+            Expanded(child: _TermColumn(board: board)),
           ],
         ),
       ),
