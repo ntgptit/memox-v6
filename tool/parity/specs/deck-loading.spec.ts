@@ -119,3 +119,49 @@ test('MX-VIS-043 reaches the leaf branch while its cards are still loading', asy
   await expectRoute(page, '/library');
   await expectDeckRow(page, 'Numbers & counting');
 });
+
+// MX-VIS-036 · Deck detail — parent branch · Loaded
+// Master flow: docs/business/deck/browse-nested-decks.md §3
+// Flow node: M["Root destination · tap Library tab"] → N["Load root decks của active pair"] → O{"Root load result"} → S["Library · root deck list"] → A["Open Parent"] → B["Load path + direct children + aggregate counts"] → C{"Result"} -- "Loaded" --> D["Child deck list"]
+test('MX-VIS-036 opens a parent deck onto its child list', async ({
+  page,
+}, testInfo) => {
+  // Seeded: a parent whose five children carry the shot's exact counts, so
+  // the aggregate header is produced by the data rather than asserted.
+  await enterFlow(page, {
+    masterFlow: 'docs/business/deck/browse-nested-decks.md',
+    fixture: 'MX-VIS-036',
+  });
+
+  await tapControl(page, 'Library');
+  await expectRoute(page, '/library');
+  await expectDeckRow(page, 'Korean TOPIK I');
+
+  await tapControl(page, 'Korean TOPIK I');
+  await expectRoute(page, '/deck/fx-loaded');
+
+  // C → D: the child list, with the aggregate the kit puts over it.
+  await expect(page.getByText('217 cards · 23 due')).toBeVisible();
+  await expectDeckRow(page, 'Greetings & introductions');
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-036',
+    shot: 'subdeck-list--loaded',
+    screen: 'Deck detail — parent branch',
+    state: 'Loaded',
+    masterFlow: 'docs/business/deck/browse-nested-decks.md',
+    flowNode:
+      'M["Root destination · tap Library tab"] → N["Load root decks của active pair"] → O{"Root load result"} → S["Library · root deck list"] → A["Open Parent"] → B["Load path + direct children + aggregate counts"] → C{"Result"} -- "Loaded" --> D["Child deck list"]',
+    fixture: 'MX-VIS-036',
+    route: '/deck/fx-loaded',
+  });
+
+  // D → H: the list is only proven navigable by opening a child, and Back
+  // must return here rather than out to the Library.
+  await tapControl(page, 'Greetings & introductions');
+  await expectRoute(page, '/deck/fx-l1');
+  await tapControl(page, 'Back');
+  await expectRoute(page, '/deck/fx-loaded');
+  await expectDeckRow(page, 'Greetings & introductions');
+});
