@@ -346,6 +346,7 @@
   "keepCardLabel": "Gi\u1eef th\u1ebb",
   "cardNotFoundMessage": "Th\u1ebb n\u00e0y kh\u00f4ng c\u00f2n kh\u1ea3 d\u1ee5ng.",
   "additionalTranslationsLabel": "Ngh\u0129a b\u1ed5 sung",
+  "showTranslationFieldLabel": "Thêm một nghĩa khác",
   "addTranslationLabel": "Th\u00eam ngh\u0129a",
   "addTranslationPlaceholder": "Ngh\u0129a kh\u00e1c",
   "removeTranslationLabel": "Xo\u00e1 ngh\u0129a",

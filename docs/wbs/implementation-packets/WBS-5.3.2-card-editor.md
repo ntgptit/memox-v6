@@ -270,8 +270,31 @@ whatever the footer does. But three iterations were spent on surfaces worth
 ~0.5pp each while the dominant band went unexamined. Measure contribution
 first, then build.
 
+### `MX-VIS-060` additional translation — PASS at 1.40% / 2.56%
+
+The method from the previous state paid off immediately. Banding by
+contribution **before** touching anything showed the same footer signature —
+6.03 of 10.32pp in three bands around the sticky Save — so the single change
+that mattered was dirtying the form. A translation persists on its own, so
+adding one leaves the *card content* clean and Save dimmed against the kit's
+enabled one. 6.82% → 1.40% in one step, no product change at all.
+
+**Defect found and fixed on the way: two controls sharing an accessible name.**
+The Meaning label's disclosure `+` and the translations section's add button
+both answered to "Add translation", so a screen-reader user could not tell them
+apart — and the parity spec proved it by tapping the wrong one, re-triggering
+disclosure instead of committing the typed translation. The kit avoids this by
+scoping its label (`ariaLabel={'Add ' + alt + ' translation'}`). The disclosure
+control is now "Add another meaning" (`showTranslationFieldLabel`), translated
+in both ARBs; the committing control keeps "Add translation".
+
+One harness note: the widget test taps that control **by icon**, not by
+accessible name. A label that reaches the tree through `MxTappable` is not
+visible to `find.bySemanticsLabel`, though Flutter Web exposes it fine — which
+is why the Playwright spec can target the name and the widget test cannot.
+
 **Remaining for child C:** the Term field's audio control (CF-05), which does
-not exist here at all, plus `keyboard-open` and `additional-translation`. Note
+not exist here at all, plus `keyboard-open`. Note
 the kit's edit shot also carries the *create another* checkbox that
 `specs/flashcard-editor.md` records as removed under CF-13 — a shot/spec
 contradiction of the same class as `MX-VIS-036`/`037`, and small enough that
