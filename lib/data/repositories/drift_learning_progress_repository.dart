@@ -4,6 +4,7 @@ import 'package:memox_v6/data/database/sqlite_error_mapper.dart';
 import 'package:memox_v6/data/mappers/progress_mapper.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress_repository.dart';
+import 'package:memox_v6/domain/learning_progress/study_queue_counts.dart';
 import 'package:memox_v6/domain/study_session/study_attempt.dart';
 
 /// Drift-backed [LearningProgressRepository] (WBS 4.6B).
@@ -120,6 +121,33 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
         .findProgressByCard(cardId)
         .getSingleOrNull();
     return row?.toDomain();
+  }
+
+  @override
+  Future<StudyQueueCounts> countDeckQueues(
+    String deckId, {
+    required DateTime nowUtc,
+  }) async {
+    // drift types this bound variable as text, so the query CASTs it
+    // back to the integer epoch it compares against.
+    final row = await _database.learningProgressDao
+        .countDeckQueues(deckId, nowUtc.millisecondsSinceEpoch.toString())
+        .getSingle();
+    return StudyQueueCounts(dueCount: row.dueCount, newCount: row.newCount);
+  }
+
+  @override
+  Future<StudyQueueCounts> countLibraryQueues(
+    String languagePairId, {
+    required DateTime nowUtc,
+  }) async {
+    final row = await _database.learningProgressDao
+        .countLibraryQueues(
+          nowUtc.millisecondsSinceEpoch.toString(),
+          languagePairId,
+        )
+        .getSingle();
+    return StudyQueueCounts(dueCount: row.dueCount, newCount: row.newCount);
   }
 
   @override

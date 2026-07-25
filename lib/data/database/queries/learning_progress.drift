@@ -43,10 +43,20 @@ UPDATE learning_progress SET
   updated_at = :updatedAt
 WHERE card_id = :cardId AND revision = :expectedRevision;
 
+-- WBS 5.4.2 classification (surface-due-cards.md §4). Box carries the
+-- queue, not the presence of a row:
+--   New  = box 0 (initial state, dueAt null, not yet introduced)
+--   Due  = box 1..7 with due_at <= nowUtc
+--   box 8 = mastered, in no queue
+-- The box range is stated even though the schema CHECK already forces
+-- due_at to be null outside 1..7 — the queue contract should be
+-- readable here rather than inferred from a constraint two files away.
+-- Due-at-equal-now counts as due (§7).
 pageDueProgress:
 SELECT learning_progress.* FROM learning_progress
 INNER JOIN flashcards ON flashcards.id = learning_progress.card_id
-WHERE learning_progress.due_at IS NOT NULL
+WHERE learning_progress.box BETWEEN 1 AND 7
+  AND learning_progress.due_at IS NOT NULL
   AND learning_progress.due_at <= :nowUtc
   AND flashcards.deleted_at IS NULL
   AND flashcards.is_hidden = 0
@@ -56,10 +66,55 @@ LIMIT :limit OFFSET :offset;
 countDueProgress:
 SELECT COUNT(*) AS due_count FROM learning_progress
 INNER JOIN flashcards ON flashcards.id = learning_progress.card_id
-WHERE learning_progress.due_at IS NOT NULL
+WHERE learning_progress.box BETWEEN 1 AND 7
+  AND learning_progress.due_at IS NOT NULL
   AND learning_progress.due_at <= :nowUtc
   AND flashcards.deleted_at IS NULL
   AND flashcards.is_hidden = 0;
+
+-- Scoped queue counts (§5). A Leaf answers for its direct cards and a
+-- Parent aggregates its descendant Leaves through the same recursive
+-- walk, so an Empty deck answers zero rather than being special-cased.
+-- COUNT(DISTINCT f.id) states the §1 "same card never twice" invariant
+-- explicitly; the card_id UNIQUE index already makes the join 1:1, and
+-- the DISTINCT is what keeps that true if the join ever widens.
+-- The INNER JOIN drops a card whose progress row is missing: that is a
+-- repair case owned by the 5.4.1 initialise contract, not a queue
+-- member. Read-only — no queue query mutates progress (§9).
+countDeckQueues:
+WITH RECURSIVE subtree (id) AS (
+  SELECT :deckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+)
+SELECT
+  COUNT(DISTINCT CASE
+    WHEN lp.box BETWEEN 1 AND 7
+      AND lp.due_at IS NOT NULL
+      AND lp.due_at <= CAST(:nowUtc AS INTEGER)
+      THEN f.id END) AS due_count,
+  COUNT(DISTINCT CASE WHEN lp.box = 0 THEN f.id END) AS new_count
+FROM flashcards f
+INNER JOIN learning_progress lp ON lp.card_id = f.id
+WHERE f.deck_id IN (SELECT id FROM subtree)
+  AND f.deleted_at IS NULL
+  AND f.is_hidden = 0;
+
+-- Dashboard scope (§2): every eligible card in the pair's library.
+countLibraryQueues:
+SELECT
+  COUNT(DISTINCT CASE
+    WHEN lp.box BETWEEN 1 AND 7
+      AND lp.due_at IS NOT NULL
+      AND lp.due_at <= CAST(:nowUtc AS INTEGER)
+      THEN f.id END) AS due_count,
+  COUNT(DISTINCT CASE WHEN lp.box = 0 THEN f.id END) AS new_count
+FROM flashcards f
+INNER JOIN learning_progress lp ON lp.card_id = f.id
+INNER JOIN decks d ON d.id = f.deck_id
+WHERE d.language_pair_id = :languagePairId
+  AND f.deleted_at IS NULL
+  AND f.is_hidden = 0;
 
 deleteProgressByCard:
 DELETE FROM learning_progress WHERE card_id = :cardId;

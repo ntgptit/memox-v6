@@ -13,6 +13,7 @@ import 'package:memox_v6/domain/usecases/flashcard/manage_card_tags_usecase.dart
 import 'package:memox_v6/domain/usecases/flashcard/manage_card_translations_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/create_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/initialise_card_progress_usecase.dart';
+import 'package:memox_v6/domain/usecases/learning_progress/load_study_queue_counts_usecase.dart';
 import 'package:memox_v6/domain/usecases/onboarding/dismiss_first_run_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/remove_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
@@ -98,6 +99,15 @@ InitialiseCardProgressUseCase initialiseCardProgressUseCase(Ref ref) {
     cards: ref.watch(flashcardRepositoryProvider),
     progress: ref.watch(learningProgressRepositoryProvider),
     idGenerator: ref.watch(idGeneratorProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
+@riverpod
+LoadStudyQueueCountsUseCase loadStudyQueueCountsUseCase(Ref ref) {
+  return LoadStudyQueueCountsUseCase(
+    progress: ref.watch(learningProgressRepositoryProvider),
+    decks: ref.watch(deckRepositoryProvider),
     clock: ref.watch(appClockProvider),
   );
 }
