@@ -120,6 +120,56 @@ async function openFirstDeck(page: Page): Promise<string> {
   return expectRoute(page, /^\/deck\/[^/]+$/);
 }
 
+// MX-VIS-058 · Card Editor · Validation
+// Master flow: docs/business/flashcard/create-flashcard.md §3
+// Flow node: C["Enter term / meaning / optional content"] → D["Invalid · inline field errors"]
+test('MX-VIS-058 clearing a required field shows its inline error', async ({
+  page,
+}, testInfo) => {
+  await enterFlow(page, {
+    masterFlow: 'docs/business/flashcard/create-flashcard.md',
+    fixture: 'MX-VIS-058',
+  });
+
+  const deckRoute = await openFirstDeck(page);
+  await tapControl(page, 'Add card');
+  const editorRoute = `${deckRoute}/new-card`;
+  await expectRoute(page, editorRoute);
+
+  // A required field reports its error once *touched*, not on arrival — a
+  // pristine form must not greet the user with two complaints. So the way to
+  // reach the kit's both-errors state is the way a user reaches it: type
+  // something into each field, then clear it again.
+  await fillField(page, /한국어/, '안');
+  await fillField(page, /한국어/, '');
+  await fillField(page, /English/i, 'H');
+  await fillField(page, /English/i, '');
+
+  await expect(page.getByText('Enter a term.')).toBeVisible();
+  await expect(page.getByText('Enter a meaning.')).toBeVisible();
+
+  // Move focus off the text fields before capturing. `fillField` blurs with
+  // Tab, and in this form Tab lands on the *next* text field — so a caret
+  // keeps blinking and three consecutive settles never agree. The deck
+  // context pill is inert text, so clicking it parks focus harmlessly.
+  await page.getByText('Beginner Grammar').first().click({ force: true });
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-058',
+    shot: 'flashcard-editor--validation',
+    screen: 'Card Editor',
+    state: 'Validation',
+    masterFlow: 'docs/business/flashcard/create-flashcard.md',
+    flowNode:
+      'C["Enter term / meaning / optional content"] → D["Invalid · inline field errors"]',
+    fixture: 'MX-VIS-058',
+    route: editorRoute,
+  });
+
+  await holdDemoFrame(page);
+});
+
 // MX-VIS-056 · Card Editor · Submitting
 // Master flow: docs/business/flashcard/create-flashcard.md §3
 // Flow node: A["Open Card Editor"] → C["Enter term / meaning / optional content"] → H["Atomic save"]
