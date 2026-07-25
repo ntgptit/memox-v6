@@ -931,6 +931,16 @@
   "@fillTypeTermLabel": {
     "description": "Label above the Fill answer input (the meaning is shown; type the term)."
   },
+  "fillTypeTermInLanguageLabel": "Type the term ({language})",
+  "@fillTypeTermInLanguageLabel": {
+    "description": "Fill mode: the deck-driven form of fillTypeTermLabel, naming the term language. The kit requires language labels to come from the pair, never hard-coded; the unqualified string remains the fallback when the pair cannot be resolved.",
+    "placeholders": { "language": { "type": "String" } }
+  },
+  "fillAnswerInLanguagePlaceholder": "Type the {language} word…",
+  "@fillAnswerInLanguagePlaceholder": {
+    "description": "Fill mode: the deck-driven form of fillAnswerPlaceholder. A learner with two active pairs cannot tell which script is wanted from \"Type your answer\".",
+    "placeholders": { "language": { "type": "String" } }
+  },
   "fillAnswerPlaceholder": "Type your answer…",
   "@fillAnswerPlaceholder": {
     "description": "Placeholder in the empty Fill answer input."
