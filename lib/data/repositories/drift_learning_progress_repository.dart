@@ -62,6 +62,38 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
   }
 
   @override
+  Future<LearningProgress> initialiseNew(
+    String cardId, {
+    required String progressId,
+    required DateTime at,
+  }) {
+    return mapSqliteConflicts(entity: 'learning_progress', () async {
+      return _database.transaction(() async {
+        await _database.learningProgressDao.insertNewProgressIfAbsent(
+          progressId,
+          cardId,
+          at.millisecondsSinceEpoch,
+          at.millisecondsSinceEpoch,
+        );
+        // Read back inside the same transaction: the insert is
+        // OR IGNORE, so this is what distinguishes "created" from
+        // "already there" — and either way the caller gets the stored
+        // state, never a locally built one.
+        final row = await _database.learningProgressDao
+            .findProgressByCard(cardId)
+            .getSingleOrNull();
+        if (row == null) {
+          throw ConflictFailure(
+            code: 'progress-missing',
+            entity: 'learning_progress',
+          );
+        }
+        return row.toDomain();
+      });
+    });
+  }
+
+  @override
   Future<void> resetCard(
     String cardId, {
     required String newProgressId,

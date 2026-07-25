@@ -13,7 +13,24 @@ import 'package:memox_v6/domain/study_session/study_attempt.dart';
 ///
 /// `resetCard` is operation 6: progress returns to Box 0 with no due
 /// date and cleared counters without touching card content.
+///
+/// `initialiseNew` is the WBS 5.4.1 entry point: insert-if-absent then
+/// read back, in one transaction, so it always answers with the state
+/// the store holds — the one it just created, or the one that was
+/// already there. It never overwrites, which is what keeps a repeat
+/// call from resetting a learned card.
 abstract interface class LearningProgressRepository {
+  /// Ensures [cardId] has a current progress row and returns it.
+  ///
+  /// Idempotent by card id: an existing row is returned untouched,
+  /// including its box, due date, counters and revision. [progressId]
+  /// is only used when this call is the one that inserts.
+  Future<LearningProgress> initialiseNew(
+    String cardId, {
+    required String progressId,
+    required DateTime at,
+  });
+
   Future<void> applyScheduledOutcome({
     required StudyAttempt attempt,
     required int newBox,
