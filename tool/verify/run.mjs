@@ -287,6 +287,14 @@ try {
       'node',
       ['--test', 'tool/verify/ci_scope.test.mjs'],
     );
+    // The P0.6 census clause. Cheap — it reads the register, the recorded
+    // evidence and the gate's gap list — so it runs in every mode, unlike the
+    // pixel suite whose Flutter Web build belongs in CI's `visual_parity` job.
+    command(
+      'kit parity census',
+      'node',
+      ['tool/verify/parity_census.mjs'],
+    );
 
     const guardRoot = join(repoRoot, 'tools', 'code-verification-guard');
     const guardTests = [
