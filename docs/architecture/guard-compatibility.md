@@ -2,7 +2,7 @@
 
 - Status: **Accepted contract; activation debt tracked by WBS 1.8**
 - Owner: Architecture / Guard
-- Updated: 2026-07-18
+- Updated: 2026-07-25
 
 ## Resolved drift
 
@@ -32,3 +32,36 @@ WBS 1.8 closes the activation debt by:
    warning has a time-bounded owner-approved exception.
 
 No rule may be weakened merely to make the scaffold green.
+
+## Dormant-rule audit, 2026-07-25
+
+Ten `memox.*` rules were reporting `rule_without_targets` on every run, which
+means ten things nobody was checking. Audited each against the layout the
+project actually has.
+
+**Repointed and now live** (`code-verification-guard-v2#4`), all passing
+against the current tree, so they lock in conventions that were being followed
+by habit rather than enforced:
+
+| Rule | Was scoped to | Actually lives in |
+| --- | --- | --- |
+| `architecture.drift_database_off_main_isolate` | `lib/data/datasources/local/**` | `lib/core/database/**` — the executor is not under `data/` at all |
+| `layer_naming.dao_file_suffix` | `lib/data/datasources/local/daos/**` | `lib/data/database/daos/**` |
+| `layer_naming.dao_class_suffix` | same | same |
+
+**Repointed separately** (`code-verification-guard-v2#3`):
+`performance.retained_async_state_requires_skeleton`, which named two renamed
+paths and an API (`MxRetainedAsyncState`) the app does not have.
+
+**Left dormant on purpose — each needs a decision, not a path:**
+
+| Rule | Why it cannot simply be repointed |
+| --- | --- |
+| `layer_naming.repository_interface_file_suffix` / `_class_suffix` | assume a dedicated `lib/domain/repositories/**`. This repo keeps each interface beside its aggregate, per the AGENTS.md rule against per-feature triplets, so there is no folder to scope to and a `lib/domain/**` scope would fail every model file. The rule needs to key off file content. |
+| `layer_naming.migration_file_prefix` | expects one file per schema version (`v8_*.dart`); this repo uses a single `app_migrations.dart`. Repointing would fail the build on a structural choice, not a naming slip. |
+| `coding.flashcard_editor_no_part_of` | names a screen that no longer exists. |
+| `architecture.centralized_shared_preferences_provider`, both `action_density.*` | carry no include block at all — a different defect from a stale path. |
+
+The submodule pointer is not bumped until those two PRs are reviewed: the guard
+is shared with other consumers, so activating rules for everyone is not a
+side effect this repo should cause on its own.
