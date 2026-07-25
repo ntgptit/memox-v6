@@ -531,6 +531,11 @@ yet measured under this gate.
 | MX-VIS-047 | Deck detail — leaf branch | Long text | `flashcard-list--long-text` | Blocked — same as MX-VIS-042; plus a `Show more` expand affordance |
 | MX-VIS-048 | Home / Stats / Profile placeholders | Default | *no kit reference — placeholder chrome* | Out of scope until 5.7 / 11.2 replace them |
 | MX-VIS-049 | Card Editor | Create | `flashcard-editor--create` | **Playwright PASS — 1.29% light / 1.61% dark** (fresh app launch → first-use Create Deck A→K → user opens Empty Deck → Create Flashcard A→J; capture at C, PASS only after Save returns to Leaf list with the committed Card visible) |
+| MX-VIS-050 | Review | Browsing | `review-mode--browsing` | **Playwright PASS — 0.91% light / 1.12% dark** |
+| MX-VIS-051 | Guess | Waiting | `guess-mode--waiting` | **Playwright PASS — 1.46% light / 1.76% dark** |
+| MX-VIS-052 | Recall | Revealed | `recall-mode--revealed` | **Playwright PASS — 0.94% light / 0.97% dark** |
+| MX-VIS-053 | Fill | Waiting | `fill-mode--waiting` | **Playwright PASS — 1.97% light / 2.16% dark** |
+| MX-VIS-054 | Study Result | Standard | `study-result--standard` | **Playwright PASS — 1.76% light / 2.37% dark** |
 | MX-VIS-055 | Card Editor | Duplicate | `flashcard-editor--duplicate` | **Playwright PASS — 1.97% light / 2.20% dark** (fresh launch → first-use Create Deck → open deck → save first Card → **Add card again** with the same term → duplicate review). No fixture override: the duplicate is produced by the real create path, because detection reads the normalized content that path writes. Reaching it at all required the disabled leaf-deck `Add card` fix (PR #126) |
 | MX-VIS-056 | Card Editor | Submitting | `flashcard-editor--submitting` | **Playwright PASS — 1.02% light / 1.27% dark** (create journey → Save with the card write pinned on a completer nothing resolves; the fields freeze and Save reads "Saving…") |
 | MX-VIS-057 | Card Editor | Submit error | `flashcard-editor--submit-error` | **Light PASS 1.72% / dark FAIL 4.94%** (edit journey: save a card, reopen it, edit, save against a throwing edit path; the edits survive). Was 3.36 / 9.99 before the banner was corrected to the kit's untitled inline shape — the call site passed the message as `title`, which is the stacked decision layout, not the recoverable-failure one. **Two hypotheses for the dark residual were measured and both disproved:** dark colour tokens (sampled identical — page, banner fill, field fill, footer all match) and the create-vs-edit app-bar title (rebuilding the journey in the kit's edit variant moved it 4.92 → 4.94, i.e. nothing). The diff image shows the real cause: the shot embeds an additional-translation row ("Another meaning") and tag content the journey never creates, spread across the lower form. Same class as `MX-VIS-036`/`037` — shot content the flow does not produce. Dark fails only because light-on-dark glyph edges carry larger per-pixel deltas than dark-on-light, so the identical mismatch costs ~3× more |
@@ -609,9 +614,11 @@ state-theme runs green**. Three findings the register did not reflect:
   not produce a ratio at all — it failed the determinism check instead.
 - **Numbers drifted once that was fixed.** `MX-VIS-052` improved (5.25 → 3.39
   light) while `MX-VIS-050` regressed past the gate (2.67 → 3.38 light, 5.47
-  dark). The study states `MX-VIS-050`–`054` are measured by the suite but were
-  never added to this register, so their figures live only in run notes — a
-  census gap `P0.1` owns.
+  dark). The study states `MX-VIS-050`–`054` were measured by the suite but missing
+  from this register, so their figures lived only in run notes — a census gap
+  `P0.1` owned. **Closed 2026-07-26:** the five rows are in the register
+  above, and `parity_census.mjs` now fails when evidence exists for an id
+  that has no row, so the hole cannot silently reopen.
 
 `MX-VIS-012`/`014`/`015` remain red for a different reason: a semantics defect
 in `MxFieldScaffold` (it marks the whole label+input+helper group as

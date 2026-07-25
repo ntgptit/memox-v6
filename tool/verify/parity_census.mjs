@@ -19,6 +19,11 @@ import { fileURLToPath } from 'node:url';
  * 3. A row is neither measured nor carries a recorded reason for not being
  *    measured — the census hole `P0.6` exists to close. An ID nobody can say
  *    anything about reads exactly like one that is fine.
+ * 4. Evidence exists for an id the register never lists. This is the mirror of
+ *    (3) and it actually happened: `MX-VIS-050`-`054` were measured by the
+ *    suite for weeks while missing from the register, so their figures lived
+ *    only in run notes. Checking rows against evidence cannot see that; only
+ *    checking evidence against rows can.
  *
  * Evidence is optional: a clean checkout has none and the structural half of
  * the audit still runs. Only the cross-check in (1) needs measurements.
@@ -94,6 +99,8 @@ const isAccounted = (status) => {
 const contradicted = [];
 const unrecordedFailures = [];
 const unaccounted = [];
+const knownIds = new Set(rows.map((row) => row.id));
+const unlisted = [...measured.keys()].filter((id) => !knownIds.has(id));
 
 for (const row of rows) {
   const results = measured.get(row.id);
@@ -134,7 +141,8 @@ const bullet = (entries) => entries.map((entry) => `  - ${entry}`).join('\n');
 if (
   contradicted.length === 0 &&
   unrecordedFailures.length === 0 &&
-  unaccounted.length === 0
+  unaccounted.length === 0 &&
+  unlisted.length === 0
 ) {
   process.stdout.write(`${report}. Every row is accounted for.\n`);
 } else {
@@ -147,6 +155,17 @@ if (
     process.stderr.write(
       `\nRows reporting a failure the parity gate does not know about:\n` +
         `${bullet(unrecordedFailures)}\n`,
+    );
+  }
+  if (unlisted.length > 0) {
+    process.stderr.write(
+      `
+Measured states the register never lists:
+${bullet(unlisted)}
+
+` +
+        `Add a row for each, with its screen, state, kit reference and result.
+`,
     );
   }
   if (unaccounted.length > 0) {
