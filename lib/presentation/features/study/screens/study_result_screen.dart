@@ -111,7 +111,18 @@ class _ResultBody extends StatelessWidget {
           const MxGap.s4(),
           const Center(
             child: MxIconTile(
-              icon: Symbols.task_alt_rounded,
+              // The kit names the task-alt glyph here, but it does not render
+              // in the bundled Material Symbols Outlined or Rounded fonts.
+              // Both paint an ellipse with an identical 112x85 ink box at 4x,
+              // which is what a missing glyph falling back to a shared
+              // substitute looks like; the sharp family paints it square.
+              // Against the kit shot the hero came out 28x21 logical where
+              // the kit draws 27x27. The check-in-a-circle glyph used here
+              // carries the same meaning, stays in the Rounded family the
+              // icon contract requires, and renders undistorted. Pinned by
+              // mx_icon_aspect_test.dart, which fails once the named glyph
+              // renders square again.
+              icon: Symbols.check_circle_rounded,
               tone: MxIconTileTone.accent,
               large: true,
             ),
@@ -281,7 +292,15 @@ class _StreakCard extends StatelessWidget {
             ],
           ),
           const MxGap.s2(),
-          MxProgress(value: progress.toDouble(), semanticLabel: progressLabel),
+          // The kit draws this goal bar as the taller `ProgressBar height={8}` on
+          // a `border` track, not the 4px `.progress` default: measured against
+          // the shot it is ~7 logical px tall with a (74, 72, 93) track where
+          // the default renders 4px on (28, 26, 43).
+          MxProgress(
+            value: progress.toDouble(),
+            semanticLabel: progressLabel,
+            prominent: true,
+          ),
         ],
       ),
     );

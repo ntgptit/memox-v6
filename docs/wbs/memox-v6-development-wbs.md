@@ -550,18 +550,30 @@ already passed:
 | `MX-VIS-051` | Guess — waiting | 1.69 / 2.05 | **1.46 / 1.76 PASS** |
 | `MX-VIS-052` | Recall — revealed | 3.39 / 6.03 | **0.94 / 0.97 PASS** |
 | `MX-VIS-053` | Fill — waiting | 4.97 / 6.14 | **1.97 / 2.16 PASS** |
-| `MX-VIS-054` | Study Result — standard | 2.51 / 3.76 | **2.51 PASS / 3.76 FAIL** |
+| `MX-VIS-054` | Study Result — standard | 2.51 / 3.76 | **1.76 / 2.37 PASS** |
 
 The CJK terms render correctly throughout now, so the font blocker recorded
 against these states is spent.
 
-`MX-VIS-054` dark is the one left, and its cause is not spacing: the hero
-`task_alt` glyph renders **28 × 21 logical where the kit's is 27 × 27** —
-vertically compressed rather than merely mis-sized. `MxIcon` is a plain
-`Icon` with a token size, so nothing in the widget layer squashes it; this
-points at the bundled Material Symbols build rather than at the screen, and
-wants its own investigation. Light passes at 2.51%, so the glyph is the
-whole of the dark gap.
+`MX-VIS-054` closed on the next pass, and the interesting part is that the
+obvious suspect was not the cause. The hero `task_alt` glyph really was
+distorted — 28 × 21 logical against the kit's 27 × 27 — and rendering it
+natively with the real font reproduced it exactly, so it was never a
+web-build artifact: the glyph paints an identical 112 × 85 ink box in
+*both* the Outlined and Rounded families, which is what a missing glyph
+falling back to a shared substitute looks like, while the sharp family
+paints it square. Swapping to a check-in-a-circle glyph in the same Rounded
+family fixed the shape — and moved the ratio by 0.01pp. It was a real
+rendering defect worth fixing on its own merits, not the diff.
+
+The actual cause was the goal bar: the kit draws it as the taller
+`ProgressBar height={8}` on a `border` track, measured at ~7 logical px
+with a `(74, 72, 93)` track, where the screen used the 4px `.progress`
+default on `(28, 26, 43)`. `MxProgress(prominent: true)` already carries
+exactly that treatment. This is the *progress-bar thickness* question
+recorded earlier as an open design decision — it is not a global one: the
+kit uses the prominent bar for study/goal surfaces and the 4px default
+elsewhere, so the two coexist and the screen simply picked the wrong one.
 
 #### Suite health, 2026-07-25 — the recorded ratios had gone stale
 
