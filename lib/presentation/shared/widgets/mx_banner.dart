@@ -155,9 +155,21 @@ class MxBanner extends StatelessWidget {
       );
     }
 
+    // Kit `ActionCallout`: `padding: space-3 space-4`, `radius-control`. This
+    // layout used `space-4` on all four sides and the card radius, making
+    // every inline banner 8 logical taller than the kit's and rounding it
+    // differently — found by row-band comparison on `MX-VIS-057`, where the
+    // extra height pushed each band below the banner out of alignment. The
+    // stacked layout above already had both right.
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.space4),
-      decoration: BoxDecoration(color: bg, borderRadius: AppBorderRadii.card),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.space3,
+        horizontal: AppSpacing.space4,
+      ),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: AppBorderRadii.control,
+      ),
       // Kit `ActionCallout` has two layouts, and which one applies is decided
       // by the title, not by the action:
       //
