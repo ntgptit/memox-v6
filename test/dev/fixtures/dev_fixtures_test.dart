@@ -70,10 +70,13 @@ void main() {
   test('dueCard seeds a card due in the past', () async {
     await fixtures.seed(DevFixtureState.dueCard);
 
+    // Reads the rows rather than a count: the unscoped `countDueProgress`
+    // was removed with `countDue`, because a due total that ignores the
+    // language pair is the shape of bug this fixture would not catch.
     final due = await database.learningProgressDao
-        .countDueProgress(1752885000000)
-        .getSingle();
-    expect(due, 1);
+        .pageDueProgress(1752885000000, 10, 0)
+        .get();
+    expect(due, hasLength(1));
   });
 
   test('reset returns any state to empty', () async {

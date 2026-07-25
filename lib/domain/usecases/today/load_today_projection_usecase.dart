@@ -50,7 +50,8 @@ class LoadTodayProjectionUseCase {
     // decks the Library does not even show, and the number disagreed with the
     // scope the session would actually run over. `LoadStudyQueueCountsUseCase`
     // has documented itself as "the Dashboard scope" since 5.4.2 and was wired
-    // into DI but never called by anything.
+    // into DI but never called by anything. That unscoped read has since been
+    // deleted from the port, so the mistake is not available to repeat.
     final dueCount = pair == null
         ? 0
         : (await _queueCounts.forLibrary(pair.id)).dueCount;
