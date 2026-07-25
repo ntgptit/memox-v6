@@ -34,7 +34,23 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
             .getSingleOrNull();
         // Exactly-once: a stored idempotency key means the earlier
         // transaction committed both the evidence and the schedule.
-        if (replayed != null) return;
+        //
+        // The key column is globally unique, so a key minted for one card
+        // would silently swallow a grade for another — no write, no error,
+        // the caller believing it succeeded. Today's keys are card-scoped by
+        // construction (`terminal:<session>:<card>` and the stage key's
+        // card position), so this cannot fire; it exists so that if that
+        // ever stops being true, the result is a typed failure rather than a
+        // lost review.
+        if (replayed != null) {
+          if (replayed.cardId != attempt.cardId) {
+            throw ValidationFailure(
+              field: 'idempotencyKey',
+              code: 'card-mismatch',
+            );
+          }
+          return;
+        }
 
         await _database.studyAttemptDao.insertAttempt(
           attempt.id,
