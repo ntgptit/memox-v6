@@ -6,6 +6,7 @@ import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// A show-more control that reveals advanced content (kit
 /// `flashcard-editor/more-toggle`).
@@ -51,7 +52,6 @@ class MxDisclosure extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final styles = context.textStyles;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,16 +78,8 @@ class MxDisclosure extends StatelessWidget {
                     color: colors.textSecondary,
                   ),
                   const MxGap.s1(),
-                  // Kit `.more-toggle`: sm size, bold, text-secondary. The
-                  // button style is the token pairing for bold-at-sm; `MxText`
-                  // has no role for it.
-                  Text(
-                    label,
-                    style: styles.caption.copyWith(
-                      color: colors.textSecondary,
-                      fontWeight: styles.button.fontWeight,
-                    ),
-                  ),
+                  // Kit `.more-toggle`: sm, bold, text-secondary.
+                  MxText(label, role: MxTextRole.captionStrong),
                 ],
               ),
             ),

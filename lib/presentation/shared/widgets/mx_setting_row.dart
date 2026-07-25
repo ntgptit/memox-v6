@@ -45,7 +45,6 @@ class MxSettingRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final styles = context.textStyles;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -63,10 +62,7 @@ class MxSettingRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                // Kit titles this row semibold at base size. `MxText` has no
-                // bold-base role, so this borrows the button style the same
-                // way `MxBanner` does for its own title.
-                Text(title, style: styles.button),
+                MxText(title, role: MxTextRole.bodyStrong),
                 const MxGap.s1(),
                 MxText(
                   body,

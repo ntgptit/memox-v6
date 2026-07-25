@@ -133,6 +133,18 @@ for (const row of rows) {
 const contradicted = [];
 const unrecordedFailures = [];
 const unaccounted = [];
+const drifted = [];
+
+// How far a recorded percentage may sit from the measured one before the row
+// counts as stale. Captures are byte-deterministic within a run
+// (`expectStableCapture`), so this is not run-to-run jitter — it is the margin
+// below which re-recording every row costs more than it tells anyone.
+const RECORDED_TOLERANCE_PP = 0.1;
+const recordedIn = (status) => {
+  const match = /([0-9.]+)% light \/ ([0-9.]+)% dark/.exec(status);
+  if (match === null) return null;
+  return { light: Number(match[1]), dark: Number(match[2]) };
+};
 const knownIds = new Set(rows.map((row) => row.id));
 const unlisted = [...measured.keys()].filter((id) => !knownIds.has(id));
 
@@ -156,6 +168,30 @@ for (const row of rows) {
           .map((r) => `${r.theme} measured ${r.differencePercentage}%`)
           .join(', ')}`,
       );
+      continue;
+    }
+
+    // A row that still passes can still be lying about *how well*. These
+    // numbers drift silently: a change three screens away moves a shared
+    // widget, every ratio shifts, and the register keeps quoting the old
+    // figure. Seventeen rows had drifted when this check was written, one of
+    // them by 0.8pp — enough to hide a real regression inside a passing state.
+    const recorded = recordedIn(row.status);
+    if (recorded !== null) {
+      const stale = results
+        .filter(
+          (result) =>
+            Math.abs(result.differencePercentage - recorded[result.theme]) >
+            RECORDED_TOLERANCE_PP,
+        )
+        .map(
+          (result) =>
+            `${result.theme} records ${recorded[result.theme]}% but measured ` +
+            `${result.differencePercentage}%`,
+        );
+      if (stale.length > 0) {
+        drifted.push(`${row.id} — ${stale.join('; ')}`);
+      }
     }
     continue;
   }
@@ -174,6 +210,7 @@ const bullet = (entries) => entries.map((entry) => `  - ${entry}`).join('\n');
 
 if (
   contradicted.length === 0 &&
+  drifted.length === 0 &&
   unrecordedFailures.length === 0 &&
   unaccounted.length === 0 &&
   unlisted.length === 0 &&
@@ -194,6 +231,16 @@ if (
   if (contradicted.length > 0) {
     process.stderr.write(
       `\nRows claiming a result the evidence contradicts:\n${bullet(contradicted)}\n`,
+    );
+  }
+  if (drifted.length > 0) {
+    process.stderr.write(
+      `
+Rows whose recorded percentage no longer matches the evidence:
+${bullet(
+        drifted,
+      )}
+`,
     );
   }
   if (unrecordedFailures.length > 0) {
