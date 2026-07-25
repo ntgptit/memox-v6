@@ -187,6 +187,19 @@ class MatchBoard extends _$MatchBoard {
   /// opening a new one — the board reads the same in both directions.
   void selectTerm(String cardId) {
     if (state.round.isLocked(cardId)) return;
+    // Tapping the selected tile again cancels it. Without this a mis-tap was
+    // unrecoverable: the only way out of a selection was to pair it with
+    // something, so choosing the wrong tile forced the learner to record a
+    // lapse on a card they had not actually got wrong.
+    if (state.selectedTermId == cardId) {
+      state = state._copyWith(
+        selectedTermId: null,
+        flashCardId: null,
+        flashMeaningId: null,
+        flashOutcome: null,
+      );
+      return;
+    }
     final pendingMeaning = state.selectedMeaningId;
     if (pendingMeaning != null) {
       _resolve(termId: cardId, meaningCardId: pendingMeaning);
@@ -206,6 +219,17 @@ class MatchBoard extends _$MatchBoard {
   /// SM-MATCH-v1 and records a lapse's first pick for the flush.
   void selectMeaning(String meaningCardId) {
     if (state.round.isLocked(meaningCardId)) return;
+    // Mirrors `selectTerm`: the board is symmetric, so cancelling has to work
+    // from whichever side the learner opened.
+    if (state.selectedMeaningId == meaningCardId) {
+      state = state._copyWith(
+        selectedMeaningId: null,
+        flashCardId: null,
+        flashMeaningId: null,
+        flashOutcome: null,
+      );
+      return;
+    }
     final termId = state.selectedTermId;
     // No term waiting: open the pair from this side rather than swallowing
     // the tap. This used to `return` — half the board did nothing on a first

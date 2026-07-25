@@ -55,6 +55,8 @@ class ParityFixtures {
     'MX-VIS-063',
     'MX-VIS-064',
     'MX-VIS-065',
+    'MX-VIS-066',
+    'MX-VIS-067',
     'MX-VIS-051',
     'MX-VIS-052',
     'MX-VIS-053',
@@ -103,6 +105,12 @@ class ParityFixtures {
       case 'MX-VIS-063':
       case 'MX-VIS-064':
       case 'MX-VIS-065':
+      // 066 (`almost`) and 067 (`complete`) are the same board reached
+      // further in: the kit's `almost` is *almost finished*, not "almost
+      // correct" — `MatchMode.jsx` tones three tiles a side `matched` and
+      // shows 12/20. Both are journeys over this fixture, not new data.
+      case 'MX-VIS-066':
+      case 'MX-VIS-067':
         await _seedActivePair();
         await _study.seedMatchSession();
         return;

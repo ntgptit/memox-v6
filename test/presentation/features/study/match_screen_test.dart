@@ -184,6 +184,88 @@ void main() {
     expect(solved.maintainSize, isTrue);
   });
 
+  // A selection used to be a one-way door: the only way out was to pair the
+  // tile with something, so a mis-tap forced the learner to record a lapse on
+  // a card they had not actually got wrong. It also made the kit's resting
+  // `match-mode--almost` frame unreachable — every route out of a selection
+  // left either a selected tile or a flashing outcome.
+  testWidgets('tapping the selected tile again cancels the selection', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap(runtime()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('love'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<MxCard>(
+            find
+                .ancestor(of: find.text('love'), matching: find.byType(MxCard))
+                .first,
+          )
+          .variant,
+      MxCardVariant.primarySoft,
+    );
+
+    await tester.tap(find.text('love'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester
+          .widget<MxCard>(
+            find
+                .ancestor(of: find.text('love'), matching: find.byType(MxCard))
+                .first,
+          )
+          .variant,
+      MxCardVariant.flat,
+      reason: 'the tile should return to resting, not stay selected',
+    );
+
+    // And the board is genuinely free: the next pairing resolves normally
+    // rather than against the abandoned pick.
+    await tester.tap(find.text('school'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('학교'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester
+          .widget<MxCard>(
+            find
+                .ancestor(
+                  of: find.text('school'),
+                  matching: find.byType(MxCard),
+                )
+                .first,
+          )
+          .variant,
+      MxCardVariant.successSoft,
+    );
+  });
+
+  testWidgets('cancelling works from the term side too', (tester) async {
+    await tester.pumpWidget(wrap(runtime()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('사랑'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('사랑'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester
+          .widget<MxCard>(
+            find
+                .ancestor(of: find.text('사랑'), matching: find.byType(MxCard))
+                .first,
+          )
+          .variant,
+      MxCardVariant.flat,
+    );
+  });
+
   testWidgets('meanings are the left column and terms the right', (
     tester,
   ) async {

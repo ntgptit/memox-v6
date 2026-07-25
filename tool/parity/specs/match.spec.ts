@@ -148,3 +148,99 @@ test('MX-VIS-065 a mismatched pair reads wrong', async ({ page }, testInfo) => {
     route: '/study',
   });
 });
+
+// MX-VIS-066 · Match · almost
+// Master flow: docs/business/study-session/resume-study-session.md §3
+// Flow node: G["Open committed stage/card"] → H["Answer the stage"]
+//
+// The register described this as "the near-miss cue (SM-MATCH-* classification)"
+// — the duplicate-normalized-meaning outcome. It is not. `MatchMode.jsx` tones
+// three tiles a side `matched` and shows 12/20: `almost` here means the board is
+// almost *finished*, not that a pairing was almost right. A near-miss fixture
+// (two cards sharing a normalized meaning) would have measured the wrong state.
+test('MX-VIS-066 a board three pairs from done', async ({ page }, testInfo) => {
+  await deepLinkEntry(page, {
+    masterFlow: 'docs/business/study-session/resume-study-session.md',
+    fixture: 'MX-VIS-066',
+    route: '/study',
+    justification:
+      'resume-study-session §3 begins by reopening an app that holds a committed active session; the study route is that flow’s entry node (open committed stage/card), and the Match stage is the committed checkpoint, not a bypass of the start flow.',
+  });
+
+  await expectRoute(page, '/study');
+  await expect(page.getByText('Match')).toBeVisible();
+
+  // Three of the five pairs, cleared the way a learner clears them.
+  for (const [meaning, term] of [
+    ['time', '시간'],
+    ['food', '음식'],
+    ['school', '학교'],
+  ]) {
+    await tapControl(page, meaning);
+    await tapControl(page, term);
+  }
+
+  // The kit's frame is a board at rest: three pairs cleared, nothing selected
+  // and nothing flashing. The last match leaves its pair flashing until the
+  // next interaction, and every interaction used to leave a selection behind —
+  // so this frame was unreachable until a selected tile could be cancelled.
+  await tapControl(page, 'love');
+  await tapControl(page, 'love');
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-066',
+    shot: 'match-mode--almost',
+    screen: 'Match',
+    state: 'almost',
+    masterFlow: 'docs/business/study-session/resume-study-session.md',
+    flowNode: 'G["Open committed stage/card"] → H["Answer the stage"]',
+    fixture: 'MX-VIS-066',
+    route: '/study',
+  });
+});
+
+// MX-VIS-067 · Match · complete
+// Master flow: docs/business/study-session/resume-study-session.md §3
+// Flow node: H["Answer the stage"] → I["Stage complete"]
+test('MX-VIS-067 clearing every pair completes the round', async ({
+  page,
+}, testInfo) => {
+  await deepLinkEntry(page, {
+    masterFlow: 'docs/business/study-session/resume-study-session.md',
+    fixture: 'MX-VIS-067',
+    route: '/study',
+    justification:
+      'resume-study-session §3 begins by reopening an app that holds a committed active session; the study route is that flow’s entry node (open committed stage/card), and the Match stage is the committed checkpoint, not a bypass of the start flow.',
+  });
+
+  await expectRoute(page, '/study');
+  await expect(page.getByText('Match')).toBeVisible();
+
+  for (const [meaning, term] of [
+    ['love', '사랑'],
+    ['school', '학교'],
+    ['food', '음식'],
+    ['time', '시간'],
+    ['friend', '친구'],
+  ]) {
+    await tapControl(page, meaning);
+    await tapControl(page, term);
+  }
+
+  // The board is replaced by the round-complete state — the proof the journey
+  // actually reached it, rather than capturing a board with one pair left.
+  await expect(page.getByText('Round complete!')).toBeVisible();
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-067',
+    shot: 'match-mode--complete',
+    screen: 'Match',
+    state: 'complete',
+    masterFlow: 'docs/business/study-session/resume-study-session.md',
+    flowNode: 'H["Answer the stage"] → I["Stage complete"]',
+    fixture: 'MX-VIS-067',
+    route: '/study',
+  });
+});
