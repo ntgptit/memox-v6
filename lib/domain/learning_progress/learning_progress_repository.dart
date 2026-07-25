@@ -1,4 +1,5 @@
 import 'package:memox_v6/domain/learning_progress/learning_progress.dart';
+import 'package:memox_v6/domain/learning_progress/study_queue_counts.dart';
 import 'package:memox_v6/domain/study_session/study_attempt.dart';
 
 /// Learning Progress repository port (WBS 4.6B).
@@ -48,6 +49,24 @@ abstract interface class LearningProgressRepository {
   });
 
   Future<LearningProgress?> findByCard(String cardId);
+
+  /// Eligible due/new counts for a deck scope (WBS 5.4.2).
+  ///
+  /// A Leaf answers for its direct cards, a Parent aggregates its
+  /// descendant Leaves, and an Empty deck answers zero. Hidden and
+  /// soft-deleted cards are excluded. Read-only: no queue query
+  /// mutates progress or a due instant.
+  Future<StudyQueueCounts> countDeckQueues(
+    String deckId, {
+    required DateTime nowUtc,
+  });
+
+  /// The same counts across every deck of one language pair — the
+  /// Dashboard scope.
+  Future<StudyQueueCounts> countLibraryQueues(
+    String languagePairId, {
+    required DateTime nowUtc,
+  });
 
   Future<List<LearningProgress>> pageDue(
     DateTime nowUtc, {
