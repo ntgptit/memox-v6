@@ -8,7 +8,6 @@ import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/flashcard/screens/card_editor_screen.dart';
-import 'package:memox_v6/presentation/features/flashcard/widgets/card_tags_section.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_translations_section.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 
@@ -434,10 +433,15 @@ void main() {
       return rows.map((r) => r.read<String>('name')).toList();
     }
 
-    Finder tagsAdd() => find.descendant(
-      of: find.byType(CardTagsSection),
-      matching: find.byIcon(Symbols.add_rounded),
-    );
+    /// Commits the typed tag.
+    ///
+    /// The kit's `TagsField` is a single bordered row — glyph, chips and
+    /// caret on one surface — with no separate add button, so a tag is
+    /// committed by submitting the entry.
+    Future<void> submitTag(WidgetTester tester) async {
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await pumpEditor(tester);
+    }
 
     testWidgets('attaches a tag chip that persists', (tester) async {
       await seedCard();
@@ -448,9 +452,7 @@ void main() {
       // slot is not resting in the form (kit progressive disclosure).
       await tester.enterText(find.byType(TextField).at(2), 'grammar');
       await tester.pump();
-      await tester.ensureVisible(tagsAdd());
-      await tester.tap(tagsAdd());
-      await pumpEditor(tester);
+      await submitTag(tester);
 
       expect(await tagNames(), ['grammar']);
       expect(find.text('grammar'), findsOneWidget);
@@ -465,9 +467,7 @@ void main() {
 
       await tester.enterText(find.byType(TextField).at(2), 'grammar');
       await tester.pump();
-      await tester.ensureVisible(tagsAdd());
-      await tester.tap(tagsAdd());
-      await pumpEditor(tester);
+      await submitTag(tester);
       expect(await tagNames(), ['grammar']);
 
       await tester.ensureVisible(find.text('grammar'));

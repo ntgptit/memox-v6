@@ -146,7 +146,7 @@ test('MX-VIS-059 reopening a saved card prefills it for editing', async ({
   await tapControl(page, 'Add card');
   await expectRoute(page, `${deckRoute}/new-card`);
   await fillField(page, /한국어/, '안녕하세요');
-  await fillField(page, /English/i, 'Hello (formal)');
+  await fillField(page, /English/i, 'Hello');
   await fillField(page, /Tags/i, '#TOPIK_I, #인사');
   await tapControl(page, 'Save');
   await expectRoute(page, deckRoute);
@@ -170,6 +170,14 @@ test('MX-VIS-059 reopening a saved card prefills it for editing', async ({
   // are covered by the widget test "prefills the card and keeps a clean Save
   // disabled".
   await expect(page.getByText('Edit card')).toBeVisible();
+
+  // The kit's edit state is a *dirty* edit — its JSX sets
+  // `isDirty = view === 'edit'` and leaves Save at full strength, where this
+  // app disables Save until something diverges (`edit-flashcard.md` §6). So
+  // the card is saved as "Hello" and amended here to the "Hello (formal)" the
+  // shot shows: the rendered content matches and the form is legitimately
+  // dirty, instead of comparing an enabled control against a disabled one.
+  await fillField(page, /English/i, 'Hello (formal)');
 
   await expectStableCapture(page);
   await expectKitParity(page, testInfo, {
