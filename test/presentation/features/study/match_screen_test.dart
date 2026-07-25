@@ -152,10 +152,36 @@ void main() {
       );
       expect(
         tile.variant,
-        MxCardVariant.primary,
-        reason: '$label should be locked by the resolved pair',
+        MxCardVariant.successSoft,
+        reason: '$label should read correct after the pair resolves',
       );
     }
+  });
+
+  testWidgets('a matched pair leaves the board on the next interaction', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap(runtime()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('love'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('사랑'));
+    await tester.pumpAndSettle();
+
+    // Any further interaction clears the flash; the solved pair then renders
+    // hidden at full height (kit `Tile.jsx`: `visibility: hidden`), so the
+    // board keeps its shape without the pair competing for attention.
+    await tester.tap(find.text('school'));
+    await tester.pumpAndSettle();
+
+    final solved = tester.widget<Visibility>(
+      find
+          .ancestor(of: find.text('love'), matching: find.byType(Visibility))
+          .first,
+    );
+    expect(solved.visible, isFalse);
+    expect(solved.maintainSize, isTrue);
   });
 
   testWidgets('meanings are the left column and terms the right', (

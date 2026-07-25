@@ -146,6 +146,9 @@ class _TermColumn extends ConsumerWidget {
               board,
               isFlash: board.flashCardId == term.cardId,
             ),
+            cleared:
+                board.round.isLocked(term.cardId) &&
+                board.flashCardId != term.cardId,
             onTap: board.round.isLocked(term.cardId)
                 ? null
                 : () => ref
@@ -158,11 +161,11 @@ class _TermColumn extends ConsumerWidget {
     );
   }
 
-  MxCardVariant _termVariant(MatchBoardState board, String cardId) {
-    if (board.round.isLocked(cardId)) return MxCardVariant.primary;
-    if (board.selectedTermId == cardId) return MxCardVariant.primarySoft;
-    return MxCardVariant.flat;
-  }
+  MxCardVariant _termVariant(MatchBoardState board, String cardId) =>
+      _toneFor(board, cardId, isFlash: board.flashCardId == cardId) ??
+      (board.selectedTermId == cardId
+          ? MxCardVariant.primarySoft
+          : MxCardVariant.flat);
 }
 
 class _MeaningColumn extends ConsumerWidget {
@@ -183,6 +186,9 @@ class _MeaningColumn extends ConsumerWidget {
               board,
               isFlash: board.flashMeaningId == meaning.cardId,
             ),
+            cleared:
+                board.round.isLocked(meaning.cardId) &&
+                board.flashMeaningId != meaning.cardId,
             onTap: board.round.isLocked(meaning.cardId)
                 ? null
                 : () => ref
@@ -198,11 +204,32 @@ class _MeaningColumn extends ConsumerWidget {
   /// Mirrors `_termVariant`: a meaning picked first reads selected, exactly as
   /// a term does. It previously had no selected state at all, because a
   /// meaning could not be picked first.
-  MxCardVariant _meaningVariant(MatchBoardState board, String cardId) {
-    if (board.round.isLocked(cardId)) return MxCardVariant.primary;
-    if (board.selectedMeaningId == cardId) return MxCardVariant.primarySoft;
-    return MxCardVariant.flat;
-  }
+  MxCardVariant _meaningVariant(MatchBoardState board, String cardId) =>
+      _toneFor(board, cardId, isFlash: board.flashMeaningId == cardId) ??
+      (board.selectedMeaningId == cardId
+          ? MxCardVariant.primarySoft
+          : MxCardVariant.flat);
+}
+
+/// The kit's `Tile.jsx` TONE map: `correct` tints success-soft, `wrong` (and
+/// `almost`, its near-miss sibling) tints error-soft, each with an emphasis
+/// border in the matching role colour. Null means the tile carries no outcome
+/// and the caller decides between selected and resting.
+///
+/// Only the flashing pair is toned. A locked tile that is no longer flashing
+/// has left the board — see [_MatchTile], which hides it — so it never reaches
+/// a colour at all.
+MxCardVariant? _toneFor(
+  MatchBoardState board,
+  String cardId, {
+  required bool isFlash,
+}) {
+  if (!isFlash) return null;
+  return switch (board.flashOutcome) {
+    ModeOutcome.correct => MxCardVariant.successSoft,
+    ModeOutcome.wrong || ModeOutcome.almost => MxCardVariant.errorSoft,
+    _ => null,
+  };
 }
 
 /// The last-resolved pairing's tiles carry a transient outcome icon (no timer):
@@ -236,6 +263,7 @@ class _MatchTile extends StatelessWidget {
     required this.variant,
     required this.feedbackIcon,
     required this.onTap,
+    this.cleared = false,
   });
 
   final String label;
@@ -243,8 +271,26 @@ class _MatchTile extends StatelessWidget {
   final MxIcon? feedbackIcon;
   final VoidCallback? onTap;
 
+  /// A pair that has been resolved and is no longer flashing. The kit's tile
+  /// renders `visibility: hidden` at full height once matched: the board keeps
+  /// its shape while the solved pair stops competing for attention.
+  final bool cleared;
+
   @override
   Widget build(BuildContext context) {
+    if (cleared) {
+      return Visibility(
+        visible: false,
+        maintainSize: true,
+        maintainAnimation: true,
+        maintainState: true,
+        child: _card(context),
+      );
+    }
+    return _card(context);
+  }
+
+  Widget _card(BuildContext context) {
     return MxCard(
       variant: variant,
       onTap: onTap,
