@@ -110,6 +110,30 @@ void main() {
       expect(size.height, greaterThanOrEqualTo(AppSpacing.touchMin));
     });
 
+    // The constraint reaches the child unchanged — `Material` does not loosen
+    // it — so a control shorter than the minimum was stretched to 48 with its
+    // content against the *top* edge. It cost a breadcrumb crumb ~14 logical
+    // of misalignment against the separator beside it, and no pixel ratio
+    // caught it: the row still occupied exactly the same box.
+    testWidgets('centres a child smaller than the minimum touch target', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(
+          MxTappable(
+            onTap: () {},
+            child: const SizedBox(width: 10, height: 10),
+          ),
+        ),
+      );
+
+      final outer = tester.getRect(find.byType(MxTappable));
+      final child = tester.getRect(find.byType(SizedBox).last);
+
+      expect(child.center.dy, closeTo(outer.center.dy, 0.5));
+      expect(child.center.dx, closeTo(outer.center.dx, 0.5));
+    });
+
     testWidgets('shows the focus ring when focused via keyboard', (
       tester,
     ) async {
