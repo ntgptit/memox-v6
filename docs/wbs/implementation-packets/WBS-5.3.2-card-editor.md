@@ -217,6 +217,38 @@ controllers are covered by the widget test "prefills the card and keeps a clean
 Save disabled". Any future spec asserting prefilled content needs the same
 care.
 
+### Progressive disclosure landed (2026-07-25)
+
+The kit's header states the rule plainly: *"the default view shows only Term →
+Meaning (+ tags); the translation and advanced options are one tap away"*, and
+its `Field` carries a `labelAction` — an `add` icon button on the Meaning label
+— with the translation slot rendering only in the `additional-translation`
+view. This build rendered the translations section expanded at all times,
+pushing Tags below it.
+
+`MxFieldScaffold`/`MxTextField` gained `labelAction`, and the editor now hides
+the translation slot until the `+` asks for it. A card that *already* carries
+translations still shows them unasked — disclosure hides an empty slot, never
+existing content.
+
+The action is **overlaid** on the label line rather than placed in a row with
+the label. Two reasons, both load-bearing: it has to stay outside the
+`MergeSemantics` that gives the input its accessible name, or the merge
+swallows the button — the same defect this scaffold already carried once — and
+a row would narrow the input by the button's width, where the kit keeps the
+input full-bleed under a label line the action merely sits on.
+
+Measured effect on `MX-VIS-059`: 7.00% → 6.53% light, 7.54% → 7.11% dark. Real
+but modest, which is itself the finding — the translations section was not the
+dominant contributor.
+
+**Next itemised target, the tags surface.** The kit's `TagsField` is a single
+bordered row (`radius-control`, hairline divider, `surface` ground,
+`touch-min` height) holding a `sell` glyph and plain `MxChip`s, under a
+sm/bold `Tags` label. This build renders an uppercase `TAGS` overline, chips
+that each carry a remove `×`, and a separate *Add tag* field below. After that,
+the Term field's audio control (CF-05), which does not exist here at all.
+
 ## Acceptance and test procedure
 
 `AC-WBS-5.3.2-01`: the editor creates learnable cards atomically in

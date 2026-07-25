@@ -8,6 +8,7 @@ import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_tags_section.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_translations_section.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
+import 'package:memox_v6/presentation/features/flashcard/viewmodels/card_translations_viewmodel.dart';
 import 'package:memox_v6/presentation/features/flashcard/viewmodels/card_editor_viewmodel.dart';
 import 'package:memox_v6/presentation/shared/hooks/mx_text_hooks.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_form_footer.dart';
@@ -20,6 +21,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_context_pill.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
@@ -137,6 +139,10 @@ class _CardEditorForm extends HookConsumerWidget {
     final tagsInput = useMxTextValue();
     final createAnother = useState(false);
     final termTouched = useState(false);
+    // Kit progressive disclosure: the resting form is Term -> Meaning ->
+    // Tags, and the translation slot is one tap away behind the Meaning
+    // label's `+`.
+    final translationsOpen = useState(false);
     final meaningTouched = useState(false);
 
     // Edit is dirty only when the content diverges from the loaded card
@@ -173,6 +179,16 @@ class _CardEditorForm extends HookConsumerWidget {
       }
       Navigator.of(context).pop();
     });
+
+    // A card that already carries translations shows them without being
+    // asked — disclosure hides an empty slot, never existing content.
+    final hasTranslations =
+        isEdit &&
+        (ref
+                .watch(cardTranslationsProvider(cardId: editingCard.id))
+                .value
+                ?.isNotEmpty ??
+            false);
 
     final duplicates = ref.watch(cardEditorDuplicatesViewmodelProvider);
     final isSubmitting = saveState is AsyncLoading<void>;
@@ -307,6 +323,15 @@ class _CardEditorForm extends HookConsumerWidget {
                       label: l10n.meaningFieldLabel(editor.meaningLanguageName),
                       boxed: true,
                       requiredField: true,
+                      labelAction: isEdit
+                          ? MxIconButton(
+                              icon: Symbols.add_rounded,
+                              semanticLabel: l10n.addTranslationLabel,
+                              onPressed: isSubmitting
+                                  ? null
+                                  : () => translationsOpen.value = true,
+                            )
+                          : null,
                       placeholder: l10n.enterMeaningPlaceholder,
                       errorText: meaningTouched.value && !meaning.canSubmit
                           ? l10n.enterMeaningError
@@ -334,11 +359,16 @@ class _CardEditorForm extends HookConsumerWidget {
                     // Additional translations manage in place on an existing
                     // card (WBS 6.4); create adds them after the first save.
                     if (isEdit) ...[
-                      CardTranslationsSection(
-                        cardId: editingCard.id,
-                        languageCode: editor.meaningLanguageCode,
-                      ),
-                      const MxGap.s6(),
+                      // Hidden until the Meaning label's `+` asks for it, or
+                      // until the card already carries translations — the kit
+                      // keeps the resting form Term -> Meaning -> Tags.
+                      if (translationsOpen.value || hasTranslations) ...[
+                        CardTranslationsSection(
+                          cardId: editingCard.id,
+                          languageCode: editor.meaningLanguageCode,
+                        ),
+                        const MxGap.s6(),
+                      ],
                       CardTagsSection(cardId: editingCard.id),
                       const MxGap.s6(),
                     ],

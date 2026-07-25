@@ -71,6 +71,16 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   }
 
+  /// Reveals the additional-translations slot.
+  ///
+  /// The kit keeps the resting form Term -> Meaning -> Tags and puts the
+  /// translation slot one tap away behind the Meaning label's `+`, so a test
+  /// that wants the slot has to ask for it the way a user does.
+  Future<void> discloseTranslations(WidgetTester tester) async {
+    await tester.tap(find.bySemanticsLabel('Add translation').first);
+    await pumpEditor(tester);
+  }
+
   Future<void> disposeAndFlushStreams(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(seconds: 1));
@@ -281,8 +291,9 @@ void main() {
       await pumpEditor(tester);
 
       expect(find.text('Edit card'), findsOneWidget);
-      // term, meaning, add-translation and add-tag fields (no free tags field).
-      expect(find.byType(TextField), findsNWidgets(4));
+      // term, meaning and add-tag. The translation slot is disclosed, not
+      // resting (kit progressive disclosure), so it is not here yet.
+      expect(find.byType(TextField), findsNWidgets(3));
       final termField = tester.widget<TextField>(find.byType(TextField).at(0));
       final meaningField = tester.widget<TextField>(
         find.byType(TextField).at(1),
@@ -344,7 +355,9 @@ void main() {
       await tester.pumpWidget(editApp('c1'));
       await pumpEditor(tester);
 
-      // The overline section header renders in caps.
+      expect(find.text('ADDITIONAL TRANSLATIONS'), findsNothing);
+      await discloseTranslations(tester);
+      // The overline section header renders in caps once disclosed.
       expect(find.text('ADDITIONAL TRANSLATIONS'), findsOneWidget);
       // term, meaning, and the add-translation field.
       await tester.enterText(find.byType(TextField).at(2), 'goodbye');
@@ -367,6 +380,7 @@ void main() {
       await seedCard();
       await tester.pumpWidget(editApp('c1'));
       await pumpEditor(tester);
+      await discloseTranslations(tester);
 
       await tester.enterText(find.byType(TextField).at(2), 'goodbye');
       await tester.pump();
@@ -391,6 +405,7 @@ void main() {
       await seedCard();
       await tester.pumpWidget(editApp('c1'));
       await pumpEditor(tester);
+      await discloseTranslations(tester);
 
       // The add control stays disabled with no text (nothing to persist).
       await tester.enterText(find.byType(TextField).at(2), '   ');
@@ -429,8 +444,9 @@ void main() {
       await tester.pumpWidget(editApp('c1'));
       await pumpEditor(tester);
 
-      // term, meaning, add-translation, add-tag — the tag field is last.
-      await tester.enterText(find.byType(TextField).at(3), 'grammar');
+      // term, meaning, add-tag — the tag field is last, and the translation
+      // slot is not resting in the form (kit progressive disclosure).
+      await tester.enterText(find.byType(TextField).at(2), 'grammar');
       await tester.pump();
       await tester.ensureVisible(tagsAdd());
       await tester.tap(tagsAdd());
@@ -447,7 +463,7 @@ void main() {
       await tester.pumpWidget(editApp('c1'));
       await pumpEditor(tester);
 
-      await tester.enterText(find.byType(TextField).at(3), 'grammar');
+      await tester.enterText(find.byType(TextField).at(2), 'grammar');
       await tester.pump();
       await tester.ensureVisible(tagsAdd());
       await tester.tap(tagsAdd());
