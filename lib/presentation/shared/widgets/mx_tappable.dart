@@ -100,7 +100,18 @@ class _MxTappableState extends State<MxTappable> {
         onHighlightChanged: widget.pressedScale == 1
             ? null
             : (pressed) => setState(() => _pressed = pressed),
-        child: widget.child,
+        // Centred inside the enforced minimum. The touch-target constraint
+        // below reaches the child unchanged — `Material` does not loosen it —
+        // and a control shorter than 48 is simply stretched to 48 with its
+        // content laid out against the *top* edge. A breadcrumb crumb sat ~14
+        // logical above the separator and the page crumb beside it, which no
+        // ratio caught because the row still occupies the same box.
+        //
+        // The factors keep the box shrink-wrapped: without them a `Center`
+        // takes the whole cross-axis extent the parent offers.
+        child: widget.enforceMinTouchTarget
+            ? Center(widthFactor: 1, heightFactor: 1, child: widget.child)
+            : widget.child,
       ),
     );
 
