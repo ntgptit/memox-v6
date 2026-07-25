@@ -105,11 +105,15 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   }
 
-  testWidgets('a root deck shows no breadcrumb', (tester) async {
+  testWidgets('a root deck still shows the Library trail', (tester) async {
     await tester.pumpWidget(app(RoutePaths.deckDetail('root')));
     await pumpStreams(tester);
 
-    expect(find.byType(MxBreadcrumb), findsNothing);
+    // Both kit deck shots draw the trail at every level, and for a deck
+    // reached by a push the crumb is the only way back to the Library —
+    // the app bar's back returns to wherever the push came from
+    // (owner, 2026-07-25).
+    expect(find.byType(MxBreadcrumb), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });

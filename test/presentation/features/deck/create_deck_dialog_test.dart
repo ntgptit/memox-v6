@@ -109,7 +109,9 @@ void main() {
     await tester.pumpWidget(app(RoutePaths.deckDetail('root')));
     await pumpStreams(tester);
 
-    await tester.tap(find.text('Create deck'));
+    // A deck screen opens create from the shell FAB (icon-only), the same
+    // way the populated Library does.
+    await tester.tap(find.byType(MxFab));
     await pumpStreams(tester);
     expect(find.text('Inside Travel'), findsOneWidget);
 
@@ -189,8 +191,11 @@ void main() {
     await tester.pumpWidget(app(RoutePaths.deckDetail('root')));
     await pumpStreams(tester);
 
+    // The point of this test is that nothing overflows. The name now renders
+    // twice — the app-bar title and the breadcrumb's page crumb — and both
+    // have to ellipsize, so the count is `findsWidgets` rather than one.
     expect(tester.takeException(), isNull);
-    expect(find.textContaining('A very long'), findsOneWidget);
+    expect(find.textContaining('A very long'), findsWidgets);
 
     await disposeAndFlushStreams(tester);
   });
