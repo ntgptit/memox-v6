@@ -26,9 +26,31 @@ export interface FlowEntry {
   fixture: string;
 }
 
+/**
+ * Emulates `prefers-reduced-motion: reduce` on [page].
+ *
+ * The Playwright config declares `reducedMotion: 'reduce'` in its shared
+ * `use` block, but that option does not reach Chromium here — a page in
+ * either project reports `matchMedia('(prefers-reduced-motion: reduce)')`
+ * as false until this explicit call runs. `page.emulateMedia` does apply,
+ * and it leaves the project's `colorScheme` emulation intact.
+ *
+ * This matters for more than tidiness. The kit's own shots are
+ * reduced-motion captures, and Flutter Web maps the media query onto
+ * `MediaQuery.disableAnimations`, so without this every capture ran with
+ * animations enabled. The suite only got away with it because no measured
+ * state had a perpetual animation; the first one that did — the deck-detail
+ * loading skeletons — failed the three-consecutive-settles determinism
+ * check instead of producing a ratio.
+ */
+async function applyReducedMotion(page: Page): Promise<void> {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+}
+
 /** App launch — the entry node of every Master flow chart. */
 export async function enterFlow(page: Page, entry: FlowEntry): Promise<void> {
   await blockNetworkEgress(page);
+  await applyReducedMotion(page);
   await page.goto(`/?fixture=${encodeURIComponent(entry.fixture)}`);
   await enableFlutterAccessibility(page);
   await settle(page);
@@ -48,6 +70,7 @@ export async function deepLinkEntry(
     'deepLinkEntry requires a written justification (WBS §6.6)',
   ).toBeGreaterThan(20);
   await blockNetworkEgress(page);
+  await applyReducedMotion(page);
   // The fixture must sit in the root query so parity_main
   // (`Uri.base.queryParameters`) reads it; the hash carries the deep-link
   // route for the go_router hash strategy.

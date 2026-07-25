@@ -7,8 +7,10 @@ import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/domain/study_session/session_summary_policy.dart';
 import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/open_deck_usecase.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_result_notifier.dart';
 
 /// Dependency preconditions for kit visual-parity states (WBS P0.3).
@@ -46,6 +48,18 @@ List<Override> parityOverridesFor(String fixtureId) {
         ),
       ),
     ],
+    // The two deck-detail loading states. Only the card stream is pinned:
+    // the child-deck stream still resolves, which is what lets the screen
+    // derive Parent vs Leaf and pick the matching kit composition. Pinning
+    // both would collapse them into one indistinguishable state.
+    'MX-VIS-037' || 'MX-VIS-043' => <Override>[
+      openDeckUseCaseProvider.overrideWith(
+        (ref) => _PendingCardsOpenDeckUseCase(
+          decks: ref.watch(deckRepositoryProvider),
+          cards: ref.watch(flashcardRepositoryProvider),
+        ),
+      ),
+    ],
     // Study Result standard: a finished session's committed summary. The result
     // is a terminal screen whose precondition (a completed, finalized session)
     // is not an active row a data fixture could resume into, so the summary is
@@ -75,6 +89,25 @@ class _SeededStudyResult extends StudyResult {
           ),
         ),
       );
+}
+
+/// A deck read whose card stream never emits, for the two loading states.
+///
+/// Same contract as the hanging create path below: an in-flight state is
+/// pinned so the capture is a still frame rather than a race against the
+/// real read finishing. `childrenOf` is deliberately left alone —
+/// `subdeck-list--loading` and `flashcard-list--loading` are different
+/// kit compositions, and the screen tells them apart by whether the deck
+/// resolved any child decks.
+class _PendingCardsOpenDeckUseCase extends OpenDeckUseCase {
+  const _PendingCardsOpenDeckUseCase({
+    required super.decks,
+    required super.cards,
+  });
+
+  @override
+  Stream<List<Flashcard>> cardsOf(String deckId) =>
+      StreamController<List<Flashcard>>().stream;
 }
 
 /// A create path that never completes, for the submitting state.

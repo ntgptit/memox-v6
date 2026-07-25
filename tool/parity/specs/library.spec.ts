@@ -25,7 +25,10 @@ test('MX-VIS-018 reaches the empty Library from a root destination', async ({
   // Launch settles on Today. This is asserted by content, not by route:
   // the initial location is reached without a navigation, so go_router
   // has not written a hash yet and the URL route is still empty.
-  await expect(page.getByText('MemoX Home')).toBeVisible();
+  // `Today` labels both the screen and its nav tab, so this matches more
+  // than one node — the assertion is that the Today root rendered, not
+  // that exactly one element carries the word.
+  await expect(page.getByText('Today').first()).toBeVisible();
 
   // M → N: the tab entry. This also asserts the persistent tab bar is
   // present on a root destination that is not Library, which is the

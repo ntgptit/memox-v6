@@ -510,13 +510,13 @@ yet measured under this gate.
 | MX-VIS-034 | Deck detail — empty branch | Default | `empty-deck--default` | Blocked — add-card CTA enabled (5.3.2); measured 9.68% light / 13.58% dark |
 | MX-VIS-035 | Deck detail — empty branch | Create nested dialog | `empty-deck--create-nested-dialog` | Blocked — byte-identical to `create-deck-dialog--nested`; fold into MX-VIS-026 |
 | MX-VIS-036 | Deck detail — parent branch | Loaded | `subdeck-list--loaded` | Blocked — breadcrumb (6.2), SRS counters (5.4.2), play affordance, app-bar search (5.x) |
-| MX-VIS-037 | Deck detail — parent branch | Loading | `subdeck-list--loading` | Pending — **both blockers cleared, composition built, not yet measured.** The breadcrumb shipped with `6.2`; the missing skeleton/shimmer primitive is now `MxSkeleton`, and the parent branch renders the kit `SubdeckList.jsx` loading composition (40px filter pill over four deck rows, each a round 40 tile beside a 60%/40% line pair). Which of the two loading compositions appears is derived from the resolved child decks. Needs a `?fixture=` precondition + a Playwright spec before a ratio exists |
+| MX-VIS-037 | Deck detail — parent branch | Loading | `subdeck-list--loading` | **Measured — 5.54% light / 6.48% dark. FAIL (gate ≤3%).** Now a real measurement: fixture + `deck-loading.spec.ts` walk Today → Library → the deck, and the fixture pins only the card stream so the branch still resolves to Parent. Diff banded: **~62% of it is vertical drift** — the app's content sits ~16 logical px higher than the kit at the filter pill and ~37 px higher by the first card, so the gap between them differs too; **~16% is the FAB** the kit shot draws and the app's deck detail has none of (`deckDetailRoutes` sits outside the tab shell); the rest is the app bar's search glyph (`5.x`). Blocked on the vertical-offset cause, not on the skeleton |
 | MX-VIS-038 | Deck detail — parent branch | Error | `subdeck-list--error` | Pending — **actionable**: only the app-bar search/overflow glyphs diverge |
 | MX-VIS-039 | Deck detail — parent branch | Not found | `subdeck-list--not-found` | Pending — **actionable**: no blockers; needs the kit icon-tile + title composition |
 | MX-VIS-040 | Deck detail — parent branch | Dense | `subdeck-list--dense` | Blocked — same as MX-VIS-036 |
 | MX-VIS-041 | Deck detail — parent branch | Deep hierarchy | `subdeck-list--deep` | Blocked — collapsed breadcrumb is the point of the shot (6.2); plus MX-VIS-036 set |
 | MX-VIS-042 | Deck detail — leaf branch | Loaded | `flashcard-list--loaded` | Blocked — filter chips (10.2), SRS counters/badges (5.4.2), breadcrumb (6.2) |
-| MX-VIS-043 | Deck detail — leaf branch | Loading | `flashcard-list--loading` | Pending — **primitive shipped, composition built, not yet measured.** `MxSkeleton` exists and the leaf branch renders the kit `FlashcardList.jsx` loading composition (44px filter pill over five card rows, each a 45%/65% line pair beside a 56×22 badge pill, no leading tile). Needs a `?fixture=` precondition + a Playwright spec before a ratio exists |
+| MX-VIS-043 | Deck detail — leaf branch | Loading | `flashcard-list--loading` | **Measured — 5.32% light / 11.49% dark. FAIL (gate ≤3%).** Same fixture/spec pair as `MX-VIS-037`, seeded with a childless deck so the branch resolves to Leaf. Shares that row's vertical drift and missing FAB. The much larger dark figure is not yet diagnosed and should be banded before anything is changed for it |
 | MX-VIS-044 | Deck detail — leaf branch | Error | `flashcard-list--error` | Pending — **actionable**: needs the centered error composition instead of the inline banner |
 | MX-VIS-045 | Deck detail — leaf branch | Minimum data | `flashcard-list--minimum-data` | Blocked — same as MX-VIS-042 |
 | MX-VIS-046 | Deck detail — leaf branch | Dense | `flashcard-list--dense` | Blocked — same as MX-VIS-042; shot is near-identical to `--loaded`, consider merging |
@@ -528,6 +528,35 @@ Rows marked **Blocked** name the WBS item that unblocks them; they are not
 waivers. Rows marked *kit decision needed* require the Design Kit owner either
 to publish a shot or to record the state as intentionally unspecified before
 P0.6 can close.
+
+#### Suite health, 2026-07-25 — the recorded ratios had gone stale
+
+Running the whole suite after repairing the harness (below) put it at **27/36
+state-theme runs green**. Three findings the register did not reflect:
+
+- **Two states recorded as PASS were not even reaching their capture.**
+  `MX-VIS-018` still asserted `MemoX Home`, a placeholder `5.7.2` replaced with
+  `TodayScreen`; `MX-VIS-049` still tapped the `Open deck` callout the owner
+  superseded on 2026-07-21 (`MX-VIS-021`). The Dart suites were retargeted when
+  those landed and the Playwright specs were not. Both are fixed and green again.
+- **The gate had never actually run with reduced motion.** `playwright.config.ts`
+  declares `reducedMotion: 'reduce'`, but the option never reached Chromium —
+  `matchMedia` reported false in both projects. Flutter Web maps that query onto
+  `MediaQuery.disableAnimations`, so every capture in this register was taken
+  with animations *enabled*. `flows.ts` now emulates it explicitly. This is also
+  why the first state with a perpetual animation (the loading skeletons) could
+  not produce a ratio at all — it failed the determinism check instead.
+- **Numbers drifted once that was fixed.** `MX-VIS-052` improved (5.25 → 3.39
+  light) while `MX-VIS-050` regressed past the gate (2.67 → 3.38 light, 5.47
+  dark). The study states `MX-VIS-050`–`054` are measured by the suite but were
+  never added to this register, so their figures live only in run notes — a
+  census gap `P0.1` owns.
+
+`MX-VIS-012`/`014`/`015` remain red for a different reason: a semantics defect
+in `MxFieldScaffold` (it marks the whole label+input+helper group as
+`textField`, so the group shadows the real input and no value is readable).
+Recorded in the shared-widget checklist; it is an accessibility fix, not a
+parity one.
 
 #### Census audit, 2026-07-20 — statuses re-derived from the kit shots
 
