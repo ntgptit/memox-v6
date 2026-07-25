@@ -90,6 +90,34 @@ List<Override> parityOverridesFor(String fixtureId) {
         ),
       ),
     ],
+    // The two deck-detail failure states, pinned at the same seam as the
+    // loading pair above.
+    //
+    // Measurement was attempted twice on 2026-07-25 by overriding
+    // `deckChildrenProvider` — the *presentation* provider — and each time the
+    // parity build stayed on its loading skeleton while a widget test with the
+    // same broken stream rendered the failure correctly. The register narrowed
+    // that to "the parity build itself". It is narrower than that: the loading
+    // states already prove an override of `openDeckUseCaseProvider` reaches the
+    // web build, so the use case is a seam that works and the derived provider
+    // is one that does not. Breaking the read here rather than one layer up is
+    // the whole fix.
+    'MX-VIS-038' => <Override>[
+      openDeckUseCaseProvider.overrideWith(
+        (ref) => _FailingChildrenOpenDeckUseCase(
+          decks: ref.watch(deckRepositoryProvider),
+          cards: ref.watch(flashcardRepositoryProvider),
+        ),
+      ),
+    ],
+    'MX-VIS-044' => <Override>[
+      openDeckUseCaseProvider.overrideWith(
+        (ref) => _FailingCardsOpenDeckUseCase(
+          decks: ref.watch(deckRepositoryProvider),
+          cards: ref.watch(flashcardRepositoryProvider),
+        ),
+      ),
+    ],
     // Study Result standard: a finished session's committed summary. The result
     // is a terminal screen whose precondition (a completed, finalized session)
     // is not an active row a data fixture could resume into, so the summary is
@@ -138,6 +166,34 @@ class _PendingCardsOpenDeckUseCase extends OpenDeckUseCase {
   @override
   Stream<List<Flashcard>> cardsOf(String deckId) =>
       StreamController<List<Flashcard>>().stream;
+}
+
+/// A child-deck read that fails, for `subdeck-list--error`.
+///
+/// The error is raised by the read the screen watches, so what renders is the
+/// production failure path — the same thing a broken database would produce —
+/// rather than a seeded error widget.
+class _FailingChildrenOpenDeckUseCase extends OpenDeckUseCase {
+  const _FailingChildrenOpenDeckUseCase({
+    required super.decks,
+    required super.cards,
+  });
+
+  @override
+  Stream<List<Deck>> childrenOf(String deckId) =>
+      Stream<List<Deck>>.error(StateError('deck children unavailable'));
+}
+
+/// The leaf branch's equivalent, for `flashcard-list--error`.
+class _FailingCardsOpenDeckUseCase extends OpenDeckUseCase {
+  const _FailingCardsOpenDeckUseCase({
+    required super.decks,
+    required super.cards,
+  });
+
+  @override
+  Stream<List<Flashcard>> cardsOf(String deckId) =>
+      Stream<List<Flashcard>>.error(StateError('deck cards unavailable'));
 }
 
 /// A card write that never completes, for `flashcard-editor--submitting`.
