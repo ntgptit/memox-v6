@@ -13,6 +13,22 @@ INSERT INTO learning_progress (
   :id, :cardId, :box, :dueAt, :createdAt, :updatedAt
 );
 
+-- WBS 5.4.1 initialise/repair: the New state per
+-- initialise-card-progress.md §4 — box 0, no due date, and the
+-- policy_id/policy_version schema defaults. Box and due date are
+-- pinned in SQL rather than passed in, so no call site can persist a
+-- "New" row that has already activated SRS. OR IGNORE makes the
+-- statement idempotent against the card_id UNIQUE index, which is what
+-- resolves a concurrent initialise to a single row instead of a
+-- unique-constraint failure. A foreign-key violation still aborts, so
+-- an unknown card cannot leave an orphan row behind.
+insertNewProgressIfAbsent:
+INSERT OR IGNORE INTO learning_progress (
+  id, card_id, box, due_at, created_at, updated_at
+) VALUES (
+  :id, :cardId, 0, NULL, :createdAt, :updatedAt
+);
+
 findProgressByCard:
 SELECT * FROM learning_progress WHERE card_id = :cardId;
 
