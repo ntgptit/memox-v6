@@ -175,6 +175,74 @@ void main() {
     expect((await counts.forDeck('leaf')).dueCount, 1);
   });
 
+  // WBS 5.4.5 — boundary. The comparison is `due_at <= nowUtc`, so the
+  // interesting cases are the two instants either side of equality, not
+  // equality alone. One millisecond is the smallest step the stored epoch
+  // can express, which makes this the tightest form of the assertion.
+  group('the due boundary, to the millisecond (§7)', () {
+    const tick = Duration(milliseconds: 1);
+
+    test('one millisecond before now is due', () async {
+      final card = await createCard('leaf', 'just-before');
+      await schedule(card, 1, now.subtract(tick));
+
+      expect((await counts.forDeck('leaf')).dueCount, 1);
+    });
+
+    test('one millisecond after now is not due', () async {
+      final card = await createCard('leaf', 'just-after');
+      await schedule(card, 1, now.add(tick));
+
+      expect((await counts.forDeck('leaf')).dueCount, 0);
+    });
+  });
+
+  // WBS 5.4.5 — timezone. `surface-due-cards.md` §9: "Due eligibility luôn
+  // dùng UTC instant equality/before; timezone change không làm đổi persisted
+  // `dueAt`." The use case documents this in a comment; nothing held it.
+  //
+  // Dart cannot repoint the process timezone mid-test, so the equivalent
+  // check is to express the *same instant* with a different UTC offset. If
+  // any step compared wall-clock fields instead of the instant, these two
+  // readings would disagree.
+  group('due eligibility is an instant comparison, not a wall clock (§9)', () {
+    // 19:00+07:00 is the same moment as the fixture's 12:00Z.
+    final sameInstantElsewhere = DateTime.parse('2026-07-25T19:00:00+07:00');
+
+    test('the same instant in another offset classifies identically', () async {
+      final card = await createCard('leaf', 'tz');
+      await schedule(card, 1, now);
+
+      final inUtc = (await counts.forDeck('leaf')).dueCount;
+
+      clock.now = sameInstantElsewhere;
+      final inOffset = (await counts.forDeck('leaf')).dueCount;
+
+      expect(sameInstantElsewhere.isAtSameMomentAs(now), isTrue);
+      expect(inOffset, inUtc);
+      expect(inOffset, 1);
+
+      clock.now = now;
+    });
+
+    test('reading in another offset does not move the stored due', () async {
+      final card = await createCard('leaf', 'tz-stable');
+      await schedule(card, 1, now.add(const Duration(days: 3)));
+
+      final before = await progress.findByCard(card);
+
+      clock.now = sameInstantElsewhere;
+      await counts.forDeck('leaf');
+      clock.now = now;
+
+      // Asking what is due is a selection, not a mutation (§1), and a
+      // timezone change is not an event the store should notice at all.
+      final after = await progress.findByCard(card);
+      expect(after?.dueAt, before?.dueAt);
+      expect(after?.revision, before?.revision);
+    });
+  });
+
   test('a parent aggregates descendants without double-counting', () async {
     await createCard('direct', 'one');
     await createCard('grandchild', 'two');
