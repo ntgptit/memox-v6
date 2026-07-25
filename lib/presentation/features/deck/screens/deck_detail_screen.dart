@@ -135,8 +135,17 @@ class _DeckDetailBody extends ConsumerWidget {
 
     return MxAsyncBuilder<Deck?>(
       value: deck,
-      loadingLabel: l10n.loadingLabel,
-      errorTitle: l10n.somethingWentWrongMessage,
+      // The very first frame is a skeleton too, not a spinner. Opening a
+      // deck from a list otherwise flashes a centred spinner for one frame
+      // and then swaps to placeholder rows — two different loading
+      // treatments for one navigation. The deck-row shape is the right
+      // stand-in here because the branch is not known until its content
+      // resolves, which is the same reason the child stream uses it.
+      loading: (context) => const DeckRowsSkeleton(),
+      error: (context, failure) => DeckLoadErrorState(
+        title: l10n.deckLoadErrorTitle,
+        onRetry: () => ref.invalidate(deckDetailProvider(deckId: deckId)),
+      ),
       data: (context, value) => value == null
           ? DeckNotFoundState(l10n: l10n)
           : _DeckContent(deck: value),

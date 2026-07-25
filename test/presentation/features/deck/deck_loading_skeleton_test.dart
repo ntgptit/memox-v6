@@ -155,6 +155,45 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('the first frame is a skeleton before the deck resolves', (
+    tester,
+  ) async {
+    // The deck itself is still loading here, which is the frame a user sees
+    // immediately after tapping a row. It must not be a spinner that then
+    // swaps to placeholder rows — that is two loading treatments for one
+    // navigation.
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          deckDetailProvider(
+            deckId: deckId,
+          ).overrideWith((ref) => Completer<Deck?>().future),
+          deckChildrenProvider(
+            deckId: deckId,
+          ).overrideWith((ref) => pending<List<Deck>>()),
+          deckCardsProvider(
+            deckId: deckId,
+          ).overrideWith((ref) => pending<List<Flashcard>>()),
+          deckBreadcrumbProvider(
+            deckId: deckId,
+          ).overrideWith((ref) async => []),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const DeckDetailScreen(deckId: deckId),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(MxProgress), findsNothing);
+    expect(find.byType(MxSkeleton), findsWidgets);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('the loading states no longer fall back to a spinner', (
     tester,
   ) async {
