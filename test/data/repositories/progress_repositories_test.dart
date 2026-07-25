@@ -180,6 +180,147 @@ void main() {
       expect(stored?.lastReviewedAt, secondReview);
     });
 
+    // SRS8-012, child B. The test below feeds an impossible revision (9)
+    // straight in, which proves the guard rejects a bad argument but not that
+    // the guard fires in the situation it exists for. Here both writers read
+    // the card's real revision first, exactly as two devices or two tabs
+    // would, and race on it — the staleness is produced rather than asserted.
+    test(
+      'two writers on the same revision: one commits, one conflicts',
+      () async {
+        final before = await progress.findByCard('c1');
+        final sharedRevision = before!.revision;
+
+        Future<String> outcomeOf(Future<void> write) async {
+          try {
+            await write;
+            return 'committed';
+          } on ConflictFailure {
+            return 'conflict';
+          }
+        }
+
+        // Both start from the same observed revision. Whichever transaction
+        // commits first advances it, and the other's guard no longer matches.
+        final results = await Future.wait(<Future<String>>[
+          outcomeOf(
+            progress.applyScheduledOutcome(
+              attempt: attempt('a1', key: 'k1'),
+              newBox: 1,
+              newDueAt: epoch.add(const Duration(days: 1)),
+              repetitionCount: 1,
+              lapseCount: 0,
+              srsActivatedAt: epoch,
+              lastReviewedAt: epoch,
+              expectedRevision: sharedRevision,
+              updatedAt: epoch,
+            ),
+          ),
+          outcomeOf(
+            progress.applyScheduledOutcome(
+              attempt: attempt('a2', key: 'k2'),
+              newBox: 5,
+              newDueAt: epoch.add(const Duration(days: 30)),
+              repetitionCount: 1,
+              lapseCount: 0,
+              srsActivatedAt: epoch,
+              lastReviewedAt: epoch,
+              expectedRevision: sharedRevision,
+              updatedAt: epoch,
+            ),
+          ),
+        ]);
+
+        // Exactly one of them wins. Which one is not the contract — that
+        // neither is silently dropped, and neither half-applies, is.
+        expect(results, containsAll(<String>['committed', 'conflict']));
+
+        final after = await progress.findByCard('c1');
+        expect(after?.revision, sharedRevision + 1);
+
+        // The loser left nothing behind: its evidence row is absent, so a
+        // retry can re-run the whole operation cleanly.
+        final stored = await database.studyAttemptDao
+            .pageAttemptsForCard('c1', 10, 0)
+            .get();
+        expect(stored, hasLength(1));
+        expect(after?.lastTerminalAttemptId, stored.single.id);
+      },
+    );
+
+    // The idempotency column is globally unique, so a key minted for one card
+    // and reused for another would be read as a replay and the second card's
+    // grade would vanish — no write, no error. Current callers scope their
+    // keys by card, so this is unreachable; the point is that if that ever
+    // changes the failure is loud instead of a lost review.
+    test('a key already used by another card fails instead of no-op', () async {
+      await database.flashcardDao.insertFlashcard(
+        'c2',
+        'd1',
+        't2',
+        't2',
+        'm2',
+        0,
+        0,
+      );
+      await database.learningProgressDao.insertProgress(
+        'p2',
+        'c2',
+        0,
+        null,
+        0,
+        0,
+      );
+
+      await progress.applyScheduledOutcome(
+        attempt: attempt('a1', key: 'shared'),
+        newBox: 1,
+        newDueAt: epoch.add(const Duration(days: 1)),
+        repetitionCount: 1,
+        lapseCount: 0,
+        srsActivatedAt: epoch,
+        lastReviewedAt: epoch,
+        expectedRevision: 0,
+        updatedAt: epoch,
+      );
+
+      await expectLater(
+        progress.applyScheduledOutcome(
+          attempt: StudyAttempt(
+            id: 'a2',
+            idempotencyKey: 'shared',
+            cardId: 'c2',
+            sessionId: null,
+            modeId: 'guess',
+            outcome: 'correct',
+            evidenceJson: '{}',
+            isTerminal: true,
+            createdAt: epoch,
+          ),
+          newBox: 1,
+          newDueAt: epoch.add(const Duration(days: 1)),
+          repetitionCount: 1,
+          lapseCount: 0,
+          srsActivatedAt: epoch,
+          lastReviewedAt: epoch,
+          expectedRevision: 0,
+          updatedAt: epoch,
+        ),
+        throwsA(
+          isA<ValidationFailure>().having(
+            (failure) => failure.code,
+            'code',
+            'card-mismatch',
+          ),
+        ),
+      );
+
+      // The second card is untouched rather than quietly skipped.
+      final other = await progress.findByCard('c2');
+      expect(other?.box, 0);
+      expect(other?.revision, 0);
+    });
+
     // SRS8-012: a different outcome on a stale progress revision is a typed
     // conflict, not a silent last-write-wins.
     test('a stale revision conflicts and persists nothing', () async {

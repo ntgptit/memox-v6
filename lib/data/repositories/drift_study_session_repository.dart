@@ -121,7 +121,20 @@ class DriftStudySessionRepository implements StudySessionRepository {
             .findAttemptByIdempotencyKey(attempt.idempotencyKey)
             .getSingleOrNull();
         // Replay: that transaction already persisted its checkpoint and order.
-        if (replayed != null) return;
+        //
+        // Same guard as the terminal write path: the key column is globally
+        // unique, so a key belonging to another card would drop this attempt
+        // silently. Card-scoped keys make it unreachable today; the check
+        // keeps it that way loudly.
+        if (replayed != null) {
+          if (replayed.cardId != attempt.cardId) {
+            throw ValidationFailure(
+              field: 'idempotencyKey',
+              code: 'card-mismatch',
+            );
+          }
+          return;
+        }
 
         await _database.studyAttemptDao.insertAttempt(
           attempt.id,
