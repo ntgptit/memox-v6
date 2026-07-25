@@ -58,6 +58,7 @@
 | E4 | `MxSectionHeader` | `.section-head` | ✅ | 1:1 (title md/bold/tight, caption, action) |
 | E5 | `MxList` | list container | ✅ | 1:1 (separator space-3) |
 | E6 | `MxDeckCard` | deck row | 🔧 | status màu → on-warning-soft/on-success-soft ✅; weight 600 vs 700 còn (Low) |
+| E7 | `MxSkeleton` | `Skeleton`/`.mxg-skel` | ✅ | mới: `surface-sunken`, pulse opacity .5↔1 @ `duration-pulse` 1300ms, reduced-motion nghỉ ở đáy .5 (đo từ shot kit), `ExcludeSemantics`. Kit `r=8` không có token → dùng pill (mọi chỗ kit dùng default đều `h ≤ 16` nên `8 ≥ h/2`, pixel như nhau) |
 
 ## F. Layout / scaffold
 | # | Widget | Kit | Status | Ghi chú |
