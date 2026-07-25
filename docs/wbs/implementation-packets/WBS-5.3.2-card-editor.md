@@ -242,12 +242,40 @@ Measured effect on `MX-VIS-059`: 7.00% → 6.53% light, 7.54% → 7.11% dark. Re
 but modest, which is itself the finding — the translations section was not the
 dominant contributor.
 
-**Next itemised target, the tags surface.** The kit's `TagsField` is a single
-bordered row (`radius-control`, hairline divider, `surface` ground,
-`touch-min` height) holding a `sell` glyph and plain `MxChip`s, under a
-sm/bold `Tags` label. This build renders an uppercase `TAGS` overline, chips
-that each carry a remove `×`, and a separate *Add tag* field below. After that,
-the Term field's audio control (CF-05), which does not exist here at all.
+**The tags surface followed** as `MxTagField`: one bordered row holding the
+`sell` glyph, plain chips and the entry caret. The entry lives *inside* the box
+because the kit's empty state puts the "Add tags — e.g. …" hint there, which
+only makes sense if the box is the input; the chips lose their remove `×`
+because the kit draws none, and removal stays what `manage-card-tags.md`
+already specified — tapping the chip. 6.53% → 6.14% light.
+
+### `MX-VIS-059` PASSES at 0.82% / 1.63% — and the lesson is about attribution
+
+Three changes, three modest gains, then one journey fix worth more than both
+builds combined. Banding the diff by **contribution** rather than by percentage
+is what found it: six of the 9.5 percentage points sat in the footer alone
+(`y=1440..1499` carried 3.5pp at 91% of its pixels), while every content band
+scattered 0.1–0.4pp.
+
+The footer held a **dimmed Save** where the kit draws a full-strength one. Not
+a styling defect: this app disables Save until content diverges
+(`edit-flashcard.md` §6), and the kit's JSX sets `isDirty = view === 'edit'`,
+so its edit state is a *dirty* edit. The capture was comparing a disabled
+control against an enabled one. The journey now saves the card as "Hello" and
+amends it to the shot's "Hello (formal)" in the editor: rendered content
+matches and the form is legitimately dirty. **6.14% → 0.82%.**
+
+Both builds were still right — they are what the kit specifies, and they hold
+whatever the footer does. But three iterations were spent on surfaces worth
+~0.5pp each while the dominant band went unexamined. Measure contribution
+first, then build.
+
+**Remaining for child C:** the Term field's audio control (CF-05), which does
+not exist here at all, plus `keyboard-open` and `additional-translation`. Note
+the kit's edit shot also carries the *create another* checkbox that
+`specs/flashcard-editor.md` records as removed under CF-13 — a shot/spec
+contradiction of the same class as `MX-VIS-036`/`037`, and small enough that
+this state passes despite it.
 
 ## Acceptance and test procedure
 
