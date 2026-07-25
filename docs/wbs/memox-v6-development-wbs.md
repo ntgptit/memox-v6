@@ -523,6 +523,7 @@ yet measured under this gate.
 | MX-VIS-047 | Deck detail — leaf branch | Long text | `flashcard-list--long-text` | Blocked — same as MX-VIS-042; plus a `Show more` expand affordance |
 | MX-VIS-048 | Home / Stats / Profile placeholders | Default | *no kit reference — placeholder chrome* | Out of scope until 5.7 / 11.2 replace them |
 | MX-VIS-049 | Card Editor | Create | `flashcard-editor--create` | **Playwright PASS — 1.29% light / 1.61% dark** (fresh app launch → first-use Create Deck A→K → user opens Empty Deck → Create Flashcard A→J; capture at C, PASS only after Save returns to Leaf list with the committed Card visible) |
+| MX-VIS-055 | Card Editor | Duplicate | `flashcard-editor--duplicate` | **Playwright PASS — 1.97% light / 2.20% dark** (fresh launch → first-use Create Deck → open deck → save first Card → **Add card again** with the same term → duplicate review). No fixture override: the duplicate is produced by the real create path, because detection reads the normalized content that path writes. Reaching it at all required the disabled leaf-deck `Add card` fix (PR #126) |
 
 Rows marked **Blocked** name the WBS item that unblocks them; they are not
 waivers. Rows marked *kit decision needed* require the Design Kit owner either

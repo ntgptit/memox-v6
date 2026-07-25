@@ -237,30 +237,31 @@ class _CardEditorForm extends HookConsumerWidget {
                     _DeckContextPill(deckName: editor.deck.name),
                     const MxGap.s6(),
                     if (duplicates != null && duplicates.isNotEmpty) ...[
-                      MxBanner(
+                      MxBanner.stacked(
                         tone: MxBannerTone.warning,
-                        title: l10n.duplicateCardMessage(duplicates.first.term),
-                        action: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            MxButton(
-                              label: l10n.viewExistingLabel,
-                              variant: MxButtonVariant.secondary,
-                              size: MxButtonSize.sm,
-                              onPressed: () =>
-                                  context.goDeckDetail(duplicates.first.deckId),
-                            ),
-                            const MxGap.s2(),
-                            MxButton(
-                              label: l10n.addAnywayLabel,
-                              variant: MxButtonVariant.ghost,
-                              size: MxButtonSize.sm,
-                              onPressed: isSubmitting
-                                  ? null
-                                  : () => submit(allowDuplicate: true),
-                            ),
-                          ],
+                        message: l10n.duplicateCardMessage(
+                          duplicates.first.term,
                         ),
+                        stackedActions: [
+                          MxButton(
+                            label: l10n.viewExistingLabel,
+                            variant: MxButtonVariant.secondary,
+                            size: MxButtonSize.sm,
+                            onPressed: () =>
+                                context.goDeckDetail(duplicates.first.deckId),
+                          ),
+                          const MxGap.s2(),
+                          MxButton(
+                            label: l10n.addAnywayLabel,
+                            variant: MxButtonVariant.ghost,
+                            size: MxButtonSize.sm,
+                            // The override must not be re-entrant while a
+                            // save is already in flight.
+                            onPressed: isSubmitting
+                                ? null
+                                : () => submit(allowDuplicate: true),
+                          ),
+                        ],
                       ),
                       const MxGap.s6(),
                     ],

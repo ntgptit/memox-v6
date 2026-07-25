@@ -43,6 +43,7 @@ class ParityFixtures {
     'MX-VIS-037',
     'MX-VIS-043',
     'MX-VIS-049',
+    'MX-VIS-055',
     'MX-VIS-050',
     'MX-VIS-051',
     'MX-VIS-052',
@@ -108,9 +109,17 @@ class ParityFixtures {
         await _seedActivePair();
         return;
       case 'MX-VIS-049':
-        // The Card Editor journey starts at a true fresh install. The
+      case 'MX-VIS-055':
+        // The Card Editor journeys start at a true fresh install. The
         // Playwright spec creates the Language Pair and Deck through the
         // production first-run UI before entering the Flashcard flow.
+        //
+        // `MX-VIS-055` (duplicate) seeds nothing either, deliberately: a
+        // duplicate is by definition a *second* card carrying a term the
+        // deck already holds, so the spec saves the first card through the
+        // real create path and then re-enters the editor with the same term.
+        // Seeding the existing card instead would skip the write path the
+        // detector reads from.
         return;
       default:
         throw ArgumentError.value(id, 'id', 'Unknown parity fixture');

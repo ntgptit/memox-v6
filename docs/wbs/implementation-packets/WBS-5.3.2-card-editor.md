@@ -68,11 +68,47 @@ kit's FAB + sheet belongs to `MX-VIS-042`, which is Blocked on filter chips
 row's to unblock, and none of them a reason to leave the app unable to hold a
 second card.
 
-**Remaining child-B scope** (next iteration): allocate `MX-VIS-055`+ for the
-editor states the register never tracked — the kit has **ten**, the register
-carries **one** (`MX-VIS-049` Create) — and measure `duplicate`, `submitting`,
-`submit-error` and `submit-success`. The duplicate journey is now reachable
-without a fixture override: save a card, add a second with the same term.
+**`MX-VIS-055` duplicate — PASS, 1.97% light / 2.20% dark.** Measured through
+the real create path (save a card, add a second with the same term); no fixture
+override, because detection reads normalized content only that path writes.
+
+Closing it exposed a shared-widget defect. `MxBanner` put its action inside the
+outer row, as a sibling of the `Expanded` text, so the action claimed its
+intrinsic width first and starved the message: the duplicate banner's two
+buttons squeezed the text into a ~90px column that wrapped to one word per line
+and grew the banner to four times its height. The kit's `ActionCallout` has two
+layouts and picks by *title* — untitled keeps the action inline, titled puts it
+**inside** the text column below the body. All three `action:` call sites in
+this repo pass a title, so every one took the wrong branch. Fixing that alone
+moved this state 18.12% → 6.34%.
+
+The rest is the kit's stacked decision shape, landed as `MxBanner.stacked`:
+a regular-weight message rather than a bold title, and the controls on their
+own row at the padding edge rather than indented past the glyph.
+
+It began as a feature-local `DuplicateReviewBanner`, following the kit's note
+that "the stacked 2-button flashcard-editor DupBanner … stay[s] local". The
+guard rejected it — `memox.design_system.no_theme_token_imports`: feature-layer
+code may not import `app_spacing.dart` / `app_border_radii.dart`, and there is
+no context accessor for either, so anything needing raw spacing or radius
+belongs in the shared layer. The kit's "local" is about design-system
+organisation, not this repo's layering. FD-10 already covers the case — add a
+shared variant when the kit contract supports one — and it plainly does, so
+the shape lives as a second `MxBanner` layout instead of a near-duplicate
+widget.
+
+That took two measurements to get right, and the first was worse: as a `Wrap`
+the buttons stacked and centred and the state regressed to 10.39%. `Align` +
+`Row(mainAxisSize.min)` fixed it — the banner is stretched by the form column,
+so intrinsic-width buttons centre themselves in the leftover space unless
+pinned. Reverting on the measurement rather than defending the change is what
+found it.
+
+**Remaining child-B scope:** `submitting`, `submit-error` and `submit-success`
+still have no `MX-VIS` ids. The kit has **ten** editor states; the register now
+carries **two**. `submit-success` needs a decision first — the kit keeps the
+user in the editor with Save reading "Done", while this app pops back to the
+deck on success.
 
 ## Acceptance and test procedure
 
