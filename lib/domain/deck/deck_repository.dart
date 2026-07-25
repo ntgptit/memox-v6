@@ -21,6 +21,11 @@ abstract interface class DeckRepository {
 
   Stream<List<Deck>> watchChildren(String parentId);
 
+  /// A parent's direct children with the same list-surface counters as
+  /// [watchRootSummaries] — the deck-detail Parent branch renders the same
+  /// deck card the Library root does.
+  Stream<List<DeckSummary>> watchChildSummaries(String parentId);
+
   /// The ancestor chain for [deckId], ordered root → … → the deck itself —
   /// the nested-deck breadcrumb path (WBS 6.2). Returns a single-element list
   /// (the deck) for a root deck, or an empty list when the deck is missing.

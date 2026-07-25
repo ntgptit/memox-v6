@@ -1,5 +1,6 @@
 import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
+import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/domain/flashcard/flashcard_repository.dart';
 
@@ -21,6 +22,11 @@ class OpenDeckUseCase {
   Future<Deck?> deckById(String deckId) => _decks.findById(deckId);
 
   Stream<List<Deck>> childrenOf(String deckId) => _decks.watchChildren(deckId);
+
+  /// The Parent branch's child rows with their list-surface counters — the
+  /// same card the Library root renders, scoped to one parent.
+  Stream<List<DeckSummary>> childSummariesOf(String deckId) =>
+      _decks.watchChildSummaries(deckId);
 
   /// Active (non-deleted) direct cards; hidden cards still count as
   /// content per the canonical contract.
