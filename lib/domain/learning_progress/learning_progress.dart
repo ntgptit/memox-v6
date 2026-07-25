@@ -13,6 +13,8 @@ class LearningProgress {
     required this.repetitionCount,
     required this.lapseCount,
     required this.lastTerminalAttemptId,
+    required this.srsActivatedAt,
+    required this.lastReviewedAt,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -27,6 +29,19 @@ class LearningProgress {
   final int repetitionCount;
   final int lapseCount;
   final String? lastTerminalAttemptId;
+
+  /// When the card first entered Box 1 (SRS policy §3); never moves again.
+  ///
+  /// NULL carries two meanings, separated by [box]: at Box 0 the card has
+  /// never been activated, while `box >= 1` with a NULL activation is a row
+  /// written before schema v2, when no column held the instant. The v2
+  /// migration deliberately left those NULL rather than invent a value.
+  final DateTime? srsActivatedAt;
+
+  /// The instant the most recent terminal grade was applied (SRS policy §8),
+  /// or NULL for a card that has never been graded.
+  final DateTime? lastReviewedAt;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 

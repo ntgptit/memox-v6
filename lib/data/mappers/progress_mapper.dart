@@ -20,6 +20,8 @@ extension LearningProgressRowMapper on db.LearningProgressData {
     repetitionCount: repetitionCount,
     lapseCount: lapseCount,
     lastTerminalAttemptId: lastTerminalAttemptId,
+    srsActivatedAt: utcDateTimeOrNull(srsActivatedAt),
+    lastReviewedAt: utcDateTimeOrNull(lastReviewedAt),
     createdAt: utcDateTime(createdAt),
     updatedAt: utcDateTime(updatedAt),
   );

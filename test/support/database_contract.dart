@@ -14,7 +14,7 @@ void runDatabaseLifecycleContract(
   QueryExecutor Function() buildExecutor,
 ) {
   group(description, () {
-    test('opens at schema v1 and answers queries', () async {
+    test('opens at the current schema version and answers queries', () async {
       final database = AppDatabase.forTesting(buildExecutor());
       addTearDown(database.close);
 
@@ -26,7 +26,10 @@ void runDatabaseLifecycleContract(
       final version = await database
           .customSelect('PRAGMA user_version')
           .getSingle();
-      expect(version.read<int>('user_version'), 1);
+      // Deliberately a literal, not `database.schemaVersion`: comparing the
+      // store to itself would pass no matter what shipped. Bumping this is
+      // part of releasing a schema version.
+      expect(version.read<int>('user_version'), 2);
     });
 
     test('enforces foreign keys on the connection', () async {

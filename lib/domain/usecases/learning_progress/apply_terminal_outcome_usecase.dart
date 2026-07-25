@@ -78,8 +78,14 @@ class ApplyTerminalOutcomeUseCase {
     return current;
   }
 
-  /// `SrsSchedule.lastReviewedAt` and `srsActivatedAt` are computed by the
-  /// policy but have no schema-v1 column, so they are not persisted here.
+  /// Every field written here comes from [schedule] — the policy's answer —
+  /// except `expectedRevision`, which is the guard against a concurrent
+  /// writer (SRS8-012).
+  ///
+  /// `srsActivatedAt` and `lastReviewedAt` gained columns in schema v2. Under
+  /// v1 the policy computed both and this method dropped them, so a card's
+  /// activation instant and last-review instant were recomputed-and-discarded
+  /// on every single grade.
   Future<void> _persist(
     LearningProgress current,
     StudyAttempt attempt,
@@ -92,6 +98,8 @@ class ApplyTerminalOutcomeUseCase {
       newDueAt: schedule.dueAt,
       repetitionCount: schedule.repetitionCount,
       lapseCount: schedule.lapseCount,
+      srsActivatedAt: schedule.srsActivatedAt,
+      lastReviewedAt: schedule.lastReviewedAt,
       expectedRevision: current.revision,
       updatedAt: nowUtc,
     );

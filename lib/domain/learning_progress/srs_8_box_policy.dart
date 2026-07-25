@@ -188,11 +188,16 @@ abstract final class Srs8BoxPolicy {
   /// `nowUtc + interval(box)`. A Box 0 card is rejected rather than
   /// silently activated — activation has its own precondition and its
   /// own entry point.
+  /// The activation instant is carried through from [current] unchanged — §3
+  /// fixes it at Box 1 and no later grade moves it. It used to be an optional
+  /// parameter, from before [LearningProgress] had the field, and no caller
+  /// ever passed one; once schema v2 began persisting the value that default
+  /// would have written NULL over a real activation instant on every grade.
+  /// Reading it from `current` removes the choice.
   static SrsSchedule applyTerminalGrade({
     required LearningProgress current,
     required SrsGrade grade,
     required DateTime nowUtc,
-    DateTime? srsActivatedAt,
   }) {
     _requireSupportedPolicy(current.policyId);
     final nextBox = boxAfterFinalization(current.box, grade);
@@ -201,7 +206,7 @@ abstract final class Srs8BoxPolicy {
       box: nextBox,
       dueAt: isMastered ? null : nowUtc.add(intervalForBox(nextBox)),
       lastReviewedAt: nowUtc,
-      srsActivatedAt: srsActivatedAt,
+      srsActivatedAt: current.srsActivatedAt,
       repetitionCount: current.repetitionCount + 1,
       lapseCount: grade == SrsGrade.wrong
           ? current.lapseCount + 1

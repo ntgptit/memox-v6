@@ -17,6 +17,8 @@ void main() {
     int repetitionCount = 0,
     int lapseCount = 0,
     String policyId = leitner8BoxPolicyId,
+    DateTime? srsActivatedAt,
+    DateTime? lastReviewedAt,
   }) {
     return LearningProgress(
       id: 'progress-1',
@@ -29,6 +31,8 @@ void main() {
       repetitionCount: repetitionCount,
       lapseCount: lapseCount,
       lastTerminalAttemptId: null,
+      srsActivatedAt: srsActivatedAt,
+      lastReviewedAt: lastReviewedAt,
       createdAt: now,
       updatedAt: now,
     );
@@ -83,6 +87,36 @@ void main() {
       expect(schedule.srsActivatedAt, now);
       expect(schedule.lastReviewedAt, now);
       expect(schedule.policyId, 'leitner-8-box-v1');
+    });
+
+    // §3: activation fixes the instant once. Before schema v2 the policy took
+    // the activation instant as an optional parameter that no caller ever
+    // passed, so it defaulted to null — harmless only because nothing
+    // persisted it. The moment v2 began storing the value, that default would
+    // have written NULL over a real activation on every grade. It now reads
+    // from `current`, and these two tests hold that line.
+    test('a later grade carries the activation instant through', () {
+      final activated = now.subtract(const Duration(days: 30));
+
+      final schedule = Srs8BoxPolicy.applyTerminalGrade(
+        current: progressAt(3, dueAt: now, srsActivatedAt: activated),
+        grade: SrsGrade.correct,
+        nowUtc: now,
+      );
+
+      expect(schedule.srsActivatedAt, activated);
+      // The review instant, by contrast, is always the grade's own `now`.
+      expect(schedule.lastReviewedAt, now);
+    });
+
+    test('a pre-v2 row keeps a null activation rather than acquiring one', () {
+      final schedule = Srs8BoxPolicy.applyTerminalGrade(
+        current: progressAt(3, dueAt: now),
+        grade: SrsGrade.correct,
+        nowUtc: now,
+      );
+
+      expect(schedule.srsActivatedAt, isNull);
     });
 
     test('activation counts neither a repetition nor a lapse', () {

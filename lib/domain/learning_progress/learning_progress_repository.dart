@@ -40,6 +40,12 @@ abstract interface class LearningProgressRepository {
     required DateTime? newDueAt,
     required int repetitionCount,
     required int lapseCount,
+    // Both come from the policy's `SrsSchedule`, like the box and due date.
+    // [srsActivatedAt] is the card's existing activation instant unchanged
+    // after Box 1, so passing it back is a no-op write; a pre-v2 row passes
+    // NULL through and keeps NULL.
+    required DateTime? srsActivatedAt,
+    required DateTime lastReviewedAt,
     required int expectedRevision,
     required DateTime updatedAt,
   });

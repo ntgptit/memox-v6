@@ -1,9 +1,19 @@
-# Drift schema v1
+# Drift schema
 
 - Status: **Accepted**
-- Schema version: `1`
+- Schema version: `2` (current)
 - Owner: Data
 - Architecture: [ADR-004](../architecture/adr/ADR-004-local-persistence-platforms.md)
+
+The file name keeps its `-v1` suffix so existing links stay valid; this document
+describes the **current** schema, with the per-version deltas below.
+
+## Version history
+
+| Version | WBS | Change |
+| --- | --- | --- |
+| 1 | `4.1`–`4.7` | First released schema. |
+| 2 | `5.4.4` | `learning_progress` gains `srs_activated_at` and `last_reviewed_at`. Both are computed by the SRS policy and had no column under v1, so every terminal grade discarded them. Added nullable and **not backfilled**: `srs_activated_at` means "first entered Box 1", an instant v1 never recorded, and the nearest available value (`updated_at`) is the *last* review rather than the first activation. Writing it would be fabrication, and migration-policy rule 6 forbids inferring business policy from a schema version. |
 
 ## Column conventions
 
@@ -49,6 +59,15 @@ behavior is one contract and must have concurrent-writer tests.
 - `policy_id = 'leitner-8-box-v1'` for the baseline policy.
 - `policy_version`, `revision`, repetition/lapse counters, and last terminal
   attempt reference.
+- `srs_activated_at` nullable (v2): when the card first entered Box 1; fixed at
+  activation and never moved by a later grade.
+- `last_reviewed_at` nullable (v2): the instant the most recent terminal grade
+  was applied.
+
+A NULL `srs_activated_at` means one of two things, separated by `box`: at Box 0
+the card has never been activated, while `box >= 1` with NULL is a row written
+before v2, when no column held the instant. The v2 migration does **not**
+backfill those — see the version history below.
 
 Eligibility is `due_at <= nowUtc`. Data code persists the result returned by
 `lib/domain/learning_progress/srs_8_box_policy.dart`; SQL/DAO/repository code must

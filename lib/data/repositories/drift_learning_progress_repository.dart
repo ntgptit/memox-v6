@@ -22,6 +22,8 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
     required DateTime? newDueAt,
     required int repetitionCount,
     required int lapseCount,
+    required DateTime? srsActivatedAt,
+    required DateTime lastReviewedAt,
     required int expectedRevision,
     required DateTime updatedAt,
   }) {
@@ -53,6 +55,8 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
               repetitionCount,
               lapseCount,
               attempt.id,
+              srsActivatedAt?.millisecondsSinceEpoch,
+              lastReviewedAt.millisecondsSinceEpoch,
               updatedAt.millisecondsSinceEpoch,
               attempt.cardId,
               expectedRevision,

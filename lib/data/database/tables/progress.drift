@@ -38,6 +38,23 @@ CREATE TABLE learning_progress (
   repetition_count INTEGER NOT NULL DEFAULT 0,
   lapse_count INTEGER NOT NULL DEFAULT 0,
   last_terminal_attempt_id TEXT REFERENCES study_attempts (id),
+  -- Added in schema v2 (WBS 5.4.4). `SrsSchedule` computed both from v1
+  -- onward but had nowhere to put them, so every terminal grade discarded
+  -- them on the way to the store.
+  --
+  -- `srs_activated_at` is when the card first entered Box 1 (SRS policy §3)
+  -- and never moves again. Deliberately no CHECK tying it to `box >= 1`:
+  -- rows written before v2 were activated at an instant nobody recorded, so
+  -- their value is NULL and stays NULL. Read it with the box, which
+  -- disambiguates — box 0 means never activated, box >= 1 with NULL means
+  -- activated before v2 at an unknown time. The migration does not invent a
+  -- value for them; that would be inferring business policy from a schema
+  -- version, which migration-policy.md rule 6 forbids.
+  --
+  -- `last_reviewed_at` is the instant the most recent terminal grade was
+  -- applied (§8). NULL until a card is first graded.
+  srs_activated_at INTEGER,
+  last_reviewed_at INTEGER,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,
   CHECK (
