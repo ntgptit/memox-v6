@@ -33,8 +33,7 @@ final class SystemTimeZone implements AppTimeZone {
   String get id => DateTime.now().timeZoneName;
 
   @override
-  LocalDay localDayOf(DateTime utcInstant) =>
-      LocalDay.of(utcInstant.toLocal());
+  LocalDay localDayOf(DateTime utcInstant) => LocalDay.of(utcInstant.toLocal());
 }
 
 /// A fixed-offset zone, for tests and for the day-boundary cases that only

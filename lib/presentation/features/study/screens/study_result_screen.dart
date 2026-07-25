@@ -235,12 +235,12 @@ class _StreakCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final target = status.goalTargetMinutes;
+    final target = status.goalTargetCards;
     final progress = target == 0
         ? 0.0
-        : (status.goalDoneMinutes / target).clamp(0.0, 1.0);
+        : (status.goalDoneCards / target).clamp(0.0, 1.0);
     final progressLabel = l10n.studyResultGoalProgressLabel(
-      status.goalDoneMinutes,
+      status.goalDoneCards,
       target,
     );
 

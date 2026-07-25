@@ -522,7 +522,7 @@
   "studyResultStreakDaysLabel": "{count} ngày",
   "studyResultStreakCaptionLabel": "chuỗi ngày học",
   "studyResultGoalTitleLabel": "Mục tiêu hôm nay",
-  "studyResultGoalProgressLabel": "{done}/{total} phút",
+  "studyResultGoalProgressLabel": "{done}/{total} thẻ",
   "studyResultContinueLabel": "Học tiếp",
   "studyResultDoneLabel": "Về thư viện",
   "studyFinalizingLabel": "Đang hoàn tất…",

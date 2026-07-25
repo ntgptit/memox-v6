@@ -8,18 +8,24 @@ import 'package:memox_v6/domain/study_session/session_terminal_grade_policy.dart
 class StudyResultGoalStatus {
   const StudyResultGoalStatus({
     required this.streakDays,
-    required this.goalDoneMinutes,
-    required this.goalTargetMinutes,
+    required this.goalDoneCards,
+    required this.goalTargetCards,
   });
 
   /// Consecutive qualified days including this session's day.
   final int streakDays;
 
-  /// Minutes counted toward today's goal so far.
-  final int goalDoneMinutes;
+  /// Qualified cards counted toward today's goal so far.
+  ///
+  /// Cards, not minutes: `metrics-v1` fixes the v1 unit ("Daily Goal unit v1
+  /// is qualified Cards") and the schema stores `qualified_card_count` /
+  /// `target_card_count`. This carried minutes, which matched neither. The
+  /// kit's shot reads "14/20 min", but `StreakGoalCard.d.ts` records its
+  /// numbers as hardcoded samples that "Flutter parameterizes".
+  final int goalDoneCards;
 
-  /// Today's goal target in minutes.
-  final int goalTargetMinutes;
+  /// Today's goal target in qualified cards.
+  final int goalTargetCards;
 }
 
 /// The committed result of a finished session, derived only from persisted

@@ -15,6 +15,7 @@ import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
 import 'package:memox_v6/domain/study_session/study_session_repository.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/apply_terminal_outcome_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_streak/record_streak_day_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_goal/track_daily_goal_usecase.dart';
 
 /// Closes a completed study session (WBS 5.6.13; `finalize-study-session.md`).
 ///
@@ -41,6 +42,7 @@ class FinalizeStudySessionUseCase {
     required AppClock clock,
     required IdGenerator idGenerator,
     RecordStreakDayUseCase? recordStreakDay,
+    TrackDailyGoalUseCase? trackDailyGoal,
     SessionModePlanResolver planResolver = const SessionModePlanResolver(),
     SessionTerminalGradePolicy gradePolicy = const SessionTerminalGradePolicy(),
     SessionSummaryPolicy summaryPolicy = const SessionSummaryPolicy(),
@@ -50,6 +52,7 @@ class FinalizeStudySessionUseCase {
        _clock = clock,
        _idGenerator = idGenerator,
        _recordStreakDay = recordStreakDay,
+       _trackDailyGoal = trackDailyGoal,
        _planResolver = planResolver,
        _gradePolicy = gradePolicy,
        _summaryPolicy = summaryPolicy;
@@ -63,6 +66,10 @@ class FinalizeStudySessionUseCase {
   /// Optional so the many existing constructions of this use case keep
   /// working; when absent the streak simply is not offered the session.
   final RecordStreakDayUseCase? _recordStreakDay;
+
+  /// Same contract as [_recordStreakDay]: optional, and never able to fail the
+  /// session it is reporting on.
+  final TrackDailyGoalUseCase? _trackDailyGoal;
   final SessionModePlanResolver _planResolver;
   final SessionTerminalGradePolicy _gradePolicy;
   final SessionSummaryPolicy _summaryPolicy;
@@ -118,6 +125,22 @@ class FinalizeStudySessionUseCase {
         // Swallowed deliberately, and narrowly: the session is already
         // durable, and the caller asked to finalize a session, not to record a
         // streak.
+      }
+    }
+
+    // Its own try rather than sharing the streak's: the two projections are
+    // independent, and a streak-store failure must not also cost the day's
+    // goal progress.
+    final trackDailyGoal = _trackDailyGoal;
+    if (trackDailyGoal != null) {
+      try {
+        await trackDailyGoal(
+          qualifiedCardCount: summary.reviewedCount,
+          finalizedAt: now,
+        );
+      } on Object {
+        // As above: a projection is rebuildable from session history, a
+        // finalized session is not.
       }
     }
 

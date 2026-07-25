@@ -37,6 +37,7 @@ import 'package:memox_v6/domain/usecases/language_pair/remove_language_pair_usec
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:memox_v6/domain/usecases/study_streak/record_streak_day_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_goal/track_daily_goal_usecase.dart';
 
 part 'usecase_providers.g.dart';
 
@@ -294,6 +295,18 @@ FinalizeStudySessionUseCase finalizeStudySessionUseCase(Ref ref) {
     clock: ref.watch(appClockProvider),
     idGenerator: ref.watch(idGeneratorProvider),
     recordStreakDay: ref.watch(recordStreakDayUseCaseProvider),
+    trackDailyGoal: ref.watch(trackDailyGoalUseCaseProvider),
+  );
+}
+
+/// Aggregates a finalized session's qualified cards into the day's goal bucket
+/// (`track-daily-goal.md`).
+@riverpod
+TrackDailyGoalUseCase trackDailyGoalUseCase(Ref ref) {
+  return TrackDailyGoalUseCase(
+    goals: ref.watch(studyGoalRepositoryProvider),
+    timeZone: ref.watch(appTimeZoneProvider),
+    idGenerator: ref.watch(idGeneratorProvider),
   );
 }
 

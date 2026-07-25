@@ -114,8 +114,8 @@ class _SeededStudyResult extends StudyResult {
           durationActiveMs: 390000,
           goalStatus: StudyResultGoalStatus(
             streakDays: 12,
-            goalDoneMinutes: 14,
-            goalTargetMinutes: 20,
+            goalDoneCards: 14,
+            goalTargetCards: 20,
           ),
         ),
       );
