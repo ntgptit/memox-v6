@@ -14,5 +14,13 @@ List<GoRoute> flashcardRoutes() {
         deckId: state.pathParameters[RouteParams.deckId] ?? '',
       ),
     ),
+    GoRoute(
+      path: RoutePaths.editCardPattern,
+      name: RouteNames.editCard,
+      builder: (context, state) => CardEditorScreen(
+        deckId: state.pathParameters[RouteParams.deckId] ?? '',
+        cardId: state.pathParameters[RouteParams.cardId],
+      ),
+    ),
   ];
 }

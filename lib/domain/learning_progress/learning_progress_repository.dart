@@ -1,4 +1,6 @@
+import 'package:memox_v6/core/ids/id_generator.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress.dart';
+import 'package:memox_v6/domain/learning_progress/study_candidates.dart';
 import 'package:memox_v6/domain/learning_progress/study_queue_counts.dart';
 import 'package:memox_v6/domain/study_session/study_attempt.dart';
 
@@ -48,7 +50,28 @@ abstract interface class LearningProgressRepository {
     required DateTime at,
   });
 
+  /// Resets every card in a deck's subtree to Box 0 atomically (WBS 6.1;
+  /// `reset-deck-progress.md`) — `resetCard`'s effect applied across the whole
+  /// scope in one commit, so a failure leaves no partial reset. Only SRS
+  /// progress changes; content and hierarchy are untouched. Returns the number
+  /// of cards reset. [idGenerator] mints each fresh progress row's id.
+  Future<int> resetSubtreeProgress(
+    String deckId, {
+    required IdGenerator idGenerator,
+    required DateTime at,
+  });
+
   Future<LearningProgress?> findByCard(String cardId);
+
+  /// Read-only due + new study queues for a deck scope (5.4.2,
+  /// `surface-due-cards.md`): the recursive subtree of [scopeDeckId], each
+  /// eligible card classified once (New = Box 0/no due; Due = Box 1..7 with
+  /// `dueAt <= nowUtc`), hidden/deleted and Box 8 excluded, due ordered
+  /// soonest-first. Never mutates progress.
+  Future<StudyCandidates> studyCandidatesInScope({
+    required String scopeDeckId,
+    required DateTime nowUtc,
+  });
 
   /// Eligible due/new counts for a deck scope (WBS 5.4.2).
   ///

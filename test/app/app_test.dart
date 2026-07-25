@@ -13,10 +13,12 @@ void main() {
         ],
       ),
     );
-    await tester.pumpAndSettle();
+    // Home is the Today entry (WBS 5.7.2). Its body loads asynchronously behind
+    // an animated spinner, so settle on the app bar rather than pumpAndSettle.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.text('MemoX Home'), findsOneWidget);
-    expect(find.text('MemoX'), findsOneWidget);
+    expect(find.text('Today'), findsWidgets);
   });
 
   testWidgets('root renders the localized home in Vietnamese', (tester) async {
@@ -30,8 +32,9 @@ void main() {
         ],
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.text('Trang chủ MemoX'), findsOneWidget);
+    expect(find.text('Hôm nay'), findsWidgets);
   });
 }

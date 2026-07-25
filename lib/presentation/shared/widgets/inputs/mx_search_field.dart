@@ -146,6 +146,12 @@ class _MxSearchFieldState extends State<MxSearchField> {
           decoration: BoxDecoration(
             color: widget.flat ? colors.surfaceMuted : colors.surface,
             borderRadius: AppBorderRadii.pill,
+          ),
+          // Kit `.field:focus-visible` ring: painted over the content on focus
+          // (foregroundDecoration) so it never insets the input like a layout
+          // border would.
+          foregroundDecoration: BoxDecoration(
+            borderRadius: AppBorderRadii.pill,
             border: Border.all(
               color: _focused
                   ? colors.focusRing

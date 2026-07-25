@@ -1,5 +1,6 @@
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
+import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
 import 'package:memox_v6/domain/flashcard/flashcard_repository.dart';
 
@@ -48,6 +49,20 @@ class MoveFlashcardUseCase {
       cardId,
       targetDeckId: targetDeckId,
       updatedAt: _clock.nowUtc(),
+    );
+  }
+
+  /// The decks [cardId] can move into (WBS 6.5 picker) — Empty/Leaf decks in
+  /// the card's own language pair, excluding its current deck. Empty when the
+  /// card or its deck is missing; the store still owns the write.
+  Future<List<Deck>> destinationsFor(String cardId) async {
+    final card = await _cards.findById(cardId);
+    if (card == null || card.isDeleted) return const [];
+    final deck = await _decks.findById(card.deckId);
+    if (deck == null) return const [];
+    return _decks.cardMoveTargets(
+      deck.languagePairId,
+      excludeDeckId: card.deckId,
     );
   }
 }

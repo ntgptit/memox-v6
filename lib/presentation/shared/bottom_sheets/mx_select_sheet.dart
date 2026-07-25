@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
+import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/presentation/shared/bottom_sheets/mx_sheet.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_section_label.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
@@ -62,7 +64,8 @@ class _MxSelectSheetBody<K> extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        MxText(title, role: MxTextRole.overline),
+        // Kit `SelectSheet` title is the sm/bold SectionLabel, uppercased.
+        MxSectionLabel(text: StringUtils.upperCased(title)),
         const MxGap.s3(),
         for (final option in options)
           MxTappable(
@@ -70,17 +73,19 @@ class _MxSelectSheetBody<K> extends StatelessWidget {
             semanticLabel: option.label,
             child: ExcludeSemantics(
               child: Padding(
+                // Kit `MenuItem`: space-3 vertical, space-2 horizontal, with a
+                // space-4 icon->label gap and a primary `check` on the selected row.
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.space2,
-                  vertical: AppSpacing.space2,
+                  vertical: AppSpacing.space3,
                 ),
                 child: Row(
                   children: [
                     MxIcon(icon: option.icon, color: colors.textSecondary),
-                    const MxGap.s3(),
+                    const MxGap.s4(),
                     Expanded(child: MxText(option.label)),
                     if (option.key == selected)
-                      MxIcon(icon: Symbols.check_circle, color: colors.accent),
+                      MxIcon(icon: Symbols.check, color: colors.primary),
                   ],
                 ),
               ),

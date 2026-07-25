@@ -113,13 +113,14 @@ class DriftStudySessionRepository implements StudySessionRepository {
   Future<void> saveAttemptWithCheckpoint({
     required domain.StudyAttempt attempt,
     required SessionCheckpoint checkpoint,
+    SessionRoundOrder? newRoundOrder,
   }) {
     return mapSqliteConflicts(entity: 'study_attempts', () async {
       await _database.transaction(() async {
         final replayed = await _database.studyAttemptDao
             .findAttemptByIdempotencyKey(attempt.idempotencyKey)
             .getSingleOrNull();
-        // Replay: that transaction already persisted its checkpoint.
+        // Replay: that transaction already persisted its checkpoint and order.
         if (replayed != null) return;
 
         await _database.studyAttemptDao.insertAttempt(
@@ -134,6 +135,20 @@ class DriftStudySessionRepository implements StudySessionRepository {
           attempt.createdAt.millisecondsSinceEpoch,
         );
         await _upsertCheckpoint(checkpoint);
+
+        // A new round/stage's generated order commits atomically with the
+        // answer it advanced past (answer-study-stage.md §7).
+        final order = newRoundOrder;
+        if (order != null) {
+          await _database.sessionSnapshotDao.insertRoundOrder(
+            order.id,
+            order.sessionId,
+            order.roundIndex,
+            order.seed,
+            jsonEncode(order.cardIds),
+            attempt.createdAt.millisecondsSinceEpoch,
+          );
+        }
       });
     });
   }
@@ -144,6 +159,14 @@ class DriftStudySessionRepository implements StudySessionRepository {
         .findCheckpoint(sessionId)
         .getSingleOrNull();
     return row?.toDomain();
+  }
+
+  @override
+  Future<List<domain.StudyAttempt>> attempts(String sessionId) async {
+    final rows = await _database.studyAttemptDao
+        .listAttemptsForSession(sessionId)
+        .get();
+    return rows.map((row) => row.toDomain()).toList();
   }
 
   @override

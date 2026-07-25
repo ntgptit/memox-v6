@@ -1,6 +1,7 @@
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/data/database/app_database.dart';
 import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
+import 'package:memox_v6/data/repositories/drift_search_repository.dart';
 import 'package:memox_v6/data/repositories/drift_flashcard_repository.dart';
 import 'package:memox_v6/data/repositories/drift_language_pair_repository.dart';
 import 'package:memox_v6/data/repositories/drift_learning_progress_repository.dart';
@@ -9,6 +10,7 @@ import 'package:memox_v6/data/repositories/drift_streak_repository.dart';
 import 'package:memox_v6/data/repositories/drift_study_goal_repository.dart';
 import 'package:memox_v6/data/repositories/drift_study_session_repository.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
+import 'package:memox_v6/domain/search/search_repository.dart';
 import 'package:memox_v6/domain/flashcard/flashcard_repository.dart';
 import 'package:memox_v6/domain/language_pair/language_pair_repository.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress_repository.dart';
@@ -48,6 +50,11 @@ DeckRepository deckRepository(Ref ref) {
     ref.watch(appDatabaseProvider),
     ref.watch(appClockProvider),
   );
+}
+
+@Riverpod(keepAlive: true)
+SearchRepository searchRepository(Ref ref) {
+  return DriftSearchRepository(ref.watch(appDatabaseProvider));
 }
 
 @Riverpod(keepAlive: true)

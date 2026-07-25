@@ -114,6 +114,8 @@ void main() {
       expect(afterReplay?.revision, 1);
     });
 
+    // SRS8-012: a different outcome on a stale progress revision is a typed
+    // conflict, not a silent last-write-wins.
     test('a stale revision conflicts and persists nothing', () async {
       await expectLater(
         progress.applyScheduledOutcome(
@@ -143,6 +145,7 @@ void main() {
       expect(untouched?.box, 0);
     });
 
+    // SRS8-016: Reset returns any box to Box 0 with a null due date.
     test('reset returns a card to Box 0 without touching content', () async {
       await progress.applyScheduledOutcome(
         attempt: attempt('a1'),

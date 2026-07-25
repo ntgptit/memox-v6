@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/core/theme/tokens/app_border_radii.dart';
 import 'package:memox_v6/core/theme/tokens/app_component_dimensions.dart';
+import 'package:memox_v6/core/theme/tokens/app_opacities.dart';
 import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
@@ -95,10 +96,12 @@ class MxIconButton extends StatelessWidget {
         ? AppComponentDimensions.iconBtnSm
         : AppSpacing.touchMin;
 
-    return MxTappable(
+    final button = MxTappable(
       onTap: onPressed,
       borderRadius: AppBorderRadii.full,
       semanticLabel: semanticLabel,
+      // Kit `.icon-btn:active { transform: scale(0.9) }`.
+      pressedScale: 0.9,
       child: Center(
         child: Container(
           width: visual,
@@ -115,5 +118,11 @@ class MxIconButton extends StatelessWidget {
         ),
       ),
     );
+
+    // Kit `.icon-btn:disabled { opacity: opacity-muted }` (0.55).
+    if (onPressed == null) {
+      return Opacity(opacity: AppOpacities.opacityMuted, child: button);
+    }
+    return button;
   }
 }

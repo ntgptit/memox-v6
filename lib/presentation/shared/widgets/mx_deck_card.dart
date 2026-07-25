@@ -59,10 +59,12 @@ class MxDeckCard extends StatelessWidget {
     final trailing = this.trailing;
     final status = this.status;
     final secondary = styles.caption.copyWith(color: colors.textSecondary);
+    // Kit deck-row status uses the on-*-soft readable tones, not the strong
+    // fills: due -> on-warning-soft, up-to-date -> on-success-soft.
     final statusColor = switch (statusTone) {
-      MxDeckStatusTone.due => colors.warning,
+      MxDeckStatusTone.due => colors.onWarningSoft,
       MxDeckStatusTone.isNew => colors.accent,
-      MxDeckStatusTone.upToDate || null => colors.success,
+      MxDeckStatusTone.upToDate || null => colors.onSuccessSoft,
     };
 
     return MxCard(

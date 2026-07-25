@@ -174,8 +174,9 @@ class _MxFieldScaffoldState extends State<MxFieldScaffold> {
       input = Container(
         alignment: Alignment.centerLeft,
         constraints: const BoxConstraints(minHeight: AppSpacing.touchMin),
+        // Kit `Field` boxed input: space-3 vertical, space-4 horizontal.
         padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.space2,
+          vertical: AppSpacing.space3,
           horizontal: AppSpacing.space4,
         ),
         decoration: BoxDecoration(
@@ -243,14 +244,16 @@ class _MxFieldScaffoldState extends State<MxFieldScaffold> {
         left: AppSpacing.space1,
       ),
       child: Text.rich(
+        // Kit `field-group__label`: sm/semibold (fieldLabel), not the bold,
+        // wide-tracked section label.
         TextSpan(
           text: label,
-          style: styles.sectionLabel.copyWith(color: colors.textSecondary),
+          style: styles.fieldLabel.copyWith(color: colors.textSecondary),
           children: [
             if (widget.requiredField)
               TextSpan(
                 text: ' *',
-                style: styles.sectionLabel.copyWith(color: colors.error),
+                style: styles.fieldLabel.copyWith(color: colors.error),
               ),
           ],
         ),

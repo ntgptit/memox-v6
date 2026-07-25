@@ -24,6 +24,9 @@ extension AppNavigation on BuildContext {
   /// Opens the Library root.
   void goLibrary() => GoRouter.of(this).go(RoutePaths.library);
 
+  /// Opens the active study session route (WBS 5.6/5.7).
+  void goStudy() => GoRouter.of(this).go(RoutePaths.study);
+
   /// Opens the Stats root (placeholder until WBS 5.8 lands).
   void goStats() => GoRouter.of(this).go(RoutePaths.stats);
 
@@ -39,9 +42,16 @@ extension AppNavigation on BuildContext {
   void pushDeckDetail(String deckId) =>
       GoRouter.of(this).push(RoutePaths.deckDetail(deckId));
 
+  /// Opens Library search (WBS 10.2).
+  void pushSearch() => GoRouter.of(this).push(RoutePaths.search);
+
   /// Pushes the Card Editor for creating a card in [deckId].
   void pushNewCard(String deckId) =>
       GoRouter.of(this).push(RoutePaths.newCard(deckId));
+
+  /// Opens the Card Editor in edit mode for an existing card (WBS 6.3).
+  void pushEditCard(String deckId, String cardId) =>
+      GoRouter.of(this).push(RoutePaths.editCard(deckId, cardId));
 
   /// Pops one level, falling back to the Library root.
   void backFromDeck() {

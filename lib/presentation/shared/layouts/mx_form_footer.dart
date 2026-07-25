@@ -33,12 +33,14 @@ class MxFormFooter extends StatelessWidget {
     final colors = context.colors;
 
     return Container(
+      // Kit SaveBar: a `surface` panel (not the canvas), space-3 top / space-4
+      // bottom, separated by a top hairline.
       padding: const EdgeInsets.only(
-        top: AppSpacing.space4,
+        top: AppSpacing.space3,
         bottom: AppSpacing.space4,
       ),
       decoration: BoxDecoration(
-        color: colors.bg,
+        color: colors.surface,
         border: Border(
           top: BorderSide(color: colors.divider, width: AppStrokes.hairline),
         ),

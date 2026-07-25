@@ -220,6 +220,45 @@ void main() {
           .get();
       expect(evidence.single.id, 'a1');
     });
+
+    test(
+      'a new round order commits atomically and a replay never duplicates it',
+      () async {
+        await sessions.startSession(
+          session: session('s1'),
+          cardSnapshots: [snapshot('sc1')],
+          initialOrder: order('ro1'),
+        );
+
+        const nextRound = SessionRoundOrder(
+          id: 'ro2',
+          sessionId: 's1',
+          roundIndex: 1,
+          seed: 7,
+          cardIds: <String>['c1'],
+        );
+        await sessions.saveAttemptWithCheckpoint(
+          attempt: attempt('a1', key: 'once'),
+          checkpoint: checkpoint(position: 0),
+          newRoundOrder: nextRound,
+        );
+
+        final persisted = await sessions.roundOrder('s1', 1);
+        expect(persisted?.id, 'ro2');
+        expect(persisted?.cardIds, <String>['c1']);
+
+        // Replaying the same idempotency key persists nothing again.
+        await sessions.saveAttemptWithCheckpoint(
+          attempt: attempt('a2', key: 'once'),
+          checkpoint: checkpoint(position: 0),
+          newRoundOrder: nextRound,
+        );
+        final orders = await database.sessionSnapshotDao
+            .findRoundOrder('s1', 1)
+            .get();
+        expect(orders.length, 1, reason: 'no duplicate order row');
+      },
+    );
   });
 
   group('finalizeSession (atomic operation 5)', () {

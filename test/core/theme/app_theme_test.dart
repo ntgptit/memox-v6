@@ -8,6 +8,8 @@ import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/core/theme/tokens/app_colors.dart';
 import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 import 'package:memox_v6/core/theme/tokens/app_typography.dart';
+import 'package:memox_v6/domain/today/today_projection.dart';
+import 'package:memox_v6/presentation/features/today/viewmodels/today_projection_provider.dart';
 
 void main() {
   group('color scheme mapping', () {
@@ -79,6 +81,14 @@ void main() {
       buildRoot(
         overrides: [
           appRouterInstanceProvider.overrideWithValue(createAppRouter()),
+          // Home is the async Today entry (WBS 5.7.2); pin a resolved
+          // projection so the root settles for the brightness assertion.
+          todayProjectionProvider.overrideWith(
+            (ref) async => const TodayProjection(
+              primaryAction: TodayPrimaryAction.caughtUp,
+              dueCount: 0,
+            ),
+          ),
         ],
       ),
     );

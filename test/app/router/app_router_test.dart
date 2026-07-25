@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
@@ -7,17 +8,31 @@ import 'package:memox_v6/app/router/route_names.dart';
 import 'package:memox_v6/app/router/route_paths.dart';
 import 'package:memox_v6/app/router/route_placeholder.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
+import 'package:memox_v6/domain/today/today_projection.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
+import 'package:memox_v6/presentation/features/today/screens/today_screen.dart';
+import 'package:memox_v6/presentation/features/today/viewmodels/today_projection_provider.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_bottom_nav.dart';
 
 Widget _appWithRouter(GoRouter router) {
-  // The shell renders kit chrome (`MxBottomNav`) on every root
-  // destination, so the harness must carry the app theme extensions.
-  return MaterialApp.router(
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    theme: AppTheme.light(),
-    routerConfig: router,
+  // The shell renders kit chrome (`MxBottomNav`) on every root destination, so
+  // the harness must carry the app theme extensions. Home is the async Today
+  // entry (WBS 5.7.2), so pin a resolved projection so it settles.
+  return ProviderScope(
+    overrides: [
+      todayProjectionProvider.overrideWith(
+        (ref) async => const TodayProjection(
+          primaryAction: TodayPrimaryAction.caughtUp,
+          dueCount: 0,
+        ),
+      ),
+    ],
+    child: MaterialApp.router(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      theme: AppTheme.light(),
+      routerConfig: router,
+    ),
   );
 }
 
@@ -27,12 +42,13 @@ void main() {
     expect(RouteNames.home, 'home');
   });
 
-  testWidgets('initial location renders the home placeholder', (tester) async {
+  testWidgets('initial location renders the Today home', (tester) async {
     await tester.pumpWidget(_appWithRouter(createAppRouter()));
     await tester.pumpAndSettle();
 
-    expect(find.byType(HomePlaceholderScreen), findsOneWidget);
-    expect(find.text('MemoX Home'), findsOneWidget);
+    expect(find.byType(TodayScreen), findsOneWidget);
+    // The Today title also labels the nav tab.
+    expect(find.text('Today'), findsWidgets);
   });
 
   testWidgets('unknown location renders the localized not-found screen', (
@@ -67,7 +83,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(RouteNotFoundScreen), findsNothing);
-    expect(find.byType(HomePlaceholderScreen), findsOneWidget);
+    expect(find.byType(TodayScreen), findsOneWidget);
   });
 
   testWidgets('goHome extension returns to the home placeholder', (
@@ -84,7 +100,7 @@ void main() {
     tester.element(find.byType(RouteNotFoundScreen)).goHome();
     await tester.pumpAndSettle();
 
-    expect(find.byType(HomePlaceholderScreen), findsOneWidget);
+    expect(find.byType(TodayScreen), findsOneWidget);
   });
 
   // Regression: the root destinations were four independent top-level
@@ -117,7 +133,7 @@ void main() {
     await tester.pumpWidget(_appWithRouter(router));
     await tester.pumpAndSettle();
 
-    tester.element(find.byType(HomePlaceholderScreen)).goStats();
+    tester.element(find.byType(TodayScreen)).goStats();
     await tester.pumpAndSettle();
     expect(find.byType(StatsPlaceholderScreen), findsOneWidget);
 
@@ -126,16 +142,17 @@ void main() {
     nav.onChanged(RouteNames.home);
     await tester.pumpAndSettle();
 
-    expect(find.byType(HomePlaceholderScreen), findsOneWidget);
+    expect(find.byType(TodayScreen), findsOneWidget);
   });
 
-  testWidgets('home placeholder renders in Vietnamese', (tester) async {
+  testWidgets('Today home renders in Vietnamese', (tester) async {
     tester.platformDispatcher.localesTestValue = const <Locale>[Locale('vi')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
 
     await tester.pumpWidget(_appWithRouter(createAppRouter()));
     await tester.pumpAndSettle();
 
-    expect(find.text('Trang chủ MemoX'), findsOneWidget);
+    // The Today title also labels the nav tab.
+    expect(find.text('Hôm nay'), findsWidgets);
   });
 }

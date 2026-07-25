@@ -33,6 +33,11 @@ class MxGap extends StatelessWidget {
   const MxGap.s11() : this._(AppSpacing.space11);
   const MxGap.s12() : this._(AppSpacing.space12);
 
+  /// Raw spacing values for the rare layout that needs a token as a number
+  /// (e.g. `Wrap.spacing`) rather than a gap widget — so features stay off
+  /// the raw spacing tokens.
+  static const double s2Value = AppSpacing.space2;
+
   final double _size;
 
   @override

@@ -3,9 +3,12 @@ import 'package:memox_v6/app/router/route_names.dart';
 import 'package:memox_v6/app/router/route_paths.dart';
 import 'package:memox_v6/app/router/app_tab_shell.dart';
 import 'package:memox_v6/app/router/route_placeholder.dart';
+import 'package:memox_v6/presentation/features/today/routes/today_routes.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
 import 'package:memox_v6/presentation/features/flashcard/routes/flashcard_routes.dart';
 import 'package:memox_v6/presentation/features/language_pair/routes/language_pair_routes.dart';
+import 'package:memox_v6/presentation/features/search/routes/search_routes.dart';
+import 'package:memox_v6/presentation/features/study/routes/study_routes.dart';
 
 /// Builds a fresh router. Production resolves it through
 /// `appRouterInstanceProvider` (which supplies the first-run gate); tests
@@ -45,15 +48,7 @@ GoRouter createAppRouter({
         builder: (context, state, navigationShell) =>
             AppTabShell(navigationShell: navigationShell),
         branches: <StatefulShellBranch>[
-          StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: RoutePaths.home,
-                name: RouteNames.home,
-                builder: (context, state) => const HomePlaceholderScreen(),
-              ),
-            ],
-          ),
+          StatefulShellBranch(routes: todayBranchRoutes()),
           StatefulShellBranch(routes: libraryBranchRoutes()),
           StatefulShellBranch(
             routes: <RouteBase>[
@@ -79,6 +74,8 @@ GoRouter createAppRouter({
       ...firstRunDeckRoutes(),
       ...deckDetailRoutes(),
       ...flashcardRoutes(),
+      ...studyRoutes(),
+      ...searchRoutes(),
     ],
     errorBuilder: (context, state) => const RouteNotFoundScreen(),
   );

@@ -330,6 +330,14 @@ void main() {
       expect(progress, isNotNull);
     });
 
+    test('destinationsFor lists Empty/Leaf decks minus the source', () async {
+      final cardId = await createCard();
+      final targets = await move.destinationsFor(cardId);
+      // d1 is the source (excluded); parent has a child (excluded); child +
+      // d2 can hold cards; other-pair is a different language pair.
+      expect(targets.map((d) => d.id), ['child', 'd2']);
+    });
+
     test('the source deck is never accepted', () async {
       final cardId = await createCard();
       await expectLater(

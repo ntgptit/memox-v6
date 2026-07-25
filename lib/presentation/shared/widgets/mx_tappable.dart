@@ -32,6 +32,9 @@ import 'package:memox_v6/core/theme/tokens/app_strokes.dart';
 /// - borderRadius: shape of state layers and ring (default control token).
 /// - semanticLabel: optional button semantics wrapping the child.
 /// - enforceMinTouchTarget: keeps the 48px accessibility minimum.
+/// - pressedScale: kit `:active` press scale for controls that specify one
+///   (`.btn` 0.97, `.fab` 0.94, `.icon-btn` 0.9); 1 leaves the surface
+///   unscaled, which is the default for plain rows and tiles.
 ///
 /// States:
 /// enabled, hovered, pressed, focused (visible ring), disabled.
@@ -43,6 +46,7 @@ class MxTappable extends StatefulWidget {
     this.borderRadius,
     this.semanticLabel,
     this.enforceMinTouchTarget = true,
+    this.pressedScale = 1,
   });
 
   /// Tap handler; `null` disables the surface (no states, no semantics
@@ -63,12 +67,16 @@ class MxTappable extends StatefulWidget {
   /// already guarantees the target.
   final bool enforceMinTouchTarget;
 
+  /// Kit `:active` press scale; 1 means the surface does not scale.
+  final double pressedScale;
+
   @override
   State<MxTappable> createState() => _MxTappableState();
 }
 
 class _MxTappableState extends State<MxTappable> {
   bool _focused = false;
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -89,9 +97,22 @@ class _MxTappableState extends State<MxTappable> {
           return null;
         }),
         onFocusChange: (focused) => setState(() => _focused = focused),
+        onHighlightChanged: widget.pressedScale == 1
+            ? null
+            : (pressed) => setState(() => _pressed = pressed),
         child: widget.child,
       ),
     );
+
+    if (widget.pressedScale != 1) {
+      // Kit `:active { transform: scale(...) }` on the control surfaces.
+      surface = AnimatedScale(
+        scale: _pressed ? widget.pressedScale : 1,
+        duration: AppMotion.durationFast,
+        curve: AppMotion.easeStandard,
+        child: surface,
+      );
+    }
 
     surface = AnimatedContainer(
       duration: AppMotion.durationFast,

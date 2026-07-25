@@ -21,6 +21,29 @@ abstract interface class DeckRepository {
 
   Stream<List<Deck>> watchChildren(String parentId);
 
+  /// The ancestor chain for [deckId], ordered root → … → the deck itself —
+  /// the nested-deck breadcrumb path (WBS 6.2). Returns a single-element list
+  /// (the deck) for a root deck, or an empty list when the deck is missing.
+  Future<List<Deck>> ancestors(String deckId);
+
+  /// Decks in [languagePairId] that [movingDeckId] can be reparented under —
+  /// the move-destination picker's eligible list (WBS 6.2). Excludes the
+  /// moving deck's own subtree (a cycle), decks holding direct cards (4.3
+  /// mixed content) and the current parent (a no-op). Library root is not a
+  /// row here — the caller offers it separately.
+  Future<List<Deck>> moveDestinations(
+    String languagePairId, {
+    required String movingDeckId,
+  });
+
+  /// Decks in [languagePairId] that can hold a card — Empty or Leaf (no child
+  /// decks) — excluding [excludeDeckId] (the card's current deck). The
+  /// card-move-destination picker's eligible list (WBS 6.5).
+  Future<List<Deck>> cardMoveTargets(
+    String languagePairId, {
+    required String excludeDeckId,
+  });
+
   Future<void> rename(
     String deckId, {
     required String name,
@@ -43,6 +66,10 @@ abstract interface class DeckRepository {
   /// Active cards in [deckId]'s whole subtree (the Parent summary's
   /// aggregate count in `open-deck.md` §5).
   Future<int> countSubtreeCards(String deckId);
+
+  /// Count of nested decks below [deckId] (all descendants, excluding the deck
+  /// itself) — the delete/reset impact summary (`delete-deck.md` §4).
+  Future<int> countSubtreeDecks(String deckId);
 
   /// Number of decks (any depth) owned by [languagePairId]; the
   /// language-pair removal guard reads this.

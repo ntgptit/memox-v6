@@ -75,7 +75,9 @@ void main() {
     final container = tester.widget<Container>(
       find.ancestor(of: find.byType(Row), matching: find.byType(Container)),
     );
-    final border = (container.decoration! as BoxDecoration).border!;
+    // The focus ring is painted over the content via foregroundDecoration so
+    // it never insets the input (kit `.field:focus-visible`).
+    final border = (container.foregroundDecoration! as BoxDecoration).border!;
     expect(border.top.color, AppColors.light.focusRing);
   });
 }

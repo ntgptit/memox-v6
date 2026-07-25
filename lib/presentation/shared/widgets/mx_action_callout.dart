@@ -157,10 +157,14 @@ class MxActionCallout extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              MxText(title, role: MxTextRole.subtitle, color: foreground),
+              // Kit `ActionCallout` titled heading is base/bold (not lg).
+              Text(
+                title,
+                style: context.textStyles.button.copyWith(color: foreground),
+              ),
               const MxGap.s1(),
               MxText(text, role: MxTextRole.caption, color: foreground),
-              if (action != null) ...[const MxGap.s2(), action],
+              if (action != null) ...[const MxGap.s3(), action],
             ],
           ),
         ),
@@ -172,7 +176,8 @@ class MxActionCallout extends StatelessWidget {
   List<Widget> _dismiss(Color foreground) {
     if (onDismiss == null) return const [];
     return [
-      const MxGap.s2(),
+      // Kit `.callout` keeps the space-3 flex gap before the dismiss glyph.
+      const MxGap.s3(),
       MxIconButton(
         icon: Symbols.close_rounded,
         small: true,

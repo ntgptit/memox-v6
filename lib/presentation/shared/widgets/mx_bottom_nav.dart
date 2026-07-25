@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/core/theme/tokens/app_border_radii.dart';
 import 'package:memox_v6/core/theme/tokens/app_component_dimensions.dart';
+import 'package:memox_v6/core/theme/tokens/app_icon_sizes.dart';
 import 'package:memox_v6/core/theme/tokens/app_motion.dart';
 import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
@@ -145,7 +146,12 @@ class _NavItem extends StatelessWidget {
                   borderRadius: AppBorderRadii.pill,
                 ),
                 child: MxIcon(
+                  // Kit `.bottom-nav__item` glyph is icon-size-lg (28); the
+                  // active destination fills (`FILL 1`) so selection reads
+                  // beyond color.
                   icon: item.icon,
+                  size: AppIconSizes.lg,
+                  filled: active,
                   color: active ? colors.onPrimarySoft : colors.textSecondary,
                 ),
               ),

@@ -35,6 +35,10 @@ abstract final class AppTypography {
   /// `--memox-font-cjk`: CJK is not covered by the primary family and must
   /// fall through to platform CJK families — explicit, never an undefined
   /// default (kit contract KIT-09-04/KIT-37-02).
+  ///
+  /// `Noto Sans KR` is bundled (see `pubspec.yaml`) so the offline web build —
+  /// which has no platform CJK font and cannot fetch CanvasKit's remote Noto —
+  /// still resolves Hangul; devices with a platform CJK family use it first.
   static const List<String> cjkFamilyFallback = <String>[
     'Noto Sans CJK KR',
     'Noto Sans KR',
@@ -49,6 +53,14 @@ abstract final class AppTypography {
     'Apple SD Gothic Neo',
     'PingFang SC',
     'sans-serif',
+  ];
+
+  /// The effective fallback for every UI/body text role: the Latin platform
+  /// stack first, then the CJK families. Per-glyph fallback keeps Latin on the
+  /// primary family and resolves Hangul against the bundled `Noto Sans KR`.
+  static const List<String> textFamilyFallback = <String>[
+    ...fontFamilyFallback,
+    ...cjkFamilyFallback,
   ];
 
   // --- font sizes (logical px) ---

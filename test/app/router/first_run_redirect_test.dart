@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/app/app.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
+import 'package:memox_v6/domain/today/today_projection.dart';
+import 'package:memox_v6/presentation/features/today/viewmodels/today_projection_provider.dart';
 
 void main() {
   late db.AppDatabase database;
@@ -19,7 +21,18 @@ void main() {
 
   Widget app() {
     return ProviderScope(
-      overrides: [appDatabaseProvider.overrideWithValue(database)],
+      overrides: [
+        appDatabaseProvider.overrideWithValue(database),
+        // Home is the async Today entry (WBS 5.7.2); pin a resolved projection
+        // so it settles deterministically instead of leaving a live drift
+        // stream that never quiesces under bounded pumps.
+        todayProjectionProvider.overrideWith(
+          (ref) async => const TodayProjection(
+            primaryAction: TodayPrimaryAction.caughtUp,
+            dueCount: 0,
+          ),
+        ),
+      ],
       child: const MemoxApp(),
     );
   }
@@ -56,8 +69,9 @@ void main() {
     await tester.pumpWidget(app());
     await pumpApp(tester);
 
-    expect(find.text('MemoX Home'), findsOneWidget);
-    expect(find.text('Library'), findsOneWidget);
+    // Home is the Today entry (WBS 5.7.2); its title also labels the nav tab.
+    expect(find.text('Today'), findsWidgets);
+    expect(find.text('Library'), findsWidgets);
 
     await disposeAndFlushStreams(tester);
   });
@@ -83,9 +97,10 @@ void main() {
     await tester.pumpWidget(app());
     await pumpApp(tester);
 
-    expect(find.text('MemoX Home'), findsOneWidget);
+    // Home is the Today entry (WBS 5.7.2); its title also labels the nav tab.
+    expect(find.text('Today'), findsWidgets);
 
-    await tester.tap(find.text('Library'));
+    await tester.tap(find.text('Library').last);
     await pumpApp(tester);
 
     expect(

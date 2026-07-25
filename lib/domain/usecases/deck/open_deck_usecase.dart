@@ -29,4 +29,8 @@ class OpenDeckUseCase {
   /// Aggregate active-card count across the subtree (Parent summary).
   Future<int> subtreeCardCount(String deckId) =>
       _decks.countSubtreeCards(deckId);
+
+  /// The ancestor chain (root → … → the deck), the nested-deck breadcrumb
+  /// path (WBS 6.2). Empty when the deck is missing.
+  Future<List<Deck>> ancestorsOf(String deckId) => _decks.ancestors(deckId);
 }

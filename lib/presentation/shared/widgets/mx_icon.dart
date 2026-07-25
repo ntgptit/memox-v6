@@ -24,19 +24,27 @@ import 'package:memox_v6/core/theme/tokens/app_icon_sizes.dart';
 /// - icon: a `Symbols.*` glyph (Material Symbols Rounded).
 /// - size: token size from `AppIconSizes` (default md).
 /// - color: overrides the default `colors.text`.
+/// - filled: the Material Symbols `FILL 1` axis — the kit's selected-state
+///   cue (e.g. the active bottom-nav destination), so selection reads
+///   beyond color alone.
 /// - semanticLabel: passthrough to [Icon].
+///
+/// States:
+/// outline (default) and filled (`FILL 1`).
 class MxIcon extends StatelessWidget {
   const MxIcon({
     super.key,
     required this.icon,
     this.size = AppIconSizes.md,
     this.color,
+    this.filled = false,
     this.semanticLabel,
   });
 
   final IconData icon;
   final double size;
   final Color? color;
+  final bool filled;
   final String? semanticLabel;
 
   @override
@@ -45,6 +53,7 @@ class MxIcon extends StatelessWidget {
       icon,
       size: size,
       color: color ?? context.colors.text,
+      fill: filled ? 1 : 0,
       semanticLabel: semanticLabel,
     );
   }
