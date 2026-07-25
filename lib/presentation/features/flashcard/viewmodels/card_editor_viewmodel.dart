@@ -1,4 +1,5 @@
 import 'package:memox_v6/app/di/usecase_providers.dart';
+import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/flashcard/create_flashcard_result.dart';
 import 'package:memox_v6/domain/flashcard/edit_flashcard_result.dart';
@@ -76,12 +77,31 @@ class CardEditorSaveViewmodel extends _$CardEditorSaveViewmodel {
     required String primaryMeaning,
     required List<String> rawTagLabels,
     bool allowDuplicate = false,
+    String? draftTranslation,
+    String? meaningLanguageCode,
   }) async {
     state = const AsyncLoading<void>();
     state = await AsyncValue.guard(() async {
       final tagIds = await ref
           .read(manageCardTagsUseCaseProvider)
           .resolveTagIds(rawTagLabels);
+
+      // The create form's optional translation slot (kit
+      // `flashcard-editor/translation`; `manage-card-translations.md` §2 lists
+      // Create as an entry point beside Edit). It goes through the use case
+      // rather than a follow-up write so the translation lands in the same
+      // transaction as the card — a second write that failed would leave the
+      // card stored without it, and the retry would create a duplicate card.
+      final draft = draftTranslation == null
+          ? null
+          : StringUtils.trimmed(draftTranslation);
+      final languageCode = meaningLanguageCode;
+      final translations =
+          draft != null && draft.isNotEmpty && languageCode != null
+          ? <({String languageCode, String text})>[
+              (languageCode: languageCode, text: draft),
+            ]
+          : const <({String languageCode, String text})>[];
 
       final result = await ref
           .read(createFlashcardUseCaseProvider)
@@ -91,6 +111,7 @@ class CardEditorSaveViewmodel extends _$CardEditorSaveViewmodel {
             primaryMeaning: primaryMeaning,
             allowDuplicate: allowDuplicate,
             tagIds: tagIds,
+            translations: translations,
           );
       // Candidates are a review decision, not an error: the banner
       // surface owns them (resolve-duplicate-flashcard.md).
