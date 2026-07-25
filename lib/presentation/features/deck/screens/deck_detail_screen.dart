@@ -58,6 +58,17 @@ class DeckDetailScreen extends ConsumerWidget {
         onBack: () => context.backFromDeck(),
         backLabel: l10n.backLabel,
         actions: <Widget>[
+          // Kit `subdeck-list`/`flashcard-list` app bar: search sits left of
+          // the overflow. It opens the same library-wide search the Library
+          // root does — narrowing to this deck is the Deck picker inside
+          // search's own filter sheet (`filter-search-results.md` §3), which
+          // is not built, so the label stays unscoped rather than promising
+          // a scope the screen cannot deliver.
+          MxIconButton.toolbar(
+            icon: Symbols.search_rounded,
+            semanticLabel: l10n.searchLabel,
+            onPressed: () => context.pushSearch(),
+          ),
           if (deck.value case final d?)
             MxIconButton.toolbar(
               icon: Symbols.more_vert_rounded,
