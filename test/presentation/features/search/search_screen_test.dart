@@ -12,6 +12,8 @@ import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
 import 'package:memox_v6/presentation/features/flashcard/routes/flashcard_routes.dart';
 import 'package:memox_v6/presentation/features/search/routes/search_routes.dart';
 import 'package:memox_v6/presentation/features/search/screens/search_screen.dart';
+import 'package:memox_v6/domain/search/search_result.dart';
+import 'package:memox_v6/domain/search/search_repository.dart';
 
 /// WBS 10.2 — the search screen queries the read-model: a blank query shows the
 /// prompt, a matching query lists ranked hits, and no hits shows guidance.
@@ -199,4 +201,59 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  // `recover-search-failure.md` §3: the primary CTA on a recoverable failure
+  // is Retry, and §1's objective is recovery "mà không buộc user nhập lại".
+  // There was no retry at all, so the only escape from a failed search was to
+  // edit the query — the re-entry this flow exists to prevent.
+  testWidgets('a failed search offers a retry that reruns it', (tester) async {
+    var failNext = true;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(database),
+          searchRepositoryProvider.overrideWith(
+            (ref) => _FlakySearch(() => failNext),
+          ),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const SearchScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'greet');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Try again'), findsOneWidget);
+    // The query survives the failure — nothing to retype.
+    expect(find.text('greet'), findsWidgets);
+
+    failNext = false;
+    await tester.tap(find.text('Try again'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Try again'), findsNothing);
+  });
+}
+
+/// Fails until told otherwise, so the retry has something to recover from.
+class _FlakySearch implements SearchRepository {
+  _FlakySearch(this._shouldFail);
+
+  final bool Function() _shouldFail;
+
+  @override
+  Future<List<SearchResult>> searchLibrary(
+    String languagePairId, {
+    required String cardQuery,
+    required String deckQuery,
+  }) async {
+    if (_shouldFail()) throw StateError('search index unavailable');
+    return const <SearchResult>[];
+  }
 }
