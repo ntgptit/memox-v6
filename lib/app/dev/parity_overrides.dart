@@ -13,6 +13,8 @@ import 'package:memox_v6/domain/flashcard/card_audio_ref.dart';
 import 'package:memox_v6/domain/flashcard/card_translation.dart';
 import 'package:memox_v6/domain/flashcard/create_flashcard_result.dart';
 import 'package:memox_v6/domain/usecases/flashcard/create_flashcard_usecase.dart';
+import 'package:memox_v6/domain/flashcard/edit_flashcard_result.dart';
+import 'package:memox_v6/domain/usecases/flashcard/edit_flashcard_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/open_deck_usecase.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_result_notifier.dart';
@@ -65,12 +67,14 @@ List<Override> parityOverridesFor(String fixtureId) {
         ),
       ),
     ],
+    // Submit-error is measured against the kit's *edit* shot — its app bar
+    // reads "Edit card", because the kit gives "New card" only to the create
+    // view — so the failing path here is the edit write, not the create one.
     'MX-VIS-057' => <Override>[
-      createFlashcardUseCaseProvider.overrideWith(
-        (ref) => _FailingCreateFlashcardUseCase(
+      editFlashcardUseCaseProvider.overrideWith(
+        (ref) => _FailingEditFlashcardUseCase(
           cards: ref.watch(flashcardRepositoryProvider),
           decks: ref.watch(deckRepositoryProvider),
-          idGenerator: ref.watch(idGeneratorProvider),
           clock: ref.watch(appClockProvider),
         ),
       ),
@@ -166,32 +170,30 @@ class _HangingCreateFlashcardUseCase extends CreateFlashcardUseCase {
   }
 }
 
-/// A card write that always fails, for `flashcard-editor--submit-error`.
+/// An edit that always fails, for `flashcard-editor--submit-error`.
 ///
-/// It throws rather than returning a validation result, so the draft stays
-/// intact behind the failure banner — which is the point of the state:
-/// `create-flashcard.md` requires the typed content to survive a failed save.
-class _FailingCreateFlashcardUseCase extends CreateFlashcardUseCase {
-  const _FailingCreateFlashcardUseCase({
+/// The kit draws this state in the edit variant, so the journey opens an
+/// existing card rather than a blank form. It throws instead of returning a
+/// typed result, so the edited draft stays intact behind the failure banner —
+/// which is the point of the state: `edit-flashcard.md` requires the user's
+/// changes to survive a failed save.
+class _FailingEditFlashcardUseCase extends EditFlashcardUseCase {
+  const _FailingEditFlashcardUseCase({
     required super.cards,
     required super.decks,
-    required super.idGenerator,
     required super.clock,
   });
 
   @override
-  Future<CreateFlashcardResult> call({
-    required String deckId,
+  Future<EditFlashcardResult> call({
+    required String cardId,
     required String term,
     required String primaryMeaning,
-    String? retryCardId,
+    required int expectedContentVersion,
     bool allowDuplicate = false,
-    List<CardTranslation> translations = const [],
-    List<String> tagIds = const [],
-    List<CardAudioRef> audioRefs = const [],
   }) async {
     throw const UnexpectedFailure(
-      cause: 'parity fixture: the card write path fails for MX-VIS-057',
+      cause: 'parity fixture: the card edit path fails for MX-VIS-057',
     );
   }
 }

@@ -119,16 +119,38 @@ banner — one regular-weight sentence with `Try again` trailing it on the same
 row. Correcting the call site moved it 3.36% → 1.58% light and 9.99% → 4.92%
 dark.
 
-The dark residual is colour, not composition: the same widget tree passes in
-light. That belongs to the dark-token sweep rather than to this row.
+### Chasing the dark residual — two wrong answers, then the diff image
 
-**Finding for whoever closes these:** the kit's `--submitting` and
-`--submit-error` shots are both drawn in the **edit** variant — the app bar
-reads "Edit card", because the kit's JSX gives "New card" only to
-`view === 'create'`. Both journeys here are create. `MX-VIS-056` passes anyway,
-which puts that difference at roughly 1%, so it is not the dark blocker — but
-neither shot can reach zero from a create journey, and an edit-mode journey
-would need a failing *edit* write path alongside the create one.
+Worth recording as method, because both hypotheses were plausible and both were
+wrong, and each cost a full measurement to disprove.
+
+*"It is a dark colour token."* Sampling the two renders at the page background,
+banner fill, field fill and sticky footer returned **identical** values in
+every position. Not colour.
+
+*"It is the app-bar title."* The kit's `--submitting` and `--submit-error`
+shots are both drawn in the **edit** variant — they read "Edit card", because
+the kit's JSX gives "New card" only to `view === 'create'` — while both
+journeys were create. Rebuilding `MX-VIS-057` as a genuine edit journey (save a
+card, reopen it, edit, fail the *edit* write) moved the number
+4.92% → 4.94%. The title contributes nothing measurable.
+
+The diff image, which should have been the first thing read rather than the
+third, shows the actual cause: the residual is spread across the **lower**
+form. The shot embeds an additional-translation row ("Another meaning") and tag
+content that the journey never creates. That is the same class as
+`MX-VIS-036`/`037` — content baked into a shot that the flow does not produce —
+not a defect in the widget tree.
+
+Dark fails where light passes because light-on-dark glyph edges carry larger
+per-pixel deltas than dark-on-light, so an identical text mismatch costs
+roughly three times as much.
+
+The edit journey is kept even though it did not move the number: the shot *is*
+the edit variant, so the journey now matches what it is being compared against.
+
+**Note the earlier claim in this packet — "the dark residual is colour, not
+composition" — was wrong on both counts.**
 
 **Remaining child-B scope:** `submit-success` and the dirty-discard overlay.
 The kit has **ten** editor states; the register now carries **four**.
