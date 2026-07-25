@@ -293,8 +293,27 @@ accessible name. A label that reaches the tree through `MxTappable` is not
 visible to `find.bySemanticsLabel`, though Flutter Web exposes it fine — which
 is why the Playwright spec can target the name and the widget test cannot.
 
-**Remaining for child C:** the Term field's audio control (CF-05), which does
-not exist here at all, plus `keyboard-open`. Note
+### `keyboard-open` is unreachable, and that is the right answer
+
+The kit draws this state with a **simulated software keyboard** rendered into
+the mock — its own comment says so: "keyboard-open renders the populated edit
+form with a simulated software keyboard raised". A headless-Chromium capture
+has no OS keyboard and the app never draws one, so no journey can produce those
+pixels. Recorded as `MX-VIS-061`, structurally unreachable, the same class as
+`MX-VIS-013`/`027`. Faking a keyboard to satisfy a pixel gate would measure a
+composition the product does not have.
+
+What the state exists *for* is testable, and now is. KIT-25-04/35-01 puts the
+SaveBar above the faux keyboard so the primary action is never covered; the
+widget test "the Save bar stays above a raised keyboard" raises a 600px bottom
+inset and asserts the button moved up into the area the keyboard left. Verified
+by mutation: `resizeToAvoidBottomInset: false` on `MxScaffold` fails it
+(expected ≤400, got 584).
+
+**Remaining for child C:** only the Term field's audio control (CF-05), which
+does not exist in this build at all — the kit itself defers it ("mock shows
+play/generate only; business owns Generate / Attach file / Remove"), so it is
+product to be authored rather than parity to be closed. Note
 the kit's edit shot also carries the *create another* checkbox that
 `specs/flashcard-editor.md` records as removed under CF-13 — a shot/spec
 contradiction of the same class as `MX-VIS-036`/`037`, and small enough that

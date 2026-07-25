@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox_v6/presentation/shared/layouts/mx_form_footer.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
@@ -91,6 +92,39 @@ void main() {
 
   MxButton saveButton(WidgetTester tester) =>
       tester.widget<MxButton>(find.byType(MxButton));
+
+  // KIT-25-04 / 35-01: the kit's `keyboard-open` state exists to pin one
+  // behaviour — the sticky Save bar sits directly above the raised keyboard and
+  // is never covered by it. That shot cannot be measured here (it draws a
+  // simulated software keyboard, which a desktop browser capture has no way to
+  // produce), so the contract is asserted instead of photographed.
+  testWidgets('the Save bar stays above a raised keyboard', (tester) async {
+    await tester.pumpWidget(app());
+    await pumpEditor(tester);
+
+    final beforeInset = tester.getRect(find.byType(MxButton));
+    expect(
+      beforeInset.bottom,
+      lessThanOrEqualTo(tester.view.physicalSize.height),
+    );
+
+    // Raise a keyboard the size of a typical software one.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 600);
+    addTearDown(tester.view.resetViewInsets);
+    await pumpEditor(tester);
+
+    final visibleBottom =
+        tester.view.physicalSize.height / tester.view.devicePixelRatio - 200;
+    final afterInset = tester.getRect(find.byType(MxButton));
+
+    // The button moved up rather than being covered: it now sits inside the
+    // area the keyboard left behind.
+    expect(afterInset.bottom, lessThanOrEqualTo(visibleBottom));
+    expect(afterInset.top, lessThan(beforeInset.top));
+    expect(find.byType(MxFormFooter), findsOneWidget);
+
+    await disposeAndFlushStreams(tester);
+  });
 
   testWidgets('renders deck context and deck-driven labels', (tester) async {
     await tester.pumpWidget(app());
