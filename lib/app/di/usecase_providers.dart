@@ -38,6 +38,7 @@ import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usec
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:memox_v6/domain/usecases/study_streak/record_streak_day_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_goal/track_daily_goal_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_goal/load_daily_progress_usecase.dart';
 
 part 'usecase_providers.g.dart';
 
@@ -283,6 +284,7 @@ LoadTodayProjectionUseCase loadTodayProjectionUseCase(Ref ref) {
     decks: ref.watch(deckRepositoryProvider),
     languagePairs: ref.watch(selectLanguagePairUseCaseProvider),
     clock: ref.watch(appClockProvider),
+    dailyProgress: ref.watch(loadDailyProgressUseCaseProvider),
   );
 }
 
@@ -303,6 +305,16 @@ FinalizeStudySessionUseCase finalizeStudySessionUseCase(Ref ref) {
 
 /// Aggregates a finalized session's qualified cards into the day's goal bucket
 /// (`track-daily-goal.md`).
+@riverpod
+LoadDailyProgressUseCase loadDailyProgressUseCase(Ref ref) {
+  return LoadDailyProgressUseCase(
+    streaks: ref.watch(streakRepositoryProvider),
+    goals: ref.watch(studyGoalRepositoryProvider),
+    timeZone: ref.watch(appTimeZoneProvider),
+    clock: ref.watch(appClockProvider),
+  );
+}
+
 @riverpod
 TrackDailyGoalUseCase trackDailyGoalUseCase(Ref ref) {
   return TrackDailyGoalUseCase(

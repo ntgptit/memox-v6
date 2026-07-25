@@ -18,7 +18,6 @@ import 'package:memox_v6/domain/usecases/study_streak/record_streak_day_usecase.
 import 'package:memox_v6/domain/usecases/study_goal/track_daily_goal_usecase.dart';
 import 'package:memox_v6/domain/study_streak/streak_repository.dart';
 import 'package:memox_v6/domain/study_streak/streak_projection_policy.dart';
-import 'package:memox_v6/domain/study_streak/streak_day.dart';
 import 'package:memox_v6/domain/study_goal/daily_goal_contribution.dart';
 import 'package:memox_v6/core/time/app_time_zone.dart';
 
@@ -189,7 +188,9 @@ class FinalizeStudySessionUseCase {
       // this could safely assume.
       final days = await streaks.daysBetween('0000-01-01', today.toString());
       final projection = _streakPolicy.project(
-        days: days.map(_localDayOf).whereType<LocalDay>(),
+        days: days
+            .map((day) => parseLocalDay(day.localDate))
+            .whereType<LocalDay>(),
         effectiveDay: today,
       );
       return StudyResultGoalStatus(
@@ -202,19 +203,6 @@ class FinalizeStudySessionUseCase {
       // result screen, not a failed session.
       return null;
     }
-  }
-
-  /// Stored days carry their date as `YYYY-MM-DD` text; a row that cannot be
-  /// parsed is skipped rather than crashing the result, and
-  /// `reconcile-streak-history.md` owns repairing it.
-  LocalDay? _localDayOf(StreakDay day) {
-    final parts = day.localDate.split('-');
-    if (parts.length != 3) return null;
-    final year = int.tryParse(parts[0]);
-    final month = int.tryParse(parts[1]);
-    final dayOfMonth = int.tryParse(parts[2]);
-    if (year == null || month == null || dayOfMonth == null) return null;
-    return LocalDay(year, month, dayOfMonth);
   }
 
   Future<void> _scheduleCard(

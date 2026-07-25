@@ -1,4 +1,5 @@
 import 'package:memox_v6/domain/study_session/study_session.dart';
+import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
 
 /// The single primary call-to-action the Today entry surfaces
 /// (`load-today-dashboard.md` §2). Exactly one is chosen from the composed
@@ -31,6 +32,7 @@ class TodayProjection {
     required this.primaryAction,
     required this.dueCount,
     this.pausedSession,
+    this.dailyProgress = const DailyProgressStatus.none(),
   });
 
   final TodayPrimaryAction primaryAction;
@@ -40,4 +42,9 @@ class TodayProjection {
 
   /// The resumable active session, or `null` when none is in progress.
   final StudySession? pausedSession;
+
+  /// Today's streak and goal standing, for the kit's Daily-goal card. Always
+  /// present; `hasGoal` is false when none is configured, which is the card's
+  /// own not-shown condition rather than a missing value.
+  final DailyProgressStatus dailyProgress;
 }
