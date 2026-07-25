@@ -204,6 +204,106 @@ class ParityStudyFixtures {
     );
   }
 
+  /// An active newLearning session resumed into Match, stage 1 (Review → Match
+  /// → Guess → Recall → Fill) — the kit `match-mode` states (WBS 5.6.6).
+  ///
+  /// Match is the one mode that had no fixture, no spec and no census row: it
+  /// was skipped everywhere the other five modes were covered. Seeded as data
+  /// (session, five card snapshots, the round order and the match-stage
+  /// checkpoint) so navigating to the study route resumes into Match without a
+  /// start flow, exactly as the other mode fixtures do.
+  ///
+  /// Both sides of a Match board are rendered, unlike Guess where distractor
+  /// terms never appear — so every term here is real Korean rather than
+  /// filler, or the board would read as half-broken.
+  Future<void> seedMatchSession() async {
+    await _database.deckDao.insertDeck(
+      'fx-mt-deck',
+      'fx-lp-1',
+      null,
+      'Everyday verbs',
+      'everyday verbs',
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+
+    const cards = <(String, String, String)>[
+      ('fx-mt-c0', '먹다', 'to eat'),
+      ('fx-mt-c1', '자다', 'to sleep'),
+      ('fx-mt-c2', '읽다', 'to read'),
+      ('fx-mt-c3', '쓰다', 'to write'),
+      ('fx-mt-c4', '걷다', 'to walk'),
+    ];
+    for (final (id, term, meaning) in cards) {
+      await _database.flashcardDao.insertFlashcard(
+        id,
+        'fx-mt-deck',
+        term,
+        term,
+        meaning,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+      await _database.learningProgressDao.insertProgress(
+        'p-$id',
+        id,
+        0,
+        null,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+    }
+
+    await _database.studySessionDao.insertSession(
+      'fx-mt-session',
+      'newLearning',
+      'fx-mt-deck',
+      'subtree',
+      'active',
+      1,
+      fixedInstantMs,
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+    for (var i = 0; i < cards.length; i++) {
+      final (id, term, meaning) = cards[i];
+      await _database.sessionSnapshotDao.insertSessionCard(
+        'sc-$id',
+        'fx-mt-session',
+        id,
+        i,
+        term,
+        meaning,
+        1,
+        0,
+        0,
+        fixedInstantMs,
+      );
+    }
+    // Match is stage index 1; the checkpoint and its round order share the
+    // round index so the loader resolves this order for stage 1, card 0.
+    const matchRoundIndex = 2;
+    await _database.sessionSnapshotDao.insertRoundOrder(
+      'fx-mt-order',
+      'fx-mt-session',
+      matchRoundIndex,
+      1,
+      jsonEncode(cards.map((card) => card.$1).toList()),
+      fixedInstantMs,
+    );
+    await _database.sessionCheckpointDao.upsertCheckpoint(
+      'fx-mt-checkpoint',
+      'fx-mt-session',
+      1,
+      matchRoundIndex,
+      0,
+      '[]',
+      '{}',
+      1,
+      fixedInstantMs,
+    );
+  }
+
   /// An active newLearning session resumed into Recall, stage 3 (Review → Match →
   /// Guess → Recall), card 1/5 — the kit `recall-mode` states (WBS 5.6.8). The
   /// current card is the shot's `친구` / `friend`. The spec reveals the answer

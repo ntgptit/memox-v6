@@ -51,6 +51,7 @@ class ParityFixtures {
     'MX-VIS-059',
     'MX-VIS-060',
     'MX-VIS-050',
+    'MX-VIS-062',
     'MX-VIS-051',
     'MX-VIS-052',
     'MX-VIS-053',
@@ -94,6 +95,10 @@ class ParityFixtures {
         return;
       case 'MX-VIS-043':
         await _seedLeafDeck();
+        return;
+      case 'MX-VIS-062':
+        await _seedActivePair();
+        await _study.seedMatchSession();
         return;
       case 'MX-VIS-050':
         await _seedActivePair();
