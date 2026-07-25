@@ -506,14 +506,14 @@ yet measured under this gate.
 | MX-VIS-022 | Library | Callout dismissed | `library--first-deck-created-dismissed` | **Superseded (owner, 2026-07-21)** — see MX-VIS-021; the dismissed state no longer exists either. |
 | MX-VIS-023 | Library | Dense list | `library--dense` | Blocked — same as MX-VIS-020 |
 | MX-VIS-024 | Library | Error | *no kit reference* (nearest `library--offline`) | Pending — kit decision needed |
-| MX-VIS-025 | Create Deck dialog | Root default | `create-deck-dialog--root-default` | Blocked — dialog lacks the language-pair and description rows (5.2.4); backdrop needs 10.2 + 5.4.2 |
-| MX-VIS-026 | Create Deck dialog | Nested | `create-deck-dialog--nested` | Blocked — nested variant needs the inherited-pair row (5.2.4); backdrop needs 10.2 + 5.4.2 |
-| MX-VIS-027 | Create Deck dialog | Validation error | `create-deck-dialog--validation` | Blocked — structurally unreachable: submit is gated on a non-empty name, so the empty-name error can never render (5.2.4) |
+| MX-VIS-025 | Create Deck dialog | Root default | `create-deck-dialog--root-default` | Blocked — dialog lacks the language-pair and description rows (`int-3`); backdrop needs 10.2 + 5.4.2 |
+| MX-VIS-026 | Create Deck dialog | Nested | `create-deck-dialog--nested` | Blocked — nested variant needs the inherited-pair row (`int-3`); backdrop needs 10.2 + 5.4.2 |
+| MX-VIS-027 | Create Deck dialog | Validation error | `create-deck-dialog--validation` | Blocked — structurally unreachable: submit is gated on a non-empty name, so the empty-name error can never render (`int-3`) |
 | MX-VIS-028 | Create Deck dialog | Duplicate sibling | `create-deck-dialog--duplicate-sibling` | Blocked — same nested layout as MX-VIS-026 |
-| MX-VIS-029 | Create Deck dialog | Optional expanded | `create-deck-dialog--optional-expanded` | Blocked — no description input on the dialog (5.2.4) |
-| MX-VIS-030 | Create Deck dialog | Submitting | `create-deck-dialog--submitting` | Blocked — kit relabels the CTA to `Creating…`; no such string or state (5.2.4) |
-| MX-VIS-031 | Create Deck dialog | Submit failure | `create-deck-dialog--submit-failure` | Blocked — kit shows an error banner above the form and a `Try again` CTA (5.2.4) |
-| MX-VIS-032 | Create Deck dialog | Long name | `create-deck-dialog--long-name` | Blocked — needs a name-length rule and a filled description (5.2.1, 5.2.4) |
+| MX-VIS-029 | Create Deck dialog | Optional expanded | `create-deck-dialog--optional-expanded` | Blocked — no description input on the dialog (`int-3`) |
+| MX-VIS-030 | Create Deck dialog | Submitting | `create-deck-dialog--submitting` | Blocked — kit relabels the CTA to `Creating…`; no such string or state (`int-3`) |
+| MX-VIS-031 | Create Deck dialog | Submit failure | `create-deck-dialog--submit-failure` | Blocked — kit shows an error banner above the form and a `Try again` CTA (`int-3`) |
+| MX-VIS-032 | Create Deck dialog | Long name | `create-deck-dialog--long-name` | Blocked — needs a name-length rule and a filled description (5.2.1, `int-3`) |
 | MX-VIS-033 | Create Deck dialog | Keyboard open | `create-deck-dialog--keyboard-open` | Blocked — `MxDialog` has no `viewInsets` handling, and the shot draws a mock OS keyboard a browser run cannot reproduce; recommend retiring this ID |
 | MX-VIS-034 | Deck detail — empty branch | Default | `empty-deck--default` | **Playwright PASS — 1.50% light / 2.08% dark** (seeded pair + one deck holding nothing; entered through Library, never deep-linked). Was recorded Blocked at 9.68 / 13.58 on the add-card CTA that `5.3.2` child A shipped — **the blocker cleared and nobody re-measured**, and the state had no spec at all, so it was silently never re-checked. Found by auditing every unmeasured row against whether the row it names has landed |
 | MX-VIS-035 | Deck detail — empty branch | Create nested dialog | `empty-deck--create-nested-dialog` | Blocked — byte-identical to `create-deck-dialog--nested`; fold into MX-VIS-026 |
