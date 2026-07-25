@@ -280,11 +280,10 @@ ApplyTerminalOutcomeUseCase applyTerminalOutcomeUseCase(Ref ref) {
 LoadTodayProjectionUseCase loadTodayProjectionUseCase(Ref ref) {
   return LoadTodayProjectionUseCase(
     sessions: ref.watch(studySessionRepositoryProvider),
-    progress: ref.watch(learningProgressRepositoryProvider),
     decks: ref.watch(deckRepositoryProvider),
     languagePairs: ref.watch(selectLanguagePairUseCaseProvider),
-    clock: ref.watch(appClockProvider),
     dailyProgress: ref.watch(loadDailyProgressUseCaseProvider),
+    queueCounts: ref.watch(loadStudyQueueCountsUseCaseProvider),
   );
 }
 

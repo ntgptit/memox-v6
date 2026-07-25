@@ -1,40 +1,36 @@
-import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
-import 'package:memox_v6/domain/learning_progress/learning_progress_repository.dart';
 import 'package:memox_v6/domain/study_session/study_session_repository.dart';
 import 'package:memox_v6/domain/today/today_projection.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_goal/load_daily_progress_usecase.dart';
 import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
+import 'package:memox_v6/domain/usecases/learning_progress/load_study_queue_counts_usecase.dart';
 
 /// Composes the Today entry projection (WBS 5.7.1; `load-today-dashboard.md`).
 ///
 /// Read-only: it pulls each input from its owning source and never recomputes a
 /// business value — the resumable session from [StudySessionRepository], the
 /// library card count from [DeckRepository] (for the empty-vs-caught-up split)
-/// and the due count from [LearningProgressRepository]. It then picks the single
+/// and the due count from [LoadStudyQueueCountsUseCase], scoped to the active pair. It then picks the single
 /// primary action (§2): a paused session wins; else an empty library asks to
 /// create; else due cards start a review; else the learner is caught up.
 class LoadTodayProjectionUseCase {
   const LoadTodayProjectionUseCase({
     required StudySessionRepository sessions,
-    required LearningProgressRepository progress,
     required DeckRepository decks,
     required SelectLanguagePairUseCase languagePairs,
-    required AppClock clock,
+    required LoadStudyQueueCountsUseCase queueCounts,
     LoadDailyProgressUseCase? dailyProgress,
   }) : _sessions = sessions,
-       _progress = progress,
        _decks = decks,
        _languagePairs = languagePairs,
-       _clock = clock,
+       _queueCounts = queueCounts,
        _dailyProgress = dailyProgress;
 
   final StudySessionRepository _sessions;
-  final LearningProgressRepository _progress;
   final DeckRepository _decks;
   final SelectLanguagePairUseCase _languagePairs;
-  final AppClock _clock;
+  final LoadStudyQueueCountsUseCase _queueCounts;
 
   /// Optional so existing constructions keep working; without it the
   /// projection reports no goal, which is the card's not-shown state.
@@ -46,7 +42,18 @@ class LoadTodayProjectionUseCase {
     final libraryCardCount = pair == null
         ? 0
         : await _decks.countForLanguagePair(pair.id);
-    final dueCount = await _progress.countDue(_clock.nowUtc());
+    // Scoped to the active pair, like the library count above it.
+    //
+    // This read `LearningProgressRepository.countDue`, whose SQL has no
+    // language-pair filter — it counts every due card in the database. With
+    // two pairs configured, Today advertised review work from a pair whose
+    // decks the Library does not even show, and the number disagreed with the
+    // scope the session would actually run over. `LoadStudyQueueCountsUseCase`
+    // has documented itself as "the Dashboard scope" since 5.4.2 and was wired
+    // into DI but never called by anything.
+    final dueCount = pair == null
+        ? 0
+        : (await _queueCounts.forLibrary(pair.id)).dueCount;
 
     final action = paused != null
         ? TodayPrimaryAction.continueSession

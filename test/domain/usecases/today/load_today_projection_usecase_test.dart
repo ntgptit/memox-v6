@@ -13,6 +13,8 @@ import 'package:memox_v6/domain/study_session/study_session_repository.dart';
 import 'package:memox_v6/domain/today/today_projection.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/today/load_today_projection_usecase.dart';
+import 'package:memox_v6/domain/usecases/learning_progress/load_study_queue_counts_usecase.dart';
+import 'package:memox_v6/domain/learning_progress/study_queue_counts.dart';
 
 /// WBS 5.7.1 — the Today read projection composes existing sources into one
 /// primary action, never recomputing them (`load-today-dashboard.md` §§1-3).
@@ -26,10 +28,13 @@ void main() {
     int due = 0,
   }) => LoadTodayProjectionUseCase(
     sessions: _FakeSessions(paused),
-    progress: _FakeProgress(due),
     decks: _FakeDecks(libraryCards),
     languagePairs: _StubPairs(pair),
-    clock: _FixedClock(now),
+    queueCounts: LoadStudyQueueCountsUseCase(
+      progress: _FakeProgress(due),
+      decks: _FakeDecks(libraryCards),
+      clock: _FixedClock(now),
+    ),
   );
 
   final pair = LanguagePair(
@@ -55,6 +60,26 @@ void main() {
     createdAt: now,
     updatedAt: now,
   );
+
+  // Today scopes its library card count to the active pair, and used to count
+  // due cards across the whole database. With two pairs configured it
+  // advertised review work from a pair whose decks the Library does not show,
+  // and the number disagreed with the scope a session would run over.
+  test('the due count ignores other language pairs', () async {
+    final projection = await LoadTodayProjectionUseCase(
+      sessions: _FakeSessions(null),
+      decks: _FakeDecks(12),
+      languagePairs: _StubPairs(pair),
+      queueCounts: LoadStudyQueueCountsUseCase(
+        progress: _FakeProgress(3, otherPairDue: 40),
+        decks: _FakeDecks(12),
+        clock: _FixedClock(now),
+      ),
+    ).call();
+
+    expect(projection.dueCount, 3, reason: 'lp1 only, not lp1 + the other 40');
+    expect(projection.primaryAction, TodayPrimaryAction.startReview);
+  });
 
   test('a resumable session wins the primary action', () async {
     final projection = await build(
@@ -113,11 +138,28 @@ class _FakeSessions implements StudySessionRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// Counts due cards **per language pair**, the way the scoped SQL does.
+///
+/// `countDue` deliberately throws: it is the unscoped read Today used to call,
+/// and nothing on this screen should reach for it again.
 class _FakeProgress implements LearningProgressRepository {
-  _FakeProgress(this._due);
+  _FakeProgress(this._due, {this.otherPairDue = 0});
   final int _due;
+  final int otherPairDue;
+
   @override
-  Future<int> countDue(DateTime nowUtc) async => _due;
+  Future<int> countDue(DateTime nowUtc) async =>
+      throw StateError('Today must use the pair-scoped count');
+
+  @override
+  Future<StudyQueueCounts> countLibraryQueues(
+    String languagePairId, {
+    required DateTime nowUtc,
+  }) async => StudyQueueCounts(
+    dueCount: languagePairId == 'lp1' ? _due : otherPairDue,
+    newCount: 0,
+  );
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
