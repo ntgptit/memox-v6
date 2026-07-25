@@ -38,6 +38,12 @@ const registerPath = join(
   'wbs',
   'memox-v6-development-wbs.md',
 );
+const workItemRegisterPath = join(
+  repoRoot,
+  'docs',
+  'traceability',
+  'work-item-register.md',
+);
 const summaryPath = join(repoRoot, 'evidence', 'parity', 'summary.json');
 const gapsPath = join(repoRoot, 'tool', 'parity', 'known-gaps.json');
 const shotsPath = join(
@@ -134,6 +140,7 @@ const contradicted = [];
 const unrecordedFailures = [];
 const unaccounted = [];
 const drifted = [];
+const staleClaims = [];
 
 // How far a recorded percentage may sit from the measured one before the row
 // counts as stale. Captures are byte-deterministic within a run
@@ -200,6 +207,33 @@ for (const row of rows) {
   unaccounted.push(`${row.id} — status: ${row.status.slice(0, 70)}`);
 }
 
+// Coverage claims frozen into register prose. `P0.4` carried "covering **11
+// of 49** `MX-VIS-*` IDs" long after both numbers had moved, which pointed the
+// owner at the wrong blocker for the gate that halts every UI work package.
+// The counts are right here; a sentence asserting different ones is wrong by
+// construction.
+if (evidenceAvailable) {
+  const claim = /\*\*(\d+) of (\d+)\*\* `MX-VIS-\*` IDs/g;
+  // Both registers: the MX-VIS table lives in the WBS doc, the `P0.*` child
+  // rows in the traceability one, and the claim can be written in either.
+  // The first cut scanned only `registerPath` — the WBS — and so read past
+  // the very sentence that motivated the check.
+  const registerText = [registerPath, workItemRegisterPath]
+    .filter(existsSync)
+    .map((path) => readFileSync(path, 'utf8'))
+    .join('\n');
+  for (const match of registerText.matchAll(claim)) {
+    const claimedMeasured = Number(match[1]);
+    const claimedTotal = Number(match[2]);
+    if (claimedMeasured !== measured.size || claimedTotal !== rows.length) {
+      staleClaims.push(
+        `"${match[0]}" but the census counts ${measured.size} measured of ` +
+          `${rows.length} rows`,
+      );
+    }
+  }
+}
+
 const report =
   `Parity census: ${rows.length} MX-VIS rows; ` +
   (evidenceAvailable
@@ -211,6 +245,7 @@ const bullet = (entries) => entries.map((entry) => `  - ${entry}`).join('\n');
 if (
   contradicted.length === 0 &&
   drifted.length === 0 &&
+  staleClaims.length === 0 &&
   unrecordedFailures.length === 0 &&
   unaccounted.length === 0 &&
   unlisted.length === 0 &&
@@ -231,6 +266,16 @@ if (
   if (contradicted.length > 0) {
     process.stderr.write(
       `\nRows claiming a result the evidence contradicts:\n${bullet(contradicted)}\n`,
+    );
+  }
+  if (staleClaims.length > 0) {
+    process.stderr.write(
+      `
+Register prose claiming coverage the census contradicts:
+${bullet(
+        staleClaims,
+      )}
+`,
     );
   }
   if (drifted.length > 0) {
