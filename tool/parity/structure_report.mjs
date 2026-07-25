@@ -22,8 +22,18 @@
  */
 import { PNG } from 'pngjs';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
-const root = join('..','..','evidence','parity');
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+// Resolved from this file, not the shell's cwd: the report is run from the
+// repo root as often as from `tool/parity`, and a relative path silently
+// pointed at `D:\evidence\parity` when it was.
+const root = join(
+  dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  'evidence',
+  'parity',
+);
 // Ink profile: per-column and per-row share of non-background pixels.
 function profiles(img) {
   const w = img.width, h = img.height;
