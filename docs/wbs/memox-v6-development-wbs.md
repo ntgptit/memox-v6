@@ -529,6 +529,40 @@ waivers. Rows marked *kit decision needed* require the Design Kit owner either
 to publish a shot or to record the state as intentionally unspecified before
 P0.6 can close.
 
+#### Study-screen parity closed, 2026-07-25 — one shell gap held four states
+
+`StudyShell` reserved the bottom-nav band with a `space-11` gap and never
+reclaimed it. The kit `.app__body` reserves the same band
+(`padding-bottom: nav + space-6`) and hands it straight back to the
+thumb-zone control (`marginBottom: -bottom-nav-height`), so it costs the
+stage nothing — and the study routes are top-level and carry no bottom nav
+at all, so those 80px were pure empty space between the stage and the
+control. Measured against `review-mode--browsing`, it left both cards ~38px
+shorter than the kit's while the control itself sat within 3px of the right
+place, which is why it read as content drift rather than a spacing bug.
+
+Removing it closed four states at once, with no regression to the two that
+already passed:
+
+| ID | Screen | Before | After |
+| --- | --- | ---: | ---: |
+| `MX-VIS-050` | Review — browsing | 3.38 / 5.47 | **0.91 / 1.12 PASS** |
+| `MX-VIS-051` | Guess — waiting | 1.69 / 2.05 | **1.46 / 1.76 PASS** |
+| `MX-VIS-052` | Recall — revealed | 3.39 / 6.03 | **0.94 / 0.97 PASS** |
+| `MX-VIS-053` | Fill — waiting | 4.97 / 6.14 | **1.97 / 2.16 PASS** |
+| `MX-VIS-054` | Study Result — standard | 2.51 / 3.76 | **2.51 PASS / 3.76 FAIL** |
+
+The CJK terms render correctly throughout now, so the font blocker recorded
+against these states is spent.
+
+`MX-VIS-054` dark is the one left, and its cause is not spacing: the hero
+`task_alt` glyph renders **28 × 21 logical where the kit's is 27 × 27** —
+vertically compressed rather than merely mis-sized. `MxIcon` is a plain
+`Icon` with a token size, so nothing in the widget layer squashes it; this
+points at the bundled Material Symbols build rather than at the screen, and
+wants its own investigation. Light passes at 2.51%, so the glyph is the
+whole of the dark gap.
+
 #### Suite health, 2026-07-25 — the recorded ratios had gone stale
 
 Running the whole suite after repairing the harness (below) put it at **27/36
