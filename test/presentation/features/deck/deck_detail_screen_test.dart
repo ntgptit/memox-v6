@@ -15,6 +15,7 @@ import 'package:memox_v6/presentation/features/deck/widgets/deck_list_controls.d
 import 'package:memox_v6/presentation/features/deck/widgets/deck_quick_study_action.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_summary_row.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:memox_v6/presentation/features/deck/screens/library_screen.dart';
 
 void main() {
   late db.AppDatabase database;
@@ -335,6 +336,26 @@ void main() {
     expect(find.text('Back to Library'), findsOneWidget);
     expect(find.bySemanticsLabel('Search'), findsNothing);
     expect(find.bySemanticsLabel('Deck options'), findsNothing);
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  // The exit was asserted to *exist* in two places and proven to *work* in
+  // none. That matters more here than anywhere else on this screen:
+  // `MX-VIS-039` cannot be photographed — no §6.6-compliant journey reaches a
+  // deck that vanishes while open, because deleting one navigates to Library
+  // by design — so no parity run will ever notice if this button stops
+  // navigating. A dead end whose only way out is broken is the worst version
+  // of this screen, and until now nothing would have caught it.
+  testWidgets('the not-found exit actually returns to Library', (tester) async {
+    await tester.pumpWidget(app('missing'));
+    await pumpDeck(tester);
+
+    await tester.tap(find.text('Back to Library'));
+    await pumpDeck(tester);
+
+    expect(find.text('This deck no longer exists'), findsNothing);
+    expect(find.byType(LibraryScreen), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });
