@@ -82,7 +82,6 @@ class MxBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final styles = context.textStyles;
     final (bg, fg, icon) = switch (tone) {
       MxBannerTone.info => (colors.infoSoft, colors.onInfoSoft, Symbols.info),
       MxBannerTone.success => (
@@ -195,7 +194,7 @@ class MxBanner extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (title != null)
-                  Text(title, style: styles.button.copyWith(color: fg)),
+                  MxText(title, role: MxTextRole.bodyStrong, color: fg),
                 if (body != null) ...[
                   // Kit `.banner__content` gap is space-05.
                   if (title != null) const MxGap.s05(),

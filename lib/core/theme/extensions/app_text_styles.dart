@@ -73,9 +73,28 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     fontWeight: AppTypography.fontWeightRegular,
   );
 
+  /// Body at emphasis weight (kit: `font-size-base` + `font-weight-bold`).
+  ///
+  /// The scale stepped straight from `body` (base/regular) to `bodyLarge`
+  /// (md/semibold), so anything the kit sets base+bold — a banner title, a
+  /// setting's name, a Match tile's label — had to borrow `button`, a label
+  /// role that happens to share the pairing. Three call sites had done exactly
+  /// that before this role existed.
+  TextStyle get bodyStrong => _base.copyWith(
+    fontSize: AppTypography.fontSizeBase,
+    fontWeight: AppTypography.fontWeightBold,
+  );
+
   TextStyle get caption => _base.copyWith(
     fontSize: AppTypography.fontSizeSm,
     fontWeight: AppTypography.fontWeightRegular,
+  );
+
+  /// Caption at emphasis weight (kit: `font-size-sm` + `font-weight-bold`),
+  /// e.g. the show-more toggle.
+  TextStyle get captionStrong => _base.copyWith(
+    fontSize: AppTypography.fontSizeSm,
+    fontWeight: AppTypography.fontWeightBold,
   );
 
   TextStyle get overline => _base.copyWith(

@@ -10,7 +10,9 @@ enum MxTextRole {
   subtitle,
   bodyLarge,
   body,
+  bodyStrong,
   caption,
+  captionStrong,
   overline,
 }
 
@@ -37,7 +39,7 @@ enum MxLineHeight { none, tight, snug, normal, relaxed }
 ///
 /// Public API:
 /// - text: the copy to render (localized by the caller).
-/// - role: one of the eight kit type-scale roles (default body).
+/// - role: one of the ten kit type-scale roles (default body).
 /// - color: overrides the role's default token color.
 /// - maxLines: passthrough to [Text].
 /// - overflow: passthrough to [Text].
@@ -45,8 +47,9 @@ enum MxLineHeight { none, tight, snug, normal, relaxed }
 /// - semanticsLabel: passthrough to [Text].
 ///
 /// Variants:
-/// The eight [MxTextRole]s. Caption and overline default to the secondary
-/// text color; overline uppercases its content (kit "caps").
+/// The ten [MxTextRole]s. Caption and overline default to the secondary
+/// text color; overline uppercases its content (kit "caps"). `bodyStrong` and
+/// `captionStrong` are the emphasis weights of their base roles.
 class MxText extends StatelessWidget {
   const MxText(
     this.text, {
@@ -85,11 +88,15 @@ class MxText extends StatelessWidget {
       MxTextRole.subtitle => styles.subtitle,
       MxTextRole.bodyLarge => styles.bodyLarge,
       MxTextRole.body => styles.body,
+      MxTextRole.bodyStrong => styles.bodyStrong,
       MxTextRole.caption => styles.caption,
+      MxTextRole.captionStrong => styles.captionStrong,
       MxTextRole.overline => styles.overline,
     };
     final defaultColor =
-        role == MxTextRole.caption || role == MxTextRole.overline
+        role == MxTextRole.caption ||
+            role == MxTextRole.captionStrong ||
+            role == MxTextRole.overline
         ? context.colors.textSecondary
         : context.colors.text;
     final height = switch (lineHeight) {

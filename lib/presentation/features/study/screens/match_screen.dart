@@ -317,7 +317,10 @@ class _MatchTile extends StatelessWidget {
           Expanded(
             child: MxText(
               label,
-              role: MxTextRole.body,
+              // Kit `Tile.jsx` sets the label base+bold. This rendered `body`
+              // (base/regular) because no role carried the pairing — recorded
+              // as `int-5` when `MX-VIS-063` was measured.
+              role: MxTextRole.bodyStrong,
               maxLines: 2,
               textAlign: TextAlign.center,
             ),
