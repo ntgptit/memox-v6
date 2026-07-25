@@ -406,6 +406,26 @@
       }
     }
   },
+  "deckNotFoundTitle": "This deck no longer exists",
+  "@deckNotFoundTitle": {
+    "description": "Deck detail not-found state title (kit subdeck-list--not-found)."
+  },
+  "deckNotFoundBody": "It may have been deleted or moved on another device. Head back to your library to keep studying.",
+  "@deckNotFoundBody": {
+    "description": "Deck detail not-found state body (kit subdeck-list--not-found)."
+  },
+  "deckLoadErrorTitle": "Couldn’t load decks",
+  "@deckLoadErrorTitle": {
+    "description": "Deck detail parent-branch load failure title (kit subdeck-list--error)."
+  },
+  "cardLoadErrorTitle": "Couldn’t load cards",
+  "@cardLoadErrorTitle": {
+    "description": "Deck detail leaf-branch load failure title (kit flashcard-list--error)."
+  },
+  "loadErrorBody": "Something went wrong. Check your connection and try again.",
+  "@loadErrorBody": {
+    "description": "Shared load-failure body for the deck detail error states."
+  },
   "deckNotFoundMessage": "This deck is no longer available.",
   "@deckNotFoundMessage": {
     "description": "Open-deck (WBS 5.2.4B) copy."

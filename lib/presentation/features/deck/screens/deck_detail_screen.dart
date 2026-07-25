@@ -10,6 +10,7 @@ import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_failure_states.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_list_controls.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/library_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_loading_skeletons.dart';
@@ -58,23 +59,27 @@ class DeckDetailScreen extends ConsumerWidget {
         onBack: () => context.backFromDeck(),
         backLabel: l10n.backLabel,
         actions: <Widget>[
-          // Kit `subdeck-list`/`flashcard-list` app bar: search sits left of
-          // the overflow. It opens the same library-wide search the Library
-          // root does — narrowing to this deck is the Deck picker inside
-          // search's own filter sheet (`filter-search-results.md` §3), which
-          // is not built, so the label stays unscoped rather than promising
-          // a scope the screen cannot deliver.
-          MxIconButton.toolbar(
-            icon: Symbols.search_rounded,
-            semanticLabel: l10n.searchLabel,
-            onPressed: () => context.pushSearch(),
-          ),
-          if (deck.value case final d?)
+          // The kit's not-found bar carries no actions — there is nothing
+          // left to search or configure once the deck is gone.
+          if (deck.value != null) ...<Widget>[
+            // Kit `subdeck-list`/`flashcard-list` app bar: search sits left of
+            // the overflow. It opens the same library-wide search the Library
+            // root does — narrowing to this deck is the Deck picker inside
+            // search's own filter sheet (`filter-search-results.md` §3), which
+            // is not built, so the label stays unscoped rather than promising
+            // a scope the screen cannot deliver.
             MxIconButton.toolbar(
-              icon: Symbols.more_vert_rounded,
-              semanticLabel: l10n.deckSettingsLabel,
-              onPressed: () => _openDeckSettings(context, d),
+              icon: Symbols.search_rounded,
+              semanticLabel: l10n.searchLabel,
+              onPressed: () => context.pushSearch(),
             ),
+            if (deck.value case final d?)
+              MxIconButton.toolbar(
+                icon: Symbols.more_vert_rounded,
+                semanticLabel: l10n.deckSettingsLabel,
+                onPressed: () => _openDeckSettings(context, d),
+              ),
+          ],
         ],
       ),
       scrollable: false,
@@ -132,30 +137,9 @@ class _DeckDetailBody extends ConsumerWidget {
       value: deck,
       loadingLabel: l10n.loadingLabel,
       errorTitle: l10n.somethingWentWrongMessage,
-      data: (context, value) =>
-          value == null ? _DeckNotFound(l10n: l10n) : _DeckContent(deck: value),
-    );
-  }
-}
-
-class _DeckNotFound extends StatelessWidget {
-  const _DeckNotFound({required this.l10n});
-
-  final AppLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const MxGap.s8(),
-        MxText(l10n.deckNotFoundMessage, role: MxTextRole.body),
-        const MxGap.s4(),
-        MxButton(
-          label: l10n.backToLibraryLabel,
-          onPressed: () => context.goLibrary(),
-        ),
-      ],
+      data: (context, value) => value == null
+          ? DeckNotFoundState(l10n: l10n)
+          : _DeckContent(deck: value),
     );
   }
 }
@@ -176,7 +160,10 @@ class _DeckContent extends ConsumerWidget {
       // The branch is not known yet, so this renders the deck-row shape the
       // kit uses for both the Library root and the parent branch.
       loading: (context) => const DeckRowsSkeleton(),
-      errorTitle: l10n.somethingWentWrongMessage,
+      error: (context, failure) => DeckLoadErrorState(
+        title: l10n.deckLoadErrorTitle,
+        onRetry: () => ref.invalidate(deckChildrenProvider(deckId: deck.id)),
+      ),
       data: (context, childDecks) => MxAsyncBuilder<List<Flashcard>>(
         value: cards,
         // Children have resolved by now, so the branch is derivable: any
@@ -185,7 +172,12 @@ class _DeckContent extends ConsumerWidget {
         loading: (context) => childDecks.isEmpty
             ? const CardRowsSkeleton()
             : const DeckRowsSkeleton(),
-        errorTitle: l10n.somethingWentWrongMessage,
+        error: (context, failure) => DeckLoadErrorState(
+          title: childDecks.isEmpty
+              ? l10n.cardLoadErrorTitle
+              : l10n.deckLoadErrorTitle,
+          onRetry: () => ref.invalidate(deckCardsProvider(deckId: deck.id)),
+        ),
         data: (context, directCards) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
