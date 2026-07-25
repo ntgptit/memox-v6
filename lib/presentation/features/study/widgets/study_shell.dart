@@ -5,6 +5,9 @@ import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart'
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_progress.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
+import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
+import 'package:memox_v6/l10n/generated/app_localizations.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 /// The shared chrome every Study stage renders inside (WBS 5.6.4; kit
 /// `review-mode`/`*-mode` shots): a contextual app bar (back + mode title +
@@ -53,6 +56,32 @@ class StudyShell extends StatelessWidget {
   /// Optional bottom action row (e.g. Review's swipe/continue controls).
   final Widget? bottomBar;
 
+  /// Confirms before leaving, then hands off to [onBack].
+  ///
+  /// Here rather than in each screen because all five modes route their back
+  /// action through this shell, and `exit-study-session.md` §1 makes the
+  /// confirm unconditional: "X/Back trong active session luôn mở confirm".
+  /// Every mode used to pop straight out, so a tap on Exit abandoned the
+  /// screen mid-session with no warning at all.
+  ///
+  /// The session itself stays `active`, which is this build's resumable
+  /// state — Today reads it back as the paused session and offers Continue —
+  /// so `Save and exit` is a promise the model already keeps rather than a
+  /// new transition.
+  Future<void> _confirmExit(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final leave = await showMxConfirmDialog(
+      context,
+      icon: Symbols.logout_rounded,
+      tone: MxConfirmTone.warning,
+      title: l10n.studyExitTitle,
+      text: l10n.studyExitBody,
+      confirmLabel: l10n.studyExitConfirmLabel,
+      cancelLabel: l10n.studyExitKeepLabel,
+    );
+    if (leave) onBack();
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomBar = this.bottomBar;
@@ -60,7 +89,7 @@ class StudyShell extends StatelessWidget {
       scrollable: false,
       appBar: MxContextualAppBar(
         title: title,
-        onBack: onBack,
+        onBack: () => _confirmExit(context),
         backLabel: backLabel,
         actions: actions,
       ),

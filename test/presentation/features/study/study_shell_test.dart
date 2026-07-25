@@ -60,4 +60,58 @@ void main() {
     expect(find.byKey(const Key('bottom')), findsNothing);
     expect(find.text('5/5'), findsOneWidget);
   });
+
+  // `exit-study-session.md` §1: "X/Back trong active session luôn mở confirm."
+  // Every mode used to pop straight out, so a tap on Exit abandoned the screen
+  // mid-session with no warning. The confirm lives in the shell because all
+  // five modes route their back action through it.
+  group('exit confirm', () {
+    Future<void> pumpShell(WidgetTester tester, VoidCallback onBack) async {
+      await tester.pumpWidget(
+        wrap(
+          StudyShell(
+            title: 'Review',
+            progress: 0.35,
+            progressCounter: '7/20',
+            progressSemanticLabel: '7 of 20',
+            onBack: onBack,
+            backLabel: 'Exit',
+            body: const Text('BODY'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Exit'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('back asks before leaving', (tester) async {
+      var left = 0;
+      await pumpShell(tester, () => left++);
+
+      expect(find.text('Leave this session?'), findsOneWidget);
+      expect(left, 0, reason: 'nothing left the session yet');
+    });
+
+    testWidgets('Keep studying stays in the session', (tester) async {
+      var left = 0;
+      await pumpShell(tester, () => left++);
+
+      await tester.tap(find.text('Keep studying'));
+      await tester.pumpAndSettle();
+
+      expect(left, 0);
+      expect(find.text('Leave this session?'), findsNothing);
+    });
+
+    testWidgets('Save and exit leaves exactly once', (tester) async {
+      var left = 0;
+      await pumpShell(tester, () => left++);
+
+      await tester.tap(find.text('Save and exit'));
+      await tester.pumpAndSettle();
+
+      expect(left, 1);
+    });
+  });
 }
