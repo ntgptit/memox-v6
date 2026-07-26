@@ -542,6 +542,15 @@
   "studyFinalizeErrorMessage": "Phiên học đã xong nhưng chưa cập nhật được lịch ôn. Hãy thử lại để phiên này được tính.",
   "studyRetryLabel": "Thử lại",
   "deckStudyLabel": "Học",
+  "todayGreetingMorning": "Chào buổi sáng",
+  "todayGreetingAfternoon": "Chào buổi chiều",
+  "todayGreetingEvening": "Chào buổi tối",
+  "todayGreetingDate": "{date}",
+  "@todayGreetingDate": {
+    "placeholders": {
+      "date": { "type": "DateTime", "format": "yMMMMEEEEd" }
+    }
+  },
   "todayTitle": "Hôm nay",
   "todayPausedTitle": "Phiên học đang tạm dừng",
   "todayPausedBody": "Câu trả lời đã lưu vẫn được giữ nguyên.",

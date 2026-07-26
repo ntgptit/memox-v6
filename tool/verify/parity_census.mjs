@@ -63,6 +63,12 @@ const ACCOUNTED_UNMEASURED = [
   'structurally unreachable',
   'out of scope',
   'composition built',
+  // A screen whose sections are landing one at a time: some of the state
+  // exists and the rest is named. Distinct from `composition built`, which
+  // claims the whole state is there and only the measurement is missing —
+  // saying that of a half-finished screen would be the drift this file exists
+  // to stop.
+  'composition partial',
   'enforced',
   'measured',
   'deferred',

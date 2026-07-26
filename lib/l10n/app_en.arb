@@ -1109,6 +1109,25 @@
   "@deckStudyLabel": {
     "description": "Starts a study session for the open deck (WBS 5.6.1/2)."
   },
+  "todayGreetingMorning": "Good morning",
+  "@todayGreetingMorning": {
+    "description": "Dashboard greeting headline before noon (kit dashboard/greeting). The kit's shot reads 'Good evening, Linh'; there is no account in this build (14.x), so the name is dropped rather than invented."
+  },
+  "todayGreetingAfternoon": "Good afternoon",
+  "@todayGreetingAfternoon": {
+    "description": "Dashboard greeting headline from noon to 18:00."
+  },
+  "todayGreetingEvening": "Good evening",
+  "@todayGreetingEvening": {
+    "description": "Dashboard greeting headline after 18:00."
+  },
+  "todayGreetingDate": "{date}",
+  "@todayGreetingDate": {
+    "description": "Dashboard greeting date eyebrow, formatted as a full weekday and date in the active locale.",
+    "placeholders": {
+      "date": { "type": "DateTime", "format": "yMMMMEEEEd" }
+    }
+  },
   "todayTitle": "Today",
   "@todayTitle": {
     "description": "Today entry screen title (WBS 5.7.2)."
