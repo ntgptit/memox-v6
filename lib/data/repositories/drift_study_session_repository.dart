@@ -271,6 +271,14 @@ class DriftStudySessionRepository implements StudySessionRepository {
     return rows.map((row) => row.toDomain()).toList();
   }
 
+  @override
+  Future<void> saveCheckpoint(SessionCheckpoint checkpoint) {
+    return mapSqliteConflicts(
+      entity: 'study_checkpoints',
+      () => _upsertCheckpoint(checkpoint),
+    );
+  }
+
   Future<void> _upsertCheckpoint(SessionCheckpoint checkpoint) {
     return _database.sessionCheckpointDao.upsertCheckpoint(
       checkpoint.id,

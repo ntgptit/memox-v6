@@ -8,6 +8,7 @@ import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
 import 'package:memox_v6/domain/study_session/session_card_snapshot.dart';
 import 'package:memox_v6/domain/study_session/session_round_order.dart';
 import 'package:memox_v6/domain/study_session/session_scope.dart';
+import 'package:memox_v6/domain/study_session/session_timer_state.dart';
 import 'package:memox_v6/domain/study_session/session_state.dart';
 import 'package:memox_v6/domain/study_session/session_type.dart';
 import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
@@ -77,10 +78,12 @@ void main() {
     ),
   );
 
-  Widget wrap() => ProviderScope(
+  Widget wrap({SessionTimerState? timer}) => ProviderScope(
     overrides: [
       studySessionRuntimeProvider.overrideWith(
-        (ref) => Future.value(runtime()),
+        (ref) => Future.value(
+          timer == null ? runtime() : _withTimer(runtime(), timer),
+        ),
       ),
       studyAnswerViewmodelProvider.overrideWith(_SpyAnswer.new),
     ],
@@ -152,6 +155,40 @@ void main() {
     expect(input.resolution, RecallResolution.timeout);
     expect(input.elapsedActiveMs, greaterThanOrEqualTo(20000));
   });
+
+  // `exit-study-session.md` §5: a paused countdown resumes where it stopped.
+  // Nothing wrote `timer_state_json` before, so this card used to open on a
+  // fresh twenty seconds however close to its deadline it had been left.
+  testWidgets('a restored countdown resumes instead of restarting', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      wrap(timer: const SessionTimerState(cardId: 'c0', remainingMs: 8000)),
+    );
+    await tester.pumpAndSettle();
+
+    // Eight seconds left, so the deadline lands there and not at twenty.
+    await tester.pump(const Duration(seconds: 7));
+    expect(recorded, isEmpty, reason: 'still counting at 7s');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+
+    expect(recorded, hasLength(1));
+    expect(
+      (recorded.single as RecallInput).resolution,
+      RecallResolution.timeout,
+    );
+  });
+
+  testWidgets('a countdown saved for another card is ignored', (tester) async {
+    await tester.pumpWidget(
+      wrap(timer: const SessionTimerState(cardId: 'other', remainingMs: 3000)),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.pump(const Duration(seconds: 8));
+    expect(recorded, isEmpty, reason: 'this card kept its own full budget');
+  });
 }
 
 /// The committed inputs, shared between the spy command and the assertions
@@ -165,4 +202,19 @@ class _SpyAnswer extends StudyAnswerViewmodel {
   Future<void> answer(StudyModeInput input) async {
     recorded.add(input);
   }
+}
+
+/// The same runtime with a paused countdown on it — what a resume reads back
+/// from the checkpoint.
+StudyRuntimeState _withTimer(
+  StudyRuntimeState runtime,
+  SessionTimerState timer,
+) {
+  return StudyRuntimeState(
+    session: runtime.session,
+    stages: runtime.stages,
+    position: runtime.position,
+    cardsById: runtime.cardsById,
+    timer: timer,
+  );
 }

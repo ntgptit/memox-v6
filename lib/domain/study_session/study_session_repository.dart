@@ -62,6 +62,15 @@ abstract interface class StudySessionRepository {
 
   Future<SessionCheckpoint?> checkpoint(String sessionId);
 
+  /// Persists a checkpoint on its own, outside an attempt.
+  ///
+  /// The answer path writes attempt + checkpoint together because they must
+  /// commit as one. A pause has no attempt: `exit-study-session.md` §5 asks
+  /// the Recall countdown to survive an exit, and the position it belongs to
+  /// is already committed. Keyed by session, so this updates the row the
+  /// answer path maintains rather than adding a second one.
+  Future<void> saveCheckpoint(SessionCheckpoint checkpoint);
+
   /// The session's committed attempts in commit order (`study_attempts` by
   /// `session_id`), for terminal-grade aggregation and the finalize summary
   /// (WBS 5.6.13).

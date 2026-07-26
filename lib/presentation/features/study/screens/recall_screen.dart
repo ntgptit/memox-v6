@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:memox_v6/domain/study_session/session_timer_state.dart';
+import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
@@ -99,7 +101,25 @@ class _RecallStage extends ConsumerWidget {
       progress: total == 0 ? 0 : currentIndex / total,
       progressCounter: '$currentIndex/$total',
       progressSemanticLabel: l10n.studyProgressLabel(currentIndex, total),
-      onBack: () => Navigator.of(context).maybePop(),
+      // §5: the countdown is persisted before leaving, so a resume continues
+      // it rather than handing the card a fresh 20 seconds. Only Recall needs
+      // this — every other mode's position is already committed, and this is
+      // the only state a screen holds that the checkpoint does not.
+      onBack: () async {
+        if (timer.phase == RecallPhase.counting) {
+          await ref
+              .read(pauseStudySessionUseCaseProvider)
+              .call(
+                runtime,
+                timer: SessionTimerState(
+                  cardId: card.cardId,
+                  remainingMs:
+                      timer.remainingSeconds * Duration.millisecondsPerSecond,
+                ),
+              );
+        }
+        if (context.mounted) await Navigator.of(context).maybePop();
+      },
       backLabel: l10n.studyExitLabel,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
