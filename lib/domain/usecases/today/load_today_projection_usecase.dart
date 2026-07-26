@@ -40,7 +40,7 @@ class LoadTodayProjectionUseCase {
   final LoadDailyProgressUseCase? _dailyProgress;
 
   Future<TodayProjection> call() async {
-    final paused = await _sessions.watchActive().first;
+    final paused = await _sessions.activeSession();
     final pair = await _languagePairs.activePair();
     final libraryCardCount = pair == null
         ? 0

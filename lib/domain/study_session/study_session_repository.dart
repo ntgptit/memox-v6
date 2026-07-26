@@ -35,6 +35,15 @@ abstract interface class StudySessionRepository {
 
   Stream<StudySession?> watchActive();
 
+  /// The active session right now, or null.
+  ///
+  /// Separate from [watchActive] because a decision wants a value, not a
+  /// subscription: `watchActive().first` opens a query stream and waits for
+  /// its first emission, which arrives a frame or more later. A start that
+  /// asked the stream therefore did not know whether a session existed until
+  /// after the caller had moved on.
+  Future<StudySession?> activeSession();
+
   Future<List<SessionCardSnapshot>> cardSnapshots(String sessionId);
 
   Future<SessionRoundOrder?> roundOrder(String sessionId, int roundIndex);

@@ -24,7 +24,7 @@ class ContinueSessionFromTodayUseCase {
     // A → B → C: the store, not the projection. `watchActive` is the same
     // read the projection composed from, so "resumable" means exactly what it
     // meant when the CTA appeared — only fresher.
-    final active = await _sessions.watchActive().first;
+    final active = await _sessions.activeSession();
     if (active == null) return const SessionNoLongerResumable();
     return ResumeAtCheckpoint(active);
   }

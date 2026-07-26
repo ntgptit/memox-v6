@@ -205,6 +205,9 @@ class _FakeSessions implements StudySessionRepository {
   final StudySession? _paused;
   @override
   Stream<StudySession?> watchActive() => Stream<StudySession?>.value(_paused);
+
+  @override
+  Future<StudySession?> activeSession() async => _paused;
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
