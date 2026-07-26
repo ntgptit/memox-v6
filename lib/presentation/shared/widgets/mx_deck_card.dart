@@ -3,6 +3,7 @@ import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_progress.dart';
 
 /// One deck row card (kit shared `DeckCard`): tinted icon tile, bold
 /// title, secondary meta line and an optional trailing slot.
@@ -28,6 +29,9 @@ import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
 /// - status / statusTone: optional coloured study status appended to the
 ///   meta line (kit deck-card meta: `N cards · 48 due`), toned due /
 ///   new / up-to-date.
+/// - progress: optional 0..1 mastery bar under the meta line (kit passes
+///   this on the Dashboard's Recent-decks rows only; Library rows omit it).
+/// - progressSemanticLabel: required whenever `progress` is given.
 /// - trailing: optional trailing widget (badge, action).
 /// - onTap: opens the deck.
 class MxDeckCard extends StatelessWidget {
@@ -39,9 +43,14 @@ class MxDeckCard extends StatelessWidget {
     required this.meta,
     this.status,
     this.statusTone,
+    this.progress,
+    this.progressSemanticLabel,
     this.trailing,
     this.onTap,
-  });
+  }) : assert(
+         progress == null || progressSemanticLabel != null,
+         'a progress bar must be announced',
+       );
 
   final IconData icon;
   final MxIconTileTone tone;
@@ -49,6 +58,10 @@ class MxDeckCard extends StatelessWidget {
   final String meta;
   final String? status;
   final MxDeckStatusTone? statusTone;
+
+  /// Mastered share of the deck, `0.0`–`1.0`.
+  final double? progress;
+  final String? progressSemanticLabel;
   final Widget? trailing;
   final VoidCallback? onTap;
 
@@ -58,6 +71,8 @@ class MxDeckCard extends StatelessWidget {
     final styles = context.textStyles;
     final trailing = this.trailing;
     final status = this.status;
+    final progress = this.progress;
+    final progressSemanticLabel = this.progressSemanticLabel;
     final secondary = styles.caption.copyWith(color: colors.textSecondary);
     // Kit deck-row status uses the on-*-soft readable tones, not the strong
     // fills: due -> on-warning-soft, up-to-date -> on-success-soft.
@@ -109,6 +124,21 @@ class MxDeckCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                // Both non-null together by construction; read as a pair so
+                // the branch needs no non-null assertion.
+                if (progress != null && progressSemanticLabel != null) ...[
+                  const MxGap.s2(),
+                  // The kit's deck-row bar is 6 logical tall, which is off its
+                  // own spacing scale — the handoff note for this screen says
+                  // "tokens only (no raw hex / off-scale)". The standard 4px
+                  // bar is the nearest on-scale height, so the 2px is a
+                  // deliberate residual rather than a new token invented to
+                  // match one literal in the JSX.
+                  MxProgress(
+                    value: progress,
+                    semanticLabel: progressSemanticLabel,
+                  ),
+                ],
               ],
             ),
           ),

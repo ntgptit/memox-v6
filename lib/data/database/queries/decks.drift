@@ -51,7 +51,13 @@ SELECT d.*,
       THEN f.id END) AS due_count,
   COUNT(DISTINCT CASE
     WHEN f.deleted_at IS NULL AND f.is_hidden = 0
-      AND learning_progress.box = 0 THEN f.id END) AS new_count
+      AND learning_progress.box = 0 THEN f.id END) AS new_count,
+  COUNT(DISTINCT CASE
+    WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      AND learning_progress.box = 8 THEN f.id END) AS mastered_count,
+  COUNT(DISTINCT CASE
+    WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      THEN f.id END) AS studiable_count
 FROM decks d
 LEFT JOIN flashcards f ON f.deck_id = d.id
 LEFT JOIN learning_progress ON learning_progress.card_id = f.id
@@ -79,13 +85,61 @@ SELECT d.*,
       THEN f.id END) AS due_count,
   COUNT(DISTINCT CASE
     WHEN f.deleted_at IS NULL AND f.is_hidden = 0
-      AND learning_progress.box = 0 THEN f.id END) AS new_count
+      AND learning_progress.box = 0 THEN f.id END) AS new_count,
+  COUNT(DISTINCT CASE
+    WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      AND learning_progress.box = 8 THEN f.id END) AS mastered_count,
+  COUNT(DISTINCT CASE
+    WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      THEN f.id END) AS studiable_count
 FROM decks d
 LEFT JOIN flashcards f ON f.deck_id = d.id
 LEFT JOIN learning_progress ON learning_progress.card_id = f.id
 WHERE d.parent_id = :parentId
 GROUP BY d.id
 ORDER BY d.normalized_name, d.id;
+
+-- The Dashboard's "Recent decks" rows (`load-today-dashboard.md` §3: Deck
+-- summaries are a supporting section of Today).
+--
+-- Same counters as the Library rows, ordered by when the deck was last
+-- studied rather than by name — `learning_progress.last_reviewed_at` is the
+-- instant the most recent terminal grade was applied (SRS policy §8), so the
+-- newest of a deck's cards is the deck's own last-studied time.
+--
+-- A deck nobody has graded yet has no such instant. Those sort last, by name,
+-- rather than being dropped: a learner who has created decks but not started
+-- has a Library, and a "Recent decks" section that hid it would say the
+-- opposite. `IS NULL` sorts first ascending in SQLite, hence the explicit
+-- leading key.
+recentRootDeckSummaries:
+SELECT d.*,
+  COUNT(DISTINCT CASE WHEN f.deleted_at IS NULL THEN f.id END) AS card_count,
+  COUNT(DISTINCT CASE
+    WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      AND learning_progress.box BETWEEN 1 AND 7
+      AND learning_progress.due_at IS NOT NULL
+      AND learning_progress.due_at <= CAST(:nowUtc AS INTEGER)
+      THEN f.id END) AS due_count,
+  COUNT(DISTINCT CASE
+    WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      AND learning_progress.box = 0 THEN f.id END) AS new_count,
+  COUNT(DISTINCT CASE
+    WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      AND learning_progress.box = 8 THEN f.id END) AS mastered_count,
+  COUNT(DISTINCT CASE
+    WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      THEN f.id END) AS studiable_count,
+  MAX(CASE WHEN f.deleted_at IS NULL AND f.is_hidden = 0
+      THEN learning_progress.last_reviewed_at END) AS last_studied_at
+FROM decks d
+LEFT JOIN flashcards f ON f.deck_id = d.id
+LEFT JOIN learning_progress ON learning_progress.card_id = f.id
+WHERE d.language_pair_id = :languagePairId AND d.parent_id IS NULL
+GROUP BY d.id
+ORDER BY last_studied_at IS NULL, last_studied_at DESC,
+  d.normalized_name, d.id
+LIMIT :limit;
 
 watchChildDecks:
 SELECT * FROM decks WHERE parent_id = :parentId

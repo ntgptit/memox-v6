@@ -19,6 +19,17 @@ abstract interface class DeckRepository {
   /// Root decks with their list-surface counters (library rows).
   Stream<List<DeckSummary>> watchRootSummaries(String languagePairId);
 
+  /// The most recently studied root decks, newest first, at most [limit] of
+  /// them — Today's Recent-decks section (`load-today-dashboard.md` §3).
+  ///
+  /// A one-shot read rather than a stream, because Today is composed once per
+  /// load: the projection that carries it is a snapshot, and a section that
+  /// re-emitted on its own would drift from the counts beside it.
+  Future<List<DeckSummary>> recentSummaries(
+    String languagePairId, {
+    required int limit,
+  });
+
   Stream<List<Deck>> watchChildren(String parentId);
 
   /// A parent's direct children with the same list-surface counters as

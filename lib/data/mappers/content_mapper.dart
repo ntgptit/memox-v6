@@ -54,6 +54,8 @@ extension ChildDeckSummaryRowMapper on db.WatchChildDeckSummariesResult {
     cardCount: cardCount,
     dueCount: dueCount,
     newCount: newCount,
+    masteredCount: masteredCount,
+    studiableCount: studiableCount,
   );
 }
 
@@ -72,6 +74,31 @@ extension DeckSummaryRowMapper on db.WatchRootDeckSummariesResult {
     cardCount: cardCount,
     dueCount: dueCount,
     newCount: newCount,
+    masteredCount: masteredCount,
+    studiableCount: studiableCount,
+  );
+}
+
+/// The Dashboard's Recent-decks row: the Library columns plus the ordering
+/// key, which the domain summary does not carry — the order is the query's
+/// answer, not a field the caller re-sorts by.
+extension RecentDeckSummaryRowMapper on db.RecentRootDeckSummariesResult {
+  DeckSummary toDomain() => DeckSummary(
+    deck: Deck(
+      id: id,
+      languagePairId: languagePairId,
+      parentId: parentId,
+      name: name,
+      normalizedName: normalizedName,
+      description: description,
+      createdAt: utcDateTime(createdAt),
+      updatedAt: utcDateTime(updatedAt),
+    ),
+    cardCount: cardCount,
+    dueCount: dueCount,
+    newCount: newCount,
+    masteredCount: masteredCount,
+    studiableCount: studiableCount,
   );
 }
 

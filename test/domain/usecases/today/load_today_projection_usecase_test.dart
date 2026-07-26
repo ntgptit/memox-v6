@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
+import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
+import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/domain/language_pair/language_pair.dart';
 import 'package:memox_v6/domain/language_pair/language_pair_repository.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress_repository.dart';
@@ -21,14 +23,31 @@ import 'package:memox_v6/domain/learning_progress/study_queue_counts.dart';
 void main() {
   final now = DateTime.utc(2026, 7, 24, 10);
 
+  DeckSummary deckNamed(String name, {int mastered = 0, int studiable = 0}) =>
+      DeckSummary(
+        deck: Deck(
+          id: name,
+          languagePairId: 'lp1',
+          parentId: null,
+          name: name,
+          normalizedName: name.toLowerCase(),
+          createdAt: now,
+          updatedAt: now,
+        ),
+        cardCount: studiable,
+        masteredCount: mastered,
+        studiableCount: studiable,
+      );
+
   LoadTodayProjectionUseCase build({
     StudySession? paused,
     LanguagePair? pair,
     int libraryCards = 5,
     int due = 0,
+    _FakeDecks? decks,
   }) => LoadTodayProjectionUseCase(
     sessions: _FakeSessions(paused),
-    decks: _FakeDecks(libraryCards),
+    decks: decks ?? _FakeDecks(libraryCards),
     languagePairs: _StubPairs(pair),
     queueCounts: LoadStudyQueueCountsUseCase(
       progress: _FakeProgress(due),
@@ -120,6 +139,37 @@ void main() {
     final projection = await build(due: 0).call();
     expect(projection.primaryAction, TodayPrimaryAction.createLibrary);
   });
+
+  // `load-today-dashboard.md` §3: Deck summaries are a supporting section of
+  // Today, so the projection composes them rather than the screen fetching
+  // them itself.
+  test('composes the recent decks, bounded by the section limit', () async {
+    final decks = _FakeDecks(
+      12,
+      recent: <DeckSummary>[
+        deckNamed('Grammar', mastered: 9, studiable: 12),
+        deckNamed('Vocabulary'),
+        deckNamed('Phrases'),
+        deckNamed('Listening'),
+      ],
+    );
+
+    final projection = await build(pair: pair, due: 4, decks: decks).call();
+
+    expect(decks.askedLimit, TodayProjection.recentDeckLimit);
+    expect(projection.recentDecks.length, TodayProjection.recentDeckLimit);
+    expect(projection.recentDecks.first.deck.name, 'Grammar');
+    expect(projection.recentDecks.first.masteryFraction, 0.75);
+  });
+
+  // No active pair means no library to read from, and the section is empty
+  // rather than the load failing — it is supporting, not primary.
+  test('no active pair yields no deck rows', () async {
+    final projection = await build(libraryCards: 0).call();
+
+    expect(projection.recentDecks, isEmpty);
+    expect(projection.primaryAction, TodayPrimaryAction.createLibrary);
+  });
 }
 
 class _FixedClock implements AppClock {
@@ -161,10 +211,28 @@ class _FakeProgress implements LearningProgressRepository {
 }
 
 class _FakeDecks implements DeckRepository {
-  _FakeDecks(this._cards);
+  _FakeDecks(this._cards, {List<DeckSummary> recent = const <DeckSummary>[]})
+    : _recent = recent;
+
   final int _cards;
+  final List<DeckSummary> _recent;
+
+  /// The limit the projection asked for, so a test can assert the section is
+  /// bounded rather than trusting the caller passed something.
+  int? askedLimit;
+
   @override
   Future<int> countForLanguagePair(String languagePairId) async => _cards;
+
+  @override
+  Future<List<DeckSummary>> recentSummaries(
+    String languagePairId, {
+    required int limit,
+  }) async {
+    askedLimit = limit;
+    return _recent.take(limit).toList();
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
