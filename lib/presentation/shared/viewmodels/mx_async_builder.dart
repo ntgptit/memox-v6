@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
+import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_progress.dart';
@@ -35,10 +36,16 @@ import 'package:memox_v6/presentation/shared/widgets/mx_progress.dart';
 ///   surface.
 /// - retain: keep showing previous data while refreshing (default true —
 ///   the retained-composition contract).
+/// - staleLabel: localized notice shown above retained data when a refresh
+///   fails. Opt-in: without it a failed refresh falls back to the error
+///   surface, which is right for a screen whose provider only ever loads
+///   once. With it, the last good content survives the failure — the
+///   `refresh-today-projections.md` §1 contract, "Refresh failure giữ
+///   last-good Dashboard với stale marker".
 ///
 /// States:
-/// data, loading (spinner), refreshing (retained data), error (banner with
-/// optional retry).
+/// data, loading (spinner), refreshing (retained data), stale (retained data
+/// under a notice), error (banner with optional retry).
 class MxAsyncBuilder<T> extends StatelessWidget {
   const MxAsyncBuilder({
     super.key,
@@ -51,6 +58,7 @@ class MxAsyncBuilder<T> extends StatelessWidget {
     this.onRetry,
     this.retryLabel,
     this.retain = true,
+    this.staleLabel,
   }) : assert(
          loading != null || loadingLabel != null,
          'provide loadingLabel for the default spinner or a loading builder',
@@ -73,9 +81,26 @@ class MxAsyncBuilder<T> extends StatelessWidget {
   final VoidCallback? onRetry;
   final String? retryLabel;
   final bool retain;
+  final String? staleLabel;
 
   @override
   Widget build(BuildContext context) {
+    final staleLabel = this.staleLabel;
+    // A failed *refresh* is not a failed load: there is still a good snapshot
+    // on screen, and replacing it with an error throws away the only data the
+    // user has. `AsyncValue.when` has no `skipErrorOnRefresh` counterpart to
+    // `skipLoadingOnRefresh`, so the retained case is handled before it.
+    if (retain && staleLabel != null && value.hasError && value.hasValue) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          MxBanner(tone: MxBannerTone.warning, body: staleLabel),
+          const SizedBox(height: AppSpacing.space4),
+          Expanded(child: data(context, value.requireValue)),
+        ],
+      );
+    }
+
     return value.when(
       skipLoadingOnRefresh: retain,
       data: (loaded) => data(context, loaded),

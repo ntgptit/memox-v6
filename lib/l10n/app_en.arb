@@ -1212,6 +1212,10 @@
   "@todaySessionEndedBody": {
     "description": "Today notice when the paused session was finalized elsewhere before Resume was tapped."
   },
+  "todayStaleBody": "Showing what was loaded earlier — the refresh didn’t go through.",
+  "@todayStaleBody": {
+    "description": "Today stale marker: a refresh failed, so the dashboard on screen is the last good snapshot."
+  },
   "todayStartReviewFailedBody": "Couldn’t start the review. Your progress is unchanged — try again.",
   "@todayStartReviewFailedBody": {
     "description": "Today start-review failure notice. The dashboard is kept as it was; nothing was created."

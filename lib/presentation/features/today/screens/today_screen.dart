@@ -100,7 +100,20 @@ class _TodayBody extends ConsumerWidget {
         // Kit `.app__body` gap: `space-6`. It was `space-5` (20) here, four
         // logical short of every other section break in the app.
         const MxGap.s6(),
-        Expanded(child: _TodayStates(l10n: l10n)),
+        // §3's manual trigger. The other triggers it lists — foreground, day
+        // boundary, deck/card mutation — are not wired yet; this is the one
+        // the learner can reach.
+        //
+        // No request token of its own (§1): the provider element keeps only
+        // its latest future, so a response from a superseded refresh is
+        // dropped before it can reach the screen. Adding a second token would
+        // be a parallel mechanism for a guarantee Riverpod already gives.
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () => ref.refresh(todayProjectionProvider.future),
+            child: _TodayStates(l10n: l10n),
+          ),
+        ),
       ],
     );
   }
@@ -119,6 +132,9 @@ class _TodayStates extends ConsumerWidget {
       errorTitle: l10n.todayErrorTitle,
       retryLabel: l10n.studyRetryLabel,
       onRetry: () => ref.invalidate(todayProjectionProvider),
+      // §1: a refresh that fails keeps the last good dashboard and says it is
+      // old, rather than replacing a screenful of real data with a banner.
+      staleLabel: l10n.todayStaleBody,
       data: (context, projection) => _TodayContent(projection: projection),
     );
   }
