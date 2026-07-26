@@ -14,6 +14,9 @@ import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_section_header.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
+import 'package:memox_v6/presentation/features/today/widgets/today_loading_skeleton.dart';
+import 'package:memox_v6/presentation/features/today/widgets/today_greeting_header.dart';
+import 'package:memox_v6/app/di/core_providers.dart';
 
 /// The Today entry (WBS 5.7.2; `load-today-dashboard.md`, kit `dashboard`). A
 /// branch of `AppTabShell` (the bottom nav lives there), it renders the composed
@@ -52,9 +55,33 @@ class _TodayBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    // The greeting needs no data, so it sits outside the async builder and
+    // renders in every state including loading and error — which is what the
+    // kit does: it splits the greeting out of the app bar so it scrolls with
+    // the content, and draws it above the skeleton too.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        TodayGreetingHeader(
+          now: ref.watch(appClockProvider).nowUtc().toLocal(),
+        ),
+        const MxGap.s5(),
+        Expanded(child: _TodayStates(l10n: l10n)),
+      ],
+    );
+  }
+}
+
+class _TodayStates extends ConsumerWidget {
+  const _TodayStates({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     return MxAsyncBuilder<TodayProjection>(
       value: ref.watch(todayProjectionProvider),
-      loadingLabel: l10n.loadingLabel,
+      loading: (context) => const TodayLoadingSkeleton(),
       errorTitle: l10n.todayErrorTitle,
       retryLabel: l10n.studyRetryLabel,
       onRetry: () => ref.invalidate(todayProjectionProvider),

@@ -10,6 +10,8 @@ import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/today/screens/today_screen.dart';
 import 'package:memox_v6/presentation/features/today/viewmodels/today_projection_provider.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
+import 'package:memox_v6/presentation/features/today/widgets/today_loading_skeleton.dart';
+import 'package:memox_v6/presentation/features/today/widgets/today_greeting_header.dart';
 
 /// WBS 5.7.2 — the Today entry renders one primary action per projection state,
 /// plus loading (no fake zeros) and load-error (`load-today-dashboard.md`).
@@ -112,5 +114,48 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Today couldn’t load'), findsOneWidget);
     expect(find.widgetWithText(MxButton, 'Retry'), findsOneWidget);
+  });
+
+  // Kit `dashboard/greeting`: the greeting sits in the scroll body, above
+  // every state — including loading, which is why it is outside the async
+  // builder rather than inside each branch.
+  testWidgets('the greeting renders above the loading skeleton', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      wrap(
+        todayProjectionProvider.overrideWith(
+          (ref) => Completer<TodayProjection>().future,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(TodayGreetingHeader), findsOneWidget);
+    expect(find.byType(TodayLoadingSkeleton), findsOneWidget);
+  });
+
+  testWidgets('the greeting follows the time of day', (tester) async {
+    Future<String> greetingAt(int hour) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: TodayGreetingHeader(now: DateTime(2026, 7, 26, hour)),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return tester
+          .widgetList<Text>(find.byType(Text))
+          .map((t) => t.data ?? '')
+          .firstWhere((t) => t.startsWith('Good'));
+    }
+
+    expect(await greetingAt(9), 'Good morning');
+    expect(await greetingAt(14), 'Good afternoon');
+    expect(await greetingAt(20), 'Good evening');
   });
 }
