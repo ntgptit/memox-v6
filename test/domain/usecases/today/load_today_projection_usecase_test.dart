@@ -52,7 +52,15 @@ void main() {
     decks: decks ?? _FakeDecks(libraryCards),
     languagePairs: _StubPairs(pair),
     queueCounts: LoadStudyQueueCountsUseCase(
-      progress: _FakeProgress(due, mastery: mastery),
+      // The library's content is now expressed in studiable *cards*, not in
+      // a deck count — which is the bug `int-26` fixed: a deck whose cards
+      // were all deleted used to read as a non-empty library.
+      progress: _FakeProgress(
+        due,
+        mastery:
+            mastery ??
+            LibraryMastery(masteredCount: 0, studiableCount: libraryCards),
+      ),
       decks: _FakeDecks(libraryCards),
       clock: _FixedClock(now),
     ),
@@ -92,7 +100,11 @@ void main() {
       decks: _FakeDecks(12),
       languagePairs: _StubPairs(pair),
       queueCounts: LoadStudyQueueCountsUseCase(
-        progress: _FakeProgress(3, otherPairDue: 40),
+        progress: _FakeProgress(
+          3,
+          otherPairDue: 40,
+          mastery: const LibraryMastery(masteredCount: 0, studiableCount: 12),
+        ),
         decks: _FakeDecks(12),
         clock: _FixedClock(now),
       ),
