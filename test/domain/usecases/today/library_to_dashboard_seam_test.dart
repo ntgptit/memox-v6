@@ -8,6 +8,16 @@ import 'package:memox_v6/data/repositories/drift_learning_progress_repository.da
 import 'package:memox_v6/data/repositories/drift_study_session_repository.dart';
 import 'package:memox_v6/domain/language_pair/language_pair.dart';
 import 'package:memox_v6/domain/today/today_projection.dart';
+import 'package:memox_v6/data/repositories/drift_flashcard_repository.dart';
+import 'package:memox_v6/domain/study_modes/strategies/srs_binary_review_study_mode_strategy.dart';
+import 'package:memox_v6/domain/study_modes/study_mode_factory.dart';
+import 'package:memox_v6/domain/study_session/session_scope.dart';
+import 'package:memox_v6/domain/study_session/session_type.dart';
+import 'package:memox_v6/domain/usecases/learning_progress/apply_terminal_outcome_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_session/answer_study_stage_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_session/finalize_study_session_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_session/start_study_session_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/delete_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/reset_deck_progress_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
@@ -191,6 +201,60 @@ void main() {
       );
     },
   );
+
+  // A studied deck carries session and attempt rows that reference it and its
+  // cards, and none of those references cascade — so a deck that had ever been
+  // used was undeletable, which is the usual reason to delete one. The
+  // learner's streak and daily goals survive: those are keyed by local date in
+  // their own tables and never referenced the deck.
+  test('a studied deck can be deleted', () async {
+    await deck('d1', 'Alpha', cards: 2);
+    final sessions = DriftStudySessionRepository(database);
+    final start = StartStudySessionUseCase(
+      progress: progress,
+      cards: DriftFlashcardRepository(database),
+      sessions: sessions,
+      clock: _FixedClock(now),
+      idGenerator: _SeqIds('start'),
+    );
+    final answer = AnswerStudyStageUseCase(
+      sessions: sessions,
+      factory: StudyModeFactory.standard(),
+      clock: _FixedClock(now),
+      idGenerator: _SeqIds('answer'),
+    );
+    await start.call(
+      deckId: 'd1',
+      scope: SessionScope.subtree,
+      type: SessionType.dueReview,
+    );
+    var runtime = (await LoadStudyRuntimeUseCase(sessions: sessions)())!;
+    for (var step = 0; step < 20 && !runtime.isComplete; step++) {
+      final cardId = runtime.position.currentCardId!;
+      runtime = await answer.call(
+        runtime,
+        SrsBinaryReviewInput(
+          sessionId: runtime.session.id,
+          cardId: cardId,
+          roundIndex: runtime.position.roundIndex,
+          eventId: 'srs-$cardId-r${runtime.position.roundIndex}',
+          action: SrsBinaryAction.remembered,
+        ),
+      );
+    }
+    await FinalizeStudySessionUseCase(
+      sessions: sessions,
+      progress: progress,
+      applyTerminalOutcome: ApplyTerminalOutcomeUseCase(repository: progress),
+      clock: _FixedClock(now),
+      idGenerator: _SeqIds('final'),
+    ).call(runtime);
+
+    await DeleteDeckUseCase(decks: decks).call('d1');
+
+    final after = await loadToday();
+    expect(after.primaryAction, TodayPrimaryAction.createLibrary);
+  });
 }
 
 class _FixedClock implements AppClock {
