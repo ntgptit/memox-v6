@@ -124,6 +124,9 @@ void main() {
     await pumpStreams(tester);
 
     expect(await boxOf('c1'), 0);
+    // §7: the learner is told it landed. Without this the dialog just
+    // vanishes and success reads the same as nothing happening.
+    expect(find.text('Deck progress reset'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });

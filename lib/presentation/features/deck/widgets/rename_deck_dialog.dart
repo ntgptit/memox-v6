@@ -11,6 +11,7 @@ import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// The rename-deck dialog (WBS 6.1; `edit-deck.md`, kit `deck-settings--rename`).
@@ -49,6 +50,7 @@ class _RenameDeckForm extends HookConsumerWidget {
         // The deck-detail read is a one-shot future; refresh it so the renamed
         // name updates in place (open-deck.md), then close.
         ref.invalidate(deckDetailProvider(deckId: deckId));
+        showMxSnackbar(context, message: l10n.deckUpdatedMessage);
         Navigator.of(context).pop();
       },
     );

@@ -80,6 +80,9 @@ void main() {
     // Dialog closed; the reactive list shows the new root.
     expect(find.text('Inside Library'), findsNothing);
     expect(find.text('Korean'), findsOneWidget);
+    // `create-deck.md`: "Deck created" with an `Open` action on the new deck.
+    expect(find.text('Deck created'), findsOneWidget);
+    expect(find.text('Open'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });

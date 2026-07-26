@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
@@ -10,6 +11,7 @@ import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// The standard create-deck dialog (WBS 5.2.4C; `create-deck.md` §8):
@@ -53,7 +55,25 @@ class _CreateDeckForm extends HookConsumerWidget {
     listenMxAction(
       ref,
       createDeckDialogViewmodelProvider,
-      onSuccess: () => Navigator.of(context).pop(),
+      onSuccess: () {
+        // Shown before the pop: the messenger is app-level, so the bar
+        // outlives the dialog that asked for it and lands on the screen the
+        // learner returns to (`create-deck.md`).
+        final createdDeckId = ref
+            .read(createDeckDialogViewmodelProvider.notifier)
+            .lastCreatedDeckId;
+        showMxSnackbar(
+          context,
+          message: l10n.deckCreatedMessage,
+          action: createdDeckId == null
+              ? null
+              : MxSnackbarAction(
+                  label: l10n.deckCreatedOpenLabel,
+                  onPressed: () => context.goDeckDetail(createdDeckId),
+                ),
+        );
+        Navigator.of(context).pop();
+      },
     );
 
     final isSubmitting = createState is AsyncLoading<void>;

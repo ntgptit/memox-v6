@@ -133,6 +133,7 @@ void main() {
     await pumpStreams(tester);
 
     expect(await parentOf('child'), 'other');
+    expect(find.text('Deck moved'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });

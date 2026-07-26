@@ -1348,6 +1348,30 @@
   "@todayCaughtUpBody": {
     "description": "Today caught-up body."
   },
+  "deckCreatedMessage": "Deck created",
+  "@deckCreatedMessage": {
+    "description": "Success confirmation after creating a deck (create-deck.md §Root deck)."
+  },
+  "deckCreatedOpenLabel": "Open",
+  "@deckCreatedOpenLabel": {
+    "description": "Action on the deck-created confirmation; opens the new deck (create-deck.md)."
+  },
+  "deckUpdatedMessage": "Deck updated",
+  "@deckUpdatedMessage": {
+    "description": "Success confirmation after renaming or editing a deck (edit-deck.md)."
+  },
+  "deckMovedMessage": "Deck moved",
+  "@deckMovedMessage": {
+    "description": "Success confirmation after moving a deck (move-deck.md)."
+  },
+  "deckDeletedMessage": "Deck deleted",
+  "@deckDeletedMessage": {
+    "description": "Success confirmation after deleting a deck (delete-deck.md)."
+  },
+  "deckProgressResetMessage": "Deck progress reset",
+  "@deckProgressResetMessage": {
+    "description": "Success confirmation after resetting a deck's progress (reset-deck-progress.md §7)."
+  },
   "todayErrorTitle": "Today couldn’t load",
   "@todayErrorTitle": {
     "description": "Today load-error title."
