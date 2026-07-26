@@ -134,6 +134,23 @@ void main() {
     expect(find.byType(MxBanner), findsNothing);
   });
 
+  // `MX-VIS-006` — the sheet's unfiltered list. No kit shot covers it (nearest
+  // is `languages--list`), so under the owner decision of 2026-07-26 it is
+  // asserted rather than photographed. The filter test below only proves what
+  // disappears; this proves what is there before anyone types.
+  testWidgets('the sheet opens on the full supported list', (tester) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(MxSelectRow).first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('English · English'), findsOneWidget);
+    expect(find.text('Tiếng Việt · Vietnamese'), findsOneWidget);
+    expect(find.text('한국어 · Korean'), findsOneWidget);
+    expect(find.text('No languages match your search.'), findsNothing);
+  });
+
   testWidgets('the sheet search filters languages', (tester) async {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
