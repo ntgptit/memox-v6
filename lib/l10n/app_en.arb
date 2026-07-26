@@ -1404,6 +1404,14 @@
   "@cardDeleteFailedMessage": {
     "description": "Delete failure; nothing was removed (delete-flashcard.md §7)."
   },
+  "dailyGoalUpdatedMessage": "Daily goal updated",
+  "@dailyGoalUpdatedMessage": {
+    "description": "Success confirmation after saving the daily goal (set-daily-study-goal.md §6)."
+  },
+  "dailyGoalSaveFailedMessage": "Couldn’t update your daily goal. Your changes are still here.",
+  "@dailyGoalSaveFailedMessage": {
+    "description": "Daily-goal save failure; the sheet and its draft stay (set-daily-study-goal.md §6)."
+  },
   "todayErrorTitle": "Today couldn’t load",
   "@todayErrorTitle": {
     "description": "Today load-error title."

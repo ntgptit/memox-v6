@@ -23,6 +23,8 @@ void main() {
     database = db.AppDatabase.forTesting(NativeDatabase.memory());
   });
 
+  // One test closes the database mid-flight to make a save fail; closing an
+  // already-closed database is a no-op, so this stays unconditional.
   tearDown(() => database.close());
 
   Widget host() => ProviderScope(
@@ -64,6 +66,38 @@ void main() {
     expect(goals, isNotNull);
     expect(goals!.targetCardCount, 30);
     expect(goals.isEnabled, 1);
+    expect(find.text('Daily goal updated'), findsOneWidget);
+  });
+
+  // §6: "Failure giữ draft". The sheet popped on whatever came back, so a
+  // goal that never reached storage closed the form and read as saved — the
+  // learner would have gone looking for it on the dashboard.
+  testWidgets('a save that cannot land keeps the sheet and the draft', (
+    tester,
+  ) async {
+    await open(tester);
+
+    await tester.tap(find.text('30 cards'));
+    await tester.pumpAndSettle();
+    // The store goes away under the open sheet — the write fails, and the
+    // form is left holding a draft it must not lose.
+    await database.close();
+
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Couldn’t update your daily goal. Your changes are still here.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Save'), findsOneWidget, reason: 'the sheet stayed open');
+    final chip = tester.widget<MxChip>(
+      find.ancestor(of: find.text('30 cards'), matching: find.byType(MxChip)),
+    );
+    expect(chip.selected, isTrue, reason: 'the draft target is still chosen');
+    expect(find.text('Daily goal updated'), findsNothing);
   });
 
   testWidgets('a saved goal prefills the form', (tester) async {
