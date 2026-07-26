@@ -53,6 +53,38 @@ void main() {
     );
   }
 
+  /// The editor pushed over a host screen, the way the app opens it.
+  ///
+  /// The other harnesses put the editor at `home`, so a save that pops leaves
+  /// the navigator empty and the messenger with no Scaffold to draw into —
+  /// the confirmation has nowhere to land. That is a property of the harness,
+  /// not of the screen, and this is where the difference matters.
+  Widget hostedEditApp(String cardId) {
+    return ProviderScope(
+      overrides: [appDatabaseProvider.overrideWithValue(database)],
+      child: MaterialApp(
+        theme: AppTheme.light(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) =>
+                        CardEditorScreen(deckId: 'd1', cardId: cardId),
+                  ),
+                ),
+                child: const Text('open editor'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget editApp(String cardId) {
     return ProviderScope(
       overrides: [appDatabaseProvider.overrideWithValue(database)],
@@ -394,6 +426,9 @@ void main() {
         .pageFlashcardsByDeck('d1', 50, 0)
         .get();
     expect(cards, hasLength(1));
+    // The create-another branch needs the bar most: nothing navigates, and a
+    // cleared form is otherwise the only sign the card was written.
+    expect(find.text('Card added'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });
@@ -548,6 +583,28 @@ void main() {
           .getSingle();
       expect(row.primaryMeaning, 'hello');
       expect(row.contentVersion, 2);
+
+      await disposeAndFlushStreams(tester);
+    });
+
+    // `edit-flashcard.md` §7. The bar is raised before the pop and outlives
+    // it — the messenger is app-level, so it lands on the screen the editor
+    // returns to rather than dying with the route that asked for it.
+    testWidgets('a saved edit confirms on the screen it returns to', (
+      tester,
+    ) async {
+      await seedCard();
+      await tester.pumpWidget(hostedEditApp('c1'));
+      await tester.tap(find.text('open editor'));
+      await pumpEditor(tester);
+
+      await tester.enterText(find.byType(TextField).at(1), 'hello');
+      await tester.pump();
+      await tester.tap(find.text('Save'));
+      await pumpEditor(tester);
+
+      expect(find.text('open editor'), findsOneWidget, reason: 'popped back');
+      expect(find.text('Card updated'), findsOneWidget);
 
       await disposeAndFlushStreams(tester);
     });

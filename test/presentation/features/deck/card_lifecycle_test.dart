@@ -121,6 +121,7 @@ void main() {
 
     expect(await hiddenOf('c1'), 1);
     expect(find.byIcon(Symbols.visibility_off_rounded), findsOneWidget);
+    expect(find.text('Card hidden'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });
@@ -140,6 +141,7 @@ void main() {
 
     expect(await isDeleted('c1'), isTrue);
     expect(find.text('hello'), findsNothing);
+    expect(find.text('Card deleted'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });
@@ -171,6 +173,30 @@ void main() {
     expect(await deckOf('c1'), 'target');
     // The card left the source Leaf list.
     expect(find.text('hello'), findsNothing);
+    expect(find.text('Card moved'), findsOneWidget);
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  // `int-35`: nothing watches the lifecycle notifier, so before the bar a
+  // failed hide or delete reached nobody — the row just stayed as it was.
+  // The card vanishing under an open sheet is how that happens for real
+  // (`hide-flashcard.md` §9: another surface deleted it).
+  testWidgets('a hide that cannot land says so and changes nothing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await pumpStreams(tester);
+
+    await tester.tap(find.text('hello'));
+    await pumpStreams(tester);
+    await database.customStatement("DELETE FROM flashcards WHERE id = 'c1'");
+
+    await tester.tap(find.text('Hide'));
+    await pumpStreams(tester);
+
+    expect(find.text('Couldn’t update this card. Try again.'), findsOneWidget);
+    expect(find.text('Card hidden'), findsNothing);
 
     await disposeAndFlushStreams(tester);
   });

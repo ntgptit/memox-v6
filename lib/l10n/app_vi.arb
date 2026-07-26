@@ -620,5 +620,13 @@
   "deckMovedMessage": "Đã di chuyển deck",
   "deckDeletedMessage": "Đã xóa deck",
   "deckProgressResetMessage": "Đã đặt lại tiến độ deck",
+  "cardAddedMessage": "Đã thêm thẻ",
+  "cardUpdatedMessage": "Đã cập nhật thẻ",
+  "cardMovedMessage": "Đã di chuyển thẻ",
+  "cardHiddenMessage": "Đã ẩn thẻ",
+  "cardVisibleMessage": "Thẻ đã hiện lại",
+  "cardDeletedMessage": "Đã xóa thẻ",
+  "cardHideFailedMessage": "Không cập nhật được thẻ này. Hãy thử lại.",
+  "cardDeleteFailedMessage": "Không xóa được thẻ. Chưa có gì bị xóa.",
   "todayErrorTitle": "Không tải được Hôm nay"
 }
