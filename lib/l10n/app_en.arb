@@ -1278,6 +1278,14 @@
   "@todayEmptyBody": {
     "description": "Today empty-library hero body."
   },
+  "todayCreateSheetTitle": "Create",
+  "@todayCreateSheetTitle": {
+    "description": "Title of the Today create action sheet (kit dashboard/create-sheet). Import cards is not offered: nothing in this build imports anything."
+  },
+  "todayCreateAddCardLabel": "Add card",
+  "@todayCreateAddCardLabel": {
+    "description": "Today create-sheet action opening the card editor for an eligible deck."
+  },
   "todayCreateLabel": "Create a deck",
   "@todayCreateLabel": {
     "description": "Today empty-library primary action opening the library."

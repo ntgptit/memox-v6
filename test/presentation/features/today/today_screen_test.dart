@@ -15,6 +15,7 @@ import 'package:memox_v6/presentation/features/today/widgets/today_greeting_head
 import 'package:memox_v6/presentation/features/today/widgets/today_goal_card.dart';
 import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_note.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/domain/today/start_review_outcome.dart';
 import 'package:memox_v6/domain/today/continue_session_outcome.dart';
@@ -816,6 +817,78 @@ void main() {
         ),
         findsNothing,
       );
+    });
+  });
+
+  // WBS 5.7.2 — `manage-today-create-actions.md`; kit `dashboard/add` and
+  // `dashboard/create-sheet`.
+  group('create sheet', () {
+    testWidgets('the FAB opens the create actions', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          data(
+            const TodayProjection(
+              primaryAction: TodayPrimaryAction.startReview,
+              dueCount: 7,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(MxFab));
+      await tester.pumpAndSettle();
+
+      // The shared select sheet uppercases its title, as the kit does.
+      expect(find.text('CREATE'), findsOneWidget);
+      expect(find.text('Add card'), findsOneWidget);
+      expect(find.text('Create deck'), findsOneWidget);
+    });
+
+    // The kit lists a third entry. Nothing in this build imports anything —
+    // no route, no flow, no use case — and a row that opens nothing is worse
+    // than a menu that is honest about what it can do.
+    testWidgets('no import row, because nothing imports', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          data(
+            const TodayProjection(
+              primaryAction: TodayPrimaryAction.startReview,
+              dueCount: 7,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(MxFab));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Import'), findsNothing);
+    });
+
+    // §6: "Dismiss không có side effect."
+    testWidgets('dismissing the sheet changes nothing', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          data(
+            const TodayProjection(
+              primaryAction: TodayPrimaryAction.startReview,
+              dueCount: 7,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(MxFab));
+      await tester.pumpAndSettle();
+      // Tap the scrim above the sheet.
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+
+      expect(find.text('CREATE'), findsNothing);
+      expect(find.text('7 cards due'), findsOneWidget);
     });
   });
 }
