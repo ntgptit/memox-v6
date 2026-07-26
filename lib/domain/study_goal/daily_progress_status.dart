@@ -9,6 +9,8 @@ class DailyProgressStatus {
     required this.streakDays,
     required this.goalDoneCards,
     required this.goalTargetCards,
+    this.studiedToday = false,
+    this.hasStreakHistory = false,
   });
 
   /// Nothing to show: no goal configured, or the goal is disabled. The card is
@@ -18,7 +20,9 @@ class DailyProgressStatus {
   const DailyProgressStatus.none()
     : streakDays = 0,
       goalDoneCards = 0,
-      goalTargetCards = 0;
+      goalTargetCards = 0,
+      studiedToday = false,
+      hasStreakHistory = false;
 
   /// Consecutive qualified days ending today, or yesterday when today has no
   /// qualifying event yet (`metrics-v1`).
@@ -29,6 +33,19 @@ class DailyProgressStatus {
   final int goalDoneCards;
 
   final int goalTargetCards;
+
+  /// Today is already a qualified day. Read from the streak records rather
+  /// than from [goalDoneCards], which is zero for everyone who has configured
+  /// no goal — `record-streak-day.md` §6 makes qualification independent of
+  /// the goal, so the goal bucket cannot answer "did they study today".
+  final bool studiedToday;
+
+  /// At least one qualified day is on record, ever.
+  ///
+  /// What separates a streak that *broke* from one that never started. Both
+  /// read [streakDays] `== 0`, and telling a first-time learner their streak
+  /// reset would name a loss they never had.
+  final bool hasStreakHistory;
 
   bool get hasGoal => goalTargetCards > 0;
 

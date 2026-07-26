@@ -149,11 +149,19 @@ void main() {
     expect(status.streakDays, 1);
   });
 
-  test('no goal configured means no card', () async {
-    final status = await build(_Streaks(<String>['2026-07-26']), _Goals())();
+  // The streak does not depend on the goal (`record-streak-day.md` §6), so a
+  // missing goal hides the card and nothing else. This use case used to return
+  // early on a missing goal and throw the streak away with it — and this test
+  // asserted the zero it produced, so the bug read as the specification.
+  test('no goal configured hides the card but keeps the streak', () async {
+    final status = await build(
+      _Streaks(<String>['2026-07-25', '2026-07-26']),
+      _Goals(),
+    )();
 
     expect(status.hasGoal, isFalse);
-    expect(status.streakDays, 0);
+    expect(status.streakDays, 2);
+    expect(status.studiedToday, isTrue);
   });
 
   test('a disabled goal means no card', () async {
@@ -163,6 +171,28 @@ void main() {
     )();
 
     expect(status.hasGoal, isFalse);
+    expect(status.streakDays, 1);
+  });
+
+  // What separates a lapsed streak from one that never started. Both read
+  // zero; only the history says which happened.
+  test('a lapsed streak reports zero with history', () async {
+    final status = await build(
+      _Streaks(<String>['2026-07-01', '2026-07-02']),
+      _Goals(goal: goalOf()),
+    )();
+
+    expect(status.streakDays, 0);
+    expect(status.hasStreakHistory, isTrue);
+    expect(status.studiedToday, isFalse);
+  });
+
+  test('a learner with no history reports none', () async {
+    final status = await build(_Streaks(<String>[]), _Goals(goal: goalOf()))();
+
+    expect(status.streakDays, 0);
+    expect(status.hasStreakHistory, isFalse);
+    expect(status.studiedToday, isFalse);
   });
 
   test('a met day reports met', () async {
