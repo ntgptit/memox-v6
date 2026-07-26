@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_answer_viewmodel.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_dialog.dart';
@@ -47,11 +48,16 @@ class _StudyStageDispatch extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
 
-    // Finalize once when the session completes.
+    // Finalize once when the session completes, and step over a card that is
+    // no longer askable before it can be rendered (ST-CHG-005/006).
     ref.listen(studySessionRuntimeProvider, (_, next) {
-      if (next.asData?.value?.isComplete ?? false) {
+      final runtime = next.asData?.value;
+      if (runtime == null) return;
+      if (runtime.isComplete) {
         ref.read(studyResultProvider.notifier).finalize();
+        return;
       }
+      unawaited(_skipUnavailableCard(ref, runtime));
     });
 
     // `answer-study-stage.md` §6: a save that fails opens a dialog and the
@@ -141,4 +147,22 @@ Future<void> _reportAnswerFailure(
     return;
   }
   await ref.read(studyAnswerViewmodelProvider.notifier).retry();
+}
+
+/// Commits a skip past a card the learner deleted or hid since the session
+/// started, then re-reads the runtime so the next card renders
+/// (ST-CONTENT-CHANGE-v1 ST-CHG-005, ST-CHG-006).
+///
+/// Nothing is said about it. The card is gone because the learner removed it,
+/// and a session that quietly declines to quiz them on it is doing what they
+/// asked; a notice here would report their own action back to them mid-study.
+Future<void> _skipUnavailableCard(
+  WidgetRef ref,
+  StudyRuntimeState runtime,
+) async {
+  final skipped = await ref
+      .read(skipUnavailableCardUseCaseProvider)
+      .call(runtime);
+  if (skipped == null) return;
+  ref.invalidate(studySessionRuntimeProvider);
 }

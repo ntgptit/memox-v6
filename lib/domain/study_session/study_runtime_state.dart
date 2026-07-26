@@ -45,6 +45,14 @@ class StudyRuntimeState {
             roundCardIds: currentOrder.cardIds,
             cardPosition: checkpoint.cardPosition,
             failedCardIds: checkpoint.failedCardIds,
+            // A cursor past the end of its round is a session that finished:
+            // the phase itself is not persisted, so this is where a reload
+            // recovers it. Without it a finished session came back as one
+            // sitting on its last card, which is how a completed session
+            // could be re-asked instead of finalized (`int-44`).
+            phase: checkpoint.cardPosition >= currentOrder.cardIds.length
+                ? SessionPhase.sessionComplete
+                : SessionPhase.inRound,
           );
     return StudyRuntimeState(
       session: session,

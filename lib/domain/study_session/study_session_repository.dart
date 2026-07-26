@@ -69,7 +69,15 @@ abstract interface class StudySessionRepository {
   /// the Recall countdown to survive an exit, and the position it belongs to
   /// is already committed. Keyed by session, so this updates the row the
   /// answer path maintains rather than adding a second one.
-  Future<void> saveCheckpoint(SessionCheckpoint checkpoint);
+  ///
+  /// [newRoundOrder] rides along when the advance opened a new round, for the
+  /// same reason the answer path commits its order with its attempt: a
+  /// checkpoint pointing at an order that was not written is a session that
+  /// cannot be resumed.
+  Future<void> saveCheckpoint(
+    SessionCheckpoint checkpoint, {
+    SessionRoundOrder? newRoundOrder,
+  });
 
   /// The session's committed attempts in commit order (`study_attempts` by
   /// `session_id`), for terminal-grade aggregation and the finalize summary
