@@ -1448,6 +1448,14 @@
   "@cardInSessionMessage": {
     "description": "Delete refused because the card is the current prompt of a running session (delete-flashcard.md §5; ST-CHG-007)."
   },
+  "reviewNoSessionBody": "It may have been finished on another screen. Your saved answers are unchanged.",
+  "@reviewNoSessionBody": {
+    "description": "Recovery copy on the study route with no session (resume-study-session.md §3 node E, §7)."
+  },
+  "reviewNoSessionActionLabel": "Back to Today",
+  "@reviewNoSessionActionLabel": {
+    "description": "Action out of the no-session study route (resume-study-session.md §7: return to the Dashboard)."
+  },
   "todayErrorTitle": "Today couldn’t load",
   "@todayErrorTitle": {
     "description": "Today load-error title."

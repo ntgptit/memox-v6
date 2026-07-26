@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_answer_viewmodel.dart';
@@ -92,9 +93,19 @@ class _StudyStageDispatch extends ConsumerWidget {
       onRetry: () => ref.invalidate(studySessionRuntimeProvider),
       data: (context, runtime) {
         if (runtime == null) {
+          // §3 node E / §7: "Session unavailable: về Dashboard/Deck với copy
+          // phục hồi". This was a dead end — a title and nothing else, on a
+          // full-screen route with no tab bar and no back. A learner who
+          // opened it after their session was finalized elsewhere, or who
+          // came in on a link, had no way out of it at all.
           return MxEmptyState(
             icon: Icons.school_outlined,
             title: l10n.reviewNoSessionMessage,
+            body: l10n.reviewNoSessionBody,
+            action: MxButton(
+              label: l10n.reviewNoSessionActionLabel,
+              onPressed: () => context.goHome(),
+            ),
           );
         }
         // A completed session shows the result while finalize runs.
