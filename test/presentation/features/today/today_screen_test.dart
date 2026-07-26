@@ -17,6 +17,8 @@ import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_note.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/domain/today/start_review_outcome.dart';
+import 'package:memox_v6/domain/today/continue_session_outcome.dart';
+import 'package:memox_v6/presentation/features/today/viewmodels/continue_session_notifier.dart';
 import 'package:memox_v6/presentation/features/today/viewmodels/start_review_notifier.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/deck/deck_summary.dart';
@@ -640,6 +642,105 @@ void main() {
       expect(button.onPressed, isNotNull);
     });
   });
+
+  // WBS 5.7.3 — Resume resolves the session again before navigating
+  // (`continue-session-from-today.md`).
+  group('continue session handoff', () {
+    Override paused() => data(
+      const TodayProjection(
+        primaryAction: TodayPrimaryAction.continueSession,
+        dueCount: 12,
+      ),
+    );
+
+    Widget app(List<Override> overrides) => ProviderScope(
+      overrides: overrides,
+      child: MaterialApp(
+        theme: AppTheme.light(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const TodayScreen(),
+      ),
+    );
+
+    testWidgets('the CTA dispatches the revalidating resume', (tester) async {
+      var resumed = 0;
+      await tester.pumpWidget(
+        app(<Override>[
+          paused(),
+          continueSessionProvider.overrideWith(
+            () => _RecordingContinue(() => resumed++),
+          ),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(MxButton, 'Resume session'));
+      await tester.pumpAndSettle();
+
+      expect(resumed, 1);
+    });
+
+    // §4: "Handoff token chặn duplicate navigation".
+    testWidgets('a resume in flight disables the CTA', (tester) async {
+      await tester.pumpWidget(
+        app(<Override>[
+          paused(),
+          continueSessionProvider.overrideWith(_LoadingContinue.new),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      final button = tester.widget<MxButton>(
+        find.widgetWithText(MxButton, 'Resume session'),
+      );
+      expect(button.onPressed, isNull);
+    });
+
+    // §2 node E: refresh *and* explain. Refreshing alone would make the CTA
+    // vanish with no account of why.
+    testWidgets('a session that already ended says so', (tester) async {
+      await tester.pumpWidget(
+        app(<Override>[
+          paused(),
+          continueSessionProvider.overrideWith(_EndedContinue.new),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'That session already finished, so there is nothing to resume.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    // §1: "Resume failure không xóa session hoặc Dashboard state".
+    testWidgets('a failed resume keeps the dashboard and the session', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        app(<Override>[
+          paused(),
+          continueSessionProvider.overrideWith(_FailedContinue.new),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Study session paused'), findsOneWidget);
+      expect(
+        find.text(
+          'Couldn’t resume the session. It is still saved — try again.',
+        ),
+        findsOneWidget,
+      );
+      final button = tester.widget<MxButton>(
+        find.widgetWithText(MxButton, 'Resume session'),
+      );
+      expect(button.onPressed, isNotNull);
+    });
+  });
 }
 
 class _RecordingStartReview extends StartReview {
@@ -663,4 +764,34 @@ class _FailedStartReview extends StartReview {
     const UnexpectedFailure(cause: 'boom'),
     StackTrace.empty,
   );
+}
+
+class _RecordingContinue extends ContinueSession {
+  _RecordingContinue(this._onResume);
+
+  final void Function() _onResume;
+
+  @override
+  Future<void> resume() async => _onResume();
+}
+
+class _LoadingContinue extends ContinueSession {
+  @override
+  AsyncValue<ContinueSessionOutcome?> build() =>
+      const AsyncLoading<ContinueSessionOutcome?>();
+}
+
+class _EndedContinue extends ContinueSession {
+  @override
+  AsyncValue<ContinueSessionOutcome?> build() =>
+      const AsyncData<ContinueSessionOutcome?>(SessionNoLongerResumable());
+}
+
+class _FailedContinue extends ContinueSession {
+  @override
+  AsyncValue<ContinueSessionOutcome?> build() =>
+      AsyncError<ContinueSessionOutcome?>(
+        const UnexpectedFailure(cause: 'boom'),
+        StackTrace.empty,
+      );
 }

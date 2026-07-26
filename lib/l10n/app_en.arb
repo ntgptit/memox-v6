@@ -1204,6 +1204,14 @@
       "total": { "type": "int" }
     }
   },
+  "todayResumeFailedBody": "Couldn’t resume the session. It is still saved — try again.",
+  "@todayResumeFailedBody": {
+    "description": "Today resume-failure notice. The session and the dashboard are both left untouched."
+  },
+  "todaySessionEndedBody": "That session already finished, so there is nothing to resume.",
+  "@todaySessionEndedBody": {
+    "description": "Today notice when the paused session was finalized elsewhere before Resume was tapped."
+  },
   "todayStartReviewFailedBody": "Couldn’t start the review. Your progress is unchanged — try again.",
   "@todayStartReviewFailedBody": {
     "description": "Today start-review failure notice. The dashboard is kept as it was; nothing was created."

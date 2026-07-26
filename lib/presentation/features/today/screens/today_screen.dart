@@ -24,6 +24,8 @@ import 'package:memox_v6/presentation/features/today/widgets/today_recent_decks.
 import 'package:memox_v6/presentation/features/today/widgets/today_stat_strip.dart';
 import 'package:memox_v6/presentation/features/today/viewmodels/start_review_notifier.dart';
 import 'package:memox_v6/domain/today/start_review_outcome.dart';
+import 'package:memox_v6/domain/today/continue_session_outcome.dart';
+import 'package:memox_v6/presentation/features/today/viewmodels/continue_session_notifier.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 
@@ -200,12 +202,50 @@ class _TodayPrimary extends StatelessWidget {
   }
 }
 
-class _PausedState extends StatelessWidget {
+/// The paused-session primary section, and the handoff back into it
+/// (WBS 5.7.3; `continue-session-from-today.md`).
+///
+/// The button navigated straight to `/study` on a projection composed when
+/// Today loaded. Between then and the tap the session can be finalized on the
+/// study screen, abandoned, or completed after a restart — and the route
+/// would have opened with nothing to resume.
+class _PausedState extends ConsumerWidget {
   const _PausedState();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final resume = ref.watch(continueSessionProvider);
+
+    ref.listen<AsyncValue<ContinueSessionOutcome?>>(continueSessionProvider, (
+      previous,
+      next,
+    ) {
+      if (previous is! AsyncLoading<ContinueSessionOutcome?>) return;
+      switch (next) {
+        case AsyncData<ContinueSessionOutcome?>(value: final outcome):
+          switch (outcome) {
+            case ResumeAtCheckpoint():
+              context.goStudy();
+            case SessionNoLongerResumable():
+              // §2 node E and §4: recomposing is what makes the CTA
+              // disappear; the notice below is the "explain" half, and it
+              // survives the refresh because it lives in the command's state.
+              ref.invalidate(todayProjectionProvider);
+            case null:
+              break;
+          }
+        case AsyncError<ContinueSessionOutcome?>():
+        // §1: the session and the dashboard are both left alone.
+        case AsyncLoading<ContinueSessionOutcome?>():
+          break;
+      }
+    });
+
+    final gone =
+        resume is AsyncData<ContinueSessionOutcome?> &&
+        resume.value is SessionNoLongerResumable;
+
     // A section of the body's column, not its own scroll view: the sections
     // scroll together, which is what puts the goal card below this one instead
     // of pinned to the bottom of the frame.
@@ -213,6 +253,10 @@ class _PausedState extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        if (gone) ...<Widget>[
+          MxBanner(tone: MxBannerTone.info, body: l10n.todaySessionEndedBody),
+          const MxGap.s4(),
+        ],
         MxCard(
           variant: MxCardVariant.primarySoft,
           child: Column(
@@ -229,8 +273,14 @@ class _PausedState extends StatelessWidget {
           icon: Symbols.play_arrow_rounded,
           label: l10n.todayResumeLabel,
           block: true,
-          onPressed: () => context.goStudy(),
+          onPressed: resume is AsyncLoading<ContinueSessionOutcome?>
+              ? null
+              : () => ref.read(continueSessionProvider.notifier).resume(),
         ),
+        if (resume is AsyncError<ContinueSessionOutcome?>) ...<Widget>[
+          const MxGap.s3(),
+          MxBanner(tone: MxBannerTone.error, body: l10n.todayResumeFailedBody),
+        ],
       ],
     );
   }

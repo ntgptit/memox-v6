@@ -6,6 +6,7 @@ import 'package:memox_v6/domain/usecases/study_session/finalize_study_session_us
 import 'package:memox_v6/domain/usecases/today/load_today_projection_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/start_study_session_usecase.dart';
+import 'package:memox_v6/domain/usecases/today/continue_session_from_today_usecase.dart';
 import 'package:memox_v6/domain/usecases/today/start_review_from_today_usecase.dart';
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
@@ -349,6 +350,15 @@ RecordStreakDayUseCase recordStreakDayUseCase(Ref ref) {
     streaks: ref.watch(streakRepositoryProvider),
     timeZone: ref.watch(appTimeZoneProvider),
     idGenerator: ref.watch(idGeneratorProvider),
+  );
+}
+
+/// Revalidates Today's paused session before handing off to it
+/// (`continue-session-from-today.md`).
+@riverpod
+ContinueSessionFromTodayUseCase continueSessionFromTodayUseCase(Ref ref) {
+  return ContinueSessionFromTodayUseCase(
+    sessions: ref.watch(studySessionRepositoryProvider),
   );
 }
 
