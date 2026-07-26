@@ -497,7 +497,7 @@
   },
   "resetDeckProgressBody": "This will reset progress for {cardCount, plural, =1{1 card} other{{cardCount} cards}} in “{deckName}”. Your cards and nested decks will stay in place.",
   "@resetDeckProgressBody": {
-    "description": "Reset impact for a Leaf deck (reset-deck-progress.md §4).",
+    "description": "Reset impact for a Leaf deck (reset-deck-progress.md §4). cardCount is the affected count of §5 — cards carrying progress, not every card in scope.",
     "placeholders": {
       "cardCount": {
         "type": "int"
@@ -509,7 +509,7 @@
   },
   "resetDeckProgressParentBody": "This will reset progress for {cardCount, plural, =1{1 card} other{{cardCount} cards}} across {deckCount, plural, =1{1 nested deck} other{{deckCount} nested decks}} in “{deckName}”. Your cards stay in place.",
   "@resetDeckProgressParentBody": {
-    "description": "Reset impact for a Parent deck (reset-deck-progress.md §4).",
+    "description": "Reset impact for a Parent deck (reset-deck-progress.md §4). cardCount is the affected count of §5 — cards carrying progress, not every card in scope.",
     "placeholders": {
       "cardCount": {
         "type": "int"

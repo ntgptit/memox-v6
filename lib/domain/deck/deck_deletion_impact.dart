@@ -17,8 +17,13 @@ class DeckDeletionImpact {
 
   /// Cards in the subtree that carry study history — Box 1 and above.
   ///
-  /// The third quantity §1 asks the copy to name. Counting progress *rows*
-  /// would restate [cardCount]: every card gets one at creation. What the
-  /// learner actually loses is the history, and Box 0 means never introduced.
+  /// The third quantity `delete-deck.md` §1 asks the copy to name. Counting
+  /// progress *rows* would restate [cardCount]: every card gets one at
+  /// creation. What the learner actually loses is the history, and Box 0 means
+  /// never introduced.
+  ///
+  /// It is also the reset confirm's affected count (`reset-deck-progress.md`
+  /// §5): the cards a reset would return to the unlearned state are exactly
+  /// the cards that left it.
   final int studiedCardCount;
 }
