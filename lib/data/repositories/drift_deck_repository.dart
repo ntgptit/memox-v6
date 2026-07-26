@@ -193,7 +193,21 @@ class DriftDeckRepository implements DeckRepository {
   @override
   Future<void> delete(String deckId) {
     return mapSqliteConflicts(entity: 'decks', () async {
-      await _database.deckDao.deleteDeck(deckId);
+      // `delete-deck.md` §3 node G: "Remove subtree atomically", and §1:
+      // "Parent delete áp dụng toàn descendants; failure không xóa một phần."
+      //
+      // This was a single `DELETE FROM decks WHERE id = ?`. `flashcards`
+      // references `decks` with no ON DELETE CASCADE, so deleting any deck
+      // that held a card raised a foreign-key violation — every populated
+      // deck was undeletable. Descendants were not removed either.
+      //
+      // One transaction so a failure removes nothing. Cards go first because
+      // the deck rows are what they point at; translations, tags, audio refs
+      // and learning progress all cascade from the card.
+      await _database.transaction(() async {
+        await _database.deckDao.deleteFlashcardsInDecks(deckId);
+        await _database.deckDao.deleteDeckSubtree(deckId);
+      });
     });
   }
 }

@@ -157,6 +157,43 @@ WHERE id = :id;
 deleteDeck:
 DELETE FROM decks WHERE id = :id;
 
+-- The subtree a delete removes: the deck and every descendant
+-- (`delete-deck.md` §1, "Parent delete áp dụng toàn descendants").
+deckSubtreeIds:
+WITH RECURSIVE subtree (id) AS (
+  SELECT id FROM decks WHERE id = :deckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+)
+SELECT id FROM subtree;
+
+-- Cards of a whole subtree, deleted before the decks themselves.
+-- `flashcards.deck_id` has no ON DELETE CASCADE, so removing a deck that
+-- still holds cards is a foreign-key violation — which is what deleting any
+-- non-empty deck used to be. Translations, tags, audio refs and learning
+-- progress all cascade from the card, so this one statement takes them.
+deleteFlashcardsInDecks:
+DELETE FROM flashcards WHERE deck_id IN (
+  WITH RECURSIVE subtree (id) AS (
+    SELECT id FROM decks WHERE id = :deckId
+    UNION ALL
+    SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+  )
+  SELECT id FROM subtree
+);
+
+-- The decks themselves, deepest first so no parent is removed before its
+-- children (`parent_id` references the same table).
+deleteDeckSubtree:
+DELETE FROM decks WHERE id IN (
+  WITH RECURSIVE subtree (id) AS (
+    SELECT id FROM decks WHERE id = :deckId
+    UNION ALL
+    SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+  )
+  SELECT id FROM subtree
+);
+
 countChildDecks:
 SELECT COUNT(*) AS child_count FROM decks WHERE parent_id = :parentId;
 
