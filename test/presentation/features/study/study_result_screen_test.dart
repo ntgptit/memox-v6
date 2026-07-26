@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/domain/study_session/session_summary_policy.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
@@ -11,8 +12,13 @@ import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 /// WBS 5.6.13 — the Study Result screen renders the committed summary and the
 /// finalizing / finalize-error states (`finalize-study-session.md` §§4,6,7).
 void main() {
-  Widget wrap(AsyncValue<StudySessionSummary?> state) => ProviderScope(
-    overrides: [studyResultProvider.overrideWith(() => _FakeResult(state))],
+  Widget wrap(
+    AsyncValue<StudySessionSummary?> state, {
+    _FakeResult? notifier,
+  }) => ProviderScope(
+    overrides: [
+      studyResultProvider.overrideWith(() => notifier ?? _FakeResult(state)),
+    ],
     child: MaterialApp(
       theme: AppTheme.light(),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -45,6 +51,41 @@ void main() {
     expect(find.text('Review mistakes'), findsOneWidget); // missed cards → link
     expect(find.widgetWithText(MxButton, 'Keep studying'), findsOneWidget);
     expect(find.widgetWithText(MxButton, 'Back to library'), findsOneWidget);
+  });
+
+  // `relearn-cards.md` §6. The link is the retry, so it stays; what was
+  // missing is any sign that the tap failed at all — the learner was left
+  // tapping a control that did nothing, the same way it behaved before it
+  // started a session in the first place.
+  testWidgets('a relearn that cannot start says so and keeps the link', (
+    tester,
+  ) async {
+    final fake = _FakeResult(
+      const AsyncData<StudySessionSummary?>(
+        StudySessionSummary(
+          reviewedCount: 5,
+          correctCount: 4,
+          missedCardIds: <String>['c5'],
+        ),
+      ),
+      relearn: AsyncError<void>(
+        ValidationFailure(field: 'relearn', code: 'unwritable'),
+        StackTrace.empty,
+      ),
+    );
+    await tester.pumpWidget(
+      wrap(const AsyncData<StudySessionSummary?>(null), notifier: fake),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Review mistakes'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Couldn’t save the relearn queue. Your answers are safe.'),
+      findsOneWidget,
+    );
+    expect(find.text('Review mistakes'), findsOneWidget);
   });
 
   testWidgets('the streak card shows when the session has a goal status', (
@@ -123,8 +164,14 @@ void main() {
 /// Overrides the result notifier to a fixed state; retry is a no-op so the error
 /// test never reaches the real finalize dependencies.
 class _FakeResult extends StudyResult {
-  _FakeResult(this._state);
+  _FakeResult(this._state, {this.relearn});
   final AsyncValue<StudySessionSummary?> _state;
+
+  /// What a `Review mistakes` tap returns: null when there was nothing to
+  /// start, otherwise the start's own outcome.
+  final AsyncValue<void>? relearn;
+
+  int relearnTaps = 0;
 
   @override
   AsyncValue<StudySessionSummary?> build() => _state;
@@ -134,4 +181,10 @@ class _FakeResult extends StudyResult {
 
   @override
   Future<void> finalize() async {}
+
+  @override
+  Future<AsyncValue<void>?> startRelearn() async {
+    relearnTaps++;
+    return relearn;
+  }
 }

@@ -1416,6 +1416,10 @@
   "@appearanceSaveFailedMessage": {
     "description": "Appearance persist failure; the prior selection is restored and the rows retry (set-appearance-preference.md §2)."
   },
+  "relearnQueueFailedMessage": "Couldn’t save the relearn queue. Your answers are safe.",
+  "@relearnQueueFailedMessage": {
+    "description": "Relearn start failure on the result screen; the link stays as the retry (relearn-cards.md §6)."
+  },
   "todayErrorTitle": "Today couldn’t load",
   "@todayErrorTitle": {
     "description": "Today load-error title."
