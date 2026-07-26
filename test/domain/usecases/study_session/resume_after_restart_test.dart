@@ -239,6 +239,45 @@ void main() {
     final persisted = await app.sessions.findById(runtime.session.id);
     expect(persisted!.state, SessionState.completed);
   });
+
+  // `int-44`. The complete phase lives in memory only; the checkpoint has
+  // nowhere to keep it. A finished session used to persist a cursor sitting
+  // on its final card, so the next read — after a restart, or after the
+  // ordinary invalidate every answer performs — handed back a session that
+  // was not complete and whose current card was the one just answered. The
+  // result screen never opened, finalize never ran, and the last card came
+  // round again.
+  test('a session finished by answering still reads as finished', () async {
+    final harness = RestartHarness.create();
+    await seed(harness.database);
+
+    var app = wire(harness.database);
+    await app.start(
+      deckId: 'd1',
+      scope: SessionScope.subtree,
+      type: SessionType.dueReview,
+    );
+
+    var runtime = (await app.loadRuntime())!;
+    while (runtime.position.currentCardId != null) {
+      runtime = await answerOne(
+        app.answer,
+        runtime,
+        SrsBinaryAction.remembered,
+      );
+    }
+    expect(runtime.isComplete, isTrue, reason: 'in memory, after the answer');
+
+    // The same session read back from the store, which is what the screen
+    // does on its very next frame.
+    final reloaded = (await app.loadRuntime())!;
+    expect(reloaded.isComplete, isTrue);
+    expect(reloaded.position.currentCardId, isNull);
+
+    await harness.restart();
+    app = wire(harness.database);
+    expect((await app.loadRuntime())!.isComplete, isTrue);
+  });
 }
 
 class _FixedClock implements AppClock {

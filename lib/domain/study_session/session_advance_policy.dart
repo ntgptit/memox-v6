@@ -94,7 +94,13 @@ class SessionAdvancePolicy {
         stageIndex: current.stageIndex,
         roundIndex: current.roundIndex,
         roundCardIds: current.roundCardIds,
-        cardPosition: current.cardPosition,
+        // Past the end, not on the last card. The phase says "complete" in
+        // memory, but the checkpoint has nowhere to keep a phase — so a
+        // finished session used to persist a cursor sitting on its final
+        // card, and every reload put that card back on screen and never
+        // finalized. The cursor is what the store can carry, so it is what
+        // has to be true (`int-44`).
+        cardPosition: current.roundCardIds.length,
         failedCardIds: const <String>[],
         phase: SessionPhase.sessionComplete,
       );

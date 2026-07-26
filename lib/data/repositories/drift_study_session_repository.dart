@@ -272,11 +272,25 @@ class DriftStudySessionRepository implements StudySessionRepository {
   }
 
   @override
-  Future<void> saveCheckpoint(SessionCheckpoint checkpoint) {
-    return mapSqliteConflicts(
-      entity: 'study_checkpoints',
-      () => _upsertCheckpoint(checkpoint),
-    );
+  Future<void> saveCheckpoint(
+    SessionCheckpoint checkpoint, {
+    SessionRoundOrder? newRoundOrder,
+  }) {
+    return mapSqliteConflicts(entity: 'study_checkpoints', () async {
+      await _database.transaction(() async {
+        await _upsertCheckpoint(checkpoint);
+        final order = newRoundOrder;
+        if (order == null) return;
+        await _database.sessionSnapshotDao.insertRoundOrder(
+          order.id,
+          order.sessionId,
+          order.roundIndex,
+          order.seed,
+          jsonEncode(order.cardIds),
+          checkpoint.updatedAt.millisecondsSinceEpoch,
+        );
+      });
+    });
   }
 
   Future<void> _upsertCheckpoint(SessionCheckpoint checkpoint) {
