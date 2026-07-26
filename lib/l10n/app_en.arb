@@ -1128,6 +1128,41 @@
       "date": { "type": "DateTime", "format": "yMMMMEEEEd" }
     }
   },
+  "todayGoalCardTitle": "Daily goal",
+  "@todayGoalCardTitle": {
+    "description": "Today daily-goal card title (kit dashboard/goal)."
+  },
+  "todayGoalCardPercent": "{percent}%",
+  "@todayGoalCardPercent": {
+    "description": "Today daily-goal card percentage.",
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "todayGoalCardCaption": "{done} of {total} cards · {left} left",
+  "@todayGoalCardCaption": {
+    "description": "Today daily-goal caption. Counted in qualified Cards, the v1 unit metrics-v1 fixes; the kit shot says minutes but those are fixture values Flutter parameterizes.",
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" },
+      "left": { "type": "int" }
+    }
+  },
+  "todayGoalCardMetCaption": "All {total} cards · goal complete",
+  "@todayGoalCardMetCaption": {
+    "description": "Today daily-goal caption once the target is reached.",
+    "placeholders": {
+      "total": { "type": "int" }
+    }
+  },
+  "todayGoalCardSemantics": "{done} of {total} cards toward today’s goal",
+  "@todayGoalCardSemantics": {
+    "description": "Accessible name for the daily-goal progress bar.",
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
   "todayTitle": "Today",
   "@todayTitle": {
     "description": "Today entry screen title (WBS 5.7.2)."

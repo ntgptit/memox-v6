@@ -17,6 +17,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_loading_skeleton.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_greeting_header.dart';
 import 'package:memox_v6/app/di/core_providers.dart';
+import 'package:memox_v6/presentation/features/today/widgets/today_goal_card.dart';
 
 /// The Today entry (WBS 5.7.2; `load-today-dashboard.md`, kit `dashboard`). A
 /// branch of `AppTabShell` (the bottom nav lives there), it renders the composed
@@ -85,15 +86,50 @@ class _TodayStates extends ConsumerWidget {
       errorTitle: l10n.todayErrorTitle,
       retryLabel: l10n.studyRetryLabel,
       onRetry: () => ref.invalidate(todayProjectionProvider),
-      data: (context, projection) => switch (projection.primaryAction) {
-        TodayPrimaryAction.continueSession => _PausedState(),
-        TodayPrimaryAction.startReview => _DueState(
-          dueCount: projection.dueCount,
-        ),
-        TodayPrimaryAction.createLibrary => _EmptyState(),
-        TodayPrimaryAction.caughtUp => _CaughtUpState(),
-      },
+      data: (context, projection) => _TodayContent(projection: projection),
     );
+  }
+}
+
+class _TodayContent extends StatelessWidget {
+  const _TodayContent({required this.projection});
+
+  final TodayProjection projection;
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = projection.dailyProgress;
+    // The card is the goal's own display, so it is absent when no goal is
+    // configured rather than showing a target of zero — `hasGoal` is the
+    // card's not-shown condition, not a missing value.
+    if (!progress.hasGoal) return _TodayPrimary(projection: projection);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        TodayGoalCard(status: progress),
+        const MxGap.s5(),
+        Expanded(child: _TodayPrimary(projection: projection)),
+      ],
+    );
+  }
+}
+
+class _TodayPrimary extends StatelessWidget {
+  const _TodayPrimary({required this.projection});
+
+  final TodayProjection projection;
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (projection.primaryAction) {
+      TodayPrimaryAction.continueSession => _PausedState(),
+      TodayPrimaryAction.startReview => _DueState(
+        dueCount: projection.dueCount,
+      ),
+      TodayPrimaryAction.createLibrary => _EmptyState(),
+      TodayPrimaryAction.caughtUp => _CaughtUpState(),
+    };
   }
 }
 

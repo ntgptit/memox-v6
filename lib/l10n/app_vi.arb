@@ -551,6 +551,34 @@
       "date": { "type": "DateTime", "format": "yMMMMEEEEd" }
     }
   },
+  "todayGoalCardTitle": "Mục tiêu hằng ngày",
+  "todayGoalCardPercent": "{percent}%",
+  "@todayGoalCardPercent": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "todayGoalCardCaption": "{done}/{total} thẻ · còn {left}",
+  "@todayGoalCardCaption": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" },
+      "left": { "type": "int" }
+    }
+  },
+  "todayGoalCardMetCaption": "Đủ {total} thẻ · đã hoàn thành",
+  "@todayGoalCardMetCaption": {
+    "placeholders": {
+      "total": { "type": "int" }
+    }
+  },
+  "todayGoalCardSemantics": "{done} trên {total} thẻ cho mục tiêu hôm nay",
+  "@todayGoalCardSemantics": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
   "todayTitle": "Hôm nay",
   "todayPausedTitle": "Phiên học đang tạm dừng",
   "todayPausedBody": "Câu trả lời đã lưu vẫn được giữ nguyên.",

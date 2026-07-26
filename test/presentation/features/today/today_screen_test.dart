@@ -12,6 +12,8 @@ import 'package:memox_v6/presentation/features/today/viewmodels/today_projection
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_loading_skeleton.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_greeting_header.dart';
+import 'package:memox_v6/presentation/features/today/widgets/today_goal_card.dart';
+import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
 
 /// WBS 5.7.2 — the Today entry renders one primary action per projection state,
 /// plus loading (no fake zeros) and load-error (`load-today-dashboard.md`).
@@ -157,5 +159,68 @@ void main() {
     expect(await greetingAt(9), 'Good morning');
     expect(await greetingAt(14), 'Good afternoon');
     expect(await greetingAt(20), 'Good evening');
+  });
+
+  // Kit `dashboard/goal`. The data has existed since the projection gained
+  // `dailyProgress`; this is the display it was composed for.
+  group('daily goal card', () {
+    TodayProjection withGoal(DailyProgressStatus progress) => TodayProjection(
+      primaryAction: TodayPrimaryAction.caughtUp,
+      dueCount: 0,
+      dailyProgress: progress,
+    );
+
+    testWidgets('shows progress toward the target in cards', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          data(
+            withGoal(
+              const DailyProgressStatus(
+                streakDays: 3,
+                goalDoneCards: 14,
+                goalTargetCards: 20,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Daily goal'), findsOneWidget);
+      expect(find.text('70%'), findsOneWidget);
+      expect(find.text('14 of 20 cards · 6 left'), findsOneWidget);
+    });
+
+    testWidgets('a met goal reads complete, not a remainder', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          data(
+            withGoal(
+              const DailyProgressStatus(
+                streakDays: 4,
+                goalDoneCards: 22,
+                goalTargetCards: 20,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Over-target is allowed and displayed as done — never as 110%, and
+      // never as "-2 left".
+      expect(find.text('100%'), findsOneWidget);
+      expect(find.text('All 20 cards · goal complete'), findsOneWidget);
+    });
+
+    testWidgets('no configured goal shows no card', (tester) async {
+      await tester.pumpWidget(
+        wrap(data(withGoal(const DailyProgressStatus.none()))),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TodayGoalCard), findsNothing);
+      expect(find.text('You’re all caught up'), findsOneWidget);
+    });
   });
 }
