@@ -31,20 +31,14 @@ class LoadDailyProgressUseCase {
   final StreakProjectionPolicy _streakPolicy;
 
   Future<DailyProgressStatus> call() async {
-    final goal = await _goals.latestGoal();
-    if (goal == null || !goal.isEnabled) {
-      return const DailyProgressStatus.none();
-    }
-
     final today = _timeZone.localDayOf(_clock.nowUtc());
     final localDate = today.toString();
 
-    final bucket = await _goals.dayProgress(localDate);
-    // No bucket yet means no qualifying session today — progress is zero
-    // against the currently configured target, not "no goal".
-    final done = bucket?.qualifiedCardCount ?? 0;
-    final target = bucket?.targetSnapshot ?? goal.targetCardCount;
-
+    // The streak is read before the goal is even looked at, because it does
+    // not depend on one: `record-streak-day.md` §6 — "Không phụ thuộc Daily
+    // Goal enabled/met". Returning `none()` on a missing goal used to drop the
+    // streak with it, so a learner on day nine of a run who had never set a
+    // target was told they had no streak.
     final days = await _streaks.daysBetween('0000-01-01', localDate);
     final projection = _streakPolicy.project(
       days: days
@@ -52,11 +46,35 @@ class LoadDailyProgressUseCase {
           .whereType<LocalDay>(),
       effectiveDay: today,
     );
+    final streakDays = projection.current;
+    final studiedToday = projection.lastQualifiedDay == today;
+    final hasStreakHistory = projection.lastQualifiedDay != null;
+
+    final goal = await _goals.latestGoal();
+    if (goal == null || !goal.isEnabled) {
+      // No target, so no goal figures — `hasGoal` stays false and the card
+      // stays hidden. The streak still has something to say.
+      return DailyProgressStatus(
+        streakDays: streakDays,
+        goalDoneCards: 0,
+        goalTargetCards: 0,
+        studiedToday: studiedToday,
+        hasStreakHistory: hasStreakHistory,
+      );
+    }
+
+    final bucket = await _goals.dayProgress(localDate);
+    // No bucket yet means no qualifying session today — progress is zero
+    // against the currently configured target, not "no goal".
+    final done = bucket?.qualifiedCardCount ?? 0;
+    final target = bucket?.targetSnapshot ?? goal.targetCardCount;
 
     return DailyProgressStatus(
-      streakDays: projection.current,
+      streakDays: streakDays,
       goalDoneCards: done,
       goalTargetCards: target,
+      studiedToday: studiedToday,
+      hasStreakHistory: hasStreakHistory,
     );
   }
 }

@@ -14,6 +14,7 @@ import 'package:memox_v6/presentation/features/today/widgets/today_loading_skele
 import 'package:memox_v6/presentation/features/today/widgets/today_greeting_header.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_goal_card.dart';
 import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_note.dart';
 
 /// WBS 5.7.2 — the Today entry renders one primary action per projection state,
 /// plus loading (no fake zeros) and load-error (`load-today-dashboard.md`).
@@ -79,7 +80,9 @@ void main() {
     expect(find.widgetWithText(MxButton, 'Create a deck'), findsOneWidget);
   });
 
-  testWidgets('caught up shows the all-caught-up message', (tester) async {
+  // The kit replaces the Review CTA on a caught-up day; it does not leave the
+  // screen without one. This state used to offer nothing at all.
+  testWidgets('caught up shows the message and a way onward', (tester) async {
     await tester.pumpWidget(
       wrap(
         data(
@@ -92,6 +95,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('You’re all caught up'), findsOneWidget);
+    expect(find.widgetWithText(MxButton, 'Explore decks'), findsOneWidget);
   });
 
   testWidgets('loading shows no fake zeros', (tester) async {
@@ -179,6 +183,8 @@ void main() {
                 streakDays: 3,
                 goalDoneCards: 14,
                 goalTargetCards: 20,
+                studiedToday: true,
+                hasStreakHistory: true,
               ),
             ),
           ),
@@ -200,6 +206,8 @@ void main() {
                 streakDays: 4,
                 goalDoneCards: 22,
                 goalTargetCards: 20,
+                studiedToday: true,
+                hasStreakHistory: true,
               ),
             ),
           ),
@@ -221,6 +229,157 @@ void main() {
 
       expect(find.byType(TodayGoalCard), findsNothing);
       expect(find.text('You’re all caught up'), findsOneWidget);
+    });
+
+    // Kit and spec §3: due/resume content precedes goal/streak content. The
+    // card landed above the primary section, which put a supporting metric
+    // ahead of the screen's one objective.
+    testWidgets('the card sits below the primary section', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          data(
+            TodayProjection(
+              primaryAction: TodayPrimaryAction.startReview,
+              dueCount: 7,
+              dailyProgress: const DailyProgressStatus(
+                streakDays: 3,
+                goalDoneCards: 14,
+                goalTargetCards: 20,
+                studiedToday: true,
+                hasStreakHistory: true,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final cta = tester.getTopLeft(
+        find.widgetWithText(MxButton, 'Start review'),
+      );
+      final card = tester.getTopLeft(find.byType(TodayGoalCard));
+      expect(card.dy, greaterThan(cta.dy));
+    });
+  });
+
+  // Kit `dashboard--goal-met` / `--streak-reset` / `--not-studied`.
+  group('state notes', () {
+    TodayProjection standing(DailyProgressStatus progress) => TodayProjection(
+      primaryAction: TodayPrimaryAction.startReview,
+      dueCount: 7,
+      dailyProgress: progress,
+    );
+
+    Future<void> pump(tester, DailyProgressStatus progress) async {
+      await tester.pumpWidget(wrap(data(standing(progress))));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('a met goal celebrates without crediting itself', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        const DailyProgressStatus(
+          streakDays: 5,
+          goalDoneCards: 20,
+          goalTargetCards: 20,
+          studiedToday: true,
+          hasStreakHistory: true,
+        ),
+      );
+
+      expect(
+        find.text('Daily goal reached! Today counts toward your streak.'),
+        findsOneWidget,
+      );
+      // The streak day came from studying, not from the target — the kit's
+      // "Streak +1" would say otherwise.
+      expect(find.textContaining('+1'), findsNothing);
+    });
+
+    testWidgets('a lapsed streak reads as reset', (tester) async {
+      await pump(
+        tester,
+        const DailyProgressStatus(
+          streakDays: 0,
+          goalDoneCards: 0,
+          goalTargetCards: 20,
+          hasStreakHistory: true,
+        ),
+      );
+
+      expect(
+        find.text('Streak reset — study today to start again.'),
+        findsOneWidget,
+      );
+    });
+
+    // The same zero, a different fact. Naming a loss they never had would be
+    // the first thing a new learner reads.
+    testWidgets('a first-time learner is told nothing reset', (tester) async {
+      await pump(
+        tester,
+        const DailyProgressStatus(
+          streakDays: 0,
+          goalDoneCards: 0,
+          goalTargetCards: 20,
+        ),
+      );
+
+      expect(find.byType(MxNote), findsNothing);
+    });
+
+    testWidgets('a live streak with nothing done today nudges', (tester) async {
+      await pump(
+        tester,
+        const DailyProgressStatus(
+          streakDays: 12,
+          goalDoneCards: 0,
+          goalTargetCards: 20,
+          hasStreakHistory: true,
+        ),
+      );
+
+      expect(
+        find.text('You haven’t studied today — study to keep your streak.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a day already under way needs no note', (tester) async {
+      await pump(
+        tester,
+        const DailyProgressStatus(
+          streakDays: 12,
+          goalDoneCards: 4,
+          goalTargetCards: 20,
+          studiedToday: true,
+          hasStreakHistory: true,
+        ),
+      );
+
+      expect(find.byType(MxNote), findsNothing);
+    });
+
+    // The streak outlives the goal, so the nudge must reach someone who never
+    // set a target.
+    testWidgets('the nudge does not need a configured goal', (tester) async {
+      await pump(
+        tester,
+        const DailyProgressStatus(
+          streakDays: 9,
+          goalDoneCards: 0,
+          goalTargetCards: 0,
+          hasStreakHistory: true,
+        ),
+      );
+
+      expect(find.byType(TodayGoalCard), findsNothing);
+      expect(
+        find.text('You haven’t studied today — study to keep your streak.'),
+        findsOneWidget,
+      );
     });
   });
 }

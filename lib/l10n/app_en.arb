@@ -1196,6 +1196,22 @@
   "@todayStartReviewLabel": {
     "description": "Today primary action starting a review."
   },
+  "todayNoteGoalMet": "Daily goal reached! Today counts toward your streak.",
+  "@todayNoteGoalMet": {
+    "description": "Today note when the daily goal is met. The kit writes 'Streak +1', which is not said here: a streak day is earned by studying, not by reaching the target."
+  },
+  "todayNoteStreakReset": "Streak reset — study today to start again.",
+  "@todayNoteStreakReset": {
+    "description": "Today note when a streak that existed has lapsed. Never shown to someone who never had one."
+  },
+  "todayNoteNotStudied": "You haven’t studied today — study to keep your streak.",
+  "@todayNoteNotStudied": {
+    "description": "Today note when a streak is running but today is not a qualified day yet."
+  },
+  "todayExploreDecksLabel": "Explore decks",
+  "@todayExploreDecksLabel": {
+    "description": "Today caught-up action: open the library when nothing is due."
+  },
   "todayEmptyTitle": "Start your first deck",
   "@todayEmptyTitle": {
     "description": "Today empty-library hero title."

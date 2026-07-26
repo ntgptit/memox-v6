@@ -18,6 +18,8 @@ import 'package:memox_v6/presentation/features/today/widgets/today_loading_skele
 import 'package:memox_v6/presentation/features/today/widgets/today_greeting_header.dart';
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_goal_card.dart';
+import 'package:memox_v6/presentation/features/today/widgets/today_state_note.dart';
+import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 
 /// The Today entry (WBS 5.7.2; `load-today-dashboard.md`, kit `dashboard`). A
 /// branch of `AppTabShell` (the bottom nav lives there), it renders the composed
@@ -66,7 +68,9 @@ class _TodayBody extends ConsumerWidget {
         TodayGreetingHeader(
           now: ref.watch(appClockProvider).nowUtc().toLocal(),
         ),
-        const MxGap.s5(),
+        // Kit `.app__body` gap: `space-6`. It was `space-5` (20) here, four
+        // logical short of every other section break in the app.
+        const MxGap.s6(),
         Expanded(child: _TodayStates(l10n: l10n)),
       ],
     );
@@ -91,6 +95,13 @@ class _TodayStates extends ConsumerWidget {
   }
 }
 
+/// The dashboard body: one scrolling column of sections in the kit's order —
+/// note, the primary section, then the Daily-goal card.
+///
+/// The goal card sat *above* the primary section when it landed, which put a
+/// supporting metric ahead of the screen's one objective; the kit renders
+/// `<GoalCard>` after the Continue-studying block, and the spec's §3 order is
+/// explicit that due/resume content precedes goal/streak content.
 class _TodayContent extends StatelessWidget {
   const _TodayContent({required this.projection});
 
@@ -98,18 +109,30 @@ class _TodayContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = projection.dailyProgress;
-    // The card is the goal's own display, so it is absent when no goal is
-    // configured rather than showing a target of zero — `hasGoal` is the
-    // card's not-shown condition, not a missing value.
-    if (!progress.hasGoal) return _TodayPrimary(projection: projection);
+    // First-run is a different tree in the kit, not a section of this one: the
+    // onboarding hero replaces the body, with no note and no goal card above
+    // a library that has nothing in it yet.
+    if (projection.primaryAction == TodayPrimaryAction.createLibrary) {
+      return const _EmptyState();
+    }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final progress = projection.dailyProgress;
+    final note = todayNoteFor(progress);
+
+    return ListView(
       children: <Widget>[
-        TodayGoalCard(status: progress),
-        const MxGap.s5(),
-        Expanded(child: _TodayPrimary(projection: projection)),
+        if (note != null) ...<Widget>[
+          TodayStateNote(kind: note),
+          const MxGap.s6(),
+        ],
+        _TodayPrimary(projection: projection),
+        // The card is the goal's own display, so it is absent when no goal is
+        // configured rather than showing a target of zero — `hasGoal` is the
+        // card's not-shown condition, not a missing value.
+        if (progress.hasGoal) ...<Widget>[
+          const MxGap.s6(),
+          TodayGoalCard(status: progress),
+        ],
       ],
     );
   }
@@ -127,6 +150,7 @@ class _TodayPrimary extends StatelessWidget {
       TodayPrimaryAction.startReview => _DueState(
         dueCount: projection.dueCount,
       ),
+      // Handled by _TodayContent, which swaps the whole body for the hero.
       TodayPrimaryAction.createLibrary => _EmptyState(),
       TodayPrimaryAction.caughtUp => _CaughtUpState(),
     };
@@ -139,7 +163,12 @@ class _PausedState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return ListView(
+    // A section of the body's column, not its own scroll view: the sections
+    // scroll together, which is what puts the goal card below this one instead
+    // of pinned to the bottom of the frame.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         MxCard(
           variant: MxCardVariant.primarySoft,
@@ -172,7 +201,9 @@ class _DueState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return ListView(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         MxSectionHeader(
           title: l10n.todayDueTitle,
@@ -209,16 +240,41 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+/// Nothing due (kit `dashboard/continue`, caught-up branch).
+///
+/// A section at the top of the body, not a centred empty state: the kit keeps
+/// the rest of the dashboard — goal, streak, decks — visible on a caught-up
+/// day, and only the Review CTA is replaced.
+///
+/// It replaces the CTA rather than removing it. This screen offered no control
+/// at all when nothing was due, so a learner who had finished their reviews
+/// was shown a congratulation and no way onward.
 class _CaughtUpState extends StatelessWidget {
   const _CaughtUpState();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return MxEmptyState(
-      icon: Icons.check_circle_outline,
-      title: l10n.todayCaughtUpTitle,
-      body: l10n.todayCaughtUpBody,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        MxText(l10n.todayCaughtUpTitle, role: MxTextRole.bodyStrong),
+        const MxGap.s1(),
+        MxText(
+          l10n.todayCaughtUpBody,
+          role: MxTextRole.caption,
+          color: context.colors.textSecondary,
+        ),
+        const MxGap.s3(),
+        MxButton(
+          variant: MxButtonVariant.secondary,
+          icon: Symbols.explore_rounded,
+          label: l10n.todayExploreDecksLabel,
+          block: true,
+          onPressed: () => context.goLibrary(),
+        ),
+      ],
     );
   }
 }
