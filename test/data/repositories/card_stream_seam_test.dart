@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
+import 'package:memox_v6/data/repositories/drift_study_session_repository.dart';
 import 'package:memox_v6/core/ids/id_generator.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
@@ -149,6 +151,9 @@ void main() {
 
     await DeleteFlashcardUseCase(
       cards: cards,
+      runtime: LoadStudyRuntimeUseCase(
+        sessions: DriftStudySessionRepository(database),
+      ),
       clock: _FixedClock(now),
     ).deleteCard(drop.id);
 

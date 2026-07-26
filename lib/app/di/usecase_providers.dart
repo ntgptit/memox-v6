@@ -266,6 +266,7 @@ HideFlashcardUseCase hideFlashcardUseCase(Ref ref) {
 DeleteFlashcardUseCase deleteFlashcardUseCase(Ref ref) {
   return DeleteFlashcardUseCase(
     cards: ref.watch(flashcardRepositoryProvider),
+    runtime: ref.watch(loadStudyRuntimeUseCaseProvider),
     clock: ref.watch(appClockProvider),
   );
 }
