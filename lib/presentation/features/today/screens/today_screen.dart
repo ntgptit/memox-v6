@@ -22,6 +22,7 @@ import 'package:memox_v6/presentation/features/today/widgets/today_goal_card.dar
 import 'package:memox_v6/presentation/features/today/widgets/today_state_note.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_recent_decks.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_stat_strip.dart';
+import 'package:memox_v6/presentation/features/today/widgets/today_create_fab.dart';
 import 'package:memox_v6/presentation/features/today/viewmodels/start_review_notifier.dart';
 import 'package:memox_v6/domain/today/start_review_outcome.dart';
 import 'package:memox_v6/domain/today/continue_session_outcome.dart';
@@ -70,6 +71,9 @@ class TodayScreen extends StatelessWidget {
           ),
         ],
       ),
+      // Kit `dashboard/add`: the create action is the FAB, never a nav tab —
+      // the bottom bar holds destinations only.
+      fab: const TodayCreateFab(),
       body: const _TodayBody(),
     );
   }

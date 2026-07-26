@@ -599,6 +599,8 @@
   "todayExploreDecksLabel": "Khám phá bộ thẻ",
   "todayEmptyTitle": "Tạo bộ thẻ đầu tiên",
   "todayEmptyBody": "Thêm những từ bạn muốn nhớ — MemoX sẽ lên lịch ôn cho bạn.",
+  "todayCreateSheetTitle": "Tạo mới",
+  "todayCreateAddCardLabel": "Thêm thẻ",
   "todayCreateLabel": "Tạo bộ thẻ",
   "todayCaughtUpTitle": "Bạn đã ôn hết rồi",
   "todayCaughtUpBody": "Hiện không có thẻ nào đến hạn.",
