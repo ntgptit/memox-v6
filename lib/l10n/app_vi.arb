@@ -628,5 +628,7 @@
   "cardDeletedMessage": "Đã xóa thẻ",
   "cardHideFailedMessage": "Không cập nhật được thẻ này. Hãy thử lại.",
   "cardDeleteFailedMessage": "Không xóa được thẻ. Chưa có gì bị xóa.",
+  "dailyGoalUpdatedMessage": "Đã cập nhật mục tiêu hằng ngày",
+  "dailyGoalSaveFailedMessage": "Không cập nhật được mục tiêu hằng ngày. Thay đổi của bạn vẫn còn đây.",
   "todayErrorTitle": "Không tải được Hôm nay"
 }

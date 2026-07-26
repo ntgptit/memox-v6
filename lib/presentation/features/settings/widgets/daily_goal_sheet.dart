@@ -6,6 +6,12 @@ import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/settings/viewmodels/daily_goal_viewmodel.dart';
 import 'package:memox_v6/presentation/shared/bottom_sheets/mx_sheet.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
+import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
+import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_action_callout.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart'
+    show MxBannerTone;
+import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_switch.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_chip.dart';
@@ -63,13 +69,26 @@ class _DailyGoalForm extends HookConsumerWidget {
     // A disabled goal keeps its last target so re-enabling need not ask again
     // (§5); with no goal at all the middle option is the starting point.
     final target = useState(goal?.targetCardCount ?? 20);
-    final saving = ref.watch(dailyGoalCommandViewmodelProvider);
+    final saveState = ref.watch(dailyGoalCommandViewmodelProvider);
+    final failure = MxActionErrors.failureOf(saveState);
 
-    Future<void> save() async {
-      await ref
+    // §6: success confirms and closes; a failure keeps the sheet — and the
+    // draft in it — exactly where it was. The sheet used to pop on whatever
+    // came back, so a goal that never reached storage closed the form and
+    // read as saved.
+    listenMxAction(
+      ref,
+      dailyGoalCommandViewmodelProvider,
+      onSuccess: () {
+        showMxSnackbar(context, message: l10n.dailyGoalUpdatedMessage);
+        Navigator.of(context).pop();
+      },
+    );
+
+    Future<void> save() {
+      return ref
           .read(dailyGoalCommandViewmodelProvider.notifier)
           .updateGoal(isEnabled: enabled.value, targetCardCount: target.value);
-      if (context.mounted) Navigator.of(context).pop();
     }
 
     return Column(
@@ -101,11 +120,18 @@ class _DailyGoalForm extends HookConsumerWidget {
               ),
           ],
         ),
+        if (failure != null) ...[
+          const MxGap.s4(),
+          MxActionCallout(
+            tone: MxBannerTone.error,
+            text: l10n.dailyGoalSaveFailedMessage,
+          ),
+        ],
         const MxGap.s5(),
         MxButton(
           label: l10n.saveLabel,
           block: true,
-          onPressed: saving is AsyncLoading<void> ? null : save,
+          onPressed: saveState is AsyncLoading<void> ? null : save,
         ),
       ],
     );

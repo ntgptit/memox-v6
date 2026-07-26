@@ -27,14 +27,20 @@ class DailyGoalCommandViewmodel extends _$DailyGoalCommandViewmodel {
     required int targetCardCount,
   }) async {
     state = const AsyncLoading<void>();
-    state = await runMxAction(() async {
+    final result = await runMxAction(() async {
       await ref
           .read(setDailyStudyGoalUseCaseProvider)
           .call(isEnabled: isEnabled, targetCardCount: targetCardCount);
     });
+    state = result;
     // The readers derive from the stored goal rather than caching it, so
     // invalidating the read is all that is needed for Today and the result
     // screen to pick the change up.
-    ref.invalidate(dailyGoalProvider);
+    //
+    // Only on success. A failed write left the stored goal alone, so there is
+    // nothing new to read — and re-reading through a store that just failed
+    // replaces the open form with its error state, taking the draft §6
+    // promises to keep with it.
+    if (result is AsyncData<void>) ref.invalidate(dailyGoalProvider);
   }
 }
