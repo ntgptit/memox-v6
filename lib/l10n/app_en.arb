@@ -1412,6 +1412,10 @@
   "@dailyGoalSaveFailedMessage": {
     "description": "Daily-goal save failure; the sheet and its draft stay (set-daily-study-goal.md §6)."
   },
+  "appearanceSaveFailedMessage": "Couldn’t change the appearance. Your previous choice is still in place.",
+  "@appearanceSaveFailedMessage": {
+    "description": "Appearance persist failure; the prior selection is restored and the rows retry (set-appearance-preference.md §2)."
+  },
   "todayErrorTitle": "Today couldn’t load",
   "@todayErrorTitle": {
     "description": "Today load-error title."

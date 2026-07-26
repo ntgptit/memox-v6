@@ -21,11 +21,22 @@ class AppearanceCommandViewmodel extends _$AppearanceCommandViewmodel {
   @override
   AsyncValue<void> build() => const AsyncData<void>(null);
 
+  /// Which selection is current. Incremented per tap so a slower earlier
+  /// write cannot decide the outcome of a faster later one.
+  int _selection = 0;
+
   Future<void> selectAppearance(AppearanceMode mode) async {
+    final selection = ++_selection;
     state = const AsyncLoading<void>();
     final result = await runMxAction(() async {
       await ref.read(setAppearancePreferenceUseCaseProvider).setMode(mode);
     });
+    // §4: "Rapid selection chỉ latest value thắng." The writes themselves land
+    // in tap order — drift runs statements on one connection in submission
+    // order — but their results come back whenever they come back. Without
+    // this, a superseded tap's result would set the state and invalidate the
+    // read, and the sheet would close on the wrong selection's success.
+    if (selection != _selection) return;
     state = result;
     if (result is! AsyncError) {
       ref.invalidate(appearanceModeProvider);
