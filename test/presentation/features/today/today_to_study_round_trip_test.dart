@@ -5,6 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/app/router/route_paths.dart';
+import 'package:memox_v6/domain/study_modes/strategies/srs_binary_review_study_mode_strategy.dart';
+import 'package:memox_v6/domain/study_session/session_scope.dart';
+import 'package:memox_v6/domain/study_session/session_type.dart';
+import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
@@ -29,6 +33,10 @@ void main() {
   late GoRouter router;
 
   final dueAt = DateTime.utc(2026, 7, 26, 9);
+
+  /// The two seeded cards, so a resumed card can be located on screen by the
+  /// term the session snapshot froze.
+  const cardTerms = <String, String>{'c1': '학교', 'c2': '친구'};
 
   setUp(() async {
     final view = TestWidgetsFlutterBinding.ensureInitialized()
@@ -156,5 +164,53 @@ void main() {
     // left: the cards left the due queue when the session scheduled them.
     expect(find.text('Start review'), findsNothing);
     expect(find.text('You’re all caught up'), findsOneWidget);
+  });
+
+  // The other handoff `5.7.3` names: a session left half-answered outranks a
+  // new review, and Resume must land on the card it was left on rather than
+  // starting the queue again.
+  testWidgets('a half-answered session resumes where it was left', (
+    tester,
+  ) async {
+    await container
+        .read(startStudySessionUseCaseProvider)
+        .call(
+          deckId: 'd1',
+          scope: SessionScope.subtree,
+          type: SessionType.dueReview,
+        );
+    // One card answered, outside the widgets: this is the state a learner
+    // leaves behind, not a step the test is driving.
+    final runtime = (await container.read(loadStudyRuntimeUseCaseProvider)())!;
+    final answered = runtime.position.currentCardId!;
+    await container.read(answerStudyStageUseCaseProvider)(
+      runtime,
+      SrsBinaryReviewInput(
+        sessionId: runtime.session.id,
+        cardId: answered,
+        roundIndex: runtime.position.roundIndex,
+        eventId: 'srs-$answered-remembered',
+        action: SrsBinaryAction.remembered,
+      ),
+    );
+
+    await tester.pumpWidget(app());
+    await settle(tester);
+
+    // The paused session takes the primary action; no new review is offered.
+    expect(find.text('Study session paused'), findsOneWidget);
+    expect(find.text('Start review'), findsNothing);
+
+    await tester.tap(find.text('Resume session'));
+    await settle(tester);
+
+    // Landed on the card that was never answered.
+    final resumed = (await container.read(loadStudyRuntimeUseCaseProvider)())!;
+    expect(resumed.position.currentCardId, isNot(answered));
+    expect(
+      find.text(cardTerms[resumed.position.currentCardId]!),
+      findsOneWidget,
+      reason: 'the unanswered card is the one on screen',
+    );
   });
 }

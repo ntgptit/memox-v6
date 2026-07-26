@@ -12,6 +12,7 @@ import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
 import 'package:memox_v6/domain/study_session/study_session.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/study/screens/study_session_screen.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 
 /// WBS 5.6 — the study route dispatches to the current stage's mode screen, or
@@ -76,9 +77,22 @@ void main() {
     expect(find.text('school'), findsOneWidget);
   });
 
-  testWidgets('shows a placeholder when no session is active', (tester) async {
+  // §3 node E / §7: "Session unavailable: về Dashboard/Deck với copy phục
+  // hồi". The study route is full-screen with no tab bar and no back, so a
+  // title on its own was a dead end for anyone who arrived after their
+  // session was finalized elsewhere.
+  testWidgets('no session offers recovery copy and a way out', (tester) async {
     await tester.pumpWidget(wrap(null));
     await tester.pumpAndSettle();
+
     expect(find.text('No study session is in progress.'), findsOneWidget);
+    expect(
+      find.text(
+        'It may have been finished on another screen. Your saved answers are '
+        'unchanged.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.widgetWithText(MxButton, 'Back to Today'), findsOneWidget);
   });
 }
