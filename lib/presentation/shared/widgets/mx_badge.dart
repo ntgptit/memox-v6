@@ -25,6 +25,9 @@ enum MxBadgeTone { primary, success, warning, error }
 /// - label: the pill text (localized by the caller).
 /// - tone: primary/success/warning/error grounds (kit `.badge--<tone>`).
 /// - soft: kit `badge--soft` — tinted surface instead of the solid ground.
+/// - `MxBadge.icon(...)`: a glyph in place of the text, for the states the
+///   kit marks with a symbol rather than a count (the up-to-date deck row's
+///   check). Announced by `semanticLabel`, since a glyph reads as nothing.
 ///
 /// Variants:
 /// See [MxBadgeTone] plus the `soft` flag.
@@ -34,11 +37,24 @@ class MxBadge extends StatelessWidget {
     required this.label,
     this.tone = MxBadgeTone.primary,
     this.soft = false,
-  });
+  }) : icon = null,
+       semanticLabel = null;
+
+  const MxBadge.icon({
+    super.key,
+    required IconData this.icon,
+    required String this.semanticLabel,
+    this.tone = MxBadgeTone.primary,
+    this.soft = false,
+  }) : label = '';
 
   final String label;
   final MxBadgeTone tone;
   final bool soft;
+
+  /// Non-null only for [MxBadge.icon].
+  final IconData? icon;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -85,15 +101,24 @@ class MxBadge extends StatelessWidget {
         color: soft ? softBg : solidBg,
         borderRadius: AppBorderRadii.pill,
       ),
-      child: Text(
-        label,
-        style: styles.overline.copyWith(
-          fontWeight: styles.boldWeight,
-          letterSpacing: null,
-          height: 1,
-          color: soft ? softFg : solidFg,
-        ),
-      ),
+      child: icon == null
+          ? Text(
+              label,
+              style: styles.overline.copyWith(
+                fontWeight: styles.boldWeight,
+                letterSpacing: null,
+                height: 1,
+                color: soft ? softFg : solidFg,
+              ),
+            )
+          : Icon(
+              icon,
+              // The kit sizes this glyph at font-size-xs so it matches the
+              // count it replaces rather than the icon scale.
+              size: styles.overline.fontSize,
+              color: soft ? softFg : solidFg,
+              semanticLabel: semanticLabel,
+            ),
     );
   }
 }

@@ -1196,6 +1196,29 @@
   "@todayStartReviewLabel": {
     "description": "Today primary action starting a review."
   },
+  "deckDueBadgeLabel": "{count}",
+  "@deckDueBadgeLabel": {
+    "description": "Due-card count in a deck-row badge. Localized rather than interpolated so the digits follow the locale's numbering system.",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "deckMasteryLabel": "{mastered} of {total} cards mastered",
+  "@deckMasteryLabel": {
+    "description": "Accessible name for the deck-row mastery bar. Mastered means Box 8 (srs-8-box-policy.md §3); the denominator is the studiable cards, excluding hidden ones.",
+    "placeholders": {
+      "mastered": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "todayRecentDecksTitle": "Recent decks",
+  "@todayRecentDecksTitle": {
+    "description": "Today deck-list section title, ordered by when each deck was last studied."
+  },
+  "todaySeeAllDecksLabel": "See all decks",
+  "@todaySeeAllDecksLabel": {
+    "description": "Today link closing the deck list, opening the Library."
+  },
   "todayNoteGoalMet": "Daily goal reached! Today counts toward your streak.",
   "@todayNoteGoalMet": {
     "description": "Today note when the daily goal is met. The kit writes 'Streak +1', which is not said here: a streak day is earned by studying, not by reaching the target."

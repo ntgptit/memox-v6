@@ -1,3 +1,4 @@
+import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/domain/study_session/study_session.dart';
 import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
 
@@ -33,7 +34,12 @@ class TodayProjection {
     required this.dueCount,
     this.pausedSession,
     this.dailyProgress = const DailyProgressStatus.none(),
+    this.recentDecks = const <DeckSummary>[],
   });
+
+  /// How many deck rows Today shows (kit `dashboard/decks`: three, then a
+  /// "See all decks" link to the Library rather than a longer list).
+  static const int recentDeckLimit = 3;
 
   final TodayPrimaryAction primaryAction;
 
@@ -51,4 +57,10 @@ class TodayProjection {
   /// present; `hasGoal` is false when none is configured, which is the card's
   /// own not-shown condition rather than a missing value.
   final DailyProgressStatus dailyProgress;
+
+  /// The most recently studied root decks of the active pair, newest first —
+  /// the kit's Recent-decks section. A supporting section by
+  /// `load-today-dashboard.md` §3, so it is empty rather than fatal when the
+  /// library has nothing in it.
+  final List<DeckSummary> recentDecks;
 }

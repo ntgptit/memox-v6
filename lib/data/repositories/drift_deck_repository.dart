@@ -69,6 +69,19 @@ class DriftDeckRepository implements DeckRepository {
   }
 
   @override
+  Future<List<domain.DeckSummary>> recentSummaries(
+    String languagePairId, {
+    required int limit,
+  }) async {
+    // Same read-time due-ness contract as the watching queries above.
+    final nowUtc = _clock.nowUtc().millisecondsSinceEpoch.toString();
+    final rows = await _database.deckDao
+        .recentRootDeckSummaries(nowUtc, languagePairId, limit)
+        .get();
+    return rows.map((row) => row.toDomain()).toList();
+  }
+
+  @override
   Stream<List<domain.DeckSummary>> watchChildSummaries(String parentId) {
     // Same subscription-time due-ness contract as watchRootSummaries.
     final nowUtc = _clock.nowUtc().millisecondsSinceEpoch.toString();

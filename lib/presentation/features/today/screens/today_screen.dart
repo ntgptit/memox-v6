@@ -19,6 +19,7 @@ import 'package:memox_v6/presentation/features/today/widgets/today_greeting_head
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_goal_card.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_state_note.dart';
+import 'package:memox_v6/presentation/features/today/widgets/today_recent_decks.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 
 /// The Today entry (WBS 5.7.2; `load-today-dashboard.md`, kit `dashboard`). A
@@ -27,13 +28,13 @@ import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 /// start a review, create a first deck, or an all-caught-up message — plus the
 /// loading and load-error states.
 ///
-/// Scoped to the projection's primary CTA: the kit's Daily-goal card, the
-/// four-stat Today strip and the Recent-decks list are deferred. Two of the
-/// sources they needed now exist — `TodayProjection.dailyProgress` carries the
-/// goal and streak — but time-studied does not (`int-9`: the metric is
-/// specified, nothing captures the intervals) and mastery is uncomposed, and
-/// Start review currently opens the Library because no session-start UI command
-/// exists app-wide and `StartStudySessionUseCase` is deck-scoped (recorded gaps).
+/// The kit's greeting, state note, Daily-goal card and Recent-decks section
+/// are all in place. What is left of the kit composition is the four-stat
+/// Today strip, and two of its four stats have no source: time-studied
+/// (`int-9` — the metric is specified, nothing captures the intervals) and
+/// words-learned-today. Start review still opens the Library, because no
+/// session-start UI command exists app-wide and `StartStudySessionUseCase` is
+/// deck-scoped (recorded gaps).
 ///
 /// Template-only shell: the consumer child does the watch.
 class TodayScreen extends StatelessWidget {
@@ -132,6 +133,16 @@ class _TodayContent extends StatelessWidget {
         if (progress.hasGoal) ...<Widget>[
           const MxGap.s6(),
           TodayGoalCard(status: progress),
+        ],
+        // A supporting section (§3): empty when the pair has no decks, which
+        // does not change what Today asks for.
+        if (projection.recentDecks.isNotEmpty) ...<Widget>[
+          const MxGap.s6(),
+          TodayRecentDecks(
+            decks: projection.recentDecks,
+            onOpenDeck: (summary) => context.goDeckDetail(summary.deck.id),
+            onSeeAll: () => context.goLibrary(),
+          ),
         ],
       ],
     );

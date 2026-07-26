@@ -1,4 +1,5 @@
 import 'package:memox_v6/domain/deck/deck_repository.dart';
+import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/domain/study_session/study_session_repository.dart';
 import 'package:memox_v6/domain/today/today_projection.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
@@ -70,11 +71,22 @@ class LoadTodayProjectionUseCase {
     final dailyProgress =
         await _dailyProgress?.call() ?? const DailyProgressStatus.none();
 
+    // Read after the primary action is settled: the deck rows are a supporting
+    // section (§3), so they are the part that may come back empty without
+    // changing what Today asks the learner to do.
+    final recentDecks = pair == null
+        ? const <DeckSummary>[]
+        : await _decks.recentSummaries(
+            pair.id,
+            limit: TodayProjection.recentDeckLimit,
+          );
+
     return TodayProjection(
       primaryAction: action,
       dueCount: dueCount,
       pausedSession: paused,
       dailyProgress: dailyProgress,
+      recentDecks: recentDecks,
     );
   }
 }

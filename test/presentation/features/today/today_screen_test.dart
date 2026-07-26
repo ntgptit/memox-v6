@@ -15,6 +15,12 @@ import 'package:memox_v6/presentation/features/today/widgets/today_greeting_head
 import 'package:memox_v6/presentation/features/today/widgets/today_goal_card.dart';
 import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_note.dart';
+import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/deck/deck_summary.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/deck_summary_row.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_badge.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_progress.dart';
 
 /// WBS 5.7.2 — the Today entry renders one primary action per projection state,
 /// plus loading (no fake zeros) and load-error (`load-today-dashboard.md`).
@@ -380,6 +386,92 @@ void main() {
         find.text('You haven’t studied today — study to keep your streak.'),
         findsOneWidget,
       );
+    });
+  });
+
+  // Kit `dashboard/decks`. The rows are the shared DeckCard the Library
+  // renders, so the two screens cannot say different things about a deck.
+  group('recent decks', () {
+    DeckSummary summary(
+      String name, {
+      int cards = 10,
+      int due = 0,
+      int mastered = 0,
+      int studiable = 10,
+    }) => DeckSummary(
+      deck: Deck(
+        id: name,
+        languagePairId: 'lp1',
+        parentId: null,
+        name: name,
+        normalizedName: name.toLowerCase(),
+        createdAt: DateTime.utc(2026),
+        updatedAt: DateTime.utc(2026),
+      ),
+      cardCount: cards,
+      dueCount: due,
+      masteredCount: mastered,
+      studiableCount: studiable,
+    );
+
+    Future<void> pump(WidgetTester tester, List<DeckSummary> decks) async {
+      await tester.pumpWidget(
+        wrap(
+          data(
+            TodayProjection(
+              primaryAction: TodayPrimaryAction.startReview,
+              dueCount: 7,
+              recentDecks: decks,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('lists the decks with their counts and mastery', (
+      tester,
+    ) async {
+      await pump(tester, <DeckSummary>[
+        summary('Grammar', cards: 12, due: 4, mastered: 9, studiable: 12),
+      ]);
+
+      expect(find.text('Recent decks'), findsOneWidget);
+      expect(find.byType(DeckSummaryRow), findsOneWidget);
+      final bar = tester.widget<MxProgress>(find.byType(MxProgress));
+      expect(bar.value, 0.75);
+    });
+
+    // "0" in a due-count badge reads as a count that failed to load, so the
+    // kit marks a settled deck with a check instead.
+    testWidgets('a deck with nothing due is checked, not zeroed', (
+      tester,
+    ) async {
+      await pump(tester, <DeckSummary>[summary('Phrases')]);
+
+      expect(find.text('0'), findsNothing);
+      final badge = tester.widget<MxBadge>(find.byType(MxBadge));
+      expect(badge.icon, isNotNull);
+    });
+
+    testWidgets('a due deck shows its count', (tester) async {
+      await pump(tester, <DeckSummary>[summary('Grammar', due: 4)]);
+
+      expect(find.widgetWithText(MxBadge, '4'), findsOneWidget);
+    });
+
+    testWidgets('the list closes with a link to the Library', (tester) async {
+      await pump(tester, <DeckSummary>[summary('Grammar')]);
+
+      expect(find.widgetWithText(MxLink, 'See all decks'), findsOneWidget);
+    });
+
+    // A supporting section: it disappears rather than showing an empty box.
+    testWidgets('no decks shows no section', (tester) async {
+      await pump(tester, const <DeckSummary>[]);
+
+      expect(find.text('Recent decks'), findsNothing);
+      expect(find.byType(DeckSummaryRow), findsNothing);
     });
   });
 }

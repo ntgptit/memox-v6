@@ -7,14 +7,30 @@ import 'package:memox_v6/presentation/shared/widgets/mx_deck_card.dart';
 
 /// One deck row on a list surface — the kit's shared `DeckCard`.
 ///
-/// The Library root and the deck-detail Parent branch show the same card
-/// for the same thing, so the status rule lives here once instead of being
-/// restated per screen. It was private to the Library screen until the
-/// Parent branch needed it too.
+/// The Library root, the deck-detail Parent branch and Today's Recent-decks
+/// section show the same card for the same thing, so the status rule lives
+/// here once instead of being restated per screen. It was private to the
+/// Library screen until the Parent branch needed it too.
 class DeckSummaryRow extends StatelessWidget {
-  const DeckSummaryRow({super.key, required this.summary, required this.onTap});
+  const DeckSummaryRow({
+    super.key,
+    required this.summary,
+    required this.onTap,
+    this.trailing,
+    this.showMastery = false,
+  });
 
   final DeckSummary summary;
+
+  /// Replaces the kit's default list-surface trailing — the quick-study bolt
+  /// — for surfaces the kit gives a different one. Today's rows carry a due
+  /// badge instead, because Today already has exactly one primary action and
+  /// a per-row start would be a second.
+  final Widget? trailing;
+
+  /// Draws the mastery bar under the meta line. The kit passes deck progress
+  /// on the Dashboard only; Library rows omit it.
+  final bool showMastery;
 
   /// How opening this deck navigates. The Library root replaces the route
   /// and the Parent branch pushes onto it, so that a nested deck can be
@@ -52,6 +68,10 @@ class DeckSummaryRow extends StatelessWidget {
       meta: l10n.cardsCountLabel(summary.cardCount),
       status: status,
       statusTone: statusTone,
+      progress: showMastery ? summary.masteryFraction : null,
+      progressSemanticLabel: showMastery
+          ? l10n.deckMasteryLabel(summary.masteredCount, summary.studiableCount)
+          : null,
       // Kit deck row: a bolt that starts a session for this deck without
       // opening it. The screen showing these rows mounts
       // `listenForQuickStudyStart` once so the start navigates.
@@ -60,7 +80,7 @@ class DeckSummaryRow extends StatelessWidget {
       // parent one, which moves its accessible name from text content onto
       // `aria-label`. Anything locating a deck row must therefore match on
       // the accessible name, not on rendered text.
-      trailing: DeckQuickStudyAction(deckId: summary.deck.id),
+      trailing: trailing ?? DeckQuickStudyAction(deckId: summary.deck.id),
       onTap: onTap,
     );
   }
