@@ -204,7 +204,19 @@ class DriftDeckRepository implements DeckRepository {
       // One transaction so a failure removes nothing. Cards go first because
       // the deck rows are what they point at; translations, tags, audio refs
       // and learning progress all cascade from the card.
+      // Order is forced by the references, none of which cascade to a deck:
+      // progress points at an attempt, attempts point at cards, sessions
+      // point at decks. That chain is why a deck which had ever been studied
+      // could not be deleted, though being used is the usual reason to want
+      // it gone.
+      //
+      // The session history of a deleted deck goes with it. The learner's
+      // streak and daily goals do not: those are keyed by local date in their
+      // own tables and never referenced the deck.
       await _database.transaction(() async {
+        await _database.deckDao.clearTerminalAttemptRefsInDecks(deckId);
+        await _database.deckDao.deleteAttemptsInDecks(deckId);
+        await _database.deckDao.deleteSessionsInDecks(deckId);
         await _database.deckDao.deleteFlashcardsInDecks(deckId);
         await _database.deckDao.deleteDeckSubtree(deckId);
       });
