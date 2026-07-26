@@ -6,6 +6,7 @@ import 'package:memox_v6/domain/usecases/study_session/finalize_study_session_us
 import 'package:memox_v6/domain/usecases/today/load_today_projection_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/start_study_session_usecase.dart';
+import 'package:memox_v6/domain/usecases/today/start_review_from_today_usecase.dart';
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
@@ -348,6 +349,19 @@ RecordStreakDayUseCase recordStreakDayUseCase(Ref ref) {
     streaks: ref.watch(streakRepositoryProvider),
     timeZone: ref.watch(appTimeZoneProvider),
     idGenerator: ref.watch(idGeneratorProvider),
+  );
+}
+
+/// Revalidates Today's due projection and hands off to the session
+/// (`start-review-from-today.md`).
+@riverpod
+StartReviewFromTodayUseCase startReviewFromTodayUseCase(Ref ref) {
+  return StartReviewFromTodayUseCase(
+    sessions: ref.watch(studySessionRepositoryProvider),
+    decks: ref.watch(deckRepositoryProvider),
+    languagePairs: ref.watch(selectLanguagePairUseCaseProvider),
+    queueCounts: ref.watch(loadStudyQueueCountsUseCaseProvider),
+    startSession: ref.watch(startStudySessionUseCaseProvider),
   );
 }
 

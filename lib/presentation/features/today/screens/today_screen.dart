@@ -22,6 +22,9 @@ import 'package:memox_v6/presentation/features/today/widgets/today_goal_card.dar
 import 'package:memox_v6/presentation/features/today/widgets/today_state_note.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_recent_decks.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_stat_strip.dart';
+import 'package:memox_v6/presentation/features/today/viewmodels/start_review_notifier.dart';
+import 'package:memox_v6/domain/today/start_review_outcome.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 
 /// The Today entry (WBS 5.7.2; `load-today-dashboard.md`, kit `dashboard`). A
@@ -233,14 +236,52 @@ class _PausedState extends StatelessWidget {
   }
 }
 
-class _DueState extends StatelessWidget {
+/// The due-cards primary section, and the handoff into the session
+/// (WBS 5.7.3; `start-review-from-today.md`).
+///
+/// The button used to open the Library, which was the only thing it could do
+/// while nothing revalidated the count. It now runs the revalidation the flow
+/// specifies and acts on what comes back.
+class _DueState extends ConsumerWidget {
   const _DueState({required this.dueCount});
 
   final int dueCount;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final start = ref.watch(startReviewProvider);
+
+    // §2's four branches. Nothing here decides anything — the outcome was
+    // resolved against freshly read state, and this only routes it.
+    ref.listen<AsyncValue<StartReviewOutcome?>>(startReviewProvider, (
+      previous,
+      next,
+    ) {
+      if (previous is! AsyncLoading<StartReviewOutcome?>) return;
+      switch (next) {
+        case AsyncData<StartReviewOutcome?>(value: final outcome):
+          switch (outcome) {
+            case ResumeActiveSession():
+            case ReviewStarted():
+              context.goStudy();
+            case NothingDueNow():
+              // §4: "No longer due chuyển caught-up, không báo lỗi" —
+              // recomposing the projection *is* the move to caught-up.
+              ref.invalidate(todayProjectionProvider);
+            case ChooseReviewScope():
+              context.goLibrary();
+            case null:
+              break;
+          }
+        case AsyncError<StartReviewOutcome?>():
+        // §4: the dashboard is kept as it was; the error is reported in
+        // place and the button stays available to retry.
+        case AsyncLoading<StartReviewOutcome?>():
+          break;
+      }
+    });
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -254,8 +295,20 @@ class _DueState extends StatelessWidget {
           icon: Symbols.bolt_rounded,
           label: l10n.todayStartReviewLabel,
           block: true,
-          onPressed: () => context.goLibrary(),
+          // §4: "Starting khóa CTA/double tap". The command guards
+          // re-entrancy too; a disabled control says so instead of
+          // swallowing the tap.
+          onPressed: start is AsyncLoading<StartReviewOutcome?>
+              ? null
+              : () => ref.read(startReviewProvider.notifier).start(),
         ),
+        if (start is AsyncError<StartReviewOutcome?>) ...<Widget>[
+          const MxGap.s3(),
+          MxBanner(
+            tone: MxBannerTone.error,
+            body: l10n.todayStartReviewFailedBody,
+          ),
+        ],
       ],
     );
   }

@@ -15,6 +15,9 @@ import 'package:memox_v6/presentation/features/today/widgets/today_greeting_head
 import 'package:memox_v6/presentation/features/today/widgets/today_goal_card.dart';
 import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_note.dart';
+import 'package:memox_v6/core/errors/app_failure.dart';
+import 'package:memox_v6/domain/today/start_review_outcome.dart';
+import 'package:memox_v6/presentation/features/today/viewmodels/start_review_notifier.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/domain/learning_progress/library_mastery.dart';
@@ -541,4 +544,123 @@ void main() {
       expect(find.text('words learned'), findsNothing);
     });
   });
+
+  // WBS 5.7.3 — the CTA runs the revalidation rather than navigating on a
+  // count that may be minutes old (`start-review-from-today.md`).
+  group('start review handoff', () {
+    Override due() => data(
+      const TodayProjection(
+        primaryAction: TodayPrimaryAction.startReview,
+        dueCount: 7,
+      ),
+    );
+
+    testWidgets('the CTA dispatches the revalidating start', (tester) async {
+      var started = 0;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            due(),
+            startReviewProvider.overrideWith(
+              () => _RecordingStartReview(() => started++),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const TodayScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(MxButton, 'Start review'));
+      await tester.pumpAndSettle();
+
+      expect(started, 1);
+    });
+
+    // §4: "Starting khóa CTA/double tap".
+    testWidgets('a start in flight disables the CTA', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            due(),
+            startReviewProvider.overrideWith(_LoadingStartReview.new),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const TodayScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final button = tester.widget<MxButton>(
+        find.widgetWithText(MxButton, 'Start review'),
+      );
+      expect(button.onPressed, isNull);
+    });
+
+    // §4: "Start failure giữ Dashboard snapshot" — the dashboard stays, and
+    // says so, instead of navigating or blanking.
+    testWidgets('a failed start keeps the dashboard and reports', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            due(),
+            startReviewProvider.overrideWith(_FailedStartReview.new),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const TodayScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Continue studying'), findsOneWidget);
+      expect(
+        find.text(
+          'Couldn’t start the review. Your progress is unchanged — try again.',
+        ),
+        findsOneWidget,
+      );
+      // Still offered: the retry is the same control.
+      final button = tester.widget<MxButton>(
+        find.widgetWithText(MxButton, 'Start review'),
+      );
+      expect(button.onPressed, isNotNull);
+    });
+  });
+}
+
+class _RecordingStartReview extends StartReview {
+  _RecordingStartReview(this._onStart);
+
+  final void Function() _onStart;
+
+  @override
+  Future<void> start() async => _onStart();
+}
+
+class _LoadingStartReview extends StartReview {
+  @override
+  AsyncValue<StartReviewOutcome?> build() =>
+      const AsyncLoading<StartReviewOutcome?>();
+}
+
+class _FailedStartReview extends StartReview {
+  @override
+  AsyncValue<StartReviewOutcome?> build() => AsyncError<StartReviewOutcome?>(
+    const UnexpectedFailure(cause: 'boom'),
+    StackTrace.empty,
+  );
 }

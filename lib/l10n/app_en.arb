@@ -1204,6 +1204,10 @@
       "total": { "type": "int" }
     }
   },
+  "todayStartReviewFailedBody": "Couldn’t start the review. Your progress is unchanged — try again.",
+  "@todayStartReviewFailedBody": {
+    "description": "Today start-review failure notice. The dashboard is kept as it was; nothing was created."
+  },
   "todayStripTitle": "Today",
   "@todayStripTitle": {
     "description": "Heading of the Today inline stat strip (kit dashboard/today). Separate from the app-bar title so the two can be worded differently per locale."
