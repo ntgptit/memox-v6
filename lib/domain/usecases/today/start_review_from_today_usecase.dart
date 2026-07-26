@@ -38,8 +38,12 @@ class StartReviewFromTodayUseCase {
   /// CTA, `newLearning` for the caught-up state's optional action
   /// (`handle-caught-up-today.md` §2 node G, "Revalidate Study flow" — the
   /// same revalidation, over the queue that state is about).
+  /// [deckId] skips the scope resolution because the learner has already
+  /// chosen: the session starts there. Everything else still revalidates —
+  /// a choice made a moment ago is as stale as a count made a moment ago.
   Future<StartReviewOutcome> call({
     SessionType type = SessionType.dueReview,
+    String? deckId,
   }) async {
     // A → B: the active session is revalidated first, because it decides the
     // answer on its own — no count matters if one is already running.
@@ -54,25 +58,42 @@ class StartReviewFromTodayUseCase {
     // session that follows needs a scope. `forDeck` aggregates a Parent's
     // subtree, so an eligible card in a nested deck counts toward its root.
     final roots = await _decks.watchRoots(pair.id).first;
-    final eligibleRoots = <String>[];
+    final eligible = <ReviewScopeOption>[];
     for (final deck in roots) {
       final counts = await _queueCounts.forDeck(deck.id);
       final count = type == SessionType.newLearning
           ? counts.newCount
           : counts.dueCount;
-      if (count > 0) eligibleRoots.add(deck.id);
+      if (count > 0) {
+        eligible.add(
+          ReviewScopeOption(
+            deckId: deck.id,
+            deckName: deck.name,
+            eligibleCount: count,
+          ),
+        );
+      }
     }
 
-    if (eligibleRoots.isEmpty) return const NothingDueNow();
-    if (eligibleRoots.length > 1) {
-      return ChooseReviewScope(deckCount: eligibleRoots.length);
+    if (eligible.isEmpty) return const NothingDueNow();
+
+    // A chosen deck is honoured only if it is still eligible. Between opening
+    // the picker and tapping a row the queue can empty — starting anyway would
+    // create the empty session §6 forbids.
+    final chosen = deckId == null
+        ? null
+        : eligible.where((option) => option.deckId == deckId).firstOrNull;
+    if (deckId != null && chosen == null) return const NothingDueNow();
+
+    if (chosen == null && eligible.length > 1) {
+      return ChooseReviewScope(options: eligible);
     }
 
-    // C → E → F: one scope, so there is nothing to choose. The session is
+    // C → E → F: one scope, so there is nothing left to choose. The session is
     // created by the Start Session contract (§6) — this use case supplies the
     // scope it revalidated and nothing else.
     final session = await _startSession.call(
-      deckId: eligibleRoots.single,
+      deckId: (chosen ?? eligible.single).deckId,
       scope: SessionScope.subtree,
       type: type,
     );

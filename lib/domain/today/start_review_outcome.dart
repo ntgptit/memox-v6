@@ -34,7 +34,29 @@ class ReviewStarted extends StartReviewOutcome {
 /// library-wide session cannot be represented in schema v1 at all. Narrowing
 /// silently to one deck would start 15 cards under a button that says 24.
 class ChooseReviewScope extends StartReviewOutcome {
-  const ChooseReviewScope({required this.deckCount});
+  const ChooseReviewScope({required this.options});
 
-  final int deckCount;
+  /// The decks that actually have something eligible, with the counts that
+  /// make the choice meaningful. Carried rather than re-queried by the screen:
+  /// the numbers the learner picks between must be the ones the revalidation
+  /// just read, not a second answer from a moment later.
+  final List<ReviewScopeOption> options;
+
+  int get deckCount => options.length;
+}
+
+/// One deck the learner may scope the session to.
+class ReviewScopeOption {
+  const ReviewScopeOption({
+    required this.deckId,
+    required this.deckName,
+    required this.eligibleCount,
+  });
+
+  final String deckId;
+  final String deckName;
+
+  /// Due cards for a review, unstudied cards for a new-learning start — the
+  /// queue the chosen session type would run over.
+  final int eligibleCount;
 }

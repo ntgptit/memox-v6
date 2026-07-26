@@ -11,6 +11,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
+import 'package:memox_v6/presentation/shared/bottom_sheets/mx_select_sheet.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_section_header.dart';
@@ -233,6 +234,39 @@ class _TodayPrimary extends StatelessWidget {
 /// Today loaded. Between then and the tap the session can be finalized on the
 /// study screen, abandoned, or completed after a restart — and the route
 /// would have opened with nothing to resume.
+
+/// Offers the decks a review could run over, then starts in the chosen one
+/// (`start-review-from-today.md` §2, node E).
+///
+/// The counts come from the outcome rather than a fresh query: the learner
+/// must choose between the numbers the revalidation just read, not a second
+/// answer from a moment later. The start still revalidates that the chosen
+/// deck is eligible — a queue can empty while a sheet is open.
+Future<void> _chooseScope(
+  BuildContext context,
+  WidgetRef ref,
+  List<ReviewScopeOption> options,
+) async {
+  final l10n = AppLocalizations.of(context);
+  final deckId = await showMxSelectSheet<String>(
+    context,
+    title: l10n.todayChooseScopeTitle,
+    options: <MxSelectOption<String>>[
+      for (final option in options)
+        MxSelectOption<String>(
+          key: option.deckId,
+          icon: Symbols.style_rounded,
+          label: l10n.todayChooseScopeOption(
+            option.deckName,
+            option.eligibleCount,
+          ),
+        ),
+    ],
+  );
+  if (deckId == null) return;
+  await ref.read(startReviewProvider.notifier).start(deckId: deckId);
+}
+
 class _PausedState extends ConsumerWidget {
   const _PausedState();
 
@@ -343,8 +377,12 @@ class _DueState extends ConsumerWidget {
               // §4: "No longer due chuyển caught-up, không báo lỗi" —
               // recomposing the projection *is* the move to caught-up.
               ref.invalidate(todayProjectionProvider);
-            case ChooseReviewScope():
-              context.goLibrary();
+            case ChooseReviewScope(:final options):
+              // §2 node E: resolve the scope, then hand off. This opened the
+              // Library, which is neither — it left the learner to find a
+              // deck themselves and lost the counts the revalidation had
+              // just read.
+              _chooseScope(context, ref, options);
             case null:
               break;
           }
