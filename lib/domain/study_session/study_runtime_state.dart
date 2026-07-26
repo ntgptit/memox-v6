@@ -3,6 +3,7 @@ import 'package:memox_v6/domain/study_session/session_advance_policy.dart';
 import 'package:memox_v6/domain/study_session/session_card_snapshot.dart';
 import 'package:memox_v6/domain/study_session/session_checkpoint.dart';
 import 'package:memox_v6/domain/study_session/session_round_order.dart';
+import 'package:memox_v6/domain/study_session/session_timer_state.dart';
 import 'package:memox_v6/domain/study_session/study_session.dart';
 
 /// The immutable read model a study screen renders (WBS 5.6.3). It is assembled
@@ -15,6 +16,7 @@ class StudyRuntimeState {
     required this.stages,
     required this.position,
     required this.cardsById,
+    this.timer,
   });
 
   /// Assemble the runtime from committed pieces. With no checkpoint the session
@@ -51,6 +53,9 @@ class StudyRuntimeState {
       cardsById: <String, SessionCardSnapshot>{
         for (final card in cardSnapshots) card.cardId: card,
       },
+      timer: checkpoint == null
+          ? null
+          : SessionTimerState.decode(checkpoint.timerStateJson),
     );
   }
 
@@ -58,6 +63,12 @@ class StudyRuntimeState {
   final List<StudyModeType> stages;
   final SessionPosition position;
   final Map<String, SessionCardSnapshot> cardsById;
+
+  /// The countdown a paused exit left behind, when the checkpoint carries one
+  /// for a card still in play (`exit-study-session.md` §5). Null on a fresh
+  /// start, after any answer (which clears the payload), and for every mode
+  /// but Recall.
+  final SessionTimerState? timer;
 
   /// The mode the current stage runs.
   StudyModeType get currentMode => stages[position.stageIndex];

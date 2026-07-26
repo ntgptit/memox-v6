@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:memox_v6/domain/study_modes/strategies/recall_study_mode_strategy.dart';
+import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'recall_timer_notifier.g.dart';
@@ -11,9 +12,9 @@ part 'recall_timer_notifier.g.dart';
 enum RecallPhase { counting, revealed, timedOut }
 
 /// The presentation state for one Recall card: its phase and the live countdown.
-/// Purely in-session — the strategy defines these labels as non-persistent; the
-/// durable cross-exit timer (persisting `remainingMs`) lands with Exit/Resume
-/// (WBS 5.6.12).
+/// The labels themselves are non-persistent; the remaining time is not — an
+/// exit persists it on the checkpoint and a resume seeds the countdown from it
+/// (WBS 5.6.12; `exit-study-session.md` §5).
 class RecallTimerState {
   const RecallTimerState({required this.phase, required this.remainingSeconds});
 
@@ -40,10 +41,22 @@ class RecallTimer extends _$RecallTimer {
   RecallTimerState build(String cardId) {
     _ticker = Timer.periodic(kRecallTickInterval, (_) => _tick());
     ref.onDispose(() => _ticker?.cancel());
-    return const RecallTimerState(
+    return RecallTimerState(
       phase: RecallPhase.counting,
-      remainingSeconds: kRecallTimeoutSeconds,
+      remainingSeconds: _resumedSeconds(cardId) ?? kRecallTimeoutSeconds,
     );
+  }
+
+  /// The countdown a paused exit left for *this* card
+  /// (`exit-study-session.md` §5: "Resume tiếp tục, không reset"). A saved
+  /// timer for another card belongs to a position the session has already
+  /// left, so it is ignored rather than applied to whatever is on screen now.
+  int? _resumedSeconds(String cardId) {
+    final timer = ref.read(studySessionRuntimeProvider).asData?.value?.timer;
+    if (timer == null || timer.cardId != cardId) return null;
+    final seconds = timer.remainingMs ~/ Duration.millisecondsPerSecond;
+    if (seconds <= 0) return null;
+    return seconds;
   }
 
   void _tick() {
