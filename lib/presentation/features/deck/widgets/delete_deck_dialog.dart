@@ -11,6 +11,7 @@ import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// The delete-deck confirm dialog (WBS 6.1; `delete-deck.md` §4, kit
@@ -50,6 +51,7 @@ class _DeleteDeckBody extends ConsumerWidget {
       ref,
       deleteDeckDialogViewmodelProvider,
       onSuccess: () {
+        showMxSnackbar(context, message: l10n.deckDeletedMessage);
         Navigator.of(context).pop();
         context.goLibrary();
       },

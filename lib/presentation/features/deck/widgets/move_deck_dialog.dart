@@ -10,6 +10,7 @@ import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
@@ -54,6 +55,7 @@ class _MoveDeckPicker extends ConsumerWidget {
         // The moved deck's parent context and breadcrumb refresh in place.
         ref.invalidate(deckDetailProvider(deckId: deckId));
         ref.invalidate(deckBreadcrumbProvider(deckId: deckId));
+        showMxSnackbar(context, message: l10n.deckMovedMessage);
         Navigator.of(context).pop();
       },
     );

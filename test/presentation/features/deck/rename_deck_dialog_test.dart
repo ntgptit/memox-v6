@@ -102,6 +102,7 @@ void main() {
         .customSelect("SELECT name FROM decks WHERE id = 'root'")
         .getSingle();
     expect(row.read<String>('name'), 'Japanese');
+    expect(find.text('Deck updated'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });

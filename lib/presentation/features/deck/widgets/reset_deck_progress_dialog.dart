@@ -13,6 +13,7 @@ import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// The reset-progress confirm dialog (WBS 6.1; `reset-deck-progress.md` §4). It
@@ -56,6 +57,7 @@ class _ResetProgressBody extends ConsumerWidget {
       resetDeckProgressDialogViewmodelProvider,
       onSuccess: () {
         ref.invalidate(deckDetailProvider(deckId: deckId));
+        showMxSnackbar(context, message: l10n.deckProgressResetMessage);
         Navigator.of(context).pop();
       },
     );

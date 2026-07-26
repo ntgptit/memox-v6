@@ -101,6 +101,9 @@ void main() {
     await pumpStreams(tester);
 
     expect(await deckExists(), isFalse);
+    // The confirmation survives the route change it triggered — the
+    // messenger is app-level, so the bar lands on the Library.
+    expect(find.text('Deck deleted'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });

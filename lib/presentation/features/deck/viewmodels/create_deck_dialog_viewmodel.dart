@@ -15,6 +15,12 @@ class CreateDeckDialogViewmodel extends _$CreateDeckDialogViewmodel {
   @override
   AsyncValue<void> build() => const AsyncData(null);
 
+  /// The deck the last successful submit created, for the confirmation's
+  /// `Open` action (`create-deck.md`). Kept beside the command state rather
+  /// than inside it: the shared runner's contract is `AsyncValue<void>`, and
+  /// widening it for one caller would change every command in the app.
+  String? lastCreatedDeckId;
+
   Future<void> createDeck({
     required String name,
     required String? parentDeckId,
@@ -23,11 +29,12 @@ class CreateDeckDialogViewmodel extends _$CreateDeckDialogViewmodel {
     state = const AsyncLoading();
     state = await runMxAction(() async {
       final pairId = await _resolvePairId(parentDeckId);
-      await ref.read(createDeckUseCaseProvider)(
+      final deck = await ref.read(createDeckUseCaseProvider)(
         name: name,
         languagePairId: pairId,
         parentId: parentDeckId,
       );
+      lastCreatedDeckId = deck.id;
     });
   }
 
