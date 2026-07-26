@@ -582,6 +582,7 @@
   "todayStartReviewLabel": "Bắt đầu ôn",
   "deckDueBadgeLabel": "{count}",
   "deckMasteryLabel": "Đã thuộc {mastered} trên {total} thẻ",
+  "todayStartReviewFailedBody": "Không bắt đầu được phiên ôn. Tiến độ của bạn không thay đổi — hãy thử lại.",
   "todayStripTitle": "Hôm nay",
   "todayStripStreakValue": "{count}",
   "todayStripStreakLabel": "ngày liên tiếp",
