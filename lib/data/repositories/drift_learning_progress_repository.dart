@@ -4,6 +4,7 @@ import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/data/database/sqlite_error_mapper.dart';
 import 'package:memox_v6/data/mappers/progress_mapper.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress.dart';
+import 'package:memox_v6/domain/learning_progress/library_mastery.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress_repository.dart';
 import 'package:memox_v6/domain/learning_progress/study_candidates.dart';
 import 'package:memox_v6/domain/learning_progress/study_queue_counts.dart';
@@ -215,6 +216,17 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
         )
         .getSingle();
     return StudyQueueCounts(dueCount: row.dueCount, newCount: row.newCount);
+  }
+
+  @override
+  Future<LibraryMastery> countLibraryMastery(String languagePairId) async {
+    final row = await _database.learningProgressDao
+        .countLibraryMastery(languagePairId)
+        .getSingle();
+    return LibraryMastery(
+      masteredCount: row.masteredCount,
+      studiableCount: row.studiableCount,
+    );
   }
 
   @override

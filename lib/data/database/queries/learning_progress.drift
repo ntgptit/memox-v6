@@ -140,5 +140,23 @@ WHERE d.language_pair_id = :languagePairId
   AND f.deleted_at IS NULL
   AND f.is_hidden = 0;
 
+-- Today's "library mastered" stat (kit `dashboard/today`): the mastered
+-- share of everything studiable in the pair.
+--
+-- Mastered is Box 8 (`srs-8-box-policy.md` §3), the same rule the deck-row
+-- bar reads — one definition, two surfaces. The denominator is the studiable
+-- cards, matching countLibraryQueues' eligibility: a hidden card can never be
+-- mastered, so counting it would put 100% out of reach.
+countLibraryMastery:
+SELECT
+  COUNT(DISTINCT CASE WHEN lp.box = 8 THEN f.id END) AS mastered_count,
+  COUNT(DISTINCT f.id) AS studiable_count
+FROM flashcards f
+INNER JOIN learning_progress lp ON lp.card_id = f.id
+INNER JOIN decks d ON d.id = f.deck_id
+WHERE d.language_pair_id = :languagePairId
+  AND f.deleted_at IS NULL
+  AND f.is_hidden = 0;
+
 deleteProgressByCard:
 DELETE FROM learning_progress WHERE card_id = :cardId;

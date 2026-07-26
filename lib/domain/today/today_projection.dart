@@ -1,4 +1,5 @@
 import 'package:memox_v6/domain/deck/deck_summary.dart';
+import 'package:memox_v6/domain/learning_progress/library_mastery.dart';
 import 'package:memox_v6/domain/study_session/study_session.dart';
 import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
 
@@ -35,6 +36,7 @@ class TodayProjection {
     this.pausedSession,
     this.dailyProgress = const DailyProgressStatus.none(),
     this.recentDecks = const <DeckSummary>[],
+    this.libraryMastery = const LibraryMastery.empty(),
   });
 
   /// How many deck rows Today shows (kit `dashboard/decks`: three, then a
@@ -63,4 +65,9 @@ class TodayProjection {
   /// `load-today-dashboard.md` §3, so it is empty rather than fatal when the
   /// library has nothing in it.
   final List<DeckSummary> recentDecks;
+
+  /// The mastered share of the active pair's library — the stat strip's
+  /// "library mastered". Zero when there is no pair, which is also what an
+  /// empty library reads.
+  final LibraryMastery libraryMastery;
 }

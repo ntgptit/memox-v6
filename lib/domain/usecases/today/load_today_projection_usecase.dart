@@ -5,6 +5,7 @@ import 'package:memox_v6/domain/today/today_projection.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_goal/load_daily_progress_usecase.dart';
 import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
+import 'package:memox_v6/domain/learning_progress/library_mastery.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/load_study_queue_counts_usecase.dart';
 
 /// Composes the Today entry projection (WBS 5.7.1; `load-today-dashboard.md`).
@@ -81,12 +82,19 @@ class LoadTodayProjectionUseCase {
             limit: TodayProjection.recentDeckLimit,
           );
 
+    // Box 8 is a state rather than a schedule, so this asks for no instant —
+    // it is the same library scope as the due count, partitioned by box.
+    final mastery = pair == null
+        ? const LibraryMastery.empty()
+        : await _queueCounts.masteryForLibrary(pair.id);
+
     return TodayProjection(
       primaryAction: action,
       dueCount: dueCount,
       pausedSession: paused,
       dailyProgress: dailyProgress,
       recentDecks: recentDecks,
+      libraryMastery: mastery,
     );
   }
 }

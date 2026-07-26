@@ -20,6 +20,7 @@ import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_goal_card.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_state_note.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_recent_decks.dart';
+import 'package:memox_v6/presentation/features/today/widgets/today_stat_strip.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 
 /// The Today entry (WBS 5.7.2; `load-today-dashboard.md`, kit `dashboard`). A
@@ -28,13 +29,14 @@ import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 /// start a review, create a first deck, or an all-caught-up message — plus the
 /// loading and load-error states.
 ///
-/// The kit's greeting, state note, Daily-goal card and Recent-decks section
-/// are all in place. What is left of the kit composition is the four-stat
-/// Today strip, and two of its four stats have no source: time-studied
-/// (`int-9` — the metric is specified, nothing captures the intervals) and
-/// words-learned-today. Start review still opens the Library, because no
-/// session-start UI command exists app-wide and `StartStudySessionUseCase` is
-/// deck-scoped (recorded gaps).
+/// Every section of the kit composition is now in place: greeting, state
+/// note, Continue-studying, Daily-goal card, stat strip and Recent decks. The
+/// strip carries two of the kit's four stats — see `TodayStatStrip` for why
+/// the other two have no source to read.
+///
+/// Start review still opens the Library, because no session-start UI command
+/// exists app-wide and `StartStudySessionUseCase` is deck-scoped (recorded
+/// gaps).
 ///
 /// Template-only shell: the consumer child does the watch.
 class TodayScreen extends StatelessWidget {
@@ -97,7 +99,7 @@ class _TodayStates extends ConsumerWidget {
 }
 
 /// The dashboard body: one scrolling column of sections in the kit's order —
-/// note, the primary section, then the Daily-goal card.
+/// note, the primary section, the Daily-goal card, the stat strip, the decks.
 ///
 /// The goal card sat *above* the primary section when it landed, which put a
 /// supporting metric ahead of the screen's one objective; the kit renders
@@ -134,6 +136,12 @@ class _TodayContent extends StatelessWidget {
           const MxGap.s6(),
           TodayGoalCard(status: progress),
         ],
+        // Kit order: the strip sits between the goal card and the deck rows.
+        const MxGap.s6(),
+        TodayStatStrip(
+          streakDays: progress.streakDays,
+          mastery: projection.libraryMastery,
+        ),
         // A supporting section (§3): empty when the pair has no decks, which
         // does not change what Today asks for.
         if (projection.recentDecks.isNotEmpty) ...<Widget>[

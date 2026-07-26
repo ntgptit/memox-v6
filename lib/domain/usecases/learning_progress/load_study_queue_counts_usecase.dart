@@ -2,6 +2,7 @@ import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress_repository.dart';
+import 'package:memox_v6/domain/learning_progress/library_mastery.dart';
 import 'package:memox_v6/domain/learning_progress/study_queue_counts.dart';
 
 /// Reads the eligible due/new counts for a study scope (WBS 5.4.2;
@@ -44,5 +45,15 @@ class LoadStudyQueueCountsUseCase {
       languagePairId,
       nowUtc: _clock.nowUtc(),
     );
+  }
+
+  /// The mastered share of the same scope, for Today's stat strip.
+  ///
+  /// Here rather than on its own use case because it is the same read at the
+  /// same scope: Box 8 is the box the queue counts above exclude, so the two
+  /// answers partition the library between them and a second owner would be a
+  /// second place for that boundary to move.
+  Future<LibraryMastery> masteryForLibrary(String languagePairId) {
+    return _progress.countLibraryMastery(languagePairId);
   }
 }

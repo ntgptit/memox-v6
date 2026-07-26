@@ -17,6 +17,7 @@ import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_note.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/domain/deck/deck_summary.dart';
+import 'package:memox_v6/domain/learning_progress/library_mastery.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_summary_row.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_badge.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
@@ -449,7 +450,9 @@ void main() {
     ) async {
       await pump(tester, <DeckSummary>[summary('Phrases')]);
 
-      expect(find.text('0'), findsNothing);
+      // Scoped to the badge: the strip below renders a bare "0" for a streak
+      // that has not started, which is a different zero.
+      expect(find.widgetWithText(MxBadge, '0'), findsNothing);
       final badge = tester.widget<MxBadge>(find.byType(MxBadge));
       expect(badge.icon, isNotNull);
     });
@@ -472,6 +475,70 @@ void main() {
 
       expect(find.text('Recent decks'), findsNothing);
       expect(find.byType(DeckSummaryRow), findsNothing);
+    });
+  });
+
+  // Kit `dashboard/today`. Two of the kit's four stats have no source; the
+  // strip carries the two that do rather than inventing the rest.
+  group('stat strip', () {
+    Future<void> pump(
+      WidgetTester tester, {
+      int streak = 0,
+      LibraryMastery mastery = const LibraryMastery.empty(),
+    }) async {
+      await tester.pumpWidget(
+        wrap(
+          data(
+            TodayProjection(
+              primaryAction: TodayPrimaryAction.startReview,
+              dueCount: 7,
+              dailyProgress: DailyProgressStatus(
+                streakDays: streak,
+                goalDoneCards: 0,
+                goalTargetCards: 0,
+                studiedToday: true,
+                hasStreakHistory: streak > 0,
+              ),
+              libraryMastery: mastery,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('shows the streak and the mastered share', (tester) async {
+      await pump(
+        tester,
+        streak: 12,
+        mastery: const LibraryMastery(masteredCount: 11, studiableCount: 20),
+      );
+
+      expect(find.text('12'), findsOneWidget);
+      expect(find.text('day streak'), findsOneWidget);
+      expect(find.text('55%'), findsOneWidget);
+      expect(find.text('library mastered'), findsOneWidget);
+    });
+
+    // An empty library divides by zero if the fraction is naive.
+    testWidgets('an empty library reads 0%, not a crash', (tester) async {
+      await pump(tester);
+
+      expect(find.text('0%'), findsOneWidget);
+    });
+
+    // Nothing captures foreground-active intervals (`int-9`) and today's
+    // qualified-card count is recorded only when a goal exists, so neither
+    // number may appear — an invented one would look exactly like a real one.
+    testWidgets('shows no stat it has no source for', (tester) async {
+      await pump(
+        tester,
+        streak: 3,
+        mastery: const LibraryMastery(masteredCount: 1, studiableCount: 4),
+      );
+
+      expect(find.text('studied'), findsNothing);
+      expect(find.text('words learned'), findsNothing);
     });
   });
 }
