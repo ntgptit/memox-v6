@@ -252,6 +252,26 @@ countDecksForLanguagePair:
 SELECT COUNT(*) AS deck_count FROM decks
 WHERE language_pair_id = :languagePairId;
 
+-- Cards of a subtree that carry study history, for the delete confirm.
+-- `delete-deck.md` §1 requires the copy to name "số child Deck, card và
+-- learning progress bị xóa"; the impact reported the first two.
+--
+-- Counting progress *rows* would just restate the card count — every card has
+-- one from creation (`initialise-card-progress.md` §1). What a learner loses
+-- is the history: Box 0 is "never introduced" (`srs-8-box-policy.md`), so
+-- progress begins at Box 1.
+countSubtreeStudiedCards:
+WITH RECURSIVE subtree (id) AS (
+  SELECT :deckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+)
+SELECT COUNT(*) AS studied_count FROM flashcards f
+INNER JOIN learning_progress lp ON lp.card_id = f.id
+WHERE f.deck_id IN (SELECT id FROM subtree)
+  AND f.deleted_at IS NULL
+  AND lp.box > 0;
+
 countSubtreeCards:
 WITH RECURSIVE subtree (id) AS (
   SELECT :deckId

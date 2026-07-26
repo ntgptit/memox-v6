@@ -312,6 +312,7 @@
   "deleteDeckKeepLabel": "Giữ deck",
   "deleteDeckConfirmLabel": "Xoá deck",
   "deleteDeckEmptyBody": "Deck rỗng này sẽ bị xoá vĩnh viễn.",
+  "deleteDeckStudiedSuffix": "{count, plural, other{Trong đó {count} thẻ có tiến độ học sẽ mất.}}",
   "deleteDeckLeafBody": "{cardCount, plural, other{{cardCount} thẻ và tiến độ học của chúng sẽ bị xoá vĩnh viễn.}}",
   "deleteDeckParentBody": "Bao gồm {deckCount, plural, other{{deckCount} deck lồng nhau}}, {cardCount, plural, other{{cardCount} thẻ}}, và tiến độ học của chúng. Không thể hoàn tác.",
   "@createDeckTitle": {

@@ -8,9 +8,17 @@ class DeckDeletionImpact {
     required this.state,
     required this.cardCount,
     required this.deckCount,
+    this.studiedCardCount = 0,
   });
 
   final DeckContentState state;
   final int cardCount;
   final int deckCount;
+
+  /// Cards in the subtree that carry study history — Box 1 and above.
+  ///
+  /// The third quantity §1 asks the copy to name. Counting progress *rows*
+  /// would restate [cardCount]: every card gets one at creation. What the
+  /// learner actually loses is the history, and Box 0 means never introduced.
+  final int studiedCardCount;
 }

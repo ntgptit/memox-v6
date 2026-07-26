@@ -17,10 +17,12 @@ class LoadDeckDeletionImpactUseCase {
     final counts = await _decks.contentCounts(deckId);
     final cardCount = await _decks.countSubtreeCards(deckId);
     final deckCount = await _decks.countSubtreeDecks(deckId);
+    final studied = await _decks.countSubtreeStudiedCards(deckId);
     return DeckDeletionImpact(
       state: deriveDeckContentState(counts),
       cardCount: cardCount,
       deckCount: deckCount,
+      studiedCardCount: studied,
     );
   }
 }

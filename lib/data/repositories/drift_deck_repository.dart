@@ -179,6 +179,14 @@ class DriftDeckRepository implements DeckRepository {
   }
 
   @override
+  Future<int> countSubtreeStudiedCards(String deckId) async {
+    final row = await _database.deckDao
+        .countSubtreeStudiedCards(deckId)
+        .getSingle();
+    return row;
+  }
+
+  @override
   Future<int> countSubtreeDecks(String deckId) {
     return _database.deckDao.countSubtreeDecks(deckId).getSingle();
   }

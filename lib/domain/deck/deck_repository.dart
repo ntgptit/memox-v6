@@ -87,6 +87,10 @@ abstract interface class DeckRepository {
   /// itself) — the delete/reset impact summary (`delete-deck.md` §4).
   Future<int> countSubtreeDecks(String deckId);
 
+  /// Cards below [deckId] that carry study history (Box 1 and above) — the
+  /// learning progress the delete confirm has to name (`delete-deck.md` §1).
+  Future<int> countSubtreeStudiedCards(String deckId);
+
   /// Number of decks (any depth) owned by [languagePairId]; the
   /// language-pair removal guard reads this.
   Future<int> countForLanguagePair(String languagePairId);
