@@ -1,4 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:memox_v6/core/errors/app_failure.dart';
+import 'package:memox_v6/presentation/features/study/viewmodels/study_answer_viewmodel.dart';
+import 'package:memox_v6/presentation/shared/dialogs/mx_dialog.dart';
+import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
 import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
@@ -47,6 +54,19 @@ class _StudyStageDispatch extends ConsumerWidget {
       }
     });
 
+    // `answer-study-stage.md` §6: a save that fails opens a dialog and the
+    // answer stays. Nothing read this command's state, so a failed save was
+    // invisible in every mode — the card simply stayed put, exactly as it
+    // does while a save is in flight. Mounted here rather than per mode
+    // screen: all five submit through the same command, and this is the one
+    // widget that outlives the stage they are dispatched into.
+    listenMxAction(
+      ref,
+      studyAnswerViewmodelProvider,
+      onFailure: (failure) =>
+          unawaited(_reportAnswerFailure(context, ref, failure)),
+    );
+
     // The result outlives the active session (finalize clears it), so show it
     // whenever finalize has started, failed or produced a committed summary.
     final result = ref.watch(studyResultProvider);
@@ -84,4 +104,41 @@ class _StudyStageDispatch extends ConsumerWidget {
       },
     );
   }
+}
+
+/// The answer-save failure dialog (`answer-study-stage.md` §6, §9).
+///
+/// Two cases, and §9 gives each its own copy. A stale write means the session
+/// moved elsewhere and the fix is to re-read it; anything else is a save that
+/// did not land, where the answer is still on screen and `Try again`
+/// re-submits the same attempt.
+Future<void> _reportAnswerFailure(
+  BuildContext context,
+  WidgetRef ref,
+  AppFailure failure,
+) async {
+  final l10n = AppLocalizations.of(context);
+  final isStale = failure is ConflictFailure;
+  final retried = await showMxDialog<bool>(
+    context,
+    title: isStale
+        ? l10n.studyStaleSessionTitle
+        : l10n.studyAnswerSaveFailedTitle,
+    body: MxText(
+      isStale ? l10n.studyStaleSessionBody : l10n.studyAnswerSaveFailedBody,
+      role: MxTextRole.body,
+    ),
+    actions: <Widget>[
+      MxButton(
+        label: isStale ? l10n.studyReloadLabel : l10n.studyTryAgainLabel,
+        onPressed: () => Navigator.of(context).pop(true),
+      ),
+    ],
+  );
+  if (retried != true || !context.mounted) return;
+  if (isStale) {
+    ref.invalidate(studySessionRuntimeProvider);
+    return;
+  }
+  await ref.read(studyAnswerViewmodelProvider.notifier).retry();
 }

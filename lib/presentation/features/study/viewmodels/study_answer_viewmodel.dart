@@ -16,15 +16,34 @@ class StudyAnswerViewmodel extends _$StudyAnswerViewmodel {
   @override
   AsyncValue<void> build() => const AsyncData(null);
 
+  /// The answer awaiting a successful save, for [retry].
+  ///
+  /// §6's failure dialog offers `Try again`, and the attempt carries its own
+  /// request id, so re-submitting the same input is the same attempt rather
+  /// than a second one ("Retry cùng attempt không tạo record hoặc progress
+  /// update lần hai").
+  StudyModeInput? _pending;
+
   Future<void> answer(StudyModeInput input) async {
     if (state is AsyncLoading<void>) return;
     final current = ref.read(studySessionRuntimeProvider).asData?.value;
     if (current == null) return;
 
+    _pending = input;
     state = const AsyncLoading();
-    state = await runMxAction(() async {
+    final result = await runMxAction(() async {
       await ref.read(answerStudyStageUseCaseProvider).call(current, input);
       ref.invalidate(studySessionRuntimeProvider);
     });
+    if (result is AsyncData<void>) _pending = null;
+    state = result;
+  }
+
+  /// Re-submits the answer a failed save is still holding (§6 `Try again`).
+  Future<void> retry() async {
+    final pending = _pending;
+    if (pending == null) return;
+    state = const AsyncData<void>(null);
+    return answer(pending);
   }
 }
