@@ -1211,6 +1211,32 @@
       "total": { "type": "int" }
     }
   },
+  "todayStripTitle": "Today",
+  "@todayStripTitle": {
+    "description": "Heading of the Today inline stat strip (kit dashboard/today). Separate from the app-bar title so the two can be worded differently per locale."
+  },
+  "todayStripStreakValue": "{count}",
+  "@todayStripStreakValue": {
+    "description": "Day-streak value in the Today strip; localized so the digits follow the locale's numbering system.",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "todayStripStreakLabel": "day streak",
+  "@todayStripStreakLabel": {
+    "description": "Day-streak label in the Today strip."
+  },
+  "todayStripMasteryValue": "{percent}%",
+  "@todayStripMasteryValue": {
+    "description": "Mastered share of the library, as a percentage.",
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "todayStripMasteryLabel": "library mastered",
+  "@todayStripMasteryLabel": {
+    "description": "Label for the mastered share. Mastered means Box 8 (srs-8-box-policy.md §3)."
+  },
   "todayRecentDecksTitle": "Recent decks",
   "@todayRecentDecksTitle": {
     "description": "Today deck-list section title, ordered by when each deck was last studied."

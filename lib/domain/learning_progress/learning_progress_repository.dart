@@ -1,5 +1,6 @@
 import 'package:memox_v6/core/ids/id_generator.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress.dart';
+import 'package:memox_v6/domain/learning_progress/library_mastery.dart';
 import 'package:memox_v6/domain/learning_progress/study_candidates.dart';
 import 'package:memox_v6/domain/learning_progress/study_queue_counts.dart';
 import 'package:memox_v6/domain/study_session/study_attempt.dart';
@@ -96,6 +97,11 @@ abstract interface class LearningProgressRepository {
     String languagePairId, {
     required DateTime nowUtc,
   });
+
+  /// The mastered share of the same scope — Today's "library mastered" stat.
+  /// Takes no instant: Box 8 is a state, not a schedule, so unlike the queue
+  /// counts it does not depend on when it is asked.
+  Future<LibraryMastery> countLibraryMastery(String languagePairId);
 
   Future<List<LearningProgress>> pageDue(
     DateTime nowUtc, {

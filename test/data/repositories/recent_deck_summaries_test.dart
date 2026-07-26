@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
+import 'package:memox_v6/data/repositories/drift_learning_progress_repository.dart';
 
 /// WBS 5.7.2 — Today's Recent-decks rows: the Library counters plus mastery,
 /// ordered by when each deck was last studied (`load-today-dashboard.md` §3).
@@ -155,6 +156,49 @@ void main() {
     }
 
     expect((await decks.recentSummaries('lp1', limit: 3)).length, 3);
+  });
+
+  // The strip's "library mastered" reads the same Box-8 rule as the deck bars,
+  // across the whole pair rather than one deck.
+  group('library mastery', () {
+    late DriftLearningProgressRepository progress;
+
+    setUp(() {
+      progress = DriftLearningProgressRepository(database);
+    });
+
+    test('counts Box 8 across every deck of the pair', () async {
+      await deck('a', 'A');
+      await deck('b', 'B');
+      await card('a1', 'a', box: 8);
+      await card('a2', 'a', box: 3, dueAt: 5000);
+      await card('b1', 'b', box: 8);
+      await card('b2', 'b', box: 0);
+
+      final mastery = await progress.countLibraryMastery('lp1');
+
+      expect(mastery.masteredCount, 2);
+      expect(mastery.studiableCount, 4);
+      expect(mastery.fraction, 0.5);
+    });
+
+    test('hidden cards leave the denominator here too', () async {
+      await deck('a', 'A');
+      await card('a1', 'a', box: 8);
+      await card('a2', 'a', box: 0, hidden: true);
+
+      final mastery = await progress.countLibraryMastery('lp1');
+
+      expect(mastery.studiableCount, 1);
+      expect(mastery.fraction, 1.0);
+    });
+
+    test('an empty library reads zero, not a division by zero', () async {
+      final mastery = await progress.countLibraryMastery('lp1');
+
+      expect(mastery.studiableCount, 0);
+      expect(mastery.fraction, 0);
+    });
   });
 
   test('due-ness is measured at read time, like the library rows', () async {

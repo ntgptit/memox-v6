@@ -6,6 +6,7 @@ import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/domain/language_pair/language_pair.dart';
 import 'package:memox_v6/domain/language_pair/language_pair_repository.dart';
 import 'package:memox_v6/domain/learning_progress/learning_progress_repository.dart';
+import 'package:memox_v6/domain/learning_progress/library_mastery.dart';
 import 'package:memox_v6/domain/preferences/preference_repository.dart';
 import 'package:memox_v6/domain/study_session/session_scope.dart';
 import 'package:memox_v6/domain/study_session/session_state.dart';
@@ -45,12 +46,13 @@ void main() {
     int libraryCards = 5,
     int due = 0,
     _FakeDecks? decks,
+    LibraryMastery? mastery,
   }) => LoadTodayProjectionUseCase(
     sessions: _FakeSessions(paused),
     decks: decks ?? _FakeDecks(libraryCards),
     languagePairs: _StubPairs(pair),
     queueCounts: LoadStudyQueueCountsUseCase(
-      progress: _FakeProgress(due),
+      progress: _FakeProgress(due, mastery: mastery),
       decks: _FakeDecks(libraryCards),
       clock: _FixedClock(now),
     ),
@@ -162,6 +164,25 @@ void main() {
     expect(projection.recentDecks.first.masteryFraction, 0.75);
   });
 
+  // The strip's one always-available metric besides the streak.
+  test('composes the library mastery for the active pair', () async {
+    final projection = await build(
+      pair: pair,
+      due: 4,
+      mastery: const LibraryMastery(masteredCount: 11, studiableCount: 20),
+    ).call();
+
+    expect(projection.libraryMastery.masteredCount, 11);
+    expect(projection.libraryMastery.fraction, 0.55);
+  });
+
+  test('no active pair reports no mastery rather than failing', () async {
+    final projection = await build(libraryCards: 0).call();
+
+    expect(projection.libraryMastery.studiableCount, 0);
+    expect(projection.libraryMastery.fraction, 0);
+  });
+
   // No active pair means no library to read from, and the section is empty
   // rather than the load failing — it is supporting, not primary.
   test('no active pair yields no deck rows', () async {
@@ -193,9 +214,14 @@ class _FakeSessions implements StudySessionRepository {
 /// The unscoped `countDue` this screen used to call no longer exists on the
 /// port at all, so there is nothing left to reach for by mistake.
 class _FakeProgress implements LearningProgressRepository {
-  _FakeProgress(this._due, {this.otherPairDue = 0});
+  _FakeProgress(this._due, {this.otherPairDue = 0, this.mastery});
   final int _due;
   final int otherPairDue;
+  final LibraryMastery? mastery;
+
+  @override
+  Future<LibraryMastery> countLibraryMastery(String languagePairId) async =>
+      mastery ?? const LibraryMastery.empty();
 
   @override
   Future<StudyQueueCounts> countLibraryQueues(
