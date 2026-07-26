@@ -1205,6 +1205,18 @@
       }
     }
   },
+  "todayChooseScopeTitle": "Which deck?",
+  "@todayChooseScopeTitle": {
+    "description": "Title of the scope picker shown when due cards span more than one deck. A library-wide session is not representable in schema v1, so the scope has to be chosen."
+  },
+  "todayChooseScopeOption": "{deck} · {count} cards",
+  "@todayChooseScopeOption": {
+    "description": "One row of the scope picker: the deck and how many cards the chosen session type would run over there.",
+    "placeholders": {
+      "deck": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
   "todayStartReviewLabel": "Start review",
   "@todayStartReviewLabel": {
     "description": "Today primary action starting a review."

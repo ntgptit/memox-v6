@@ -139,10 +139,51 @@ void main() {
       )();
 
       expect(outcome, isA<ChooseReviewScope>());
-      expect((outcome as ChooseReviewScope).deckCount, 2);
+      final choice = outcome as ChooseReviewScope;
+      expect(choice.deckCount, 2);
+      // The options carry what the learner needs to choose between, read in
+      // the same pass that decided a choice was needed.
+      expect(choice.options.map((option) => option.deckId).toList(), <String>[
+        'd1',
+        'd2',
+      ]);
+      expect(
+        choice.options.map((option) => option.eligibleCount).toList(),
+        <int>[4, 6],
+      );
       expect(starter.calls, isEmpty);
     },
   );
+
+  // §2 node E → F: a chosen scope skips the picker and starts there.
+  test('a chosen deck starts in that deck', () async {
+    final starter = _RecordingStart(session('s-new'));
+    final outcome = await build(
+      activePair: pair,
+      roots: <Deck>[deck('d1'), deck('d2')],
+      dueByDeck: <String, int>{'d1': 4, 'd2': 6},
+      starter: starter,
+    )(deckId: 'd2');
+
+    expect(outcome, isA<ReviewStarted>());
+    expect(starter.calls.single.deckId, 'd2');
+  });
+
+  // §6 forbids a stale count from creating an empty or invalid session. A
+  // queue can empty while the picker sits open, so a tapped deck is checked
+  // again rather than trusted for having been tapped.
+  test('a chosen deck that emptied meanwhile starts nothing', () async {
+    final starter = _RecordingStart(session('s-new'));
+    final outcome = await build(
+      activePair: pair,
+      roots: <Deck>[deck('d1'), deck('d2')],
+      dueByDeck: <String, int>{'d1': 4, 'd2': 0},
+      starter: starter,
+    )(deckId: 'd2');
+
+    expect(outcome, isA<NothingDueNow>());
+    expect(starter.calls, isEmpty);
+  });
 
   test('no active pair has nothing to review', () async {
     final outcome = await build(roots: <Deck>[deck('d1')])();

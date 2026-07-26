@@ -974,6 +974,42 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
     });
   });
+
+  // WBS 5.7.3 — `start-review-from-today.md` §2 node E. Several due decks
+  // used to send the learner to the Library to find one themselves.
+  group('scope picker', () {
+    testWidgets('several due decks offer a choice with their counts', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            data(
+              const TodayProjection(
+                primaryAction: TodayPrimaryAction.startReview,
+                dueCount: 10,
+              ),
+            ),
+            startReviewProvider.overrideWith(_ChoosingStartReview.new),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const TodayScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(MxButton, 'Start review'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('WHICH DECK?'), findsOneWidget);
+      expect(find.text('Grammar · 4 cards'), findsOneWidget);
+      expect(find.text('Vocabulary · 6 cards'), findsOneWidget);
+    });
+  });
 }
 
 class _RecordingStartReview extends StartReview {
@@ -982,8 +1018,10 @@ class _RecordingStartReview extends StartReview {
   final void Function(SessionType type) _onStart;
 
   @override
-  Future<void> start({SessionType type = SessionType.dueReview}) async =>
-      _onStart(type);
+  Future<void> start({
+    SessionType type = SessionType.dueReview,
+    String? deckId,
+  }) async => _onStart(type);
 }
 
 class _LoadingStartReview extends StartReview {
@@ -1028,4 +1066,32 @@ class _FailedContinue extends ContinueSession {
         const UnexpectedFailure(cause: 'boom'),
         StackTrace.empty,
       );
+}
+
+/// Resolves straight to the multi-deck branch, so the picker is what the tap
+/// produces.
+class _ChoosingStartReview extends StartReview {
+  @override
+  Future<void> start({
+    SessionType type = SessionType.dueReview,
+    String? deckId,
+  }) async {
+    state = const AsyncLoading<StartReviewOutcome?>();
+    state = const AsyncData<StartReviewOutcome?>(
+      ChooseReviewScope(
+        options: <ReviewScopeOption>[
+          ReviewScopeOption(
+            deckId: 'd1',
+            deckName: 'Grammar',
+            eligibleCount: 4,
+          ),
+          ReviewScopeOption(
+            deckId: 'd2',
+            deckName: 'Vocabulary',
+            eligibleCount: 6,
+          ),
+        ],
+      ),
+    );
+  }
 }

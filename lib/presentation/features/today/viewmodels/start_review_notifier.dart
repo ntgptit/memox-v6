@@ -21,7 +21,10 @@ class StartReview extends _$StartReview {
   AsyncValue<StartReviewOutcome?> build() =>
       const AsyncData<StartReviewOutcome?>(null);
 
-  Future<void> start({SessionType type = SessionType.dueReview}) async {
+  Future<void> start({
+    SessionType type = SessionType.dueReview,
+    String? deckId,
+  }) async {
     if (state is AsyncLoading<StartReviewOutcome?>) return;
     state = const AsyncLoading<StartReviewOutcome?>();
 
@@ -29,7 +32,7 @@ class StartReview extends _$StartReview {
     final result = await runMxAction(() async {
       outcome = await ref
           .read(startReviewFromTodayUseCaseProvider)
-          .call(type: type);
+          .call(type: type, deckId: deckId);
     });
 
     // §4: "Start failure giữ Dashboard snapshot" — a failed start leaves the

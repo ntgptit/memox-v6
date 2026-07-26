@@ -584,6 +584,8 @@
   "todayResumeLabel": "Tiếp tục phiên",
   "todayDueTitle": "Tiếp tục học",
   "todayDueCaption": "{count} thẻ đến hạn",
+  "todayChooseScopeTitle": "Bộ thẻ nào?",
+  "todayChooseScopeOption": "{deck} · {count} thẻ",
   "todayStartReviewLabel": "Bắt đầu ôn",
   "deckDueBadgeLabel": "{count}",
   "deckMasteryLabel": "Đã thuộc {mastered} trên {total} thẻ",
