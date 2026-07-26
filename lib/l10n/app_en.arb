@@ -1444,6 +1444,10 @@
   "@studyTryAgainLabel": {
     "description": "Action on the answer-save failure dialog. §6 names this one `Try again`, distinct from the recoverable-error `Retry` of §3 node H (answer-study-stage.md)."
   },
+  "cardInSessionMessage": "This card is in the session you’re studying right now. Finish or leave the session first.",
+  "@cardInSessionMessage": {
+    "description": "Delete refused because the card is the current prompt of a running session (delete-flashcard.md §5; ST-CHG-007)."
+  },
   "todayErrorTitle": "Today couldn’t load",
   "@todayErrorTitle": {
     "description": "Today load-error title."

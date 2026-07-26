@@ -1,6 +1,8 @@
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
+import 'package:memox_v6/data/repositories/drift_study_session_repository.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
@@ -54,7 +56,13 @@ void main() {
     decks = DriftDeckRepository(database, const SystemClock());
     edit = EditFlashcardUseCase(cards: cards, decks: decks, clock: clock);
     hide = HideFlashcardUseCase(cards: cards, clock: clock);
-    delete = DeleteFlashcardUseCase(cards: cards, clock: clock);
+    delete = DeleteFlashcardUseCase(
+      cards: cards,
+      runtime: LoadStudyRuntimeUseCase(
+        sessions: DriftStudySessionRepository(database),
+      ),
+      clock: clock,
+    );
     move = MoveFlashcardUseCase(cards: cards, decks: decks, clock: clock);
 
     await database.languagePairDao.insertLanguagePair(

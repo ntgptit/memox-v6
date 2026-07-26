@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
@@ -426,12 +427,28 @@ void _reportCardOutcome(
   required String success,
   required String failure,
 }) {
-  final isFailure = MxActionErrors.failureOf(result) != null;
+  final outcome = MxActionErrors.failureOf(result);
   showMxSnackbar(
     context,
-    message: isFailure ? failure : success,
-    tone: isFailure ? MxSnackbarTone.error : MxSnackbarTone.success,
+    message: outcome == null
+        ? success
+        : _cardFailureMessage(outcome, failure, AppLocalizations.of(context)),
+    tone: outcome == null ? MxSnackbarTone.success : MxSnackbarTone.error,
   );
+}
+
+/// The blocked delete is not a failure to retry, it is a rule: the card is the
+/// prompt of a running session, and `delete-flashcard.md` §5 blocks it until
+/// the learner exits or commits (ST-CHG-007). Saying "couldn't delete, nothing
+/// removed" would send them back to try the same thing again.
+String _cardFailureMessage(
+  AppFailure failure,
+  String fallback,
+  AppLocalizations l10n,
+) {
+  if (failure is! ConflictFailure) return fallback;
+  if (failure.code != 'card-in-session') return fallback;
+  return l10n.cardInSessionMessage;
 }
 
 class _LeafBranch extends ConsumerWidget {

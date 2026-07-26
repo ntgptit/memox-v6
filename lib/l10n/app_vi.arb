@@ -638,5 +638,6 @@
   "studyStaleSessionBody": "Hãy tải lại tiến độ đã lưu.",
   "studyReloadLabel": "Tải lại",
   "studyTryAgainLabel": "Thử lại",
+  "cardInSessionMessage": "Thẻ này đang nằm trong phiên học bạn đang làm. Hãy kết thúc hoặc rời phiên trước.",
   "todayErrorTitle": "Không tải được Hôm nay"
 }
