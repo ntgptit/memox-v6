@@ -42,9 +42,23 @@ class LoadTodayProjectionUseCase {
   Future<TodayProjection> call() async {
     final paused = await _sessions.activeSession();
     final pair = await _languagePairs.activePair();
-    final libraryCardCount = pair == null
-        ? 0
-        : await _decks.countForLanguagePair(pair.id);
+
+    // Box 8 is a state rather than a schedule, so this asks for no instant —
+    // it is the same library scope as the due count, partitioned by box.
+    //
+    // Read here, before the primary action, because `studiableCount` is what
+    // decides whether the library is empty: cards that are not deleted and
+    // not hidden. That decision used to read `countForLanguagePair`, which
+    // counts **decks** — and was held in a variable called
+    // `libraryCardCount`, which is how it survived. A deck whose cards had
+    // all been deleted therefore reported caught-up: a congratulation shown
+    // to someone with nothing to study, against
+    // `handle-caught-up-today.md` §1's requirement that caught-up needs
+    // eligible content.
+    final mastery = pair == null
+        ? const LibraryMastery.empty()
+        : await _queueCounts.masteryForLibrary(pair.id);
+    final studiableCards = mastery.studiableCount;
     // Scoped to the active pair, like the library count above it.
     //
     // This read `LearningProgressRepository.countDue`, whose SQL has no
@@ -62,7 +76,7 @@ class LoadTodayProjectionUseCase {
 
     final action = paused != null
         ? TodayPrimaryAction.continueSession
-        : libraryCardCount == 0
+        : studiableCards == 0
         ? TodayPrimaryAction.createLibrary
         : dueCount > 0
         ? TodayPrimaryAction.startReview
@@ -83,12 +97,6 @@ class LoadTodayProjectionUseCase {
             pair.id,
             limit: TodayProjection.recentDeckLimit,
           );
-
-    // Box 8 is a state rather than a schedule, so this asks for no instant —
-    // it is the same library scope as the due count, partitioned by box.
-    final mastery = pair == null
-        ? const LibraryMastery.empty()
-        : await _queueCounts.masteryForLibrary(pair.id);
 
     return TodayProjection(
       primaryAction: action,
