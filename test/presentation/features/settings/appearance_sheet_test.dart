@@ -62,5 +62,36 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(await storedMode(), AppearanceMode.dark);
+    expect(find.text('Dark'), findsNothing, reason: 'the sheet closed');
+  });
+
+  // §2: a failed persist restores the prior selection and offers a retry. The
+  // sheet used to pop the moment a row was tapped, without waiting to see
+  // whether the write landed, so a preference that never persisted closed the
+  // sheet exactly like one that did.
+  testWidgets('a persist that fails keeps the sheet on the prior choice', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Appearance'));
+    await tester.pumpAndSettle();
+    // The store goes away under the open sheet.
+    await database.close();
+
+    await tester.tap(find.text('Dark'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Couldn’t change the appearance. Your previous choice is still in '
+        'place.',
+      ),
+      findsOneWidget,
+    );
+    // The rows are still there, which is where the retry happens.
+    expect(find.text('Dark'), findsOneWidget);
+    expect(find.text('System'), findsOneWidget);
   });
 }

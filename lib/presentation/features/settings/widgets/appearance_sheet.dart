@@ -5,6 +5,11 @@ import 'package:memox_v6/domain/preferences/appearance_mode.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/settings/viewmodels/appearance_viewmodel.dart';
 import 'package:memox_v6/presentation/shared/bottom_sheets/mx_sheet.dart';
+import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
+import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_action_callout.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_banner.dart'
+    show MxBannerTone;
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
@@ -31,11 +36,24 @@ class _AppearanceBody extends ConsumerWidget {
     final current =
         ref.watch(appearanceModeProvider).value ?? AppearanceMode.system;
 
+    final saveState = ref.watch(appearanceCommandViewmodelProvider);
+    final failure = MxActionErrors.failureOf(saveState);
+
+    // §2: a failed persist restores the prior selection and offers a retry.
+    // The sheet used to pop the moment a row was tapped, without waiting to
+    // see whether the write landed — so a preference that never persisted
+    // closed the sheet exactly like one that did, and the retry §2 asks for
+    // had nowhere to happen.
+    listenMxAction(
+      ref,
+      appearanceCommandViewmodelProvider,
+      onSuccess: () => Navigator.of(context).pop(),
+    );
+
     void select(AppearanceMode mode) {
       ref
           .read(appearanceCommandViewmodelProvider.notifier)
           .selectAppearance(mode);
-      Navigator.of(context).pop();
     }
 
     return Column(
@@ -57,6 +75,16 @@ class _AppearanceBody extends ConsumerWidget {
           selected: current == AppearanceMode.dark,
           onTap: () => select(AppearanceMode.dark),
         ),
+        // The check still sits on the stored mode, so the sheet is already
+        // showing the restored prior selection; this says why, and the rows
+        // stay live as the retry.
+        if (failure != null) ...[
+          const MxGap.s4(),
+          MxActionCallout(
+            tone: MxBannerTone.error,
+            text: l10n.appearanceSaveFailedMessage,
+          ),
+        ],
       ],
     );
   }
