@@ -5,7 +5,9 @@ import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
 import 'package:memox_v6/data/repositories/drift_learning_progress_repository.dart';
+import 'package:memox_v6/data/repositories/drift_study_session_repository.dart';
 import 'package:memox_v6/domain/usecases/deck/load_deck_deletion_impact_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/load_reset_progress_availability_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/reset_deck_progress_usecase.dart';
 
 /// WBS 6.1 — the reset confirm's affected count against what the reset changes
@@ -59,6 +61,10 @@ void main() {
     impact = LoadDeckDeletionImpactUseCase(decks: decks);
     reset = ResetDeckProgressUseCase(
       progress: progress,
+      availability: LoadResetProgressAvailabilityUseCase(
+        decks: decks,
+        sessions: DriftStudySessionRepository(database),
+      ),
       idGenerator: _SeqIds('lp'),
       clock: _FixedClock(now),
     );
@@ -140,20 +146,27 @@ void main() {
     expect(after.newCount, 2);
   });
 
-  test('a parent reset reaches its descendants and leaves them there', () async {
-    // Deck exclusivity (WBS 4.3): a deck holds cards or subdecks, never both.
-    await deck('root');
-    await deck('child', parentId: 'root');
-    await card('c1', 'child', box: 4);
-    await card('c2', 'child', box: 6);
+  test(
+    'a parent reset reaches its descendants and leaves them there',
+    () async {
+      // Deck exclusivity (WBS 4.3): a deck holds cards or subdecks, never both.
+      await deck('root');
+      await deck('child', parentId: 'root');
+      await card('c1', 'child', box: 4);
+      await card('c2', 'child', box: 6);
 
-    expect((await impact('root')).studiedCardCount, 2);
+      expect((await impact('root')).studiedCardCount, 2);
 
-    await reset('root');
+      await reset('root');
 
-    expect(await boxes(), everyElement(0));
-    expect(await decks.findById('child'), isNotNull, reason: 'hierarchy stays');
-  });
+      expect(await boxes(), everyElement(0));
+      expect(
+        await decks.findById('child'),
+        isNotNull,
+        reason: 'hierarchy stays',
+      );
+    },
+  );
 }
 
 class _FixedClock implements AppClock {

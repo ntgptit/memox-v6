@@ -306,6 +306,7 @@
   "resetDeckProgressBody": "Thao tác này sẽ đặt lại tiến độ cho {cardCount, plural, other{{cardCount} thẻ}} trong “{deckName}”. Thẻ và deck lồng nhau vẫn được giữ nguyên.",
   "resetDeckProgressParentBody": "Thao tác này sẽ đặt lại tiến độ cho {cardCount, plural, other{{cardCount} thẻ}} trong {deckCount, plural, other{{deckCount} deck lồng nhau}} của “{deckName}”. Thẻ vẫn được giữ nguyên.",
   "resetDeckProgressNothingBody": "Deck này chưa có tiến độ học để đặt lại.",
+  "resetDeckProgressBlockedBody": "Hãy kết thúc phiên học hiện tại trước. Đặt lại lúc này sẽ thay đổi chính những thẻ phiên đó đang học.",
   "resetDeckProgressKeepLabel": "Giữ tiến độ",
   "resetDeckProgressConfirmLabel": "Đặt lại tiến độ",
   "deleteDeckTitle": "Xoá “{deckName}”?",

@@ -14,6 +14,7 @@ import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/domain/usecases/deck/create_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/delete_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/load_deck_deletion_impact_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/load_reset_progress_availability_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/move_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/rename_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/reset_deck_progress_usecase.dart';
@@ -145,9 +146,20 @@ LoadDeckDeletionImpactUseCase loadDeckDeletionImpactUseCase(Ref ref) {
 }
 
 @riverpod
+LoadResetProgressAvailabilityUseCase loadResetProgressAvailabilityUseCase(
+  Ref ref,
+) {
+  return LoadResetProgressAvailabilityUseCase(
+    decks: ref.watch(deckRepositoryProvider),
+    sessions: ref.watch(studySessionRepositoryProvider),
+  );
+}
+
+@riverpod
 ResetDeckProgressUseCase resetDeckProgressUseCase(Ref ref) {
   return ResetDeckProgressUseCase(
     progress: ref.watch(learningProgressRepositoryProvider),
+    availability: ref.watch(loadResetProgressAvailabilityUseCaseProvider),
     idGenerator: ref.watch(idGeneratorProvider),
     clock: ref.watch(appClockProvider),
   );
