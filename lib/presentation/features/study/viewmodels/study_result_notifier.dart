@@ -70,17 +70,24 @@ class StudyResult extends _$StudyResult {
   /// (`relearn-cards.md` §1: "Relearn là session mới do user explicit start
   /// từ `Review missed`").
   ///
-  /// Returns whether one started, so the caller only navigates when there is
-  /// something to navigate to. `Review mistakes` used to call `goStudy()` and
-  /// nothing else — it re-entered the route the result was already on, so the
-  /// missed cards were never relearned and the control did nothing at all.
-  Future<bool> startRelearn() async {
+  /// Returns the start's outcome, or null when there was nothing to start —
+  /// so the caller navigates on success, reports a failure, and stays quiet
+  /// about a tap that was never going to do anything. `Review mistakes` used
+  /// to call `goStudy()` and nothing else — it re-entered the route the result
+  /// was already on, so the missed cards were never relearned and the control
+  /// did nothing at all.
+  Future<AsyncValue<void>?> startRelearn() async {
     final summary = state.asData?.value;
     final deckId = _sourceDeckId;
     final scope = _sourceScope;
-    if (summary == null || deckId == null || scope == null) return false;
-    if (summary.missedCardIds.isEmpty) return false;
+    if (summary == null || deckId == null || scope == null) return null;
+    if (summary.missedCardIds.isEmpty) return null;
+    // A second tap while the first start is still in flight would find the
+    // session it is about to create and fail on the one-active-session rule —
+    // reporting a conflict for what is really one request.
+    if (_starting) return null;
 
+    _starting = true;
     final action = await runMxAction(() async {
       await ref
           .read(startStudySessionUseCaseProvider)
@@ -91,6 +98,10 @@ class StudyResult extends _$StudyResult {
             relearnCardIds: summary.missedCardIds,
           );
     });
-    return action is! AsyncError;
+    _starting = false;
+    return action;
   }
+
+  /// Whether a relearn start is in flight; see [startRelearn].
+  bool _starting = false;
 }

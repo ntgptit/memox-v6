@@ -17,6 +17,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_progress.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// Study Result (WBS 5.6.13; `finalize-study-session.md`, kit `study-result`).
@@ -178,10 +179,23 @@ class _ResultBody extends ConsumerWidget {
                 // route the result was already on — the control rendered,
                 // took a tap, and did nothing.
                 onTap: () async {
-                  final started = await ref
+                  final outcome = await ref
                       .read(studyResultProvider.notifier)
                       .startRelearn();
-                  if (started && context.mounted) context.goStudy();
+                  if (outcome == null || !context.mounted) return;
+                  // `relearn-cards.md` §6. A start that cannot save the queue
+                  // used to leave the learner tapping a link that did
+                  // nothing; the answers it would relearn are already
+                  // committed, which is the part worth saying.
+                  if (outcome is AsyncError) {
+                    showMxSnackbar(
+                      context,
+                      message: l10n.relearnQueueFailedMessage,
+                      tone: MxSnackbarTone.error,
+                    );
+                    return;
+                  }
+                  context.goStudy();
                 },
               ),
             ),

@@ -631,5 +631,6 @@
   "dailyGoalUpdatedMessage": "Đã cập nhật mục tiêu hằng ngày",
   "dailyGoalSaveFailedMessage": "Không cập nhật được mục tiêu hằng ngày. Thay đổi của bạn vẫn còn đây.",
   "appearanceSaveFailedMessage": "Không đổi được giao diện. Lựa chọn trước đó vẫn được giữ.",
+  "relearnQueueFailedMessage": "Không lưu được hàng đợi học lại. Câu trả lời của bạn vẫn an toàn.",
   "todayErrorTitle": "Không tải được Hôm nay"
 }
