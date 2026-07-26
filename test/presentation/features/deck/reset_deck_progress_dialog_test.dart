@@ -125,6 +125,45 @@ void main() {
     await disposeAndFlushStreams(tester);
   });
 
+  // §3 branches on "Has progress?": a deck whose cards are all still at Box 0
+  // has nothing to reset, however many cards it holds. Naming them would
+  // promise to undo work nobody did, and the destructive action would run a
+  // transaction that changes nothing.
+  testWidgets('a deck with cards but no progress offers no reset', (
+    tester,
+  ) async {
+    await database.customStatement(
+      'UPDATE learning_progress SET box = 0, due_at = NULL',
+    );
+
+    await tester.pumpWidget(app());
+    await pumpStreams(tester);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(MxContextualAppBar),
+        matching: find.byIcon(Symbols.more_vert_rounded),
+      ),
+    );
+    await pumpStreams(tester);
+    await tester.tap(find.text('Reset progress'));
+    await pumpStreams(tester);
+
+    expect(find.text('Reset learning progress?'), findsOneWidget);
+    expect(
+      find.text('There’s no learning progress to reset in this deck yet.'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Reset progress'),
+      findsNothing,
+      reason: 'the destructive action is not offered',
+    );
+    expect(find.text('Cancel'), findsOneWidget);
+
+    await disposeAndFlushStreams(tester);
+  });
+
   testWidgets('Keep progress cancels without resetting', (tester) async {
     await tester.pumpWidget(app());
     await pumpStreams(tester);

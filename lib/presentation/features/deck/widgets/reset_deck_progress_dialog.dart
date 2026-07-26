@@ -14,9 +14,10 @@ import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// The reset-progress confirm dialog (WBS 6.1; `reset-deck-progress.md` §4). It
-/// shows how many cards in the subtree would return to the unlearned state,
-/// keeps content + hierarchy in place, and is irreversible. An empty scope shows
-/// the "nothing to reset" state (§3) with no destructive action.
+/// shows how many cards in the subtree would return to the unlearned state —
+/// the ones carrying progress, which §5 calls the affected count — keeps
+/// content + hierarchy in place, and is irreversible. A scope with no progress
+/// shows the "nothing to reset" state (§3) with no destructive action.
 Future<void> showResetDeckProgressDialog(
   BuildContext context, {
   required String deckId,
@@ -57,7 +58,10 @@ class _ResetProgressBody extends ConsumerWidget {
 
     final isResetting = resetState is AsyncLoading<void>;
     final failure = MxActionErrors.failureOf(resetState);
-    final nothingToReset = impact != null && impact.cardCount == 0;
+    // §3 branches on "Has progress?", not on "has cards" — a deck full of
+    // never-introduced cards has nothing to reset, and offering the
+    // destructive action there would run a transaction that changes nothing.
+    final nothingToReset = impact != null && impact.studiedCardCount == 0;
 
     return Material(
       type: MaterialType.transparency,
@@ -111,15 +115,20 @@ class _ResetProgressBody extends ConsumerWidget {
     );
   }
 
+  /// The impact summary §5 asks for: the affected count is *only* the cards
+  /// carrying progress to reset, not every card in scope. The two differ for
+  /// any deck the learner has partly studied, and naming the larger number
+  /// promises to undo work that was never done.
   String _bodyText(DeckDeletionImpact impact, AppLocalizations l10n) {
-    if (impact.cardCount == 0) return l10n.resetDeckProgressNothingBody;
+    final affected = impact.studiedCardCount;
+    if (affected == 0) return l10n.resetDeckProgressNothingBody;
     if (impact.state == DeckContentState.parent) {
       return l10n.resetDeckProgressParentBody(
-        impact.cardCount,
+        affected,
         impact.deckCount,
         deckName,
       );
     }
-    return l10n.resetDeckProgressBody(impact.cardCount, deckName);
+    return l10n.resetDeckProgressBody(affected, deckName);
   }
 }
