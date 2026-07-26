@@ -741,6 +741,83 @@ void main() {
       expect(button.onPressed, isNotNull);
     });
   });
+
+  // WBS 5.7.2 — `refresh-today-projections.md`. A failed *refresh* is not a
+  // failed load: there is a good snapshot on screen and it must survive.
+  group('refresh', () {
+    testWidgets('a failed refresh keeps the dashboard and marks it stale', (
+      tester,
+    ) async {
+      var shouldFail = false;
+      final container = ProviderContainer(
+        overrides: [
+          todayProjectionProvider.overrideWith((ref) async {
+            if (shouldFail) throw StateError('boom');
+            return const TodayProjection(
+              primaryAction: TodayPrimaryAction.startReview,
+              dueCount: 7,
+            );
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const TodayScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('7 cards due'), findsOneWidget);
+
+      // The refresh a pull would dispatch, with the next load failing.
+      shouldFail = true;
+      await container
+          .refresh(todayProjectionProvider.future)
+          .then<void>((_) {}, onError: (Object _) {});
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'Showing what was loaded earlier — the refresh didn’t go through.',
+        ),
+        findsOneWidget,
+      );
+      // §1: last-good survives. The count is still the one that loaded.
+      expect(find.text('7 cards due'), findsOneWidget);
+      // Not the full-screen load error, which would have thrown it away.
+      expect(find.text('Today couldn’t load'), findsNothing);
+    });
+
+    // A first load that fails has no last-good to keep, so the error surface
+    // is right — the stale path must not swallow it.
+    testWidgets('a first load that fails still shows the error', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          todayProjectionProvider.overrideWith(
+            (ref) => Future<TodayProjection>.error('boom'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Today couldn’t load'), findsOneWidget);
+      expect(
+        find.text(
+          'Showing what was loaded earlier — the refresh didn’t go through.',
+        ),
+        findsNothing,
+      );
+    });
+  });
 }
 
 class _RecordingStartReview extends StartReview {

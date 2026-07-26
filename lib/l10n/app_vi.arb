@@ -584,6 +584,7 @@
   "deckMasteryLabel": "Đã thuộc {mastered} trên {total} thẻ",
   "todayResumeFailedBody": "Không tiếp tục được phiên học. Phiên vẫn được lưu — hãy thử lại.",
   "todaySessionEndedBody": "Phiên đó đã kết thúc nên không còn gì để tiếp tục.",
+  "todayStaleBody": "Đang hiển thị dữ liệu tải lần trước — lần làm mới này không thành công.",
   "todayStartReviewFailedBody": "Không bắt đầu được phiên ôn. Tiến độ của bạn không thay đổi — hãy thử lại.",
   "todayStripTitle": "Hôm nay",
   "todayStripStreakValue": "{count}",
