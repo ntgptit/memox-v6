@@ -1109,6 +1109,10 @@
   "@studyFinalizeErrorMessage": {
     "description": "Study Result finalize-error body."
   },
+  "studyResumeFailedTitle": "We couldn’t resume your session",
+  "@studyResumeFailedTitle": {
+    "description": "Resume-failure title (resume-study-session.md §4). The saved answers are still there; only the read failed."
+  },
   "studyRetryLabel": "Retry",
   "@studyRetryLabel": {
     "description": "Retries a failed finalize on the Study Result."

@@ -1,5 +1,6 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/ids/id_generator.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
@@ -133,6 +134,31 @@ void main() {
     expect(runtime, isNotNull);
     expect(runtime!.stages.length, greaterThan(1));
   });
+
+  // §3 separates node E ("Missing" — nothing to resume) from node H (a
+  // recoverable error on a session that exists). Both returned null, so a
+  // session whose round order could not be read rendered the empty "no
+  // session" state: the learner was told they had nothing to resume while
+  // their answers sat committed in the store.
+  test(
+    'a session whose round order is gone raises, not reads as absent',
+    () async {
+      for (final meaning in <String>['one', 'two', 'three', 'four', 'five']) {
+        await newCard('c-$meaning', meaning);
+      }
+      final session = await start.call(
+        deckId: 'd1',
+        scope: SessionScope.subtree,
+        type: SessionType.newLearning,
+      );
+      await database.customStatement(
+        'DELETE FROM study_round_orders WHERE session_id = ?',
+        <Object?>[session.id],
+      );
+
+      await expectLater(load(), throwsA(isA<DataCorruptionFailure>()));
+    },
+  );
 }
 
 class _FixedClock implements AppClock {
