@@ -8,14 +8,21 @@ import 'package:memox_v6/presentation/features/study/screens/guess_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/match_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/recall_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/review_screen.dart';
+import 'package:memox_v6/presentation/features/study/screens/srs_binary_review_screen.dart';
 import 'package:memox_v6/presentation/features/study/screens/study_result_screen.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_result_notifier.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 
-/// The active study session route (WBS 5.6). It dispatches to the current
-/// stage's mode screen from the runtime; an empty session shows a placeholder.
+/// The active study route (WBS 5.6). It dispatches to the current stage's
+/// mode screen from the runtime; an empty session shows a placeholder.
+///
+/// The switch is exhaustive over `StudyModeType` on purpose. It ended in a
+/// `_ =>` "coming soon" arm, which is how `srsBinaryReview` — the plan every
+/// due review runs — reached production with no screen behind it: the mode
+/// was added to the enum and the wildcard swallowed it. An exhaustive switch
+/// makes the next one a compile error.
 ///
 /// Template-only: the consumer child does the watch (guard
 /// `template_shell_no_ref_watch`).
@@ -66,11 +73,7 @@ class _StudyStageDispatch extends ConsumerWidget {
           StudyModeType.guess => const GuessScreen(),
           StudyModeType.recall => const RecallScreen(),
           StudyModeType.fill => const FillScreen(),
-          // srsBinaryReview (dueReview sessions) has no dedicated screen yet.
-          _ => MxEmptyState(
-            icon: Icons.hourglass_empty_outlined,
-            title: l10n.studyStageComingSoonMessage,
-          ),
+          StudyModeType.srsBinaryReview => const SrsBinaryReviewScreen(),
         };
       },
     );
