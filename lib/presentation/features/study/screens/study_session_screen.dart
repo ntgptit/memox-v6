@@ -57,7 +57,13 @@ class _StudyStageDispatch extends ConsumerWidget {
     return MxAsyncBuilder<StudyRuntimeState?>(
       value: ref.watch(studySessionRuntimeProvider),
       loadingLabel: l10n.loadingLabel,
-      errorTitle: l10n.somethingWentWrongMessage,
+      errorTitle: l10n.studyResumeFailedTitle,
+      // §3 node H: "Recoverable error" offers Retry. The spec pairs it with
+      // `Start fresh`, which is not offered — ending the running session is
+      // the same undefined act `int-15` records, and here it would discard
+      // answers the learner can still see the count of.
+      retryLabel: l10n.studyRetryLabel,
+      onRetry: () => ref.invalidate(studySessionRuntimeProvider),
       data: (context, runtime) {
         if (runtime == null) {
           return MxEmptyState(

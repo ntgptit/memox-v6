@@ -1,3 +1,4 @@
+import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/domain/study_session/session_mode_plan.dart';
 import 'package:memox_v6/domain/study_session/study_eligibility_policy.dart';
@@ -13,6 +14,11 @@ const int _initialRoundIndex = 1;
 /// the repository directly. It projects the committed snapshot + checkpoint +
 /// current round order into a [StudyRuntimeState], or `null` when no session is
 /// active.
+///
+/// `null` means exactly one thing: nothing to resume. A session that exists
+/// but cannot be assembled raises instead, so the screen can offer the retry
+/// §3's node H asks for rather than showing an empty state over committed
+/// answers.
 ///
 /// The mode plan is rebuilt from the **snapshot**, not from live data.
 /// `SessionModePlan` is explicit that a snapshotted plan is "replayed verbatim
@@ -65,7 +71,19 @@ class LoadStudyRuntimeUseCase {
       session.id,
       checkpoint?.roundIndex ?? _initialRoundIndex,
     );
-    if (currentOrder == null) return null;
+    if (currentOrder == null) {
+      // `resume-study-session.md` §3 separates node E ("Missing" — there is no
+      // session) from node H (a recoverable error on a session that exists).
+      // This returned null for both, so a session whose round order could not
+      // be read rendered the empty "no session" state: the learner was told
+      // they had nothing to resume while their answers sat committed in the
+      // store, and the screen offered no way to try again.
+      throw DataCorruptionFailure(
+        entity: 'study_round_orders',
+        field: 'roundIndex',
+        value: '${checkpoint?.roundIndex ?? _initialRoundIndex}',
+      );
+    }
 
     return StudyRuntimeState.assemble(
       session: session,
