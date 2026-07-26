@@ -1420,6 +1420,30 @@
   "@relearnQueueFailedMessage": {
     "description": "Relearn start failure on the result screen; the link stays as the retry (relearn-cards.md §6)."
   },
+  "studyAnswerSaveFailedTitle": "Couldn’t save your answer",
+  "@studyAnswerSaveFailedTitle": {
+    "description": "Answer-save failure dialog title (answer-study-stage.md §6, §9)."
+  },
+  "studyAnswerSaveFailedBody": "Your answer is still here.",
+  "@studyAnswerSaveFailedBody": {
+    "description": "Answer-save failure dialog body; Try again re-submits the same attempt (answer-study-stage.md §6)."
+  },
+  "studyStaleSessionTitle": "This session changed elsewhere",
+  "@studyStaleSessionTitle": {
+    "description": "Stale-checkpoint dialog title (answer-study-stage.md §9)."
+  },
+  "studyStaleSessionBody": "Reload your saved progress.",
+  "@studyStaleSessionBody": {
+    "description": "Stale-checkpoint dialog body; the action re-reads the committed session (answer-study-stage.md §9)."
+  },
+  "studyReloadLabel": "Reload",
+  "@studyReloadLabel": {
+    "description": "Action on the stale-checkpoint dialog (answer-study-stage.md §9)."
+  },
+  "studyTryAgainLabel": "Try again",
+  "@studyTryAgainLabel": {
+    "description": "Action on the answer-save failure dialog. §6 names this one `Try again`, distinct from the recoverable-error `Retry` of §3 node H (answer-study-stage.md)."
+  },
   "todayErrorTitle": "Today couldn’t load",
   "@todayErrorTitle": {
     "description": "Today load-error title."
