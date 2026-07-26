@@ -340,6 +340,11 @@ class _FakeSessions implements StudySessionRepository {
   @override
   Future<List<StudyAttempt>> attempts(String sessionId) async => _attempts;
 
+  /// Still active: finalize re-reads the session to tell a first pass from a
+  /// retry, and every test here is a first pass.
+  @override
+  Future<StudySession?> findById(String id) async => null;
+
   @override
   dynamic noSuchMethod(Invocation invocation) {
     if (invocation.memberName == #finalizeSession) {

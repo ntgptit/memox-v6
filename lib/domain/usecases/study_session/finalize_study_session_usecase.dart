@@ -107,6 +107,25 @@ class FinalizeStudySessionUseCase {
 
     final summary = _summaryPolicy.summarize(outcomes);
 
+    // `track-daily-goal.md` §1: "Paused/abandoned/retried Finalize không
+    // double-count." The SRS half honours that on its own — every terminal
+    // attempt carries the stable `terminal:<sessionId>:<cardId>` key, so a
+    // second pass re-applies nothing (SRS8-011). The **projections** did not:
+    // `TrackDailyGoalUseCase` adds the session's qualified cards to the day
+    // bucket unconditionally, so finalizing twice counted them twice and could
+    // mark a goal met that was not.
+    //
+    // The comment on that use case says its idempotency is "inherited, not
+    // re-implemented … the day bucket rides the session-finalize exactly-once
+    // contract". That contract only holds if finalize itself runs its side
+    // effects once, which is what this guard makes true: a session the store
+    // already reports as terminal is summarized and returned, and nothing is
+    // offered a second contribution.
+    final persisted = await _sessions.findById(session.id);
+    if (persisted != null && persisted.state != SessionState.active) {
+      return summary;
+    }
+
     // Schedule SRS exactly once per card, unless this is a practice session.
     if (session.scheduleSrs) {
       final grades = _gradePolicy.gradesByCard(outcomes);
