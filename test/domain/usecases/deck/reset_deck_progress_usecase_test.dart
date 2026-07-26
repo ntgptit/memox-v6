@@ -3,7 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/core/ids/id_generator.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
+import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
 import 'package:memox_v6/data/repositories/drift_learning_progress_repository.dart';
+import 'package:memox_v6/data/repositories/drift_study_session_repository.dart';
+import 'package:memox_v6/domain/usecases/deck/load_reset_progress_availability_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/reset_deck_progress_usecase.dart';
 
 /// WBS 6.1 — resetting a deck's progress returns every subtree card to Box 0 in
@@ -15,6 +18,10 @@ void main() {
 
   ResetDeckProgressUseCase useCase() => ResetDeckProgressUseCase(
     progress: progress,
+    availability: LoadResetProgressAvailabilityUseCase(
+      decks: DriftDeckRepository(database, _FixedClock(now)),
+      sessions: DriftStudySessionRepository(database),
+    ),
     idGenerator: _SeqIds(),
     clock: _FixedClock(now),
   );

@@ -526,6 +526,10 @@
   "@resetDeckProgressNothingBody": {
     "description": "Nothing-to-reset state (reset-deck-progress.md §3)."
   },
+  "resetDeckProgressBlockedBody": "Finish your current study session first. Resetting now would change the cards it’s working through.",
+  "@resetDeckProgressBlockedBody": {
+    "description": "Active-session blocked state (reset-deck-progress.md §5, §10)."
+  },
   "resetDeckProgressKeepLabel": "Keep progress",
   "@resetDeckProgressKeepLabel": {
     "description": "Safe action on the reset-progress confirm (WBS 6.1)."

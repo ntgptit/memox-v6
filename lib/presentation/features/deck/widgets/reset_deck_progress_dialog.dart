@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:memox_v6/domain/deck/deck_content_state.dart';
 import 'package:memox_v6/domain/deck/deck_deletion_impact.dart';
+import 'package:memox_v6/domain/deck/reset_progress_availability.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_deletion_impact_provider.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/reset_deck_progress_dialog_viewmodel.dart';
+import 'package:memox_v6/presentation/features/deck/viewmodels/reset_progress_availability_provider.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_dialog.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
@@ -17,7 +19,9 @@ import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 /// shows how many cards in the subtree would return to the unlearned state —
 /// the ones carrying progress, which §5 calls the affected count — keeps
 /// content + hierarchy in place, and is irreversible. A scope with no progress
-/// shows the "nothing to reset" state (§3) with no destructive action.
+/// shows the "nothing to reset" state (§3), and a scope a running session is
+/// working through shows the blocked state (§5, §10) — neither offers the
+/// destructive action.
 Future<void> showResetDeckProgressDialog(
   BuildContext context, {
   required String deckId,
@@ -56,12 +60,22 @@ class _ResetProgressBody extends ConsumerWidget {
       },
     );
 
+    final availability = ref
+        .watch(resetProgressAvailabilityProvider(deckId: deckId))
+        .asData
+        ?.value;
+
     final isResetting = resetState is AsyncLoading<void>;
     final failure = MxActionErrors.failureOf(resetState);
-    // §3 branches on "Has progress?", not on "has cards" — a deck full of
-    // never-introduced cards has nothing to reset, and offering the
-    // destructive action there would run a transaction that changes nothing.
-    final nothingToReset = impact != null && impact.studiedCardCount == 0;
+
+    // Three states carry no destructive action: still loading (§7), a session
+    // running over the scope (§5), and nothing to reset — §3 branches on
+    // "Has progress?", not on "has cards", so a deck of never-introduced
+    // cards would otherwise offer an action that changes nothing.
+    final offersReset =
+        impact != null &&
+        availability == ResetProgressAvailability.available &&
+        impact.studiedCardCount > 0;
 
     return Material(
       type: MaterialType.transparency,
@@ -69,10 +83,7 @@ class _ResetProgressBody extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          MxText(
-            impact == null ? l10n.loadingLabel : _bodyText(impact, l10n),
-            role: MxTextRole.body,
-          ),
+          MxText(_body(impact, availability, l10n), role: MxTextRole.body),
           if (failure != null) ...[
             const MxGap.s3(),
             MxText(
@@ -86,20 +97,20 @@ class _ResetProgressBody extends ConsumerWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               MxButton(
-                label: nothingToReset
-                    ? l10n.cancelLabel
-                    : l10n.resetDeckProgressKeepLabel,
+                label: offersReset
+                    ? l10n.resetDeckProgressKeepLabel
+                    : l10n.cancelLabel,
                 variant: MxButtonVariant.secondary,
                 onPressed: isResetting
                     ? null
                     : () => Navigator.of(context).pop(),
               ),
-              if (!nothingToReset) ...[
+              if (offersReset) ...[
                 const MxGap.s2(),
                 MxButton(
                   label: l10n.resetDeckProgressConfirmLabel,
                   danger: true,
-                  onPressed: (impact == null || isResetting)
+                  onPressed: isResetting
                       ? null
                       : () => ref
                             .read(
@@ -113,6 +124,18 @@ class _ResetProgressBody extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _body(
+    DeckDeletionImpact? impact,
+    ResetProgressAvailability? availability,
+    AppLocalizations l10n,
+  ) {
+    if (impact == null || availability == null) return l10n.loadingLabel;
+    if (availability == ResetProgressAvailability.blockedByActiveSession) {
+      return l10n.resetDeckProgressBlockedBody;
+    }
+    return _bodyText(impact, l10n);
   }
 
   /// The impact summary §5 asks for: the affected count is *only* the cards

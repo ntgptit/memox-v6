@@ -9,6 +9,9 @@ import 'package:memox_v6/app/router/route_paths.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
+import 'package:memox_v6/domain/study_session/session_scope.dart';
+import 'package:memox_v6/domain/study_session/session_state.dart';
+import 'package:memox_v6/domain/study_session/session_type.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 
@@ -160,6 +163,54 @@ void main() {
       reason: 'the destructive action is not offered',
     );
     expect(find.text('Cancel'), findsOneWidget);
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  // §5: a reset must not silently rewrite the cards a running session is
+  // working through. The dialog says so instead of offering an action the
+  // command would refuse.
+  testWidgets('an active session over the deck blocks the reset', (
+    tester,
+  ) async {
+    await database.studySessionDao.insertSession(
+      's1',
+      SessionType.dueReview.dbValue,
+      'root',
+      SessionScope.leaf.dbValue,
+      SessionState.active.dbValue,
+      1,
+      0,
+      0,
+      0,
+    );
+
+    await tester.pumpWidget(app());
+    await pumpStreams(tester);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(MxContextualAppBar),
+        matching: find.byIcon(Symbols.more_vert_rounded),
+      ),
+    );
+    await pumpStreams(tester);
+    await tester.tap(find.text('Reset progress'));
+    await pumpStreams(tester);
+
+    expect(
+      find.text(
+        'Finish your current study session first. Resetting now would change '
+        'the cards it’s working through.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Reset progress'),
+      findsNothing,
+      reason: 'the destructive action is not offered',
+    );
+    expect(await boxOf('c1'), 5);
 
     await disposeAndFlushStreams(tester);
   });

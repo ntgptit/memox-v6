@@ -19,6 +19,7 @@ import 'package:memox_v6/domain/usecases/study_session/finalize_study_session_us
 import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/start_study_session_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/delete_deck_usecase.dart';
+import 'package:memox_v6/domain/usecases/deck/load_reset_progress_availability_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/reset_deck_progress_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/load_study_queue_counts_usecase.dart';
@@ -159,6 +160,10 @@ void main() {
 
     await ResetDeckProgressUseCase(
       progress: progress,
+      availability: LoadResetProgressAvailabilityUseCase(
+        decks: decks,
+        sessions: DriftStudySessionRepository(database),
+      ),
       idGenerator: _SeqIds('reset'),
       clock: _FixedClock(now),
     ).call('d1');
