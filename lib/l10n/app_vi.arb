@@ -596,6 +596,7 @@
   "todayNoteGoalMet": "Đã đạt mục tiêu hôm nay! Hôm nay được tính vào chuỗi.",
   "todayNoteStreakReset": "Chuỗi đã đặt lại — học hôm nay để bắt đầu lại.",
   "todayNoteNotStudied": "Hôm nay bạn chưa học — hãy học để giữ chuỗi.",
+  "todayStudyNewLabel": "Học {count} thẻ mới",
   "todayExploreDecksLabel": "Khám phá bộ thẻ",
   "todayEmptyTitle": "Tạo bộ thẻ đầu tiên",
   "todayEmptyBody": "Thêm những từ bạn muốn nhớ — MemoX sẽ lên lịch ôn cho bạn.",

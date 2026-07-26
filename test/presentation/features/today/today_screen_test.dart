@@ -17,6 +17,7 @@ import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_note.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
+import 'package:memox_v6/domain/study_session/session_type.dart';
 import 'package:memox_v6/domain/today/start_review_outcome.dart';
 import 'package:memox_v6/domain/today/continue_session_outcome.dart';
 import 'package:memox_v6/presentation/features/today/viewmodels/continue_session_notifier.dart';
@@ -565,7 +566,7 @@ void main() {
           overrides: [
             due(),
             startReviewProvider.overrideWith(
-              () => _RecordingStartReview(() => started++),
+              () => _RecordingStartReview((_) => started++),
             ),
           ],
           child: MaterialApp(
@@ -891,15 +892,98 @@ void main() {
       expect(find.text('7 cards due'), findsOneWidget);
     });
   });
+
+  // WBS 5.7.2 — `handle-caught-up-today.md` §2 node G and
+  // `handle-empty-library-today.md` §1.
+  group('caught-up and empty actions', () {
+    // Caught up on reviews is not the same as having nothing to learn.
+    testWidgets('unstudied cards offer a new-learning session', (tester) async {
+      var startedWith = <SessionType>[];
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            data(
+              const TodayProjection(
+                primaryAction: TodayPrimaryAction.caughtUp,
+                dueCount: 0,
+                newCount: 40,
+              ),
+            ),
+            startReviewProvider.overrideWith(
+              () => _RecordingStartReview(startedWith.add),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const TodayScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(MxButton, 'Learn 40 new cards'));
+      await tester.pumpAndSettle();
+
+      // Sec 6: the optional action revalidates like the due CTA does, over
+      // the new queue rather than the due one.
+      expect(startedWith, <SessionType>[SessionType.newLearning]);
+    });
+
+    // Sec 1 forbids manufacturing a CTA, and an action over an empty queue
+    // would be exactly that.
+    testWidgets('nothing to learn offers no learning action', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          data(
+            const TodayProjection(
+              primaryAction: TodayPrimaryAction.caughtUp,
+              dueCount: 0,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('new cards'), findsNothing);
+      expect(find.widgetWithText(MxButton, 'Explore decks'), findsOneWidget);
+    });
+
+    // The action said "Create a deck" and opened the Library — a list of the
+    // decks the learner does not have.
+    testWidgets('an empty library opens the create flow, not the Library', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          data(
+            const TodayProjection(
+              primaryAction: TodayPrimaryAction.createLibrary,
+              dueCount: 0,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(MxButton, 'Create a deck'));
+      await tester.pumpAndSettle();
+
+      // The create-deck dialog, identified by the field it asks for.
+      expect(find.byType(TextField), findsOneWidget);
+    });
+  });
 }
 
 class _RecordingStartReview extends StartReview {
   _RecordingStartReview(this._onStart);
 
-  final void Function() _onStart;
+  final void Function(SessionType type) _onStart;
 
   @override
-  Future<void> start() async => _onStart();
+  Future<void> start({SessionType type = SessionType.dueReview}) async =>
+      _onStart(type);
 }
 
 class _LoadingStartReview extends StartReview {

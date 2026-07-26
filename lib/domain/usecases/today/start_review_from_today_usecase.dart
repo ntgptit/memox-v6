@@ -34,7 +34,13 @@ class StartReviewFromTodayUseCase {
   final LoadStudyQueueCountsUseCase _queueCounts;
   final StartStudySessionUseCase _startSession;
 
-  Future<StartReviewOutcome> call() async {
+  /// [type] selects which queue is revalidated: `dueReview` for the primary
+  /// CTA, `newLearning` for the caught-up state's optional action
+  /// (`handle-caught-up-today.md` §2 node G, "Revalidate Study flow" — the
+  /// same revalidation, over the queue that state is about).
+  Future<StartReviewOutcome> call({
+    SessionType type = SessionType.dueReview,
+  }) async {
     // A → B: the active session is revalidated first, because it decides the
     // answer on its own — no count matters if one is already running.
     final active = await _sessions.watchActive().first;
@@ -46,26 +52,29 @@ class StartReviewFromTodayUseCase {
     // B → C: recomputed per root deck rather than read from the library
     // total, because the total cannot say *where* the cards are, and the
     // session that follows needs a scope. `forDeck` aggregates a Parent's
-    // subtree, so a due card in a nested deck counts toward its root.
+    // subtree, so an eligible card in a nested deck counts toward its root.
     final roots = await _decks.watchRoots(pair.id).first;
-    final dueRoots = <String>[];
+    final eligibleRoots = <String>[];
     for (final deck in roots) {
       final counts = await _queueCounts.forDeck(deck.id);
-      if (counts.dueCount > 0) dueRoots.add(deck.id);
+      final count = type == SessionType.newLearning
+          ? counts.newCount
+          : counts.dueCount;
+      if (count > 0) eligibleRoots.add(deck.id);
     }
 
-    if (dueRoots.isEmpty) return const NothingDueNow();
-    if (dueRoots.length > 1) {
-      return ChooseReviewScope(deckCount: dueRoots.length);
+    if (eligibleRoots.isEmpty) return const NothingDueNow();
+    if (eligibleRoots.length > 1) {
+      return ChooseReviewScope(deckCount: eligibleRoots.length);
     }
 
     // C → E → F: one scope, so there is nothing to choose. The session is
     // created by the Start Session contract (§6) — this use case supplies the
     // scope it revalidated and nothing else.
     final session = await _startSession.call(
-      deckId: dueRoots.single,
+      deckId: eligibleRoots.single,
       scope: SessionScope.subtree,
-      type: SessionType.dueReview,
+      type: type,
     );
     return ReviewStarted(session);
   }

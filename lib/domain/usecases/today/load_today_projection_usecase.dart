@@ -6,6 +6,7 @@ import 'package:memox_v6/domain/usecases/language_pair/select_language_pair_usec
 import 'package:memox_v6/domain/usecases/study_goal/load_daily_progress_usecase.dart';
 import 'package:memox_v6/domain/study_goal/daily_progress_status.dart';
 import 'package:memox_v6/domain/learning_progress/library_mastery.dart';
+import 'package:memox_v6/domain/learning_progress/study_queue_counts.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/load_study_queue_counts_usecase.dart';
 
 /// Composes the Today entry projection (WBS 5.7.1; `load-today-dashboard.md`).
@@ -54,9 +55,10 @@ class LoadTodayProjectionUseCase {
     // has documented itself as "the Dashboard scope" since 5.4.2 and was wired
     // into DI but never called by anything. That unscoped read has since been
     // deleted from the port, so the mistake is not available to repeat.
-    final dueCount = pair == null
-        ? 0
-        : (await _queueCounts.forLibrary(pair.id)).dueCount;
+    final queues = pair == null
+        ? const StudyQueueCounts(dueCount: 0, newCount: 0)
+        : await _queueCounts.forLibrary(pair.id);
+    final dueCount = queues.dueCount;
 
     final action = paused != null
         ? TodayPrimaryAction.continueSession
@@ -91,6 +93,7 @@ class LoadTodayProjectionUseCase {
     return TodayProjection(
       primaryAction: action,
       dueCount: dueCount,
+      newCount: queues.newCount,
       pausedSession: paused,
       dailyProgress: dailyProgress,
       recentDecks: recentDecks,
