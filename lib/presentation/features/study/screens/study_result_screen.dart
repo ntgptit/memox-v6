@@ -6,6 +6,7 @@ import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/domain/study_session/session_summary_policy.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_result_notifier.dart';
+import 'package:memox_v6/presentation/features/today/viewmodels/today_projection_provider.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
@@ -194,14 +195,27 @@ class _ResultBody extends ConsumerWidget {
             icon: Symbols.bolt_rounded,
             label: l10n.studyResultContinueLabel,
             block: true,
-            onPressed: () => context.goHome(),
+            // `refresh-today-projections.md` §3 lists "Study exit/finalize"
+            // among the refresh triggers, and only the manual pull was wired.
+            // The session just changed the due count, the goal bucket and the
+            // streak; without this the dashboard behind still advertises the
+            // review that was only now finished.
+            onPressed: () {
+              ref.invalidate(todayProjectionProvider);
+              context.goHome();
+            },
           ),
           const MxGap.s2(),
           MxButton(
             variant: MxButtonVariant.ghost,
             label: l10n.studyResultDoneLabel,
             block: true,
-            onPressed: () => context.goLibrary(),
+            onPressed: () {
+              // Today is one tab away from the Library, and its projection is
+              // just as stale either way out.
+              ref.invalidate(todayProjectionProvider);
+              context.goLibrary();
+            },
           ),
         ],
       ),
