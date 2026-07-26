@@ -1,3 +1,4 @@
+import 'package:memox_v6/core/time/app_time_zone.dart';
 import 'package:memox_v6/data/database/app_database.dart';
 import 'package:memox_v6/data/dev/parity_study_fixtures.dart';
 
@@ -21,8 +22,26 @@ class ParityFixtures {
   /// The resumable study-session seeds, split out for file size only.
   final ParityStudyFixtures _study;
 
-  /// The instant every parity fixture pins (2026-07-19T00:30:00Z).
+  /// The instant every parity fixture pins (2025-07-19T00:30:00Z). The
+  /// comment here read 2026 until 2026-07-26; the epoch value never moved.
   static const int fixedInstantMs = 1752885000000;
+
+  /// The zone every parity fixture pins.
+  ///
+  /// A fixed offset rather than the host's: a day-keyed record seeded against
+  /// one local date and read back against another is a machine-dependent
+  /// failure, not a state under test.
+  ///
+  /// `-06:00` puts the pinned instant at 18:30 local — evening, which is the
+  /// greeting the kit's dashboard shots were taken in. The offset is chosen
+  /// to reproduce the reference, the same way the instant itself is.
+  static const AppTimeZone fixedZone = FixedOffsetTimeZone(
+    id: 'UTC-06',
+    offset: Duration(hours: -6),
+  );
+
+  /// The local day [fixedInstantMs] falls in under [fixedZone].
+  static const String fixedLocalDate = '2025-07-18';
 
   static const String _activePairPreferenceKey = 'activeLanguagePairId';
 
@@ -63,6 +82,7 @@ class ParityFixtures {
     'MX-VIS-052',
     'MX-VIS-053',
     'MX-VIS-054',
+    'MX-VIS-069',
   ];
 
   /// Seeds [id] over a reset database.
@@ -142,6 +162,9 @@ class ParityFixtures {
         // not an active row a resume could reach).
         await _seedActivePair();
         return;
+      case 'MX-VIS-069':
+        await _seedLoadedDashboard();
+        return;
       case 'MX-VIS-049':
       case 'MX-VIS-055':
       case 'MX-VIS-056':
@@ -163,6 +186,121 @@ class ParityFixtures {
       default:
         throw ArgumentError.value(id, 'id', 'Unknown parity fixture');
     }
+  }
+
+  /// The kit `dashboard--loaded` scope: three decks carrying the shot's
+  /// counts, a live streak, and a daily goal partway through.
+  ///
+  /// The shot's header reads `24 cards due across 3 decks`, so the deck due
+  /// counts sum to 24 and there are exactly three of them. Their mastered
+  /// share is seeded to the shot's `55% library mastered` — 55 of 100
+  /// studiable cards — so the strip's number comes from the data rather than
+  /// from a constant beside it.
+  Future<void> _seedLoadedDashboard() async {
+    await _seedActivePair();
+
+    // (id, name, cards, due, mastered) — ordered as the kit lists them, which
+    // is most-recently-studied first. Cards total 100 and mastered total 55.
+    const decks = <(String, String, int, int, int)>[
+      ('fx-d1', 'TOPIK I — Vocabulary', 40, 15, 22),
+      ('fx-d2', 'Basic Grammar', 35, 6, 20),
+      ('fx-d3', 'Daily Conversation', 25, 3, 13),
+    ];
+    // Each deck's most recent grade, newest first, so the section order is
+    // the query's answer rather than an insertion accident.
+    const lastReviewedOffsets = <int>[1000, 2000, 3000];
+
+    for (var deckIndex = 0; deckIndex < decks.length; deckIndex += 1) {
+      final (deckId, name, cards, due, mastered) = decks[deckIndex];
+      await _database.deckDao.insertDeck(
+        deckId,
+        'fx-lp-1',
+        null,
+        name,
+        name.toLowerCase(),
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+      for (var index = 0; index < cards; index += 1) {
+        final cardId = '$deckId-c$index';
+        await _database.flashcardDao.insertFlashcard(
+          cardId,
+          deckId,
+          'term-$cardId',
+          'term-$cardId',
+          'meaning-$cardId',
+          fixedInstantMs,
+          fixedInstantMs,
+        );
+        final isDue = index < due;
+        final isMastered = !isDue && index < due + mastered;
+        await _database.learningProgressDao.insertProgress(
+          'p-$cardId',
+          cardId,
+          isDue ? 1 : (isMastered ? 8 : 0),
+          isDue ? fixedInstantMs - 1 : null,
+          fixedInstantMs,
+          fixedInstantMs,
+        );
+      }
+      // One graded card per deck carries the deck's last-studied instant.
+      await _database.customStatement(
+        'UPDATE learning_progress SET last_reviewed_at = ? WHERE card_id = ?',
+        <Object?>[
+          fixedInstantMs - lastReviewedOffsets[deckIndex],
+          '$deckId-c0',
+        ],
+      );
+    }
+
+    await _seedStreak(days: 12);
+    await _seedGoal(target: 20, done: 14);
+  }
+
+  /// [days] consecutive qualified days ending on [fixedLocalDate], so the
+  /// projection reads a live streak of exactly that length.
+  Future<void> _seedStreak({required int days}) async {
+    var day = DateTime.utc(2025, 7, 18).subtract(Duration(days: days - 1));
+    for (var index = 0; index < days; index += 1) {
+      final localDate =
+          '${day.year.toString().padLeft(4, '0')}-'
+          '${day.month.toString().padLeft(2, '0')}-'
+          '${day.day.toString().padLeft(2, '0')}';
+      await _database.streakDao.recordStreakDay(
+        'fx-streak-$index',
+        localDate,
+        fixedZone.id,
+        'seed',
+        fixedInstantMs,
+      );
+      day = day.add(const Duration(days: 1));
+    }
+  }
+
+  /// A configured goal and today's bucket, so the card renders partway
+  /// through rather than absent.
+  Future<void> _seedGoal({required int target, required int done}) async {
+    await _database.studyGoalDao.insertGoal(
+      'fx-goal',
+      // The schema stores these flags as integers.
+      1,
+      target,
+      fixedLocalDate,
+      fixedZone.id,
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+    await _database.studyGoalDao.upsertDayProgress(
+      'fx-goal-day',
+      fixedLocalDate,
+      fixedZone.id,
+      'fx-goal',
+      done,
+      target,
+      done >= target ? 1 : 0,
+      fixedInstantMs,
+      fixedInstantMs,
+    );
   }
 
   /// Fresh install: every table empty, so the first-run gate fires.

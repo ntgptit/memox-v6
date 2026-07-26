@@ -16,6 +16,14 @@ abstract interface class AppTimeZone {
 
   /// The local calendar day [utcInstant] falls in.
   LocalDay localDayOf(DateTime utcInstant);
+
+  /// The local wall-clock reading of [utcInstant].
+  ///
+  /// The same question [localDayOf] answers, at finer grain — anything that
+  /// needs the hour rather than the date (the dashboard greeting) must ask
+  /// this rather than `DateTime.toLocal()`, which reads the host's zone and
+  /// so can disagree with the zone every day record was written in.
+  DateTime localTimeOf(DateTime utcInstant);
 }
 
 /// The platform's local zone.
@@ -33,7 +41,12 @@ final class SystemTimeZone implements AppTimeZone {
   String get id => DateTime.now().timeZoneName;
 
   @override
-  LocalDay localDayOf(DateTime utcInstant) => LocalDay.of(utcInstant.toLocal());
+  DateTime localTimeOf(DateTime utcInstant) => utcInstant.toLocal();
+
+  // Derived from the time so the two readings cannot diverge.
+  @override
+  LocalDay localDayOf(DateTime utcInstant) =>
+      LocalDay.of(localTimeOf(utcInstant));
 }
 
 /// A fixed-offset zone, for tests and for the day-boundary cases that only
@@ -47,6 +60,9 @@ final class FixedOffsetTimeZone implements AppTimeZone {
   final Duration offset;
 
   @override
+  DateTime localTimeOf(DateTime utcInstant) => utcInstant.toUtc().add(offset);
+
+  @override
   LocalDay localDayOf(DateTime utcInstant) =>
-      LocalDay.of(utcInstant.toUtc().add(offset));
+      LocalDay.of(localTimeOf(utcInstant));
 }

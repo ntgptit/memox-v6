@@ -1,16 +1,21 @@
 import 'package:flutter/widgets.dart';
-import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
-/// The dashboard's date eyebrow + greeting headline (kit
-/// `dashboard/greeting`).
+/// The dashboard's greeting headline (kit `dashboard/greeting`).
 ///
 /// It lives in the scroll body rather than the app bar, deliberately: the kit
 /// splits it out so the greeting scrolls away with the content while the slim
 /// bar stays. Every dashboard state carries it, so it is the first thing any
 /// of them needs.
+///
+/// **No date line.** This carried a date eyebrow until 2026-07-26, which the
+/// kit does not draw anywhere on this screen: `MxContextualAppBar`'s `root`
+/// variant is "title + trailing actions" and takes no context slot, and
+/// `dashboard--loaded` shows no date either. `Dashboard.jsx` still carries a
+/// comment about the date living in the bar, but it passes no such prop — the
+/// comment is stale against the component it calls, and the eyebrow was built
+/// from the comment rather than from either.
 ///
 /// The kit writes "Good evening, Linh". There is no account in this build —
 /// sign-in is WBS 14.x — so the name is dropped rather than invented, and the
@@ -34,20 +39,11 @@ class TodayGreetingHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        MxText(
-          l10n.todayGreetingDate(now),
-          role: MxTextRole.captionStrong,
-          color: context.colors.textSecondary,
-        ),
-        const MxGap.s1(),
-        // Kit: 2xl/extrabold with tight tracking — the same ramp the large app
-        // bar used before the greeting was split out of it.
-        MxText(_greeting(l10n), role: MxTextRole.display),
-      ],
+    // Kit: 2xl/extrabold with tight tracking — the same ramp the large app
+    // bar used before the greeting was split out of it.
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: MxText(_greeting(l10n), role: MxTextRole.display),
     );
   }
 }

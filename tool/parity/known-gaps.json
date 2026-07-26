@@ -11,6 +11,8 @@
     "MX-VIS-036--light": "Kit self-contradiction: SubdeckList.jsx renders crumbs + FilterRow + list, the shot draws a DECKS section and no filter chips. Owner rulings 2026-07-25 (JSX is the source of truth) and 2026-07-26 (the shot will not be regenerated) make this a permanent recorded gap, not a parked one. The app follows the JSX; this entry exists so the ratchet still blocks every other regression.",
     "MX-VIS-036--dark": "Same as MX-VIS-036--light.",
     "MX-VIS-037--light": "Same kit self-contradiction, loading branch: the shot is a skeleton of chrome the JSX never renders. Permanent per the 2026-07-26 ruling.",
-    "MX-VIS-037--dark": "Same as MX-VIS-037--light."
+    "MX-VIS-037--dark": "Same as MX-VIS-037--light.",
+    "MX-VIS-069--light": "First measurement 2026-07-26: 8.35% light / 10.43% dark. Every section of the kit composition is built and correct; the residual is four things that cannot be built here. (1) The strip carries 2 of the kit's 4 stats — minutes-studied has no producer at all (`int-9`) and words-learned-today is recorded only when a daily goal exists (`int-12`); the two missing cells shorten the strip by one row and shift everything below it up, which is most of the diff. (2) The app bar's notification bell needs a notifications feature and (3) its avatar an account, both WBS 14.x. (4) The create FAB opens the kit's create sheet, blocked on `int-3`. Recorded rather than parked: the number is real and the causes are enumerated, so the ratchet blocks any regression while the row stays honest about why it is not green.",
+    "MX-VIS-069--dark": "Same as MX-VIS-069--light."
   }
 }
