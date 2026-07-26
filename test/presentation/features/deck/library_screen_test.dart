@@ -16,6 +16,8 @@ import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
 
 import '../../../support/sequential_ids.dart';
+import 'package:memox_v6/domain/deck/deck_summary.dart';
+import 'package:memox_v6/domain/deck/deck_repository.dart';
 
 void main() {
   late db.AppDatabase database;
@@ -77,6 +79,44 @@ void main() {
       overrides: [appDatabaseProvider.overrideWithValue(database)],
     );
     addTearDown(container.dispose);
+  });
+
+  // `MX-VIS-024` — Library error. The kit has no shot for this state (nearest
+  // is `library--offline`), so under the owner decision of 2026-07-26 it is
+  // asserted here rather than photographed. This is that assertion.
+  testWidgets('a failed root read shows the error, not an empty library', (
+    tester,
+  ) async {
+    final failing = ProviderContainer(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(database),
+        deckRepositoryProvider.overrideWith((ref) => _FailingDecks()),
+      ],
+    );
+    addTearDown(failing.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: failing,
+        child: MaterialApp.router(
+          routerConfig: GoRouter(
+            initialLocation: RoutePaths.library,
+            routes: deckRoutes(),
+          ),
+          theme: AppTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      ),
+    );
+    await pumpLibrary(tester);
+
+    // The distinction that matters: a failure must not read as "you have no
+    // decks", which would invite the learner to create one they already have.
+    expect(find.text('Something went wrong.'), findsOneWidget);
+    expect(find.text('Create your first deck'), findsNothing);
+
+    await disposeAndFlushStreams(tester);
   });
 
   testWidgets('shows the empty state without decks', (tester) async {
@@ -204,4 +244,14 @@ void main() {
     expect(korean.dueCount, 1);
     expect(korean.newCount, 1);
   });
+}
+
+/// A deck store whose root stream fails, for the `MX-VIS-024` assertion.
+class _FailingDecks implements DeckRepository {
+  @override
+  Stream<List<DeckSummary>> watchRootSummaries(String languagePairId) =>
+      Stream<List<DeckSummary>>.error(StateError('library unavailable'));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
