@@ -1,4 +1,5 @@
 import 'package:memox_v6/app/di/usecase_providers.dart';
+import 'package:memox_v6/domain/study_session/session_type.dart';
 import 'package:memox_v6/domain/today/start_review_outcome.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -20,13 +21,15 @@ class StartReview extends _$StartReview {
   AsyncValue<StartReviewOutcome?> build() =>
       const AsyncData<StartReviewOutcome?>(null);
 
-  Future<void> start() async {
+  Future<void> start({SessionType type = SessionType.dueReview}) async {
     if (state is AsyncLoading<StartReviewOutcome?>) return;
     state = const AsyncLoading<StartReviewOutcome?>();
 
     StartReviewOutcome? outcome;
     final result = await runMxAction(() async {
-      outcome = await ref.read(startReviewFromTodayUseCaseProvider).call();
+      outcome = await ref
+          .read(startReviewFromTodayUseCaseProvider)
+          .call(type: type);
     });
 
     // §4: "Start failure giữ Dashboard snapshot" — a failed start leaves the

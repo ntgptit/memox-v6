@@ -6,6 +6,9 @@ import 'package:memox_v6/app/router/router_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/app/bootstrap/app_bootstrap.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
+import 'package:memox_v6/app/di/core_providers.dart';
+import 'package:memox_v6/core/time/app_clock.dart';
+import 'package:memox_v6/core/time/app_time_zone.dart';
 import 'package:memox_v6/domain/today/today_projection.dart';
 import 'package:memox_v6/presentation/features/today/viewmodels/today_projection_provider.dart';
 
@@ -44,6 +47,18 @@ void main() {
                 db.AppDatabase.forTesting(NativeDatabase.memory()),
               ),
               appRouterInstanceProvider.overrideWithValue(createAppRouter()),
+              // Today greets by time of day, so an unpinned clock makes these
+              // snapshots depend on the hour they are recorded in: they were
+              // taken in the evening and started failing after midnight,
+              // rendering `Good morning`. The zone is pinned with it, or the
+              // local hour would still vary by machine.
+              appClockProvider.overrideWithValue(const _FixedClock()),
+              appTimeZoneProvider.overrideWithValue(
+                const FixedOffsetTimeZone(
+                  id: 'UTC-06',
+                  offset: Duration(hours: -6),
+                ),
+              ),
               // Home is the async Today entry (WBS 5.7.2); pin a resolved
               // projection so the snapshot is deterministic (no live spinner).
               todayProjectionProvider.overrideWith(
@@ -66,4 +81,15 @@ void main() {
       });
     }
   }
+}
+
+/// The instant every foundation snapshot is taken at: 2025-07-19T00:30:00Z,
+/// which is 18:30 in the pinned zone — evening, the greeting the shots were
+/// first recorded with.
+final class _FixedClock implements AppClock {
+  const _FixedClock();
+
+  @override
+  DateTime nowUtc() =>
+      DateTime.fromMillisecondsSinceEpoch(1752885000000, isUtc: true);
 }

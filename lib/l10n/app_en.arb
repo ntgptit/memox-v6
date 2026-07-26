@@ -1266,6 +1266,13 @@
   "@todayNoteNotStudied": {
     "description": "Today note when a streak is running but today is not a qualified day yet."
   },
+  "todayStudyNewLabel": "Learn {count} new cards",
+  "@todayStudyNewLabel": {
+    "description": "Today caught-up optional action: start a new-learning session. Offered only when the active pair actually has unstudied cards.",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "todayExploreDecksLabel": "Explore decks",
   "@todayExploreDecksLabel": {
     "description": "Today caught-up action: open the library when nothing is due."

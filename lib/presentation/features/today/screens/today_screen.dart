@@ -23,6 +23,8 @@ import 'package:memox_v6/presentation/features/today/widgets/today_state_note.da
 import 'package:memox_v6/presentation/features/today/widgets/today_recent_decks.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_stat_strip.dart';
 import 'package:memox_v6/presentation/features/today/widgets/today_create_fab.dart';
+import 'package:memox_v6/presentation/features/deck/widgets/create_deck_dialog.dart';
+import 'package:memox_v6/domain/study_session/session_type.dart';
 import 'package:memox_v6/presentation/features/today/viewmodels/start_review_notifier.dart';
 import 'package:memox_v6/domain/today/start_review_outcome.dart';
 import 'package:memox_v6/domain/today/continue_session_outcome.dart';
@@ -217,7 +219,9 @@ class _TodayPrimary extends StatelessWidget {
       ),
       // Handled by _TodayContent, which swaps the whole body for the hero.
       TodayPrimaryAction.createLibrary => _EmptyState(),
-      TodayPrimaryAction.caughtUp => _CaughtUpState(),
+      TodayPrimaryAction.caughtUp => _CaughtUpState(
+        newCount: projection.newCount,
+      ),
     };
   }
 }
@@ -384,11 +388,21 @@ class _DueState extends ConsumerWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
+/// The empty-library state (`handle-empty-library-today.md`).
+///
+/// The action said `Create a deck` and opened the Library, which is neither
+/// the create flow nor anything the label promised — the learner arrived at a
+/// list of the decks they do not have. §1 is explicit that Create and Import
+/// only hand off to their owning flows.
+///
+/// The kit pairs the primary with `Import from a file`. That alternate is not
+/// offered: nothing in this build imports anything, and §3 asks for exactly
+/// one primary CTA — an alternate that opens nothing is not one.
+class _EmptyState extends ConsumerWidget {
   const _EmptyState();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     return MxEmptyState(
       icon: Icons.school_outlined,
@@ -397,7 +411,12 @@ class _EmptyState extends StatelessWidget {
       action: MxButton(
         icon: Symbols.add_rounded,
         label: l10n.todayCreateLabel,
-        onPressed: () => context.goLibrary(),
+        onPressed: () async {
+          await showCreateDeckDialog(context);
+          // §2: Empty is left only after the source commits and Today
+          // recomposes; a cancel lands back here unchanged (§4).
+          ref.invalidate(todayProjectionProvider);
+        },
       ),
     );
   }
@@ -412,12 +431,20 @@ class _EmptyState extends StatelessWidget {
 /// It replaces the CTA rather than removing it. This screen offered no control
 /// at all when nothing was due, so a learner who had finished their reviews
 /// was shown a congratulation and no way onward.
-class _CaughtUpState extends StatelessWidget {
-  const _CaughtUpState();
+class _CaughtUpState extends ConsumerWidget {
+  const _CaughtUpState({required this.newCount});
+
+  /// Cards never studied in the active pair. `handle-caught-up-today.md` §2
+  /// node G: caught up on reviews is not the same as having nothing to learn,
+  /// and until this was composed Today could not tell the difference.
+  final int newCount;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final start = ref.watch(startReviewProvider);
+    final starting = start is AsyncLoading<StartReviewOutcome?>;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -430,6 +457,25 @@ class _CaughtUpState extends StatelessWidget {
           color: context.colors.textSecondary,
         ),
         const MxGap.s3(),
+        // §2 node G, the optional action. Offered only when there is
+        // something to learn — §1 forbids manufacturing a CTA ("Khong tao due
+        // Card gia de cung cap CTA"), and an action over an empty queue would
+        // be exactly that with extra steps.
+        if (newCount > 0) ...<Widget>[
+          MxButton(
+            icon: Symbols.school_rounded,
+            label: l10n.todayStudyNewLabel(newCount),
+            block: true,
+            // Sec 6: the optional action must not bypass study eligibility —
+            // the same revalidation the due CTA runs, over the new queue.
+            onPressed: starting
+                ? null
+                : () => ref
+                      .read(startReviewProvider.notifier)
+                      .start(type: SessionType.newLearning),
+          ),
+          const MxGap.s3(),
+        ],
         MxButton(
           variant: MxButtonVariant.secondary,
           icon: Symbols.explore_rounded,

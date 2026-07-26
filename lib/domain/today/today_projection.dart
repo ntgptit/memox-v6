@@ -33,6 +33,7 @@ class TodayProjection {
   const TodayProjection({
     required this.primaryAction,
     required this.dueCount,
+    this.newCount = 0,
     this.pausedSession,
     this.dailyProgress = const DailyProgressStatus.none(),
     this.recentDecks = const <DeckSummary>[],
@@ -51,6 +52,15 @@ class TodayProjection {
   /// Pair-scoped like the rest of this projection. It read an unscoped count
   /// once, which advertised review work from decks the Library does not show.
   final int dueCount;
+
+  /// Cards never studied in the **active pair**, from the same read as
+  /// [dueCount].
+  ///
+  /// What the caught-up state's optional action needs
+  /// (`handle-caught-up-today.md` §2 node G): a learner with nothing due may
+  /// still have a library of cards they have not started, and until this was
+  /// composed Today could not say so.
+  final int newCount;
 
   /// The resumable active session, or `null` when none is in progress.
   final StudySession? pausedSession;
