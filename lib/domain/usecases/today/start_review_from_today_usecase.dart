@@ -43,7 +43,7 @@ class StartReviewFromTodayUseCase {
   }) async {
     // A → B: the active session is revalidated first, because it decides the
     // answer on its own — no count matters if one is already running.
-    final active = await _sessions.watchActive().first;
+    final active = await _sessions.activeSession();
     if (active != null) return const ResumeActiveSession();
 
     final pair = await _languagePairs.activePair();

@@ -51,6 +51,17 @@ class StartStudySessionUseCase {
     StudyModeType? selectedMode,
     List<String> relearnCardIds = const <String>[],
   }) async {
+    // §3 node C, "Active session?". This used to be left to the partial
+    // unique index on `state = 'active'`, so a caller starting a second
+    // session got a raw constraint violation from the store rather than the
+    // decision §1 requires — "Nếu có active session tương thích, user chọn
+    // Resume hoặc Start over; không ghi đè im lặng". A constraint can stop
+    // the write; it cannot tell anyone what to do instead.
+    final active = await _sessions.activeSession();
+    if (active != null) {
+      throw ConflictFailure(code: 'active-session', entity: 'study_sessions');
+    }
+
     final now = _clock.nowUtc();
     final candidates = await _progress.studyCandidatesInScope(
       scopeDeckId: deckId,

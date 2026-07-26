@@ -193,6 +193,39 @@ void main() {
       ),
     );
   });
+
+  // §3 node C. This was left to the partial unique index on the active state,
+  // so a second start surfaced as a store constraint violation instead of the
+  // decision §1 asks for. A constraint can stop the write; it cannot say what
+  // to do instead.
+  test(
+    'a running session blocks a second start with a typed conflict',
+    () async {
+      for (final meaning in <String>['one', 'two', 'three', 'four', 'five']) {
+        await newCard('c-$meaning', meaning);
+      }
+      await useCase.call(
+        deckId: 'd1',
+        scope: SessionScope.subtree,
+        type: SessionType.newLearning,
+      );
+
+      await expectLater(
+        useCase.call(
+          deckId: 'd1',
+          scope: SessionScope.subtree,
+          type: SessionType.newLearning,
+        ),
+        throwsA(
+          isA<ConflictFailure>().having(
+            (failure) => failure.code,
+            'code',
+            'active-session',
+          ),
+        ),
+      );
+    },
+  );
 }
 
 class _FixedClock implements AppClock {

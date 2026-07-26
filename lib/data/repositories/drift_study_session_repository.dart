@@ -91,6 +91,14 @@ class DriftStudySessionRepository implements StudySessionRepository {
   }
 
   @override
+  Future<domain.StudySession?> activeSession() async {
+    final row = await _database.studySessionDao
+        .watchActiveSession()
+        .getSingleOrNull();
+    return row?.toDomain();
+  }
+
+  @override
   Future<List<SessionCardSnapshot>> cardSnapshots(String sessionId) async {
     final rows = await _database.sessionSnapshotDao
         .listSessionCards(sessionId)

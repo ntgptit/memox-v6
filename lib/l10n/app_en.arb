@@ -1168,6 +1168,14 @@
   "@todayPausedBody": {
     "description": "Today paused-session callout body."
   },
+  "studyActiveSessionTitle": "Continue your session?",
+  "@studyActiveSessionTitle": {
+    "description": "Prompt shown when a study session is already running and another start is attempted. The kit also offers Start over; that is not built, because no document defines what abandoning a session does to its committed contributions."
+  },
+  "studyActiveSessionBody": "A session is already in progress. Resume it to keep going.",
+  "@studyActiveSessionBody": {
+    "description": "Body of the already-running-session prompt."
+  },
   "todayResumeLabel": "Resume session",
   "@todayResumeLabel": {
     "description": "Today primary action resuming a paused session."
