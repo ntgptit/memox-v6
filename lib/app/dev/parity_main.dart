@@ -20,6 +20,7 @@ import 'package:memox_v6/data/dev/parity_fixtures.dart';
 ///
 /// - the database is reset and reseeded from `?fixture=` on every load,
 /// - the clock is pinned to [ParityFixtures.fixedInstantMs],
+/// - the timezone is pinned to [ParityFixtures.fixedZone],
 /// - ids come from a counter instead of UUID v7.
 ///
 /// Theme and locale are **not** overridden here: the app already follows
@@ -56,6 +57,12 @@ Future<void> main() async {
     overrides: <Override>[
       appDatabaseProvider.overrideWithValue(database),
       appClockProvider.overrideWithValue(const _FixedParityClock()),
+      // Without this the local day comes from the browser's zone, so a
+      // day-keyed record — a goal bucket, a streak day — would seed against
+      // one date and be read back against another on a machine in a
+      // different offset. Pinned here rather than per fixture because a
+      // *drifting* local day is nondeterminism, not a state under test.
+      appTimeZoneProvider.overrideWithValue(ParityFixtures.fixedZone),
       idGeneratorProvider.overrideWithValue(_SequentialParityIds()),
       // Fixture-specific preconditions, e.g. a write path that fails so
       // the spec can press the real button and land on the real error.

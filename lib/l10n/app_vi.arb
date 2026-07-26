@@ -545,12 +545,6 @@
   "todayGreetingMorning": "Chào buổi sáng",
   "todayGreetingAfternoon": "Chào buổi chiều",
   "todayGreetingEvening": "Chào buổi tối",
-  "todayGreetingDate": "{date}",
-  "@todayGreetingDate": {
-    "placeholders": {
-      "date": { "type": "DateTime", "format": "yMMMMEEEEd" }
-    }
-  },
   "todayGoalCardTitle": "Mục tiêu hằng ngày",
   "todayGoalCardPercent": "{percent}%",
   "@todayGoalCardPercent": {

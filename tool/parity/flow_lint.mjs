@@ -19,10 +19,19 @@ for (const specFile of specFiles) {
   const source = readFileSync(specFile, 'utf8');
   const display = relative(repoRoot, specFile).replaceAll('\\', '/');
   const ids = [...source.matchAll(/^\/\/ (MX-VIS-\d+) · .+$/gm)];
-  const flows = [...source.matchAll(/^\/\/ Master flow: (docs\/business\/.+\.md) §3$/gm)];
+  // The section number is read from the citation rather than assumed to be 3.
+  // It was pinned at §3 because every doc the lint was written against
+  // numbers its master flow there — but that is where those docs happen to
+  // put it, not a rule. `load-today-dashboard.md` has no Entry points
+  // section, so its master flow is §2, and a citation naming §2 was rejected
+  // for being accurate. Reading the number back means the check now verifies
+  // the citation instead of requiring one constant.
+  const flows = [
+    ...source.matchAll(/^\/\/ Master flow: (docs\/business\/.+\.md) §(\d+)$/gm),
+  ];
   const prerequisiteFlows = [
     ...source.matchAll(
-      /^\/\/ Prerequisite flow: (docs\/business\/.+\.md) §3$/gm,
+      /^\/\/ Prerequisite flow: (docs\/business\/.+\.md) §(\d+)$/gm,
     ),
   ];
   const nodes = [...source.matchAll(/^\/\/ Flow node: (.+)$/gm)];
@@ -42,8 +51,14 @@ for (const specFile of specFiles) {
       continue;
     }
     const doc = readFileSync(docPath, 'utf8');
-    if (!/^# 3\. Master flow\s*$/m.test(doc)) {
-      failures.push(`${display}: ${match[1]} has no '# 3. Master flow' section`);
+    const section = match[2];
+    // Heading level varies between docs; the section number is what the
+    // citation claims, so that is what is checked.
+    const heading = new RegExp(`^#{1,3} ${section}\. Master flow\s*$`, 'm');
+    if (!heading.test(doc)) {
+      failures.push(
+        `${display}: ${match[1]} has no '${section}. Master flow' section`,
+      );
     }
   }
 

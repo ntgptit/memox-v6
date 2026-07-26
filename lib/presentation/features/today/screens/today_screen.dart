@@ -10,6 +10,7 @@ import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_section_header.dart';
@@ -49,7 +50,21 @@ class TodayScreen extends StatelessWidget {
     // states), so the scaffold provides no outer scroll view.
     return MxScaffold(
       scrollable: false,
-      appBar: MxContextualAppBar(title: l10n.todayTitle),
+      appBar: MxContextualAppBar(
+        title: l10n.todayTitle,
+        // Kit `dashboard/search-open`. The bar's root variant is "title +
+        // trailing actions", and search is the one this build can wire: the
+        // notification bell needs a notifications feature and the avatar an
+        // account (WBS 14.x). Library already offers the same action, so this
+        // is the second door to one screen rather than a new capability.
+        actions: <Widget>[
+          MxIconButton.toolbar(
+            icon: Symbols.search_rounded,
+            semanticLabel: l10n.searchLabel,
+            onPressed: () => context.pushSearch(),
+          ),
+        ],
+      ),
       body: const _TodayBody(),
     );
   }
@@ -69,7 +84,13 @@ class _TodayBody extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         TodayGreetingHeader(
-          now: ref.watch(appClockProvider).nowUtc().toLocal(),
+          // The app's zone, not the host's: `DateTime.toLocal()` reads the
+          // device offset, which can differ from the zone every streak day
+          // and goal bucket was written in — the greeting would then say
+          // evening on a day the records call yesterday.
+          now: ref
+              .watch(appTimeZoneProvider)
+              .localTimeOf(ref.watch(appClockProvider).nowUtc()),
         ),
         // Kit `.app__body` gap: `space-6`. It was `space-5` (20) here, four
         // logical short of every other section break in the app.

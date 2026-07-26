@@ -1121,13 +1121,6 @@
   "@todayGreetingEvening": {
     "description": "Dashboard greeting headline after 18:00."
   },
-  "todayGreetingDate": "{date}",
-  "@todayGreetingDate": {
-    "description": "Dashboard greeting date eyebrow, formatted as a full weekday and date in the active locale.",
-    "placeholders": {
-      "date": { "type": "DateTime", "format": "yMMMMEEEEd" }
-    }
-  },
   "todayGoalCardTitle": "Daily goal",
   "@todayGoalCardTitle": {
     "description": "Today daily-goal card title (kit dashboard/goal)."
