@@ -19,39 +19,51 @@ Future<List<Deck>> cardMoveDestinations(Ref ref, {required String cardId}) {
 /// Kept alive because the caller only `read`s it (no widget watches its
 /// state) — autoDispose would otherwise tear it down mid-command and the
 /// pending `state=` would throw.
+///
+/// Each command also *returns* what it assigned to [state]. Nothing watches
+/// this notifier, so a caller that only awaited the future had no way to tell
+/// a completed command from a failed one, and hide/delete failures reached
+/// nobody (`int-35`). The state assignment stays: the return is the same
+/// value, for the caller that is standing right there.
 @Riverpod(keepAlive: true)
 class CardLifecycleCommandViewmodel extends _$CardLifecycleCommandViewmodel {
   @override
   AsyncValue<void> build() => const AsyncData<void>(null);
 
-  Future<void> setCardHidden({
+  Future<AsyncValue<void>> setCardHidden({
     required String cardId,
     required bool hidden,
   }) async {
     state = const AsyncLoading<void>();
-    state = await runMxAction(() async {
+    final result = await runMxAction(() async {
       await ref
           .read(hideFlashcardUseCaseProvider)
           .setHidden(cardId, hidden: hidden);
     });
+    state = result;
+    return result;
   }
 
-  Future<void> deleteCard({required String cardId}) async {
+  Future<AsyncValue<void>> deleteCard({required String cardId}) async {
     state = const AsyncLoading<void>();
-    state = await runMxAction(() async {
+    final result = await runMxAction(() async {
       await ref.read(deleteFlashcardUseCaseProvider).deleteCard(cardId);
     });
+    state = result;
+    return result;
   }
 
-  Future<void> moveCard({
+  Future<AsyncValue<void>> moveCard({
     required String cardId,
     required String targetDeckId,
   }) async {
     state = const AsyncLoading<void>();
-    state = await runMxAction(() async {
+    final result = await runMxAction(() async {
       await ref
           .read(moveFlashcardUseCaseProvider)
           .call(cardId: cardId, targetDeckId: targetDeckId);
     });
+    state = result;
+    return result;
   }
 }

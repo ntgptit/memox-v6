@@ -9,6 +9,7 @@ import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
@@ -46,6 +47,7 @@ class _MoveCardPicker extends ConsumerWidget {
       cardLifecycleCommandViewmodelProvider,
       onSuccess: () {
         // The source Leaf list is a stream; it drops the moved card. Close.
+        showMxSnackbar(context, message: l10n.cardMovedMessage);
         Navigator.of(context).pop();
       },
     );

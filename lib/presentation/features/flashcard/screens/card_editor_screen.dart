@@ -25,6 +25,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart'
 import 'package:memox_v6/presentation/shared/widgets/mx_disclosure.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_setting_row.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 import 'package:memox_v6/core/utils/string_utils.dart';
@@ -184,6 +185,13 @@ class _CardEditorForm extends HookConsumerWidget {
     // settling — a duplicate-review pause also settles without saving.
     ref.listen(cardEditorSavedTickViewmodelProvider, (previous, next) {
       if (previous == null || next <= previous) return;
+      // `create-flashcard.md` §7 / `edit-flashcard.md` §7. Raised before
+      // either branch: the create-another path stays on the form, where a
+      // cleared form is the only other sign that anything was saved.
+      showMxSnackbar(
+        context,
+        message: isEdit ? l10n.cardUpdatedMessage : l10n.cardAddedMessage,
+      );
       if (createAnother.value) {
         term.controller.clear();
         meaning.controller.clear();

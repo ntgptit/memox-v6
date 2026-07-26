@@ -33,6 +33,8 @@ import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
+import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
@@ -373,7 +375,19 @@ Future<void> _openCardSettings(
     case CardSettingsAction.move:
       await showMoveCardSheet(context, cardId: card.id);
     case CardSettingsAction.toggleHidden:
-      await notifier.setCardHidden(cardId: card.id, hidden: !card.isHidden);
+      final hidden = !card.isHidden;
+      final result = await notifier.setCardHidden(
+        cardId: card.id,
+        hidden: hidden,
+      );
+      if (!context.mounted) return;
+      final l10n = AppLocalizations.of(context);
+      _reportCardOutcome(
+        context,
+        result,
+        success: hidden ? l10n.cardHiddenMessage : l10n.cardVisibleMessage,
+        failure: l10n.cardHideFailedMessage,
+      );
     case CardSettingsAction.delete:
       final l10n = AppLocalizations.of(context);
       final confirmed = await showMxConfirmDialog(
@@ -386,8 +400,38 @@ Future<void> _openCardSettings(
         cancelLabel: l10n.keepCardLabel,
         danger: true,
       );
-      if (confirmed) await notifier.deleteCard(cardId: card.id);
+      if (!confirmed) return;
+      final result = await notifier.deleteCard(cardId: card.id);
+      if (!context.mounted) return;
+      _reportCardOutcome(
+        context,
+        result,
+        success: l10n.cardDeletedMessage,
+        failure: l10n.cardDeleteFailedMessage,
+      );
   }
+}
+
+/// Says what happened to the card (`hide-flashcard.md` §7,
+/// `delete-flashcard.md` §7).
+///
+/// These two commands run from a sheet that has already closed, so there is
+/// no inline surface left to report into: the transient bar is the whole
+/// feedback. Nothing watches the lifecycle notifier, so before this a failed
+/// hide or delete reached nobody at all — the row simply stayed as it was
+/// (`int-35`).
+void _reportCardOutcome(
+  BuildContext context,
+  AsyncValue<void> result, {
+  required String success,
+  required String failure,
+}) {
+  final isFailure = MxActionErrors.failureOf(result) != null;
+  showMxSnackbar(
+    context,
+    message: isFailure ? failure : success,
+    tone: isFailure ? MxSnackbarTone.error : MxSnackbarTone.success,
+  );
 }
 
 class _LeafBranch extends ConsumerWidget {

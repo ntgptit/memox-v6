@@ -1372,6 +1372,38 @@
   "@deckProgressResetMessage": {
     "description": "Success confirmation after resetting a deck's progress (reset-deck-progress.md §7)."
   },
+  "cardAddedMessage": "Card added",
+  "@cardAddedMessage": {
+    "description": "Success confirmation after creating a card (create-flashcard.md §7)."
+  },
+  "cardUpdatedMessage": "Card updated",
+  "@cardUpdatedMessage": {
+    "description": "Success confirmation after editing a card (edit-flashcard.md)."
+  },
+  "cardMovedMessage": "Card moved",
+  "@cardMovedMessage": {
+    "description": "Success confirmation after moving a card (move-flashcard.md)."
+  },
+  "cardHiddenMessage": "Card hidden",
+  "@cardHiddenMessage": {
+    "description": "Success confirmation after hiding a card (hide-flashcard.md)."
+  },
+  "cardVisibleMessage": "Card visible",
+  "@cardVisibleMessage": {
+    "description": "Success confirmation after unhiding a card (hide-flashcard.md)."
+  },
+  "cardDeletedMessage": "Card deleted",
+  "@cardDeletedMessage": {
+    "description": "Success confirmation after deleting a card (delete-flashcard.md)."
+  },
+  "cardHideFailedMessage": "Couldn’t update this card. Try again.",
+  "@cardHideFailedMessage": {
+    "description": "Hide/show failure; the card keeps its prior visibility (hide-flashcard.md §7)."
+  },
+  "cardDeleteFailedMessage": "Couldn’t delete the card. Nothing has been removed.",
+  "@cardDeleteFailedMessage": {
+    "description": "Delete failure; nothing was removed (delete-flashcard.md §7)."
+  },
   "todayErrorTitle": "Today couldn’t load",
   "@todayErrorTitle": {
     "description": "Today load-error title."
