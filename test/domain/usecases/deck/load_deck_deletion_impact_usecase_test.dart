@@ -11,6 +11,7 @@ void main() {
     required int directCards,
     required int subtreeCards,
     required int subtreeDecks,
+    int studiedCards = 0,
   }) => LoadDeckDeletionImpactUseCase(
     decks: _FakeDecks(
       counts: DeckContentCounts(
@@ -19,6 +20,7 @@ void main() {
       ),
       subtreeCards: subtreeCards,
       subtreeDecks: subtreeDecks,
+      studiedCards: studiedCards,
     ),
   );
 
@@ -57,6 +59,21 @@ void main() {
     expect(impact.cardCount, 9);
     expect(impact.deckCount, 3);
   });
+  // `delete-deck.md` §1 asks the copy to name the learning progress removed.
+  // Counting progress rows would restate the card total — every card has one
+  // from creation — so the impact counts cards past Box 0.
+  test('the studied count is carried through', () async {
+    final impact = await build(
+      directChildren: 0,
+      directCards: 4,
+      subtreeCards: 4,
+      subtreeDecks: 0,
+      studiedCards: 2,
+    ).call('d1');
+
+    expect(impact.cardCount, 4);
+    expect(impact.studiedCardCount, 2);
+  });
 }
 
 class _FakeDecks implements DeckRepository {
@@ -64,10 +81,14 @@ class _FakeDecks implements DeckRepository {
     required this.counts,
     required this.subtreeCards,
     required this.subtreeDecks,
+    this.studiedCards = 0,
   });
   final DeckContentCounts counts;
   final int subtreeCards;
   final int subtreeDecks;
+
+  /// Cards past Box 0 — the learning progress the confirm has to name.
+  final int studiedCards;
 
   @override
   Future<DeckContentCounts> contentCounts(String deckId) async => counts;
@@ -75,6 +96,9 @@ class _FakeDecks implements DeckRepository {
   Future<int> countSubtreeCards(String deckId) async => subtreeCards;
   @override
   Future<int> countSubtreeDecks(String deckId) async => subtreeDecks;
+
+  @override
+  Future<int> countSubtreeStudiedCards(String deckId) async => studiedCards;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError(

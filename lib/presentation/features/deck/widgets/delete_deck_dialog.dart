@@ -106,7 +106,7 @@ class _DeleteDeckBody extends ConsumerWidget {
   }
 
   String _impactText(DeckDeletionImpact impact, AppLocalizations l10n) {
-    return switch (impact.state) {
+    final scope = switch (impact.state) {
       DeckContentState.empty => l10n.deleteDeckEmptyBody,
       DeckContentState.leaf => l10n.deleteDeckLeafBody(impact.cardCount),
       DeckContentState.parent => l10n.deleteDeckParentBody(
@@ -114,5 +114,12 @@ class _DeleteDeckBody extends ConsumerWidget {
         impact.cardCount,
       ),
     };
+    // `delete-deck.md` §1 asks the copy to name the *number* of learning
+    // progress removed. The scope copy mentioned it without counting it, so a
+    // learner could not tell a deck they had studied for weeks from one they
+    // had only filled in. Omitted entirely when nothing has been studied,
+    // rather than saying "0 of them".
+    if (impact.studiedCardCount == 0) return scope;
+    return '$scope ${l10n.deleteDeckStudiedSuffix(impact.studiedCardCount)}';
   }
 }

@@ -555,6 +555,13 @@
   "@deleteDeckEmptyBody": {
     "description": "Delete impact for an Empty deck (delete-deck.md §4)."
   },
+  "deleteDeckStudiedSuffix": "{count, plural, =1{1 of them has study history you will lose.} other{{count} of them have study history you will lose.}}",
+  "@deleteDeckStudiedSuffix": {
+    "description": "Appended to the delete impact when some cards carry study history. delete-deck.md §1 asks the copy to name the *number* of learning progress removed, not just mention it; counting progress rows would restate the card count, since every card has one from creation, so this counts cards past Box 0.",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "deleteDeckLeafBody": "{cardCount, plural, =1{1 card and its learning progress will be permanently deleted.} other{{cardCount} cards and their learning progress will be permanently deleted.}}",
   "@deleteDeckLeafBody": {
     "description": "Delete impact for a Leaf deck (delete-deck.md §4).",
