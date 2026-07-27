@@ -41,48 +41,49 @@ void main() {
     view.resetDevicePixelRatio();
   });
 
-  StudyRuntimeState runtime() => StudyRuntimeState.assemble(
-    session: StudySession(
-      id: 's1',
-      type: SessionType.dueReview,
-      deckId: 'd1',
-      scope: SessionScope.subtree,
-      state: SessionState.active,
-      revision: 0,
-      snapshotVersion: 1,
-      scheduleSrs: true,
-      startedAt: now,
-      finalizedAt: null,
-      createdAt: now,
-      updatedAt: now,
-    ),
-    stages: const <StudyModeType>[StudyModeType.srsBinaryReview],
-    cardSnapshots: <SessionCardSnapshot>[
-      SessionCardSnapshot(
-        id: 'sc0',
-        sessionId: 's1',
-        cardId: 'c0',
-        displayOrder: 0,
-        term: 'friend-term',
-        meaning: 'friend',
-        contentVersion: 1,
-        progressBox: 3,
-        progressRevision: 0,
-      ),
-    ],
-    currentOrder: SessionRoundOrder(
-      id: 'ro1',
-      sessionId: 's1',
-      roundIndex: 1,
-      seed: 1,
-      cardIds: const <String>['c0'],
-    ),
-  );
+  StudyRuntimeState runtime({SessionType type = SessionType.dueReview}) =>
+      StudyRuntimeState.assemble(
+        session: StudySession(
+          id: 's1',
+          type: type,
+          deckId: 'd1',
+          scope: SessionScope.subtree,
+          state: SessionState.active,
+          revision: 0,
+          snapshotVersion: 1,
+          scheduleSrs: true,
+          startedAt: now,
+          finalizedAt: null,
+          createdAt: now,
+          updatedAt: now,
+        ),
+        stages: const <StudyModeType>[StudyModeType.srsBinaryReview],
+        cardSnapshots: <SessionCardSnapshot>[
+          SessionCardSnapshot(
+            id: 'sc0',
+            sessionId: 's1',
+            cardId: 'c0',
+            displayOrder: 0,
+            term: 'friend-term',
+            meaning: 'friend',
+            contentVersion: 1,
+            progressBox: 3,
+            progressRevision: 0,
+          ),
+        ],
+        currentOrder: SessionRoundOrder(
+          id: 'ro1',
+          sessionId: 's1',
+          roundIndex: 1,
+          seed: 1,
+          cardIds: const <String>['c0'],
+        ),
+      );
 
-  Widget wrap() => ProviderScope(
+  Widget wrap({SessionType type = SessionType.dueReview}) => ProviderScope(
     overrides: [
       studySessionRuntimeProvider.overrideWith(
-        (ref) => Future.value(runtime()),
+        (ref) => Future.value(runtime(type: type)),
       ),
       studyAnswerViewmodelProvider.overrideWith(_SpyAnswer.new),
     ],
@@ -109,6 +110,48 @@ void main() {
     expect(find.text('friend'), findsOneWidget);
     expect(find.text('Remembered'), findsOneWidget);
     expect(find.text('Relearn'), findsOneWidget);
+  });
+
+  // `srs-binary-review.md` §2 gives relearn and due review different
+  // scheduling consequences on this one screen — a relearn grades from the
+  // card's current box and can promote it, a due review moves it along its
+  // schedule. Both ran under the same title with no notice, so they were the
+  // same picture with different results.
+  testWidgets('a due-review session says what answering it does', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Reviewing due cards — your answers set when each one comes back.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Review'), findsOneWidget);
+  });
+
+  // `relearn-cards.md` §1: "User được biết còn bao nhiêu Cards cần relearn",
+  // and §4 heads the surface `Relearn`. A relearn session ran under the title
+  // of whichever strategy its plan resolved, so nothing said these were the
+  // cards the learner had just missed.
+  testWidgets('a relearn session names itself and its remaining count', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap(type: SessionType.relearn));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Relearn'),
+      findsNWidgets(2),
+      reason: 'the stage title, plus the action that was already called that',
+    );
+    expect(
+      find.text('Relearning missed cards — 1 left to revisit.'),
+      findsOneWidget,
+    );
+    expect(find.text('Review'), findsNothing);
   });
 
   // §1: "Không có timer, hint hoặc inference từ thời gian."

@@ -9,6 +9,7 @@ import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_answer_viewmodel.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 import 'package:memox_v6/presentation/features/study/widgets/study_shell.dart';
+import 'package:memox_v6/presentation/features/study/widgets/study_session_note.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_card.dart';
@@ -79,34 +80,44 @@ class _SrsBinaryReviewStage extends ConsumerWidget {
     final currentIndex = position.cardPosition + 1;
 
     return StudyShell(
-      title: l10n.srsBinaryReviewTitle,
+      title: studyStageTitle(l10n, runtime, l10n.srsBinaryReviewTitle),
       progress: total == 0 ? 0 : currentIndex / total,
       progressCounter: '$currentIndex/$total',
       progressSemanticLabel: l10n.studyProgressLabel(currentIndex, total),
       onBack: () => Navigator.of(context).maybePop(),
       backLabel: l10n.studyExitLabel,
-      body: Center(
-        child: MxCard(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              MxText(
-                card.term,
-                role: MxTextRole.display,
-                textAlign: TextAlign.center,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          // §2 gives relearn and due review different scheduling consequences
+          // on this one screen; nothing said which was running.
+          StudySessionNote(runtime: runtime),
+          Expanded(
+            child: Center(
+              child: MxCard(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    MxText(
+                      card.term,
+                      role: MxTextRole.display,
+                      textAlign: TextAlign.center,
+                    ),
+                    const MxGap.s5(),
+                    const MxDivider(),
+                    const MxGap.s5(),
+                    MxText(
+                      card.meaning,
+                      role: MxTextRole.title,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-              const MxGap.s5(),
-              const MxDivider(),
-              const MxGap.s5(),
-              MxText(
-                card.meaning,
-                role: MxTextRole.title,
-                textAlign: TextAlign.center,
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
       // §4: "Hai action map deterministic tới `correct|wrong` và có non-color
       // affordance" — each carries its own glyph and label, so the pair reads
