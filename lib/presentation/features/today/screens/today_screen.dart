@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -122,6 +124,45 @@ class _TodayBody extends HookConsumerWidget {
       });
       return null;
     }, <Object?>[visible]);
+
+    // `refresh-today-projections.md` §3's day-boundary trigger, and §4:
+    // "Day boundary có thể đổi primary state và summaries cùng snapshot."
+    //
+    // Foreground covers every way *back* into the app; this covers the one
+    // way it does not — a dashboard left open across midnight. No other trigger
+    // fires there: no tab changes, no route pops, no lifecycle event, and
+    // every number on the screen is derived from a day that has just ended.
+    // The greeting still says good evening, the streak still counts
+    // yesterday, and a caught-up day quietly stops being true.
+    //
+    // Scheduled to the *next* boundary rather than ticking: one timer per day
+    // instead of one per second, and the delay is read through the same clock
+    // and zone the rest of the screen uses, so a test can move midnight.
+    final days = useState(0);
+    useEffect(() {
+      final zone = ref.read(appTimeZoneProvider);
+      final now = zone.localTimeOf(ref.read(appClockProvider).nowUtc());
+      // Arithmetic rather than `DateTime(now.year, now.month, now.day)`: the
+      // constructor builds a *host-local* instant, while `localTimeOf` may
+      // hand back a UTC-kind reading of another zone. Subtracting the two
+      // then measures the gap between two different zones' midnights, which
+      // on a UTC+9 host came out negative and fired the timer immediately.
+      // Time-of-day subtracted from a day is the same answer in any kind.
+      final sinceMidnight = Duration(
+        hours: now.hour,
+        minutes: now.minute,
+        seconds: now.second,
+        milliseconds: now.millisecond,
+        microseconds: now.microsecond,
+      );
+      final timer = Timer(const Duration(days: 1) - sinceMidnight, () {
+        // Bumping the state re-runs this effect, which arms the following
+        // midnight — so the screen keeps up however long it is left open.
+        days.value++;
+        ref.invalidate(todayProjectionProvider);
+      });
+      return timer.cancel;
+    }, <Object?>[days.value]);
 
     final resumes = useState(0);
     useEffect(() {

@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox_v6/app/di/core_providers.dart';
+import 'package:memox_v6/core/time/app_time_zone.dart';
+import '../../../support/fake_clock.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/presentation/features/search/routes/search_routes.dart';
 import 'package:memox_v6/presentation/features/today/routes/today_routes.dart';
@@ -1195,6 +1198,58 @@ void main() {
 
     expect(find.text('7 cards due'), findsNothing);
     expect(find.text('You’re all caught up'), findsOneWidget);
+  });
+
+  // `refresh-today-projections.md` §3's day-boundary trigger, and §4: "Day
+  // boundary có thể đổi primary state và summaries cùng snapshot."
+  //
+  // Foreground covers every way back into the app; this covers the one way it
+  // does not — a dashboard left open across midnight. No other trigger
+  // fires there, and every number on the screen is derived from the day that just
+  // ended.
+  testWidgets('midnight re-reads a dashboard left open across it', (
+    tester,
+  ) async {
+    // Half a minute before midnight, in a zone where local is UTC so the
+    // arithmetic under test is the screen's and not the host's.
+    final clock = FakeClock(DateTime.utc(2026, 7, 27, 23, 59, 30));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appClockProvider.overrideWithValue(clock),
+          appTimeZoneProvider.overrideWithValue(
+            const FixedOffsetTimeZone(id: 'test', offset: Duration.zero),
+          ),
+          snapshots(const <TodayProjection>[
+            TodayProjection(
+              primaryAction: TodayPrimaryAction.startReview,
+              dueCount: 7,
+            ),
+            TodayProjection(
+              primaryAction: TodayPrimaryAction.caughtUp,
+              dueCount: 0,
+            ),
+          ]),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const TodayScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('7 cards due'), findsOneWidget);
+
+    // Nobody touches the app; the day simply ends.
+    await tester.pump(const Duration(seconds: 31));
+    await tester.pumpAndSettle();
+
+    expect(find.text('7 cards due'), findsNothing);
+    expect(find.text('You’re all caught up'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 }
 
