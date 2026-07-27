@@ -226,10 +226,64 @@ jobs:
           path: evidence/parity/
           retention-days: 14
 
+  web_smoke:
+    name: Tier-1 Web smoke
+    # WBS 5.7.5 criterion 4. Every other Web check in this repo drives the
+    # parity entry, which seeds fixtures and installs provider overrides;
+    # nothing checked that `lib/main.dart` — the entry users get — boots at
+    # all, or that a write it makes survives a page load on the Drift wasm
+    # store. Skipped for docs-only PRs, which cannot change either.
+    if: >-
+      github.event_name == 'pull_request' &&
+      needs.scope.outputs.docs_only != 'true'
+    needs: scope
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.6'
+          cache: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tool/parity/package-lock.json
+
+      # The smoke borrows Playwright from the parity harness rather than
+      # installing a second copy; `tool/smoke/web.mjs` imports it from there.
+      - name: Install parity harness
+        working-directory: tool/parity
+        run: npm ci
+
+      - name: Install Chromium
+        working-directory: tool/parity
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the Tier-1 Web smoke
+        run: node tool/smoke/web.mjs
+
+      # The screenshots are the whole point of a failure: Flutter paints to
+      # canvas, so the page text says nothing and only the picture separates
+      # "wrong expectation" from "the shipping entry does not boot".
+      - name: Upload smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-smoke-evidence
+          path: evidence/smoke/web/
+          retention-days: 14
+
   gate:
     name: CI Gate
     if: always() && github.event_name == 'pull_request'
-    needs: [scope, contracts, flutter_fast, full_canonical, visual_parity]
+    needs:
+      [scope, contracts, flutter_fast, full_canonical, visual_parity, web_smoke]
     runs-on: ubuntu-latest
     steps:
       - name: Require the selected gates
@@ -242,6 +296,8 @@ jobs:
           SCOPE_RESULT: ${{ needs.scope.result }}
           VISUAL_CHANGES: ${{ needs.scope.outputs.visual_changes }}
           VISUAL_RESULT: ${{ needs.visual_parity.result }}
+          DOCS_ONLY_SMOKE: ${{ needs.scope.outputs.docs_only }}
+          SMOKE_RESULT: ${{ needs.web_smoke.result }}
         run: |
           if [[ "$SCOPE_RESULT" != "success" || "$CONTRACTS_RESULT" != "success" ]]; then
             exit 1
@@ -249,6 +305,15 @@ jobs:
           if [[ "$FULL_LABEL" == "true" ]]; then
             [[ "$FULL_RESULT" == "success" ]]
             exit
+          fi
+          # Any PR that touches the app must boot on Tier-1 Web. Docs-only
+          # PRs skip the job, and skipped is the only non-success accepted —
+          # the same shape as the parity rule below.
+          if [[ "$DOCS_ONLY_SMOKE" != "true" ]]; then
+            if [[ "$SMOKE_RESULT" != "success" ]]; then
+              echo "The Tier-1 Web smoke did not pass."
+              exit 1
+            fi
           fi
           # A screen-changing PR must carry parity evidence (§6.5). When
           # nothing visual changed the job is skipped, and skipped is the

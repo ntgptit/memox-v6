@@ -99,3 +99,8 @@ test/**/failures/
 # dart compile js byproducts of web/drift_worker.dart (the .js itself is committed)
 web/drift_worker.js.deps
 web/drift_worker.js.map
+
+# Harness output. Parity captures have always been untracked; the smoke
+# writes beside them and follows the same rule — the harness is the artefact,
+# and re-running it reproduces the evidence.
+/evidence/
