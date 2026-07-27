@@ -68,6 +68,10 @@ void main() {
         decks: decks,
         sessions: DriftStudySessionRepository(database),
       ),
+      impact: LoadDeckDeletionImpactUseCase(
+        decks: decks,
+        sessions: DriftStudySessionRepository(database),
+      ),
       idGenerator: _SeqIds('lp'),
       clock: _FixedClock(now),
     );
@@ -99,7 +103,10 @@ void main() {
       reason: 'the two never-introduced cards have nothing to reset',
     );
 
-    await reset('root');
+    await reset(
+      'root',
+      expectedAffectedCount: (await impact('root')).studiedCardCount,
+    );
 
     expect(await boxes(), everyElement(0));
     // What the dialog would say if reopened: nothing left to reset, and the
@@ -139,7 +146,10 @@ void main() {
     expect(before.dueCount, 1);
     expect(before.newCount, 0);
 
-    await reset('root');
+    await reset(
+      'root',
+      expectedAffectedCount: (await impact('root')).studiedCardCount,
+    );
 
     final after = await progress.studyCandidatesInScope(
       scopeDeckId: 'root',
@@ -160,7 +170,10 @@ void main() {
 
       expect((await impact('root')).studiedCardCount, 2);
 
-      await reset('root');
+      await reset(
+        'root',
+        expectedAffectedCount: (await impact('root')).studiedCardCount,
+      );
 
       expect(await boxes(), everyElement(0));
       expect(

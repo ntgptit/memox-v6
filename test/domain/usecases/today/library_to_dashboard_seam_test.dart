@@ -1,3 +1,4 @@
+import 'package:memox_v6/domain/usecases/deck/load_deck_deletion_impact_usecase.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/core/ids/id_generator.dart';
@@ -158,15 +159,20 @@ void main() {
     final before = await loadToday();
     expect(before.libraryMastery.masteredCount, 2);
 
+    final impact = LoadDeckDeletionImpactUseCase(
+      decks: decks,
+      sessions: DriftStudySessionRepository(database),
+    );
     await ResetDeckProgressUseCase(
       progress: progress,
       availability: LoadResetProgressAvailabilityUseCase(
         decks: decks,
         sessions: DriftStudySessionRepository(database),
       ),
+      impact: impact,
       idGenerator: _SeqIds('reset'),
       clock: _FixedClock(now),
-    ).call('d1');
+    ).call('d1', expectedAffectedCount: (await impact('d1')).studiedCardCount);
 
     final after = await loadToday();
     expect(after.libraryMastery.masteredCount, 0);

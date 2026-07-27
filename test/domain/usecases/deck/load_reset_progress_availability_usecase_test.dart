@@ -1,3 +1,4 @@
+import 'package:memox_v6/domain/usecases/deck/load_deck_deletion_impact_usecase.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
@@ -166,12 +167,19 @@ void main() {
     final reset = ResetDeckProgressUseCase(
       progress: progress,
       availability: availability,
+      impact: LoadDeckDeletionImpactUseCase(
+        decks: decks,
+        sessions: DriftStudySessionRepository(database),
+      ),
       idGenerator: _SeqIds('lp'),
       clock: _FixedClock(now),
     );
 
     await expectLater(
-      reset('root'),
+      // The session check runs before the count check, so the expectation
+      // here is irrelevant — which is the point: a blocked reset never gets
+      // as far as comparing impacts.
+      reset('root', expectedAffectedCount: 2),
       throwsA(
         isA<ConflictFailure>().having((f) => f.code, 'code', 'session-active'),
       ),

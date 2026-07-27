@@ -166,6 +166,7 @@ LoadResetProgressAvailabilityUseCase loadResetProgressAvailabilityUseCase(
 ResetDeckProgressUseCase resetDeckProgressUseCase(Ref ref) {
   return ResetDeckProgressUseCase(
     progress: ref.watch(learningProgressRepositoryProvider),
+    impact: ref.watch(loadDeckDeletionImpactUseCaseProvider),
     availability: ref.watch(loadResetProgressAvailabilityUseCaseProvider),
     idGenerator: ref.watch(idGeneratorProvider),
     clock: ref.watch(appClockProvider),
