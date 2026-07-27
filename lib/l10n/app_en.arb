@@ -599,6 +599,10 @@
   "@resetDeckProgressKeepLabel": {
     "description": "Safe action on the reset-progress confirm (WBS 6.1)."
   },
+  "resetDeckProgressChangedBody": "The number of cards changed while this was open. Check it and confirm again.",
+  "@resetDeckProgressChangedBody": {
+    "description": "Shown when the affected count moved between the confirm and the submit (reset-deck-progress.md §5, §11 \"Impact changed\")."
+  },
   "resetDeckProgressConfirmLabel": "Reset progress",
   "@resetDeckProgressConfirmLabel": {
     "description": "Destructive confirm on the reset-progress dialog (WBS 6.1)."

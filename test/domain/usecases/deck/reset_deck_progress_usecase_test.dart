@@ -7,6 +7,8 @@ import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
 import 'package:memox_v6/data/repositories/drift_learning_progress_repository.dart';
 import 'package:memox_v6/data/repositories/drift_study_session_repository.dart';
 import 'package:memox_v6/domain/usecases/deck/load_reset_progress_availability_usecase.dart';
+import 'package:memox_v6/domain/deck/reset_progress_result.dart';
+import 'package:memox_v6/domain/usecases/deck/load_deck_deletion_impact_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/reset_deck_progress_usecase.dart';
 
 /// WBS 6.1 — resetting a deck's progress returns every subtree card to Box 0 in
@@ -19,6 +21,10 @@ void main() {
   ResetDeckProgressUseCase useCase() => ResetDeckProgressUseCase(
     progress: progress,
     availability: LoadResetProgressAvailabilityUseCase(
+      decks: DriftDeckRepository(database, _FixedClock(now)),
+      sessions: DriftStudySessionRepository(database),
+    ),
+    impact: LoadDeckDeletionImpactUseCase(
       decks: DriftDeckRepository(database, _FixedClock(now)),
       sessions: DriftStudySessionRepository(database),
     ),
@@ -103,9 +109,26 @@ void main() {
     return progressRow?.box;
   }
 
+  /// The affected count the confirm showed, resolved the same way the dialog
+  /// resolves it, so the expectation passed in is the one a learner saw.
+  Future<int> affected(String deckId) async {
+    final impact = await LoadDeckDeletionImpactUseCase(
+      decks: DriftDeckRepository(database, _FixedClock(now)),
+      sessions: DriftStudySessionRepository(database),
+    )(deckId);
+    return impact.studiedCardCount;
+  }
+
+  Future<ResetProgressResult> reset(String deckId, {int? expected}) async {
+    return useCase().call(
+      deckId,
+      expectedAffectedCount: expected ?? await affected(deckId),
+    );
+  }
+
   test('resetting the root returns every subtree card to Box 0', () async {
-    final count = await useCase().call('d1');
-    expect(count, 2);
+    final result = await reset('d1');
+    expect((result as ProgressReset).cardCount, 2);
     expect(await boxOf('c1'), 0);
     expect(await boxOf('c2'), 0);
     // No due date once reset to New.
@@ -113,8 +136,8 @@ void main() {
   });
 
   test('resetting a leaf only resets its own cards', () async {
-    final count = await useCase().call('d2');
-    expect(count, 1);
+    final result = await reset('d2');
+    expect((result as ProgressReset).cardCount, 1);
     expect(await boxOf('c1'), 0);
     // The sibling leaf under the root is untouched.
     expect(await boxOf('c2'), 3);
@@ -130,7 +153,34 @@ void main() {
       0,
       0,
     );
-    expect(await useCase().call('empty'), 0);
+    expect((await reset('empty') as ProgressReset).cardCount, 0);
+  });
+
+  // §5: "Counts refresh trước submit; impact đổi yêu cầu confirm lại", and §11
+  // gives "Impact changed" its own row. A confirm is a promise about a number,
+  // and the dialog can sit open while cards are added, deleted or studied — so
+  // the store re-reads instead of trusting the number it was handed
+  // (`int-103`).
+  test('a moved affected count is re-confirmed, not reset', () async {
+    // What the learner confirmed, before a third card was studied.
+    final result = await reset('d1', expected: 1);
+
+    expect(result, isA<ResetImpactChanged>());
+    expect((result as ResetImpactChanged).affectedCardCount, 2);
+    expect(
+      await boxOf('c1'),
+      isNot(0),
+      reason: 'nothing is reset while the impact is being re-confirmed',
+    );
+  });
+
+  test('re-confirming over the new count resets', () async {
+    expect(await reset('d1', expected: 1), isA<ResetImpactChanged>());
+
+    final result = await reset('d1');
+
+    expect((result as ProgressReset).cardCount, 2);
+    expect(await boxOf('c1'), 0);
   });
 }
 

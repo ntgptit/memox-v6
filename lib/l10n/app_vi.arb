@@ -321,6 +321,7 @@
   "resetDeckProgressNothingBody": "Deck này chưa có tiến độ học để đặt lại.",
   "resetDeckProgressBlockedBody": "Hãy kết thúc phiên học hiện tại trước. Đặt lại lúc này sẽ thay đổi chính những thẻ phiên đó đang học.",
   "resetDeckProgressKeepLabel": "Giữ tiến độ",
+  "resetDeckProgressChangedBody": "Số thẻ đã thay đổi khi hộp thoại đang mở. Hãy kiểm tra lại và xác nhận.",
   "resetDeckProgressConfirmLabel": "Đặt lại tiến độ",
   "deleteDeckTitle": "Xoá “{deckName}”?",
   "deleteDeckKeepLabel": "Giữ deck",

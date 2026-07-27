@@ -10,7 +10,6 @@ import 'package:memox_v6/presentation/features/deck/viewmodels/reset_deck_progre
 import 'package:memox_v6/presentation/features/deck/viewmodels/reset_progress_availability_provider.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_dialog.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_errors.dart';
-import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
@@ -52,15 +51,15 @@ class _ResetProgressBody extends ConsumerWidget {
         ?.value;
     final resetState = ref.watch(resetDeckProgressDialogViewmodelProvider);
 
-    listenMxAction(
-      ref,
-      resetDeckProgressDialogViewmodelProvider,
-      onSuccess: () {
-        ref.invalidate(deckDetailProvider(deckId: deckId));
-        showMxSnackbar(context, message: l10n.deckProgressResetMessage);
-        Navigator.of(context).pop();
-      },
-    );
+    // A re-confirm settles the action state exactly like an applied reset, so
+    // closing on that would announce "Deck progress reset" over a reset that
+    // did not run. The applied tick is the only signal that means it did.
+    ref.listen<int>(resetAppliedTickViewmodelProvider, (_, _) {
+      ref.invalidate(deckDetailProvider(deckId: deckId));
+      showMxSnackbar(context, message: l10n.deckProgressResetMessage);
+      Navigator.of(context).pop();
+    });
+    final impactChanged = ref.watch(resetImpactChangedViewmodelProvider);
 
     final availability = ref
         .watch(resetProgressAvailabilityProvider(deckId: deckId))
@@ -86,6 +85,12 @@ class _ResetProgressBody extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           MxText(_body(impact, availability, l10n), role: MxTextRole.body),
+          // §11's "Impact changed" row: the learner is asked again over the
+          // new number rather than having a scope they never agreed to reset.
+          if (impactChanged) ...[
+            const MxGap.s3(),
+            MxText(l10n.resetDeckProgressChangedBody, role: MxTextRole.caption),
+          ],
           if (failure != null) ...[
             const MxGap.s3(),
             MxText(
@@ -118,7 +123,10 @@ class _ResetProgressBody extends ConsumerWidget {
                             .read(
                               resetDeckProgressDialogViewmodelProvider.notifier,
                             )
-                            .resetDeckProgress(deckId),
+                            .resetDeckProgress(
+                              deckId,
+                              expectedAffectedCount: impact.studiedCardCount,
+                            ),
                 ),
               ],
             ],
