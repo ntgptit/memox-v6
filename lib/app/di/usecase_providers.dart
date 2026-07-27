@@ -146,6 +146,7 @@ DeleteDeckUseCase deleteDeckUseCase(Ref ref) {
 LoadDeckDeletionImpactUseCase loadDeckDeletionImpactUseCase(Ref ref) {
   return LoadDeckDeletionImpactUseCase(
     decks: ref.watch(deckRepositoryProvider),
+    sessions: ref.watch(studySessionRepositoryProvider),
   );
 }
 

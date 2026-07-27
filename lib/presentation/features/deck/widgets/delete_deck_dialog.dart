@@ -121,7 +121,15 @@ class _DeleteDeckBody extends ConsumerWidget {
     // learner could not tell a deck they had studied for weeks from one they
     // had only filled in. Omitted entirely when nothing has been studied,
     // rather than saying "0 of them".
-    if (impact.studiedCardCount == 0) return scope;
-    return '$scope ${l10n.deleteDeckStudiedSuffix(impact.studiedCardCount)}';
+    final parts = <String>[
+      scope,
+      if (impact.studiedCardCount > 0)
+        l10n.deleteDeckStudiedSuffix(impact.studiedCardCount),
+      // §5 enumerates what goes with the deck. A running session's committed
+      // answers go too, and this was the one loss the summary never named
+      // (`int-34`).
+      if (impact.endsRunningSession) l10n.deleteDeckEndsSessionSuffix,
+    ];
+    return parts.join(' ');
   }
 }
