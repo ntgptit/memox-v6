@@ -86,10 +86,11 @@ void main() {
 
     // The dialog opens pre-filled with the current name.
     expect(find.text('Rename deck'), findsOneWidget);
-    final field = tester.widget<TextField>(find.byType(TextField));
+    // Two fields now: the name and the optional description (`int-57`).
+    final field = tester.widget<TextField>(find.byType(TextField).first);
     expect(field.controller?.text, 'Korean');
 
-    await tester.enterText(find.byType(TextField), 'Japanese');
+    await tester.enterText(find.byType(TextField).first, 'Japanese');
     await pumpStreams(tester);
     await tester.tap(find.text('Save'));
     await pumpStreams(tester);
@@ -127,7 +128,7 @@ void main() {
     await pumpStreams(tester);
     await tester.tap(find.text('Rename'));
     await pumpStreams(tester);
-    await tester.enterText(find.byType(TextField), 'Japanese');
+    await tester.enterText(find.byType(TextField).first, 'Japanese');
     await pumpStreams(tester);
     await tester.tap(find.text('Save'));
     await pumpStreams(tester);
@@ -136,6 +137,35 @@ void main() {
       find.text('A deck with this name already exists here.'),
       findsOneWidget,
     );
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  // `edit-deck.md` §1: the name and the description are one save. The
+  // description had no editing path at all before this — the column, the
+  // domain field and the first-run form all carried it, and nothing could
+  // change it afterwards (`int-57`).
+  testWidgets('the description is edited and saved with the name', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await pumpStreams(tester);
+
+    await tester.tap(find.byIcon(Symbols.more_vert_rounded));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Rename'));
+    await pumpStreams(tester);
+
+    await tester.enterText(find.byType(TextField).at(1), 'TOPIK I vocabulary');
+    await pumpStreams(tester);
+    await tester.tap(find.text('Save'));
+    await pumpStreams(tester);
+
+    final row = await database
+        .customSelect("SELECT name, description FROM decks WHERE id = 'root'")
+        .getSingle();
+    expect(row.read<String>('name'), 'Korean');
+    expect(row.read<String>('description'), 'TOPIK I vocabulary');
 
     await disposeAndFlushStreams(tester);
   });

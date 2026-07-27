@@ -107,6 +107,7 @@ Future<void> _openDeckSettings(BuildContext context, Deck deck) async {
         context,
         deckId: deck.id,
         currentName: deck.name,
+        currentDescription: deck.description,
       );
     case DeckSettingsAction.move:
       await showMoveDeckSheet(context, deckId: deck.id, deckName: deck.name);

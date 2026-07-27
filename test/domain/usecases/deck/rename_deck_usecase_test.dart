@@ -97,22 +97,25 @@ class _FakeDecks implements DeckRepository {
   String? renamedId;
   String? renamedName;
   String? renamedNormalized;
+  String? savedDescription;
   DateTime? renamedAt;
 
   @override
   Future<Deck?> findById(String id) async => _deck;
 
   @override
-  Future<void> rename(
+  Future<void> editMetadata(
     String deckId, {
     required String name,
     required String normalizedName,
+    required String? description,
     required DateTime updatedAt,
   }) async {
     if (renameError != null) throw renameError!;
     renamedId = deckId;
     renamedName = name;
     renamedNormalized = normalizedName;
+    savedDescription = description;
     renamedAt = updatedAt;
   }
 

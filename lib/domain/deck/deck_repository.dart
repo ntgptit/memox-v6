@@ -60,10 +60,16 @@ abstract interface class DeckRepository {
     required String excludeDeckId,
   });
 
-  Future<void> rename(
+  /// Writes the deck's editable metadata in one statement.
+  ///
+  /// `edit-deck.md` §1: "Save failure giữ toàn bộ draft; không autosave một
+  /// phần form" — the name and the description are one save, so a failure
+  /// cannot leave half of the form persisted.
+  Future<void> editMetadata(
     String deckId, {
     required String name,
     required String normalizedName,
+    required String? description,
     required DateTime updatedAt,
   });
 

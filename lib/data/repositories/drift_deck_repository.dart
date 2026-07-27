@@ -128,16 +128,18 @@ class DriftDeckRepository implements DeckRepository {
   }
 
   @override
-  Future<void> rename(
+  Future<void> editMetadata(
     String deckId, {
     required String name,
     required String normalizedName,
+    required String? description,
     required DateTime updatedAt,
   }) {
     return mapSqliteConflicts(entity: 'decks', () async {
-      await _database.deckDao.renameDeck(
+      await _database.deckDao.editDeckMetadata(
         name,
         normalizedName,
+        description,
         updatedAt.millisecondsSinceEpoch,
         deckId,
       );
