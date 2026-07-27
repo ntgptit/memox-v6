@@ -1,3 +1,4 @@
+import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -63,7 +64,7 @@ void listenForQuickStudyStart(WidgetRef ref, BuildContext context) {
       // stays a failure and is left to the shared error surface.
       if (failure is! ConflictFailure) return;
       if (failure.code != 'active-session') return;
-      unawaited(_confirmResumeActiveSession(context));
+      unawaited(_confirmResumeActiveSession(context, ref));
     },
   );
 }
@@ -78,12 +79,29 @@ void listenForQuickStudyStart(WidgetRef ref, BuildContext context) {
 /// not double-count. Nothing says whether an abandoned session's committed
 /// answers keep their goal and streak contributions. Offering a button whose
 /// consequences are undefined would be worse than offering one fewer.
-Future<void> _confirmResumeActiveSession(BuildContext context) async {
+Future<void> _confirmResumeActiveSession(
+  BuildContext context,
+  WidgetRef ref,
+) async {
   final l10n = AppLocalizations.of(context);
+  // §5's row for a different active session asks the prompt to name the deck
+  // before offering Resume. The conflict itself says only that some session
+  // exists, so the running one is read here — and a deck that cannot be
+  // resolved (deleted under the session) falls back to the unqualified copy
+  // rather than naming something that is gone.
+  final deckName = await ref
+      .read(loadActiveSessionDeckUseCaseProvider)
+      .deckName();
+  if (!context.mounted) return;
   final resume = await showMxDialog<bool>(
     context,
     title: l10n.studyActiveSessionTitle,
-    body: MxText(l10n.studyActiveSessionBody, role: MxTextRole.body),
+    body: MxText(
+      deckName == null
+          ? l10n.studyActiveSessionBody
+          : l10n.studyActiveSessionInDeckBody(deckName),
+      role: MxTextRole.body,
+    ),
     actions: <Widget>[
       MxButton(
         variant: MxButtonVariant.ghost,

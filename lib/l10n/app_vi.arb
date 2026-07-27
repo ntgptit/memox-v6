@@ -596,6 +596,7 @@
   "todayPausedTitle": "Phiên học đang tạm dừng",
   "todayPausedBody": "Câu trả lời đã lưu vẫn được giữ nguyên.",
   "studyActiveSessionTitle": "Tiếp tục phiên học?",
+  "studyActiveSessionInDeckBody": "Phiên học trong {deck} vẫn đang chạy. Tiếp tục để học tiếp.",
   "studyActiveSessionBody": "Đang có một phiên học dở. Tiếp tục để học tiếp.",
   "todayResumeLabel": "Tiếp tục phiên",
   "todayDueTitle": "Tiếp tục học",
