@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
@@ -81,33 +82,50 @@ class _ReviewStage extends ConsumerWidget {
       progressSemanticLabel: l10n.studyProgressLabel(viewIndex + 1, total),
       onBack: () => Navigator.of(context).maybePop(),
       backLabel: l10n.studyExitLabel,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          // Kit review-mode: the meaning and term cards split the stage
-          // roughly evenly; the meaning label + text sit at the card's top.
-          Expanded(
-            child: MxCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const MxGap.s3(),
-                  MxSectionLabel(text: l10n.meaningLabel),
-                  const MxGap.s4(),
-                  MxText(card?.meaning ?? '', role: MxTextRole.title),
-                ],
+      // §1: "Vuốt trái chuyển sang Card kế tiếp; vuốt phải quay lại Card
+      // trước đó", and §4 asks for a keyboard equivalent so neither direction
+      // depends on the gesture alone. Neither existed: the stage carried the
+      // kit's "Swipe to continue" hint over a surface that ignored every
+      // swipe, so the one instruction on screen was the one thing that did
+      // not work — and on Web there was no key that moved a card at all.
+      //
+      // Drag-only, so it stacks over the cards without taking their taps.
+      body: Focus(
+        autofocus: true,
+        onKeyEvent: (node, event) =>
+            _onKey(ref, event, card?.cardId, browseBack, canGoBack),
+        child: GestureDetector(
+          onHorizontalDragEnd: (details) =>
+              _onSwipe(ref, details, card?.cardId, browseBack, canGoBack),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              // Kit review-mode: the meaning and term cards split the stage
+              // roughly evenly; the meaning label + text sit at the card's top.
+              Expanded(
+                child: MxCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const MxGap.s3(),
+                      MxSectionLabel(text: l10n.meaningLabel),
+                      const MxGap.s4(),
+                      MxText(card?.meaning ?? '', role: MxTextRole.title),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-          const MxGap.s4(),
-          Expanded(
-            child: MxCard(
-              child: Center(
-                child: MxText(card?.term ?? '', role: MxTextRole.display),
+              const MxGap.s4(),
+              Expanded(
+                child: MxCard(
+                  child: Center(
+                    child: MxText(card?.term ?? '', role: MxTextRole.display),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
       // Kit review-mode: a "‹ Swipe to continue ›" hint. The chevrons are the
       // accessible Previous/Next controls (review-cards.md §4 keyboard/no-gesture
@@ -139,6 +157,50 @@ class _ReviewStage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// A horizontal fling: left is Next, right is Previous (§1).
+  ///
+  /// §4: "Vuốt phải ở Card đầu tiên không đổi Card" — the same rule the
+  /// disabled Previous control follows, so the two agree.
+  void _onSwipe(
+    WidgetRef ref,
+    DragEndDetails details,
+    String? cardId,
+    int browseBack,
+    bool canGoBack,
+  ) {
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity == 0) return;
+    if (velocity.isNegative) {
+      _goForward(ref, cardId, browseBack);
+      return;
+    }
+    if (!canGoBack) return;
+    ref.read(reviewBrowseCursorProvider.notifier).back();
+  }
+
+  /// The arrow-key equivalent §4 requires: right advances, left goes back —
+  /// the direction the card moves, matching the chevrons beside them.
+  KeyEventResult _onKey(
+    WidgetRef ref,
+    KeyEvent event,
+    String? cardId,
+    int browseBack,
+    bool canGoBack,
+  ) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+      _goForward(ref, cardId, browseBack);
+      return KeyEventResult.handled;
+    }
+    if (event.logicalKey != LogicalKeyboardKey.arrowLeft) {
+      return KeyEventResult.ignored;
+    }
+    // Handled either way: on the first card there is nowhere to go, and
+    // letting it fall through would move focus instead of the card.
+    if (canGoBack) ref.read(reviewBrowseCursorProvider.notifier).back();
+    return KeyEventResult.handled;
   }
 
   void _goForward(WidgetRef ref, String? cardId, int browseBack) {
