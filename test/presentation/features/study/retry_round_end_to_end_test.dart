@@ -26,6 +26,20 @@ void main() {
   late db.AppDatabase database;
   late ProviderContainer container;
 
+  // Positions in `kNewLearningStages`. Recall's round coverage lives in
+  // `recall_screen_test` instead: it owns a periodic countdown, and a live
+  // timer and a real database do not settle together under fake time.
+  const guessStage = 2;
+  const fillStage = 4;
+
+  const cards = <(String, String, String)>[
+    ('c1', 'apple', 'fruit'),
+    ('c2', 'chair', 'furniture'),
+    ('c3', 'river', 'water'),
+    ('c4', 'copper', 'metal'),
+    ('c5', 'violin', 'instrument'),
+  ];
+
   setUp(() async {
     final view = TestWidgetsFlutterBinding.ensureInitialized()
         .platformDispatcher
@@ -62,25 +76,28 @@ void main() {
       0,
       0,
     );
-    // One card, so the retry round it fails into holds exactly that card —
-    // the case where the stage re-opens on the same element it just left.
-    await database.flashcardDao.insertFlashcard(
-      'c1',
-      'd1',
-      'apple',
-      'apple',
-      'fruit',
-      0,
-      0,
-    );
-    await database.learningProgressDao.insertProgress(
-      'p-c1',
-      'c1',
-      0,
-      null,
-      0,
-      0,
-    );
+    // Five cards in the deck so Guess has the five distinct meanings its
+    // question needs; every round below still holds exactly one of them, which
+    // is the case where the stage re-opens on the element it just left.
+    for (final (id, term, meaning) in cards) {
+      await database.flashcardDao.insertFlashcard(
+        id,
+        'd1',
+        term,
+        term,
+        meaning,
+        0,
+        0,
+      );
+      await database.learningProgressDao.insertProgress(
+        'p-$id',
+        id,
+        0,
+        null,
+        0,
+        0,
+      );
+    }
   });
 
   Widget app() => UncontrolledProviderScope(
@@ -93,16 +110,15 @@ void main() {
     ),
   );
 
-  /// A new-learning session parked at its Fill stage, the last of the five.
+  /// A new-learning session parked at [stageIndex] with a one-card round.
   ///
-  /// Seeded rather than started, because the only route the app has to a Fill
-  /// stage is four stages of answering first — and `Practice`, whose plan is a
-  /// single chosen mode, cannot be started at all (`int-79`). Everything that
-  /// matters here is still real: the answer command, the advance policy, the
-  /// store and the re-read that follows each answer. Only the starting
-  /// position is placed.
-  Future<void> seedFillStage() async {
-    const fillStageIndex = 4;
+  /// Seeded rather than started, because the only route the app has to the
+  /// later stages is answering every earlier one first — and `Practice`, whose
+  /// plan is a single chosen mode, cannot be started at all (`int-79`).
+  /// Everything that matters here is still real: the answer command, the
+  /// advance policy, the store and the re-read that follows each answer. Only
+  /// the starting position is placed.
+  Future<void> seedStage(int stageIndex) async {
     await database.studySessionDao.insertSession(
       's1',
       'newLearning',
@@ -114,18 +130,20 @@ void main() {
       0,
       0,
     );
-    await database.sessionSnapshotDao.insertSessionCard(
-      'sc1',
-      's1',
-      'c1',
-      0,
-      'apple',
-      'fruit',
-      1,
-      0,
-      0,
-      0,
-    );
+    for (final (index, (id, term, meaning)) in cards.indexed) {
+      await database.sessionSnapshotDao.insertSessionCard(
+        'sc-$id',
+        's1',
+        id,
+        index,
+        term,
+        meaning,
+        1,
+        0,
+        0,
+        0,
+      );
+    }
     await database.sessionSnapshotDao.insertRoundOrder(
       'ro1',
       's1',
@@ -137,7 +155,7 @@ void main() {
     await database.sessionCheckpointDao.upsertCheckpoint(
       'cp1',
       's1',
-      fillStageIndex,
+      stageIndex,
       1,
       0,
       '[]',
@@ -150,7 +168,7 @@ void main() {
   testWidgets('a failed card can be answered again in its retry round', (
     tester,
   ) async {
-    await seedFillStage();
+    await seedStage(fillStage);
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
@@ -194,7 +212,7 @@ void main() {
   testWidgets('a hint does not follow the card into its retry round', (
     tester,
   ) async {
-    await seedFillStage();
+    await seedStage(fillStage);
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
@@ -211,5 +229,36 @@ void main() {
 
     expect(find.textContaining('starts with'), findsNothing);
     expect(find.text('Help'), findsOneWidget);
+  });
+
+  // The same boundary in Guess, whose pre-commit state is the chosen option.
+  // A carried-over choice re-opens the retry already answered.
+  testWidgets('a Guess retry round starts with nothing chosen', (tester) async {
+    await seedStage(guessStage);
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    expect(find.text('apple'), findsOneWidget, reason: 'the Guess prompt');
+
+    // Any option that is not this card's meaning is wrong.
+    await tester.tap(find.text('furniture'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+
+    // The retry round re-opens the same card: nothing chosen, and the CTA
+    // waits for a choice rather than offering to continue past one.
+    expect(find.text('apple'), findsOneWidget);
+    expect(
+      find.text('Continue'),
+      findsNothing,
+      reason: 'the retry round has no answer yet',
+    );
+
+    // And it takes a new one, which is what the carried-over selection made
+    // impossible: the stage opened already answered.
+    await tester.tap(find.text('fruit'));
+    await tester.pumpAndSettle();
+    expect(find.text('Continue'), findsOneWidget);
   });
 }
