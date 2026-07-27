@@ -11,6 +11,8 @@ import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/routes/deck_routes.dart';
+import 'package:memox_v6/presentation/features/flashcard/routes/flashcard_routes.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_list_controls.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_quick_study_action.dart';
 import 'package:memox_v6/presentation/features/deck/widgets/deck_summary_row.dart';
@@ -48,7 +50,7 @@ void main() {
   Widget app(String initialDeckId) {
     final router = GoRouter(
       initialLocation: RoutePaths.deckDetail(initialDeckId),
-      routes: deckRoutes(),
+      routes: <RouteBase>[...deckRoutes(), ...flashcardRoutes()],
     );
     return ProviderScope(
       overrides: [appDatabaseProvider.overrideWithValue(database)],
@@ -113,6 +115,16 @@ void main() {
     expect(find.text('hello'), findsOneWidget);
     expect(find.text('bye'), findsOneWidget);
     expect(find.text('Create nested deck'), findsNothing);
+
+    // The kit's `flashcard-list` FAB adds a card. This screen offered the
+    // create-deck one on every branch, so a Leaf deck promoted the action
+    // `organise-deck.md` §2 blocks: "Leaf | Attempt tạo/move child vào | Bị
+    // chặn". Only the store's exclusivity trigger stopped it, after the
+    // learner had typed a name.
+    expect(find.bySemanticsLabel('Add card'), findsWidgets);
+    await tester.tap(find.byType(MxFab));
+    await pumpDeck(tester);
+    expect(find.text('New card'), findsOneWidget);
 
     await disposeAndFlushStreams(tester);
   });

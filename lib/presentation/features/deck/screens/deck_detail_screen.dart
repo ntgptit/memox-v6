@@ -86,7 +86,7 @@ class DeckDetailScreen extends ConsumerWidget {
         ],
       ),
       scrollable: false,
-      fab: _CreateNestedDeckFab(deckId: deckId),
+      fab: _DeckPrimaryFab(deckId: deckId),
       body: _DeckDetailBody(deckId: deckId),
     );
   }
@@ -584,8 +584,16 @@ class _ParentBranch extends ConsumerWidget {
 /// It is its own consumer so the screen shell stays template-only, and it
 /// only appears once the deck has resolved — there is no parent to nest
 /// under before that.
-class _CreateNestedDeckFab extends ConsumerWidget {
-  const _CreateNestedDeckFab({required this.deckId});
+/// The deck screen's primary action, which follows the branch it is on.
+///
+/// The kit draws two different FABs: `flashcard-list` adds a card, and
+/// `subdeck-list` creates a deck. This rendered the create-deck one on both,
+/// so a Leaf deck's most prominent action was the one `organise-deck.md` §2
+/// blocks outright — "Leaf | Attempt tạo/move child vào | Bị chặn" — and the
+/// store's exclusivity trigger was all that stopped it, after the learner had
+/// typed a name.
+class _DeckPrimaryFab extends ConsumerWidget {
+  const _DeckPrimaryFab({required this.deckId});
 
   final String deckId;
 
@@ -595,23 +603,32 @@ class _CreateNestedDeckFab extends ConsumerWidget {
     final deck = ref.watch(deckDetailProvider(deckId: deckId)).value;
     if (deck == null) return const SizedBox.shrink();
 
-    // Hidden on the Empty branch, which offers Create nested deck inline —
-    // see the branch note in `_DeckContent`.
     final hasChildren =
         ref.watch(deckChildrenProvider(deckId: deckId)).value?.isNotEmpty ??
         false;
+    // Hidden on the Empty branch, which offers both choices inline — see the
+    // branch note in `_DeckContent`. Empty is the one state where the deck
+    // has not yet committed to holding cards or child decks, so there is no
+    // single primary action to promote.
     final hasCards =
         ref.watch(deckCardsProvider(deckId: deckId)).value?.isNotEmpty ?? false;
     if (!hasChildren && !hasCards) return const SizedBox.shrink();
 
+    if (hasChildren) {
+      return MxFab(
+        icon: Symbols.add_rounded,
+        semanticLabel: l10n.createDeckLabel,
+        onPressed: () => showCreateDeckDialog(
+          context,
+          parentDeckId: deck.id,
+          parentDeckName: deck.name,
+        ),
+      );
+    }
     return MxFab(
       icon: Symbols.add_rounded,
-      semanticLabel: l10n.createDeckLabel,
-      onPressed: () => showCreateDeckDialog(
-        context,
-        parentDeckId: deck.id,
-        parentDeckName: deck.name,
-      ),
+      semanticLabel: l10n.addCardLabel,
+      onPressed: () => context.pushNewCard(deck.id),
     );
   }
 }
