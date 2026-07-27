@@ -59,6 +59,7 @@ function command(name, executable, commandArgs, { allowFailure = false } = {}) {
   return result.status ?? 1;
 }
 
+command('Kit shot preflight', 'node', ['preflight.mjs']);
 command('Master-flow conformance lint', 'node', ['flow_lint.mjs']);
 command('Flutter Web parity build', 'node', ['build_web.mjs']);
 const playwrightStatus = command(
