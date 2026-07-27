@@ -120,6 +120,8 @@ const isAccounted = (status) => {
 };
 
 // Kit shots, stripped of their theme suffix — the name a row references.
+const shotsIndexPath = join(shotsPath, 'INDEX.md');
+
 const shots = existsSync(shotsPath)
   ? new Set(
       readdirSync(shotsPath)
@@ -127,6 +129,24 @@ const shots = existsSync(shotsPath)
         .map((file) => file.replace(/--(light|dark)\.png$/, '')),
     )
   : new Set();
+
+// How many shot pairs the kit says it has. The index is generated from the
+// shot registry and, unlike the PNGs, it is tracked — so it is the one thing a
+// checkout without images can still read.
+const indexedShots = existsSync(shotsIndexPath)
+  ? new Set(
+      [...readFileSync(shotsIndexPath, 'utf8').matchAll(/([\w-]+)--(?:light|dark)\.png/g)]
+        .map((match) => match[1]),
+    )
+  : new Set();
+
+// `docs/design/**/shots/*.png` is gitignored — 36 MB of reference images the
+// build does not need — so a fresh clone has a dozen force-added shots and no
+// more. That is not a register with dangling references, and reporting it as
+// one blamed seven correct rows for their environment. A checkout holding
+// fewer shots than the index names cannot judge references at all, so it says
+// that instead and leaves the per-row check to a checkout that can.
+const shotsArePartial = indexedShots.size > 0 && shots.size < indexedShots.size;
 
 const referenced = new Set();
 const danglingShots = [];
@@ -137,7 +157,7 @@ for (const row of rows) {
   if (reference === '' || reference === '—') continue;
   if (/no kit reference/i.test(reference)) continue;
   referenced.add(reference);
-  if (shots.size > 0 && !shots.has(reference)) {
+  if (!shotsArePartial && shots.size > 0 && !shots.has(reference)) {
     danglingShots.push(`${row.id} references \`${reference}\`, which has no shot`);
   }
 }
@@ -263,9 +283,15 @@ if (
     // that do not exist yet, which `P0.1` does not ask for — it enumerates
     // every *implemented* screen. Printed on every run so the census's true
     // coverage stays visible instead of being rediscovered.
+    // A partial checkout knows how many rows reference a shot but not how many
+    // shots exist, so the ratio divides two different things — it read
+    // "76/6 shots have a row (-70 without one)" before this said so instead.
     process.stdout.write(
-      `Kit shot coverage: ${referenced.size}/${shots.size} shots have a row ` +
-        `(${shots.size - referenced.size} without one).\n`,
+      shotsArePartial
+        ? `Kit shot coverage: not judged — this checkout holds ${shots.size} ` +
+            `of the ${indexedShots.size} shots the index names.\n`
+        : `Kit shot coverage: ${referenced.size}/${shots.size} shots have a ` +
+            `row (${shots.size - referenced.size} without one).\n`,
     );
   }
 } else {
