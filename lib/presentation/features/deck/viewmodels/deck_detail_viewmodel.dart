@@ -1,5 +1,6 @@
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/deck/move_destination.dart';
 import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -52,11 +53,14 @@ Future<List<Deck>> deckBreadcrumb(Ref ref, {required String deckId}) async {
   return ref.watch(openDeckUseCaseProvider).ancestorsOf(deckId);
 }
 
-/// The decks [deckId] can be reparented under (WBS 6.2 move picker). Reads the
-/// moving deck for its language pair, then the eligible destinations (its own
-/// subtree, card-holding decks and the current parent are excluded).
+/// Every deck the move picker lists for [deckId] (WBS 6.2), each carrying the
+/// reason it cannot be chosen when it cannot. Reads the moving deck for its
+/// language pair first.
+///
+/// Candidates rather than only the eligible ones: `move-deck.md` §3 disables
+/// an ineligible destination with a helper rather than hiding it.
 @riverpod
-Future<List<Deck>> deckMoveDestinations(
+Future<List<MoveDestination>> deckMoveDestinations(
   Ref ref, {
   required String deckId,
 }) async {
@@ -64,5 +68,8 @@ Future<List<Deck>> deckMoveDestinations(
   if (deck == null) return const [];
   return ref
       .watch(moveDeckUseCaseProvider)
-      .destinationsFor(deckId: deckId, languagePairId: deck.languagePairId);
+      .destinationCandidatesFor(
+        deckId: deckId,
+        languagePairId: deck.languagePairId,
+      );
 }

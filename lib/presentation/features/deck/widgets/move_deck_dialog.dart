@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
+import 'package:memox_v6/domain/deck/move_destination.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/move_deck_dialog_viewmodel.dart';
@@ -79,7 +80,7 @@ class _MoveDeckPicker extends ConsumerWidget {
           label: l10n.moveToLibraryRootLabel,
           onTap: () => moveTo(null),
         ),
-        MxAsyncBuilder<List<Deck>>(
+        MxAsyncBuilder<List<MoveDestination>>(
           value: destinations,
           loadingLabel: l10n.loadingLabel,
           errorTitle: l10n.somethingWentWrongMessage,
@@ -108,7 +109,7 @@ class _DestinationList extends StatelessWidget {
     required this.onPick,
   });
 
-  final List<Deck> decks;
+  final List<MoveDestination> decks;
   final AppLocalizations l10n;
   final ValueChanged<String> onPick;
 
@@ -121,15 +122,32 @@ class _DestinationList extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final deck in decks)
+        // §3's ineligible branch is "Disabled + helper", not "hide", and §4
+        // draws the blocked rows with their reason beside them. Filtered out,
+        // a deck that holds cards and a deck that was never there looked the
+        // same — absent — so a learner hunting for one could not tell which.
+        for (final destination in decks)
           _DestinationRow(
             icon: Symbols.folder,
-            label: deck.name,
-            onTap: () => onPick(deck.id),
+            label: destination.deck.name,
+            helper: _helperFor(destination.ineligibility, l10n),
+            onTap: destination.isEligible
+                ? () => onPick(destination.deck.id)
+                : null,
           ),
       ],
     );
   }
+
+  /// §7's copy, shortened to the row labels §4 draws beside each blocked deck.
+  static String? _helperFor(MoveIneligibility? reason, AppLocalizations l10n) =>
+      switch (reason) {
+        null => null,
+        MoveIneligibility.self => l10n.moveDeckSelfHelper,
+        MoveIneligibility.descendant => l10n.moveDeckDescendantHelper,
+        MoveIneligibility.holdsCards => l10n.moveDeckHoldsCardsHelper,
+        MoveIneligibility.alreadyThere => l10n.moveDeckAlreadyThereHelper,
+      };
 }
 
 class _DestinationRow extends StatelessWidget {
@@ -137,16 +155,28 @@ class _DestinationRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.helper,
   });
 
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+
+  /// `null` disables the row — `MxTappable` drops its states and its semantics
+  /// action, so a blocked destination reads as blocked to assistive tech too.
+  final VoidCallback? onTap;
+
+  /// Why the row is disabled, shown beside it (§4).
+  final String? helper;
 
   @override
   Widget build(BuildContext context) {
+    final helper = this.helper;
     return MxTappable(
-      semanticLabel: label,
+      semanticLabel: helper == null
+          ? label
+          : AppLocalizations.of(
+              context,
+            ).moveDeckBlockedSemantics(label, helper),
       onTap: onTap,
       child: Row(
         children: [
@@ -154,6 +184,14 @@ class _DestinationRow extends StatelessWidget {
           MxIcon(icon: icon),
           const MxGap.s4(),
           Expanded(child: MxText(label, role: MxTextRole.body)),
+          if (helper != null) ...[
+            const MxGap.s3(),
+            MxText(
+              helper,
+              role: MxTextRole.caption,
+              color: context.colors.textSecondary,
+            ),
+          ],
           const MxGap.s3(),
         ],
       ),

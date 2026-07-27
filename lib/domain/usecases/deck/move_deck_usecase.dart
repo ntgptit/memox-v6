@@ -1,6 +1,7 @@
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/deck/move_destination.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
 
 /// Moves a deck to a new parent, or to the Library root (WBS 6.1; `move-deck.md`,
@@ -54,5 +55,21 @@ class MoveDeckUseCase {
     required String languagePairId,
   }) {
     return _decks.moveDestinations(languagePairId, movingDeckId: deckId);
+  }
+
+  /// Every deck in the pair, each carrying the reason it cannot be chosen.
+  ///
+  /// §3's ineligible branch is "Disabled + helper" rather than "hide", and §4
+  /// draws the blocked rows with their reason beside them. The picker showed
+  /// only [destinationsFor]'s eligible rows, so a deck that holds cards and a
+  /// deck that was never there looked the same: absent.
+  Future<List<MoveDestination>> destinationCandidatesFor({
+    required String deckId,
+    required String languagePairId,
+  }) {
+    return _decks.moveDestinationCandidates(
+      languagePairId,
+      movingDeckId: deckId,
+    );
   }
 }
