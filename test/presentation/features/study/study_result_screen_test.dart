@@ -171,8 +171,10 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.widgetWithText(MxButton, 'Try again'), findsOneWidget);
-    expect(find.widgetWithText(MxButton, 'Back to Today'), findsOneWidget);
+    // The kit's own labels (`StudyResult.jsx`: `Retry` + `Not now`), which
+    // `MX-VIS-077` measures at 1.61% light / 2.50% dark.
+    expect(find.widgetWithText(MxButton, 'Retry'), findsOneWidget);
+    expect(find.widgetWithText(MxButton, 'Not now'), findsOneWidget);
   });
 }
 

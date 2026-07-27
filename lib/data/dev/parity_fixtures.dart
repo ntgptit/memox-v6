@@ -82,6 +82,7 @@ class ParityFixtures {
     'MX-VIS-052',
     'MX-VIS-053',
     'MX-VIS-054',
+    'MX-VIS-077',
     'MX-VIS-069',
   ];
 
@@ -156,6 +157,7 @@ class ParityFixtures {
         await _seedActivePair();
         await _study.seedFillSession();
         return;
+      case 'MX-VIS-077':
       case 'MX-VIS-054':
         // Study Result standard: past first-run so `/study` loads; the committed
         // summary is supplied through `parity_overrides` (the finished session is

@@ -1460,6 +1460,10 @@
   "@studyResumeFailedBody": {
     "description": "Reassurance under the resume-failure title (resume-study-session.md §4)."
   },
+  "studyFinalizeLaterLabel": "Not now",
+  "@studyFinalizeLaterLabel": {
+    "description": "Ghost action on the finalize-error state; leaves without finalizing (kit `study-result/finalize-later`)."
+  },
   "todayErrorTitle": "Today couldn’t load",
   "@todayErrorTitle": {
     "description": "Today load-error title."

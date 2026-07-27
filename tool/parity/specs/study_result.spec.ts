@@ -36,3 +36,40 @@ test('MX-VIS-054 shows the standard study result', async ({
     route: '/study',
   });
 });
+
+// MX-VIS-077 · Study Result · Finalize error
+// Master flow: docs/business/study-session/finalize-study-session.md §3
+// Flow node: E["Commit completion idempotently"] -- "Failure" --> F["Finalize error · Retry"]
+test('MX-VIS-077 shows the finalize error with both ways on', async ({
+  page,
+}, testInfo) => {
+  // §3's failure edge. The write that fails is the one a journey would have
+  // to break to reach this, so it is pinned in parity_overrides rather than
+  // staged — the same contract as the other failure states, and no invented
+  // content: the screen renders its own copy over a real AsyncError.
+  await deepLinkEntry(page, {
+    masterFlow: 'docs/business/study-session/finalize-study-session.md',
+    fixture: 'MX-VIS-077',
+    route: '/study',
+    justification:
+      'finalize-study-session §3 branches to the finalize error when the commit fails; the failing commit is the precondition, and the finalize orchestration itself is unit-tested.',
+  });
+
+  await expectRoute(page, '/study');
+  await expect(page.getByText('Couldn’t save your results')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Retry' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Not now' })).toBeVisible();
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-077',
+    shot: 'study-result--finalize-error',
+    screen: 'Study Result',
+    state: 'finalize-error',
+    masterFlow: 'docs/business/study-session/finalize-study-session.md',
+    flowNode:
+      'E["Commit completion idempotently"] -- "Failure" --> F["Finalize error · Retry"]',
+    fixture: 'MX-VIS-077',
+    route: '/study',
+  });
+});
