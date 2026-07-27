@@ -131,6 +131,33 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  // §3: "Row có query và remove action". Dropping one query meant clearing
+  // the whole history until now.
+  testWidgets('a recent row removes just its own query', (tester) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    for (final query in const <String>['hel', 'wor']) {
+      await tester.enterText(find.byType(TextField), query);
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+    }
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pumpAndSettle();
+    expect(find.text('hel'), findsOneWidget);
+    expect(find.text('wor'), findsOneWidget);
+
+    await tester.tap(
+      find.bySemanticsLabel('Remove “hel” from recent searches'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('hel'), findsNothing);
+    expect(find.text('wor'), findsOneWidget, reason: 'the rest stays');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('the type filters narrow the results by kind', (tester) async {
     await database.deckDao.insertDeck(
       'appdeck',

@@ -15,6 +15,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_chip.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
@@ -138,18 +139,35 @@ class _Recent extends ConsumerWidget {
         ),
         const MxGap.s2(),
         for (final query in recent)
-          MxTappable(
-            semanticLabel: query,
-            onTap: () => onSelect(query),
-            child: Row(
-              children: [
-                const MxGap.s3(),
-                const MxIcon(icon: Symbols.history_rounded),
-                const MxGap.s4(),
-                Expanded(child: MxText(query, role: MxTextRole.body)),
-                const MxGap.s3(),
-              ],
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: MxTappable(
+                  semanticLabel: query,
+                  onTap: () => onSelect(query),
+                  child: Row(
+                    children: [
+                      const MxGap.s3(),
+                      const MxIcon(icon: Symbols.history_rounded),
+                      const MxGap.s4(),
+                      Expanded(child: MxText(query, role: MxTextRole.body)),
+                    ],
+                  ),
+                ),
+              ),
+              // §3: "Row có query và remove action" — the kit draws it as the
+              // row's trailing `close` (`search/recent-remove-*`). Clearing
+              // the whole history was the only way to drop one query.
+              MxIconButton(
+                icon: Symbols.close_rounded,
+                small: true,
+                semanticLabel: l10n.removeRecentSearchLabel(query),
+                onPressed: () => ref
+                    .read(recentSearchesCommandViewmodelProvider.notifier)
+                    .removeRecent(query),
+              ),
+              const MxGap.s3(),
+            ],
           ),
       ],
     );

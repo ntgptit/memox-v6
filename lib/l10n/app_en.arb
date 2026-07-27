@@ -1468,6 +1468,15 @@
   "@studyAnswerSaveBackLabel": {
     "description": "Ghost action on the answer-save-error dialog; dismisses and leaves the answer on screen (kit `study-session/save-error-back`)."
   },
+  "removeRecentSearchLabel": "Remove “{query}” from recent searches",
+  "@removeRecentSearchLabel": {
+    "description": "Accessible name of a recent-search row's remove action (manage-recent-searches.md §3).",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
   "todayErrorTitle": "Today couldn’t load",
   "@todayErrorTitle": {
     "description": "Today load-error title."

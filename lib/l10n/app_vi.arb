@@ -644,5 +644,6 @@
   "studyResumeFailedBody": "Các câu trả lời đã lưu của bạn vẫn còn đây.",
   "studyFinalizeLaterLabel": "Để sau",
   "studyAnswerSaveBackLabel": "Quay lại",
+  "removeRecentSearchLabel": "Xóa “{query}” khỏi tìm kiếm gần đây",
   "todayErrorTitle": "Không tải được Hôm nay"
 }

@@ -59,4 +59,34 @@ void main() {
     await usecase.clear();
     expect(await usecase.current(), isEmpty);
   });
+
+  // §3: "Row có query và remove action". Clearing the whole history was the
+  // only way to drop one query until now.
+  test('remove drops one query and leaves the rest', () async {
+    await usecase.record('hello');
+    await usecase.record('goodbye');
+
+    await usecase.remove('hello');
+
+    expect(await usecase.current(), <String>['goodbye']);
+  });
+
+  // Matched on the same normalized key `record` dedupes by, so removing works
+  // on what the learner sees rather than on exact bytes.
+  test('remove matches the normalized query', () async {
+    await usecase.record('Hello');
+
+    await usecase.remove('  hello  ');
+
+    expect(await usecase.current(), isEmpty);
+  });
+
+  // §4 asks for idempotence.
+  test('removing a query that is not there changes nothing', () async {
+    await usecase.record('hello');
+
+    await usecase.remove('never typed');
+
+    expect(await usecase.current(), <String>['hello']);
+  });
 }
