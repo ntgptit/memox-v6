@@ -118,6 +118,110 @@ void main() {
     expect(find.text('Review mistakes'), findsNothing);
   });
 
+  // `complete-daily-goal.md` §3 node F: the goal-met result state. The screen
+  // had one hero for every outcome, so the surface where the goal is actually
+  // completed was the one surface that never said so.
+  testWidgets('a session that met the goal says so', (tester) async {
+    await tester.pumpWidget(
+      wrap(
+        const AsyncData<StudySessionSummary?>(
+          StudySessionSummary(
+            reviewedCount: 24,
+            correctCount: 21,
+            missedCardIds: <String>[],
+            goalStatus: StudyResultGoalStatus(
+              streakDays: 13,
+              goalDoneCards: 20,
+              goalTargetCards: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Daily goal reached!'), findsOneWidget);
+    // §4's second line, and the standard hero's copy is gone.
+    expect(find.text('20 of 20 completed today'), findsOneWidget);
+    expect(find.text('Session complete'), findsNothing);
+    // The kit's achievement badge on the streak card.
+    expect(find.text('Daily goal completed!'), findsOneWidget);
+    // The streak card itself is unchanged beside it.
+    expect(find.text('13 days'), findsOneWidget);
+  });
+
+  // §1: "Goal vượt target vẫn giữ completed state".
+  testWidgets('passing the target still reads as met', (tester) async {
+    await tester.pumpWidget(
+      wrap(
+        const AsyncData<StudySessionSummary?>(
+          StudySessionSummary(
+            reviewedCount: 30,
+            correctCount: 30,
+            missedCardIds: <String>[],
+            goalStatus: StudyResultGoalStatus(
+              streakDays: 3,
+              goalDoneCards: 22,
+              goalTargetCards: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Daily goal reached!'), findsOneWidget);
+    expect(find.text('22 of 20 completed today'), findsOneWidget);
+  });
+
+  // §1: "Disabled Goal không phát completion". Finalize returns no goal status
+  // when no goal is configured, and a session with nothing to complete must
+  // not read as a completion.
+  testWidgets('no goal configured completes nothing', (tester) async {
+    await tester.pumpWidget(
+      wrap(
+        const AsyncData<StudySessionSummary?>(
+          StudySessionSummary(
+            reviewedCount: 24,
+            correctCount: 21,
+            missedCardIds: <String>[],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Daily goal reached!'), findsNothing);
+    expect(find.text('Daily goal completed!'), findsNothing);
+    expect(find.text('Session complete'), findsOneWidget);
+  });
+
+  // A goal that is still short keeps the standard hero. §3 branches on the
+  // completion alone, and the kit's goal-missed state has no rule in this
+  // build for when a shortfall counts as almost — recorded as int-73.
+  testWidgets('a goal still short keeps the standard result', (tester) async {
+    await tester.pumpWidget(
+      wrap(
+        const AsyncData<StudySessionSummary?>(
+          StudySessionSummary(
+            reviewedCount: 14,
+            correctCount: 12,
+            missedCardIds: <String>[],
+            goalStatus: StudyResultGoalStatus(
+              streakDays: 12,
+              goalDoneCards: 14,
+              goalTargetCards: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Session complete'), findsOneWidget);
+    expect(find.text('Daily goal completed!'), findsNothing);
+  });
+
   testWidgets('a zero-card summary renders 0% without dividing by zero', (
     tester,
   ) async {

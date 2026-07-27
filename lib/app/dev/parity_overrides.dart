@@ -135,6 +135,12 @@ List<Override> parityOverridesFor(String fixtureId) {
     'MX-VIS-077' => <Override>[
       studyResultProvider.overrideWith(_FailedStudyResult.new),
     ],
+    // Study Result goal-met: the same terminal-state argument as `MX-VIS-054`,
+    // with a summary whose contribution crossed the target — the transition
+    // `complete-daily-goal.md` §3 hands to this surface.
+    'MX-VIS-080' => <Override>[
+      studyResultProvider.overrideWith(_GoalMetStudyResult.new),
+    ],
     // The answer-save error: the write the dialog reports is the one broken
     // here. Everything else on screen is the real Fill stage.
     'MX-VIS-078' => <Override>[
@@ -160,6 +166,26 @@ class _SeededStudyResult extends StudyResult {
           goalStatus: StudyResultGoalStatus(
             streakDays: 12,
             goalDoneCards: 14,
+            goalTargetCards: 20,
+          ),
+        ),
+      );
+}
+
+/// The Study Result on a session that met the daily goal
+/// (`study-result--goal-met`): the kit's 13-day streak at 22 of 20.
+class _GoalMetStudyResult extends StudyResult {
+  @override
+  AsyncValue<StudySessionSummary?> build() =>
+      const AsyncData<StudySessionSummary?>(
+        StudySessionSummary(
+          reviewedCount: 24,
+          correctCount: 21,
+          missedCardIds: <String>['m1', 'm2', 'm3'],
+          durationActiveMs: 390000,
+          goalStatus: StudyResultGoalStatus(
+            streakDays: 13,
+            goalDoneCards: 22,
             goalTargetCards: 20,
           ),
         ),

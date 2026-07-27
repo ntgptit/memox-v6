@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/core/theme/tokens/app_border_radii.dart';
 import 'package:memox_v6/core/theme/tokens/app_component_dimensions.dart';
+import 'package:memox_v6/core/theme/tokens/app_icon_sizes.dart';
+import 'package:memox_v6/core/theme/extensions/app_text_styles.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 
 /// Tone grounds of the kit `.badge` contract.
 enum MxBadgeTone { primary, success, warning, error }
@@ -25,18 +28,31 @@ enum MxBadgeTone { primary, success, warning, error }
 /// - label: the pill text (localized by the caller).
 /// - tone: primary/success/warning/error grounds (kit `.badge--<tone>`).
 /// - soft: kit `badge--soft` — tinted surface instead of the solid ground.
+/// - leadingIcon: an optional glyph *before* the label, at the kit's
+///   icon-size-sm with a space-1 gap. The kit's achievement badges pair a
+///   symbol with their text so the meaning does not rest on colour alone
+///   (KIT-08); the icon constructor replaces the text instead, which is a
+///   different job.
 /// - `MxBadge.icon(...)`: a glyph in place of the text, for the states the
 ///   kit marks with a symbol rather than a count (the up-to-date deck row's
 ///   check). Announced by `semanticLabel`, since a glyph reads as nothing.
 ///
 /// Variants:
 /// See [MxBadgeTone] plus the `soft` flag.
+///
+/// Layout note:
+/// The pill centres its content, so under loose bounded constraints — a
+/// `Column` child, an `Align`, a stretch cross-axis — it fills the width it
+/// is offered instead of wrapping its label. Place it where the main axis is
+/// unbounded (a `Row` child, including the deck row's trailing slot) or wrap
+/// it in a min-size `Row`.
 class MxBadge extends StatelessWidget {
   const MxBadge({
     super.key,
     required this.label,
     this.tone = MxBadgeTone.primary,
     this.soft = false,
+    this.leadingIcon,
   }) : icon = null,
        semanticLabel = null;
 
@@ -46,7 +62,8 @@ class MxBadge extends StatelessWidget {
     required String this.semanticLabel,
     this.tone = MxBadgeTone.primary,
     this.soft = false,
-  }) : label = '';
+  }) : label = '',
+       leadingIcon = null;
 
   final String label;
   final MxBadgeTone tone;
@@ -55,6 +72,9 @@ class MxBadge extends StatelessWidget {
   /// Non-null only for [MxBadge.icon].
   final IconData? icon;
   final String? semanticLabel;
+
+  /// Optional glyph before [label]; ignored by [MxBadge.icon].
+  final IconData? leadingIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -102,15 +122,7 @@ class MxBadge extends StatelessWidget {
         borderRadius: AppBorderRadii.pill,
       ),
       child: icon == null
-          ? Text(
-              label,
-              style: styles.overline.copyWith(
-                fontWeight: styles.boldWeight,
-                letterSpacing: null,
-                height: 1,
-                color: soft ? softFg : solidFg,
-              ),
-            )
+          ? _label(styles, soft ? softFg : solidFg)
           : Icon(
               icon,
               // The kit sizes this glyph at font-size-xs so it matches the
@@ -119,6 +131,29 @@ class MxBadge extends StatelessWidget {
               color: soft ? softFg : solidFg,
               semanticLabel: semanticLabel,
             ),
+    );
+  }
+
+  Widget _label(AppTextStyles styles, Color foreground) {
+    final text = Text(
+      label,
+      style: styles.overline.copyWith(
+        fontWeight: styles.boldWeight,
+        letterSpacing: null,
+        height: 1,
+        color: foreground,
+      ),
+    );
+    final leadingIcon = this.leadingIcon;
+    if (leadingIcon == null) return text;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        // Kit: icon-size-sm with a space-1 gap before the text.
+        Icon(leadingIcon, size: AppIconSizes.sm, color: foreground),
+        const MxGap.s1(),
+        text,
+      ],
     );
   }
 }
