@@ -89,9 +89,12 @@ class _FillStage extends HookConsumerWidget {
         .value;
     final l10n = AppLocalizations.of(context);
     final answer = useMxTextSubmitState();
-    final outcome = ref.watch(fillFeedbackProvider(card.cardId));
-    final hintShown = ref.watch(fillHintProvider(card.cardId));
     final position = runtime.position;
+    // The round is part of the key: a retry round re-opens this same card, and
+    // state keyed on the card alone would carry the last round's grade in.
+    final round = position.roundIndex;
+    final outcome = ref.watch(fillFeedbackProvider(card.cardId, round));
+    final hintShown = ref.watch(fillHintProvider(card.cardId, round));
     final total = position.roundCardIds.length;
     final currentIndex = position.cardPosition + 1;
 
@@ -206,8 +209,14 @@ class _FillStage extends HookConsumerWidget {
             icon: Symbols.lightbulb_rounded,
             label: l10n.fillHelpLabel,
             block: true,
-            onPressed: () =>
-                ref.read(fillHintProvider(card.cardId).notifier).reveal(),
+            onPressed: () => ref
+                .read(
+                  fillHintProvider(
+                    card.cardId,
+                    runtime.position.roundIndex,
+                  ).notifier,
+                )
+                .reveal(),
           ),
         ),
         const MxGap.s3(),
@@ -236,7 +245,12 @@ class _FillStage extends HookConsumerWidget {
 
   void _check(WidgetRef ref, String rawInput, bool hintUsed) {
     ref
-        .read(fillFeedbackProvider(card.cardId).notifier)
+        .read(
+          fillFeedbackProvider(
+            card.cardId,
+            runtime.position.roundIndex,
+          ).notifier,
+        )
         .grade(_input(rawInput, hintUsed));
   }
 

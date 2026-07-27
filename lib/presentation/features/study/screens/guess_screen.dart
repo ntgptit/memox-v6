@@ -92,7 +92,8 @@ class _GuessStage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final cardId = runtime.currentCard?.cardId ?? '';
-    final selected = ref.watch(guessSelectionProvider(cardId));
+    final round = runtime.position.roundIndex;
+    final selected = ref.watch(guessSelectionProvider(cardId, round));
     final position = runtime.position;
     final total = position.roundCardIds.length;
     final current = position.cardPosition + 1;
@@ -128,7 +129,7 @@ class _GuessStage extends ConsumerWidget {
               correctChoiceId: question.correctChoiceId,
               onTap: selected == null
                   ? () => ref
-                        .read(guessSelectionProvider(cardId).notifier)
+                        .read(guessSelectionProvider(cardId, round).notifier)
                         .select(option.choiceId)
                   : null,
             ),

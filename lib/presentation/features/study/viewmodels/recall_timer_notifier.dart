@@ -33,12 +33,19 @@ class RecallTimerState {
 /// manual [reveal]. Keyed by `cardId` so advancing to the next card starts a
 /// fresh 20-second budget. The screen maps the resulting resolution to a
 /// [RecallInput]; this notifier never touches the repository or commits.
+///
+/// `roundIndex` is part of the key for the same reason it is on the Fill and
+/// Guess state next door: a mastery retry round re-opens the same card, the
+/// element survives that boundary, and a timer keyed on the card alone would
+/// hand the retry the previous round's clock — on a one-card retry round, a
+/// countdown already at zero, so the card times out again the moment it opens
+/// and can never be passed.
 @riverpod
 class RecallTimer extends _$RecallTimer {
   Timer? _ticker;
 
   @override
-  RecallTimerState build(String cardId) {
+  RecallTimerState build(String cardId, int roundIndex) {
     _ticker = Timer.periodic(kRecallTickInterval, (_) => _tick());
     ref.onDispose(() => _ticker?.cancel());
     return RecallTimerState(
