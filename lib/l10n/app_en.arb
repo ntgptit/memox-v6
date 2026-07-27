@@ -1527,6 +1527,19 @@
   "@cardMovedMessage": {
     "description": "Success confirmation after moving a card (move-flashcard.md)."
   },
+  "cardHiddenBadge": "Hidden",
+  "@cardHiddenBadge": {
+    "description": "The hidden marker on a card row (`hide-flashcard.md` §4) — also the accessible name's state, so it is not icon-only."
+  },
+  "cardHiddenSemantics": "{card}, hidden",
+  "@cardHiddenSemantics": {
+    "description": "Accessible name of a hidden card row: the term followed by its visibility state, so the state is not carried by an icon alone (`hide-flashcard.md` §4).",
+    "placeholders": {
+      "card": {
+        "type": "String"
+      }
+    }
+  },
   "cardHiddenMessage": "Card hidden",
   "@cardHiddenMessage": {
     "description": "Success confirmation after hiding a card (hide-flashcard.md)."

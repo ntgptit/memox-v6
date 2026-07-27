@@ -472,7 +472,13 @@ class _LeafBranch extends ConsumerWidget {
         for (final card in directCards)
           // Tapping a card opens its lifecycle actions (WBS 6.5).
           MxTappable(
-            semanticLabel: card.term,
+            // §4: the hidden state is a semantic label, "không chỉ opacity/
+            // color". The row drew the crossed-eye glyph, which `MxIcon`
+            // renders without a label of its own, so a screen reader heard
+            // the same name for a hidden card as for a studied one.
+            semanticLabel: card.isHidden
+                ? l10n.cardHiddenSemantics(card.term)
+                : card.term,
             onTap: () =>
                 _openCardSettings(context, ref, deckId: deckId, card: card),
             child: Row(

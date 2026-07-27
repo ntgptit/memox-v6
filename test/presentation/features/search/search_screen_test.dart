@@ -107,6 +107,33 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  // `hide-flashcard.md` §1: a hidden Card stays findable, and search is where a
+  // learner goes to find one back. §4: its state is a semantic label, "không
+  // chỉ opacity/color" — the row must say hidden, not merely look it (int-93).
+  testWidgets('a hidden card is listed and reads as hidden', (tester) async {
+    await database.customStatement(
+      "UPDATE flashcards SET is_hidden = 1 WHERE id = 'c1'",
+    );
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'hel');
+    await tester.pumpAndSettle();
+
+    expect(find.text('hello'), findsOneWidget);
+    expect(find.text('Hidden'), findsOneWidget);
+    // The row's own label leads; MxTappable merges its descendants after it,
+    // so the state is heard before the term's own text repeats it.
+    expect(
+      tester.getSemantics(find.text('hello')).label,
+      startsWith('hello, hidden'),
+    );
+
+    semantics.dispose();
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   // KIT-26-02: no-results must not look like the empty dataset. Both were the
   // same centred caption, so "you haven't searched yet" and "your search found
   // nothing" were indistinguishable; the kit's `search/no-results` is a

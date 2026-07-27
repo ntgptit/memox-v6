@@ -375,8 +375,11 @@ ORDER BY d.normalized_name, d.id;
 -- search-rank-v1). Ranks card-term and deck-name matches across the pair by
 -- the absolute tier order exact(0) → prefix(1) → contained(2), then the field
 -- priority Card.term(0) → Deck.name(1), then a stable normalized/id tie-break.
--- Hidden/deleted cards are excluded before ranking. Card term and deck name are
--- normalized differently, so the caller passes each its own normalized query.
+-- Deleted cards are excluded before ranking; hidden ones are not. `hide-
+-- flashcard.md` §1 keeps a hidden Card findable and manageable and excludes it
+-- only from fresh study queues, so search returns it with `is_hidden` set and
+-- the row says so. Card term and deck name are normalized differently, so the
+-- caller passes each its own normalized query.
 -- Meaning/translation matching needs normalized storage those columns lack —
 -- a recorded follow-up.
 searchLibraryContent:
@@ -387,11 +390,11 @@ SELECT f.id AS id, 'card' AS result_type, f.term AS display_text,
     WHEN f.normalized_term LIKE :cardQuery || '%' THEN 1
     ELSE 2
   END AS tier,
-  0 AS field_priority, f.normalized_term AS sort_key
+  0 AS field_priority, f.normalized_term AS sort_key, f.is_hidden AS is_hidden
 FROM flashcards f
 INNER JOIN decks fd ON fd.id = f.deck_id
 WHERE fd.language_pair_id = :languagePairId
-  AND f.deleted_at IS NULL AND f.is_hidden = 0
+  AND f.deleted_at IS NULL
   AND f.normalized_term LIKE '%' || :cardQuery || '%'
 UNION ALL
 SELECT d.id AS id, 'deck' AS result_type, d.name AS display_text,
@@ -401,7 +404,7 @@ SELECT d.id AS id, 'deck' AS result_type, d.name AS display_text,
     WHEN d.normalized_name LIKE :deckQuery || '%' THEN 1
     ELSE 2
   END AS tier,
-  1 AS field_priority, d.normalized_name AS sort_key
+  1 AS field_priority, d.normalized_name AS sort_key, 0 AS is_hidden
 FROM decks d
 WHERE d.language_pair_id = :languagePairId
   AND d.normalized_name LIKE '%' || :deckQuery || '%'
@@ -413,7 +416,7 @@ UNION ALL
 SELECT d.id AS id, 'deck' AS result_type, d.name AS display_text,
   d.id AS deck_id,
   3 AS tier,
-  2 AS field_priority, d.normalized_name AS sort_key
+  2 AS field_priority, d.normalized_name AS sort_key, 0 AS is_hidden
 FROM decks d
 WHERE d.language_pair_id = :languagePairId
   AND d.normalized_description IS NOT NULL
@@ -421,10 +424,6 @@ WHERE d.language_pair_id = :languagePairId
   AND d.normalized_name NOT LIKE '%' || :deckQuery || '%'
 ORDER BY tier, field_priority, sort_key, id;
 
--- Valid move targets for a card (WBS 6.5 move-flashcard). Every deck in the
--- pair that can hold cards — Empty or Leaf, i.e. it has no child decks (a deck
--- with children is a Parent and 4.3 exclusivity forbids it owning cards) —
--- excluding the card's current deck. Ordered by name for the picker.
 -- Every deck in the pair as a card target, with the reason an ineligible one
 -- cannot receive the card (`add-content-to-deck.md` §3 node F, §4).
 --
@@ -443,6 +442,10 @@ FROM decks d
 WHERE d.language_pair_id = :languagePairId
 ORDER BY d.normalized_name, d.id;
 
+-- Valid move targets for a card (WBS 6.5 move-flashcard). Every deck in the
+-- pair that can hold cards — Empty or Leaf, i.e. it has no child decks (a deck
+-- with children is a Parent and 4.3 exclusivity forbids it owning cards) —
+-- excluding the card's current deck. Ordered by name for the picker.
 cardMoveDestinationDecks:
 SELECT d.* FROM decks d
 WHERE d.language_pair_id = :languagePairId

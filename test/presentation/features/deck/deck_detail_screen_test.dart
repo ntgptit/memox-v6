@@ -129,6 +129,37 @@ void main() {
     await disposeAndFlushStreams(tester);
   });
 
+  // `hide-flashcard.md` §4: the hidden state is a semantic label, "không chỉ
+  // opacity/color". The row drew the crossed-eye glyph and nothing else, and
+  // `MxIcon` renders without a label of its own — so a screen reader heard the
+  // same name for a hidden card as for a studied one (`int-93`).
+  testWidgets('a hidden card row says it is hidden', (tester) async {
+    await database.flashcardDao.insertFlashcard(
+      'c1',
+      'root',
+      'hello',
+      'hello',
+      'xin chào',
+      0,
+      0,
+    );
+    await database.customStatement(
+      "UPDATE flashcards SET is_hidden = 1 WHERE id = 'c1'",
+    );
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(app('root'));
+    await pumpDeck(tester);
+
+    expect(
+      tester.getSemantics(find.text('hello')).label,
+      startsWith('hello, hidden'),
+    );
+
+    semantics.dispose();
+    await disposeAndFlushStreams(tester);
+  });
+
   testWidgets('a parent deck lists children and browses deeper', (
     tester,
   ) async {
