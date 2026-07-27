@@ -42,5 +42,23 @@
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
   <script src="flutter_bootstrap.js" async></script>
+  <!--
+    The offline shell (WBS 5.7.4). Registered here rather than through
+    Flutter's bootstrap, which no longer registers a worker on a first visit
+    and warns that the path which does is going away
+    (flutter/flutter#156910). Registration waits for `load` so it never
+    competes with the app's own startup fetches for bandwidth.
+  -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('offline_shell.js').catch(function (error) {
+          // Not fatal: the app runs fine online without it, and saying so
+          // beats a silent failure when someone is asking why offline broke.
+          console.warn('MemoX offline shell did not register:', error);
+        });
+      });
+    }
+  </script>
 </body>
 </html>
