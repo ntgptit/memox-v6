@@ -495,44 +495,6 @@ void main() {
     await disposeAndFlushStreams(tester);
   });
 
-  // §4 draws the decision as a banner *plus* a detail block: the draft beside
-  // the stored card, term and meaning each. The banner alone named the term —
-  // the one thing the two cards are guaranteed to share — so `Add anyway` and
-  // `View existing` were both guesses (`int-96`).
-  testWidgets('the review shows both cards, not just the term', (tester) async {
-    await database.flashcardDao.insertFlashcard(
-      'c0',
-      'd1',
-      '안녕',
-      '안녕',
-      'hi',
-      0,
-      0,
-    );
-
-    await tester.pumpWidget(app());
-    await pumpEditor(tester);
-
-    await tester.enterText(find.byType(TextField).at(0), '안녕');
-    await tester.enterText(find.byType(TextField).at(1), 'hello there');
-    await tester.pump();
-    await tester.tap(find.text('Save'));
-    await pumpEditor(tester);
-
-    // Two of them: the screen's own title, and the draft column's label. §4
-    // words that column as the new or edited card, which reads right beside
-    // the existing one even where it echoes the title.
-    expect(find.text('New card'), findsNWidgets(2));
-    expect(find.text('Existing card'), findsOneWidget);
-    // The draft's meaning and the stored card's, side by side — the only
-    // thing that tells them apart.
-    expect(find.text('hello there'), findsWidgets);
-    expect(find.text('hi'), findsOneWidget);
-    expect(find.text('Review the differences before saving.'), findsOneWidget);
-
-    await disposeAndFlushStreams(tester);
-  });
-
   // §5: "Open existing: draft retained until explicit discard/return", and §8
   // repeats it. This used `go` to the existing card's *deck*, which replaces
   // the route stack: the editor and everything typed into it were gone, and

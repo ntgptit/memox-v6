@@ -440,10 +440,6 @@
   "@cardSaveFailedMessage": {
     "description": "Card Editor submit-error banner (WBS 5.3.2B)."
   },
-  "duplicateCompareDraftLabel": "Thẻ mới",
-  "duplicateCompareEditedLabel": "Thẻ đã sửa",
-  "duplicateCompareExistingLabel": "Thẻ hiện có",
-  "duplicateReviewHint": "Hãy xem lại khác biệt trước khi lưu.",
   "duplicateCheckFailedMessage": "Không thể kiểm tra trùng lặp. Thử lại.",
   "duplicateCardMessage": "Bạn đã có một thẻ cho \u201c{term}\u201d.",
   "@duplicateCardMessage": {

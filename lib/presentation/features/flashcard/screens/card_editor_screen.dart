@@ -1,11 +1,10 @@
+import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
-import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
-import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_editor_chrome.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_tags_section.dart';
@@ -326,16 +325,6 @@ class _CardEditorForm extends HookConsumerWidget {
                           ),
                         ],
                       ),
-                      const MxGap.s3(),
-                      _DuplicateComparison(
-                        draftLabel: isEdit
-                            ? l10n.duplicateCompareEditedLabel
-                            : l10n.duplicateCompareDraftLabel,
-                        draftTerm: term.controller.text,
-                        draftMeaning: meaning.controller.text,
-                        existing: duplicates.first,
-                        l10n: l10n,
-                      ),
                       const MxGap.s6(),
                     ],
                     if (failure != null) ...[
@@ -563,91 +552,4 @@ String _saveFailureMessage(AppFailure failure, AppLocalizations l10n) {
     return l10n.duplicateCheckFailedMessage;
   }
   return l10n.cardSaveFailedMessage;
-}
-
-/// The duplicate comparison (`resolve-duplicate-flashcard.md` §4).
-///
-/// §4 draws the decision as a banner *plus* a detail block — the draft beside
-/// the card already stored, term and meaning each, under "Review the
-/// differences before saving." The banner alone named the term, which is the
-/// one thing the two cards are guaranteed to share: it told the learner a
-/// collision existed and gave them nothing to decide with, so `Add anyway` and
-/// `View existing` were both guesses.
-///
-/// Two columns, as §4 draws them. They wrap rather than truncate, because §7
-/// lists long text on a narrow device as a state this has to survive.
-class _DuplicateComparison extends StatelessWidget {
-  const _DuplicateComparison({
-    required this.draftLabel,
-    required this.draftTerm,
-    required this.draftMeaning,
-    required this.existing,
-    required this.l10n,
-  });
-
-  final String draftLabel;
-  final String draftTerm;
-  final String draftMeaning;
-  final Flashcard existing;
-  final AppLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _DuplicateColumn(
-                label: draftLabel,
-                term: draftTerm,
-                meaning: draftMeaning,
-              ),
-            ),
-            const MxGap.s4(),
-            Expanded(
-              child: _DuplicateColumn(
-                label: l10n.duplicateCompareExistingLabel,
-                term: existing.term,
-                meaning: existing.primaryMeaning,
-              ),
-            ),
-          ],
-        ),
-        const MxGap.s3(),
-        MxText(l10n.duplicateReviewHint, role: MxTextRole.caption),
-      ],
-    );
-  }
-}
-
-class _DuplicateColumn extends StatelessWidget {
-  const _DuplicateColumn({
-    required this.label,
-    required this.term,
-    required this.meaning,
-  });
-
-  final String label;
-  final String term;
-  final String meaning;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        MxText(
-          label,
-          role: MxTextRole.caption,
-          color: context.colors.textSecondary,
-        ),
-        const MxGap.s1(),
-        MxText(term, role: MxTextRole.subtitle),
-        MxText(meaning, role: MxTextRole.caption),
-      ],
-    );
-  }
 }
