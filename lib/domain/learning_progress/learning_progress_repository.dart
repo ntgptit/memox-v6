@@ -75,6 +75,16 @@ abstract interface class LearningProgressRepository {
   /// eligible card classified once (New = Box 0/no due; Due = Box 1..7 with
   /// `dueAt <= nowUtc`), hidden/deleted and Box 8 excluded, due ordered
   /// soonest-first. Never mutates progress.
+  /// Every studiable card in [scopeDeckId]'s subtree, hidden and deleted
+  /// excluded (ST-TYPE-003).
+  ///
+  /// Separate from [studyCandidatesInScope] because it answers a different
+  /// question: that one selects what is *scheduled* — new and due — while
+  /// Practice draws the scope itself. Practice sets `scheduleSrs = false` and
+  /// contributes no Goal or Streak, so a card's box does not decide whether it
+  /// can be practised.
+  Future<List<String>> studiableCardIdsInScope({required String scopeDeckId});
+
   Future<StudyCandidates> studyCandidatesInScope({
     required String scopeDeckId,
     required DateTime nowUtc,

@@ -173,6 +173,13 @@ class DriftLearningProgressRepository implements LearningProgressRepository {
   }
 
   @override
+  Future<List<String>> studiableCardIdsInScope({required String scopeDeckId}) {
+    return _database.learningProgressDao
+        .studiableCardIdsInScope(scopeDeckId)
+        .get();
+  }
+
+  @override
   Future<StudyCandidates> studyCandidatesInScope({
     required String scopeDeckId,
     required DateTime nowUtc,
