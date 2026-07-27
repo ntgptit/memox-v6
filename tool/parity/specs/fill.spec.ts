@@ -59,7 +59,7 @@ test('MX-VIS-078 reports an answer that could not be saved', async ({
   });
 
   await expectRoute(page, '/study');
-  await page.getByRole('textbox').first().fill('chingu');
+  await page.getByRole('textbox').first().fill('hakgyo');
   await tapControl(page, 'Check');
   await tapControl(page, 'Continue');
 
