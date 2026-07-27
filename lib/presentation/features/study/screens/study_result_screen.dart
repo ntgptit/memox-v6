@@ -20,6 +20,9 @@ import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_progress.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
+import 'package:memox_v6/core/theme/tokens/app_border_radii.dart';
+import 'package:memox_v6/core/theme/tokens/app_sizes.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_skeleton.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// Study Result (WBS 5.6.13; `finalize-study-session.md`, kit `study-result`).
@@ -58,7 +61,9 @@ class _StudyResultBody extends ConsumerWidget {
     return MxAsyncBuilder<StudySessionSummary?>(
       value: ref.watch(studyResultProvider),
       loadingLabel: l10n.studyFinalizingLabel,
-      loading: (context) => _Finalizing(label: l10n.studyFinalizingLabel),
+      loading: (context) => _Finalizing(
+        retrying: ref.read(studyResultProvider.notifier).isRetrying,
+      ),
       // §6's own composition. The shared compact banner carried the title and
       // a small Retry, and this screen is terminal by design — "no back; exit
       // only via the explicit actions" — so a finalize that kept failing left
@@ -69,20 +74,119 @@ class _StudyResultBody extends ConsumerWidget {
       ),
       errorTitle: l10n.studyFinalizeErrorTitle,
       data: (context, summary) => summary == null
-          ? _Finalizing(label: l10n.studyFinalizingLabel)
+          ? _Finalizing(
+              retrying: ref.read(studyResultProvider.notifier).isRetrying,
+            )
           : SingleChildScrollView(child: _ResultBody(summary: summary)),
     );
   }
 }
 
+/// The finalizing view (kit `study-result--finalizing`, and its
+/// `retry-finalize` reframing).
+///
+/// §6 asks this state for a "stable progress/status", and the kit spends the
+/// whole screen on it: the hero, then the shapes of the stats and the streak
+/// card that are about to arrive. This was one centred sentence, so the screen
+/// went from a line of text to a full page the moment the commit landed — and
+/// a learner who had just watched a save fail was shown the same first-attempt
+/// copy when they pressed Retry, with nothing saying the app had heard them.
+///
+/// No CTA, by §4: "không có CTA khi đang xử lý".
 class _Finalizing extends StatelessWidget {
-  const _Finalizing({required this.label});
+  const _Finalizing({required this.retrying});
 
-  final String label;
+  /// Renders §9's `retry` state rather than the first attempt.
+  final bool retrying;
+
+  /// Kit `<S w={44} h={22} />` over `<S w="64%" h={10} />` in each stat card,
+  /// and `<S h={120} r={20} />` for the streak card.
+  static const double _statValueWidth = 44;
+  static const double _statValueHeight = 22;
+  static const double _statLabelHeight = 10;
+  static const double _statLabelFactor = 0.64;
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: MxText(label, role: MxTextRole.body));
+    final l10n = AppLocalizations.of(context);
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const MxGap.s4(),
+            Center(
+              child: MxIconTile(
+                icon: retrying
+                    ? Symbols.refresh_rounded
+                    : Symbols.cloud_sync_rounded,
+                tone: MxIconTileTone.accent,
+                large: true,
+              ),
+            ),
+            const MxGap.s3(),
+            MxText(
+              retrying
+                  ? l10n.studyFinalizeRetryingLabel
+                  : l10n.studyFinalizingLabel,
+              role: MxTextRole.subtitle,
+              textAlign: TextAlign.center,
+            ),
+            const MxGap.s1(),
+            MxText(
+              retrying
+                  ? l10n.studyFinalizeRetryingBody
+                  : l10n.studyFinalizingBody,
+              role: MxTextRole.body,
+              color: context.colors.textSecondary,
+              textAlign: TextAlign.center,
+            ),
+            const MxGap.s4(),
+            Row(
+              children: <Widget>[
+                for (var stat = 0; stat < 3; stat++) ...<Widget>[
+                  if (stat > 0) const MxGap.s3(),
+                  const Expanded(child: _StatSkeleton()),
+                ],
+              ],
+            ),
+            const MxGap.s4(),
+            const MxSkeleton(
+              height: AppSizes.size2xl,
+              borderRadius: AppBorderRadii.card,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One stat card's placeholder: the number's box over its label's line.
+class _StatSkeleton extends StatelessWidget {
+  const _StatSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return MxCard(
+      variant: MxCardVariant.muted,
+      padding: MxCardPadding.sm,
+      child: Column(
+        children: <Widget>[
+          const MxSkeleton(
+            width: _Finalizing._statValueWidth,
+            height: _Finalizing._statValueHeight,
+          ),
+          const MxGap.s2(),
+          FractionallySizedBox(
+            widthFactor: _Finalizing._statLabelFactor,
+            child: const MxSkeleton(height: _Finalizing._statLabelHeight),
+          ),
+        ],
+      ),
+    );
   }
 }
 

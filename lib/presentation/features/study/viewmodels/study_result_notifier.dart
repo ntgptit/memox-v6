@@ -62,9 +62,22 @@ class StudyResult extends _$StudyResult {
 
   /// Re-attempts a failed finalize (`finalize-study-session.md` §6).
   Future<void> retry() {
+    _retrying = true;
     state = const AsyncData<StudySessionSummary?>(null);
     return finalize();
   }
+
+  /// Whether the finalize in flight is a re-attempt.
+  ///
+  /// §9 lists `retry` as its own state beside `finalizing`, and the kit
+  /// reframes the whole view for it — a learner who just watched a save fail
+  /// should be told the app is trying again, not shown the same first-attempt
+  /// copy. The flag stays set until a later first finalize, which cannot
+  /// happen for one session: `finalize()` only runs from the not-yet-finalized
+  /// state, and a success leaves the summary in place.
+  bool get isRetrying => _retrying;
+
+  bool _retrying = false;
 
   /// Starts a relearn session over the cards this session got wrong
   /// (`relearn-cards.md` §1: "Relearn là session mới do user explicit start
