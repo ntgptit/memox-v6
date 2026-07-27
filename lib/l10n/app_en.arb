@@ -887,6 +887,10 @@
   "@studyExitBody": {
     "description": "Study exit confirm body. Names both halves: committed answers survive, the in-progress one may not."
   },
+  "matchExitUnsavedBody": "The pairs you have matched in this round are not saved yet, so this round starts over when you come back.",
+  "@matchExitUnsavedBody": {
+    "description": "Extra line on the study exit confirm during a Match round with locked pairs (exit-study-session.md \u00a75 \"Warn unfinished input not saved\")."
+  },
   "studyExitKeepLabel": "Keep studying",
   "@studyExitKeepLabel": {
     "description": "Study exit confirm: the safe choice, and the primary in a focused context (§4)."

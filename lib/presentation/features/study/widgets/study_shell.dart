@@ -30,6 +30,7 @@ class StudyShell extends StatelessWidget {
     required this.body,
     this.actions = const <Widget>[],
     this.bottomBar,
+    this.exitNote,
   });
 
   /// The mode title, e.g. "Review".
@@ -53,6 +54,16 @@ class StudyShell extends StatelessWidget {
   /// Trailing app-bar actions (font-size, overflow menu).
   final List<Widget> actions;
 
+  /// An extra line for the exit confirm, naming what *this* stage has not
+  /// committed yet.
+  ///
+  /// `exit-study-session.md` §5 requires the confirm to warn what is not
+  /// saved, and §4's body names one thing: "the current unfinished answer".
+  /// That is true of every stage that answers a card at a time, and wrong for
+  /// Match, where a round is one board — a learner nine pairs into ten has
+  /// nine unsaved matches, not one unfinished answer.
+  final String? exitNote;
+
   /// Optional bottom action row (e.g. Review's swipe/continue controls).
   final Widget? bottomBar;
 
@@ -70,12 +81,15 @@ class StudyShell extends StatelessWidget {
   /// new transition.
   Future<void> _confirmExit(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
+    final exitNote = this.exitNote;
     final leave = await showMxConfirmDialog(
       context,
       icon: Symbols.logout_rounded,
       tone: MxConfirmTone.warning,
       title: l10n.studyExitTitle,
-      text: l10n.studyExitBody,
+      text: exitNote == null
+          ? l10n.studyExitBody
+          : '${l10n.studyExitBody}\n\n$exitNote',
       confirmLabel: l10n.studyExitConfirmLabel,
       cancelLabel: l10n.studyExitKeepLabel,
     );
