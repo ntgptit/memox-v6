@@ -380,13 +380,17 @@ class _ResultRow extends HookConsumerWidget {
     Future<void> open() async {
       if (opening.value) return;
       opening.value = true;
-      // Hand off to the owning object's contract (open-search-result.md §2): a
-      // deck opens its detail, a card opens the card editor in its deck.
+      // Hand off to the owning object's contract. §3 branches "Valid Deck →
+      // Open Deck contract" and "Valid Card → Open Card/detail contract" — a
+      // card opens its *detail*, not its editor. It opened the editor because
+      // no detail screen existed, so selecting a search hit dropped the
+      // learner into a form over content they had only asked to look at
+      // (`int-100`).
       switch (result.type) {
         case SearchResultType.deck:
           await context.pushDeckDetail(result.deckId);
         case SearchResultType.card:
-          await context.pushEditCard(result.deckId, result.id);
+          await context.pushCardDetail(result.deckId, result.id);
       }
       opening.value = false;
       // §4: "Sau edit/delete, return refresh affected result/index". Search

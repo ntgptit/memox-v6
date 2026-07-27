@@ -336,7 +336,20 @@ try {
         process.exit(0);
       }
 
-      const dartFiles = output('git', ['ls-files', '*.dart']).split(/\r?\n/).filter(Boolean);
+      // `--others --exclude-standard` as well as the index: a file that is
+      // not committed yet was invisible here, so a brand-new screen skipped
+      // the format check entirely and only CI — which checks out the commit —
+      // saw it. That is precisely when a file is most likely to be
+      // misformatted.
+      const dartFiles = output('git', [
+        'ls-files',
+        '--cached',
+        '--others',
+        '--exclude-standard',
+        '*.dart',
+      ])
+        .split(/\r?\n/)
+        .filter(Boolean);
       // Windows caps the command line around 32k characters; batch the
       // file list so the format check keeps working as the tree grows.
       const FORMAT_BATCH = 80;
