@@ -1,5 +1,5 @@
+import 'package:memox_v6/domain/deck/card_target.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
-import 'package:memox_v6/domain/deck/deck.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -8,8 +8,11 @@ part 'card_lifecycle_viewmodel.g.dart';
 /// The decks a card can move into (WBS 6.5; `move-flashcard.md`) — Empty/Leaf
 /// decks in the card's pair, excluding its current deck. One-shot read.
 @riverpod
-Future<List<Deck>> cardMoveDestinations(Ref ref, {required String cardId}) {
-  return ref.watch(moveFlashcardUseCaseProvider).destinationsFor(cardId);
+Future<List<CardTarget>> cardMoveDestinations(
+  Ref ref, {
+  required String cardId,
+}) {
+  return ref.watch(moveFlashcardUseCaseProvider).targetCandidatesFor(cardId);
 }
 
 /// Hide/show and delete commands for a card (WBS 6.5; `hide-flashcard.md`,

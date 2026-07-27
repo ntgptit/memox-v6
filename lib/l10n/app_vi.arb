@@ -348,6 +348,8 @@
   "editCardLabel": "S\u1eeda",
   "moveCardLabel": "Chuy\u1ec3n",
   "moveCardPickerTitle": "Chuy\u1ec3n th\u1ebb t\u1edbi\u2026",
+  "cardTargetParentHelper": "Chọn một deck bên trong",
+  "cardTargetSourceHelper": "Đã ở đây",
   "moveCardNoDestinationsBody": "Ch\u01b0a c\u00f3 deck n\u00e0o kh\u00e1c ch\u1ee9a \u0111\u01b0\u1ee3c th\u1ebb n\u00e0y. H\u00e3y t\u1ea1o m\u1ed9t deck tr\u1ed1ng tr\u01b0\u1edbc.",
   "hideCardLabel": "\u1ea8n",
   "showCardLabel": "Hi\u1ec7n",

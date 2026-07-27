@@ -677,6 +677,14 @@
   "@moveCardPickerTitle": {
     "description": "Card move-destination picker sheet title (WBS 6.5)."
   },
+  "cardTargetParentHelper": "Choose a deck inside",
+  "@cardTargetParentHelper": {
+    "description": "Card-target picker helper on a Parent row (add-content-to-deck.md §3 node F, §4)."
+  },
+  "cardTargetSourceHelper": "Already here",
+  "@cardTargetSourceHelper": {
+    "description": "Card-target picker helper on the card's current deck."
+  },
   "moveCardNoDestinationsBody": "No other deck can hold this card yet. Create an empty deck first.",
   "@moveCardNoDestinationsBody": {
     "description": "Shown when no deck is an eligible card move target (WBS 6.5)."

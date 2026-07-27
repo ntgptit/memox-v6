@@ -36,6 +36,21 @@ extension DeckRowMapper on db.Deck {
   );
 }
 
+/// The card-target candidate row: the deck columns plus the computed reason it
+/// cannot take the card. Drift generates a result class per query.
+extension CardTargetCandidateRowMapper on db.CardTargetCandidatesResult {
+  Deck toDomain() => Deck(
+    id: id,
+    languagePairId: languagePairId,
+    parentId: parentId,
+    name: name,
+    normalizedName: normalizedName,
+    description: description,
+    createdAt: utcDateTime(createdAt),
+    updatedAt: utcDateTime(updatedAt),
+  );
+}
+
 /// The move-picker candidate row: the deck columns plus the computed reason
 /// it cannot receive the move. Drift generates a distinct result class per
 /// query, so the deck mapping is repeated rather than shared.

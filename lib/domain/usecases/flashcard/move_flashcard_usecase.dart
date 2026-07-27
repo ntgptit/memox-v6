@@ -1,6 +1,7 @@
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/deck/card_target.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
 import 'package:memox_v6/domain/flashcard/flashcard_repository.dart';
 
@@ -63,6 +64,24 @@ class MoveFlashcardUseCase {
     return _decks.cardMoveTargets(
       deck.languagePairId,
       excludeDeckId: card.deckId,
+    );
+  }
+
+  /// Every deck in the pair as a target, each carrying the reason it cannot
+  /// take the card (`add-content-to-deck.md` §3 node F, §4).
+  ///
+  /// §3's ineligible branch is "Disabled · choose child" and §4 draws the
+  /// Parent row present but disabled. [destinationsFor] returns only the
+  /// eligible ones, which left a learner unable to tell a Parent they must
+  /// drill into from a deck that is not there at all.
+  Future<List<CardTarget>> targetCandidatesFor(String cardId) async {
+    final card = await _cards.findById(cardId);
+    if (card == null || card.isDeleted) return const [];
+    final deck = await _decks.findById(card.deckId);
+    if (deck == null) return const [];
+    return _decks.cardTargetCandidates(
+      deck.languagePairId,
+      sourceDeckId: card.deckId,
     );
   }
 }
