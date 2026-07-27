@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_dialog.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// Icon tint tones of the kit ConfirmDialog composite.
@@ -25,40 +23,37 @@ Future<bool> showMxConfirmDialog(
   required String cancelLabel,
   bool danger = false,
 }) async {
-  final colors = context.colors;
-  final iconColor = switch (tone) {
-    MxConfirmTone.neutral => colors.text,
-    MxConfirmTone.warning => colors.warning,
-    MxConfirmTone.error => colors.error,
-  };
-
   final confirmed = await showMxDialog<bool>(
     context,
+    // The kit's icon `Dialog`: the tone tile leads, the copy is centred under
+    // it, and the two actions share one row. This used to compose the form
+    // layout with a bare glyph inside the body (`int-54`).
+    icon: icon,
+    tone: switch (tone) {
+      MxConfirmTone.neutral => MxIconTileTone.primary,
+      MxConfirmTone.warning => MxIconTileTone.warning,
+      MxConfirmTone.error => MxIconTileTone.error,
+    },
     title: title,
-    body: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (icon != null) ...[
-          MxIcon(icon: icon, color: iconColor),
-          const MxGap.s3(),
-        ],
-        MxText(text),
-      ],
-    ),
+    body: MxText(text),
     actions: [
       Builder(
         builder: (dialogContext) => MxButton(
           onPressed: () => Navigator.of(dialogContext).pop(false),
           label: cancelLabel,
           variant: MxButtonVariant.ghost,
+          block: true,
         ),
       ),
       Builder(
         builder: (dialogContext) => MxButton(
           onPressed: () => Navigator.of(dialogContext).pop(true),
           label: confirmLabel,
-          danger: danger || tone == MxConfirmTone.error,
+          // Tone colours the tile, not the button: the kit's error-toned
+          // dialogs still carry a primary confirm unless the action itself
+          // destroys something, which is what `danger` says.
+          danger: danger,
+          block: true,
         ),
       ),
     ],

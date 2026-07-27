@@ -6,6 +6,7 @@ import 'package:memox_v6/core/theme/tokens/app_colors.dart';
 import 'package:memox_v6/presentation/shared/bottom_sheets/mx_select_sheet.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
 
 Widget _host(Widget child) => MaterialApp(
   theme: AppTheme.light(),
@@ -17,6 +18,7 @@ void main() {
     Widget launcher({
       required void Function(bool) onResult,
       MxConfirmTone tone = MxConfirmTone.error,
+      bool danger = true,
     }) {
       return _host(
         Builder(
@@ -31,6 +33,7 @@ void main() {
                   text: "This can't be undone.",
                   confirmLabel: 'Delete',
                   cancelLabel: 'Cancel',
+                  danger: danger,
                 ),
               );
             },
@@ -47,10 +50,14 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
       expect(find.text('Delete this card?'), findsOneWidget);
-      // Error tone tints the header icon.
-      final icon = tester.widget<Icon>(find.byIcon(Symbols.delete));
-      expect(icon.color, AppColors.light.error);
-      // Error tone forces the danger confirm fill.
+      // The kit's icon `Dialog` leads with a tone tile rather than a bare
+      // glyph in the body (`int-54`).
+      final tile = tester.widget<MxIconTile>(find.byType(MxIconTile));
+      expect(tile.tone, MxIconTileTone.error);
+      expect(tile.icon, Symbols.delete);
+      // Danger is the caller's word, not the tone's: the kit tones the tile
+      // and still draws a primary confirm unless the action destroys
+      // something.
       final confirm = tester.widget<MxButton>(
         find.widgetWithText(MxButton, 'Delete'),
       );

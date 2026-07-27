@@ -5,6 +5,7 @@ import 'package:memox_v6/core/theme/tokens/app_border_radii.dart';
 import 'package:memox_v6/core/theme/tokens/app_sizes.dart';
 import 'package:memox_v6/core/theme/tokens/app_spacing.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
 
 /// The one centered modal decision surface (kit `MxDialog`).
 ///
@@ -26,10 +27,18 @@ import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 /// Public API:
 /// - title: the accessible dialog name.
 /// - body: supporting content slot.
-/// - actions: right-aligned controls (ghost cancel + primary/danger
+/// - actions: controls — right-aligned in the form layout, sharing one
+///   full-width row in the icon layout (ghost cancel + primary/danger
 ///   confirm by convention).
+/// - icon + tone: switch to the kit's icon `Dialog` layout, a centred
+///   column with a tone tile above centred copy. The kit has two dialog
+///   helpers and this build had only the form one, so every confirm
+///   rendered its title above a bare glyph, left-aligned (`int-54`).
 /// - `showMxDialog<T>(context, ...)`: presents over the token scrim and
 ///   returns the route result; barrier dismiss maps to `null`.
+///
+/// Variants:
+/// form (default) and icon (pass [icon]).
 ///
 /// States:
 /// open, dismissed via barrier/Escape, action-resolved.
@@ -39,17 +48,22 @@ class MxDialog extends StatelessWidget {
     required this.title,
     required this.body,
     required this.actions,
+    this.icon,
+    this.tone = MxIconTileTone.primary,
   });
 
   final String title;
   final Widget body;
   final List<Widget> actions;
 
+  /// Present it and the panel takes the kit's icon `Dialog` layout.
+  final IconData? icon;
+  final MxIconTileTone tone;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final elevations = context.elevations;
-    final styles = context.textStyles;
 
     return Semantics(
       scopesRoute: true,
@@ -67,34 +81,79 @@ class MxDialog extends StatelessWidget {
               borderRadius: AppBorderRadii.xxl,
               boxShadow: elevations.shadowLg,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: styles.title.copyWith(color: colors.text)),
-                const MxGap.s4(),
-                DefaultTextStyle.merge(
-                  style: styles.body.copyWith(color: colors.text),
-                  child: body,
-                ),
-                const MxGap.s4(),
-                // Wrap, not Row: on the 320-capped panel (and at 200% text
-                // scale) the action pair wraps instead of overflowing — the
-                // kit's documented dialog-action behavior.
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Wrap(
-                    alignment: WrapAlignment.end,
-                    spacing: AppSpacing.space2,
-                    runSpacing: AppSpacing.space2,
-                    children: actions,
-                  ),
-                ),
-              ],
-            ),
+            child: switch (icon) {
+              null => _formLayout(context),
+              final tile => _iconLayout(context, tile),
+            },
           ),
         ),
       ),
+    );
+  }
+
+  /// The kit's `FormDialog` shape: left-aligned copy over a right-aligned
+  /// action row. Right for create/rename, which is what it was built for.
+  Widget _formLayout(BuildContext context) {
+    final styles = context.textStyles;
+    final colors = context.colors;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: styles.title.copyWith(color: colors.text)),
+        const MxGap.s4(),
+        DefaultTextStyle.merge(
+          style: styles.body.copyWith(color: colors.text),
+          child: body,
+        ),
+        const MxGap.s4(),
+        // Wrap, not Row: on the 320-capped panel (and at 200% text
+        // scale) the action pair wraps instead of overflowing — the
+        // kit's documented dialog-action behavior.
+        Align(
+          alignment: Alignment.centerRight,
+          child: Wrap(
+            alignment: WrapAlignment.end,
+            spacing: AppSpacing.space2,
+            runSpacing: AppSpacing.space2,
+            children: actions,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// The kit's icon `Dialog`: a centred column — tone tile, the copy centred
+  /// under it, then the actions sharing one full-width row.
+  Widget _iconLayout(BuildContext context, IconData icon) {
+    final styles = context.textStyles;
+    final colors = context.colors;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        MxIconTile(icon: icon, tone: tone, large: true),
+        const MxGap.s4(),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: styles.title.copyWith(color: colors.text),
+        ),
+        const MxGap.s2(),
+        DefaultTextStyle.merge(
+          style: styles.body.copyWith(color: colors.textSecondary),
+          textAlign: TextAlign.center,
+          child: body,
+        ),
+        const MxGap.s4(),
+        Row(
+          children: <Widget>[
+            for (final (index, action) in actions.indexed) ...<Widget>[
+              if (index > 0) const MxGap.s3(),
+              Expanded(child: action),
+            ],
+          ],
+        ),
+      ],
     );
   }
 }
@@ -105,10 +164,18 @@ Future<T?> showMxDialog<T>(
   required String title,
   required Widget body,
   required List<Widget> actions,
+  IconData? icon,
+  MxIconTileTone tone = MxIconTileTone.primary,
 }) {
   return showDialog<T>(
     context: context,
     barrierColor: context.colors.overlay,
-    builder: (context) => MxDialog(title: title, body: body, actions: actions),
+    builder: (context) => MxDialog(
+      title: title,
+      body: body,
+      actions: actions,
+      icon: icon,
+      tone: tone,
+    ),
   );
 }
