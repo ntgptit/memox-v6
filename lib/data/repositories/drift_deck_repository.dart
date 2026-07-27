@@ -4,6 +4,7 @@ import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/data/database/sqlite_error_mapper.dart';
 import 'package:memox_v6/data/mappers/content_mapper.dart';
 import 'package:memox_v6/domain/deck/deck.dart' as domain;
+import 'package:memox_v6/domain/deck/move_destination.dart' as domain;
 import 'package:memox_v6/domain/deck/deck_summary.dart' as domain;
 import 'package:memox_v6/domain/deck/deck_content_state.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
@@ -104,6 +105,24 @@ class DriftDeckRepository implements DeckRepository {
   Future<List<domain.Deck>> ancestors(String deckId) async {
     final rows = await _database.deckDao.deckAncestors(deckId).get();
     return rows.map((row) => row.toDomain()).toList();
+  }
+
+  @override
+  Future<List<domain.MoveDestination>> moveDestinationCandidates(
+    String languagePairId, {
+    required String movingDeckId,
+  }) async {
+    final rows = await _database.deckDao
+        .moveDestinationCandidates(movingDeckId, languagePairId)
+        .get();
+    return rows
+        .map(
+          (row) => domain.MoveDestination(
+            deck: row.toDomain(),
+            ineligibility: domain.MoveIneligibility.parse(row.ineligibility),
+          ),
+        )
+        .toList();
   }
 
   @override

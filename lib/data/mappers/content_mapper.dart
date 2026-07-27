@@ -36,6 +36,23 @@ extension DeckRowMapper on db.Deck {
   );
 }
 
+/// The move-picker candidate row: the deck columns plus the computed reason
+/// it cannot receive the move. Drift generates a distinct result class per
+/// query, so the deck mapping is repeated rather than shared.
+extension MoveDestinationCandidateRowMapper
+    on db.MoveDestinationCandidatesResult {
+  Deck toDomain() => Deck(
+    id: id,
+    languagePairId: languagePairId,
+    parentId: parentId,
+    name: name,
+    normalizedName: normalizedName,
+    description: description,
+    createdAt: utcDateTime(createdAt),
+    updatedAt: utcDateTime(updatedAt),
+  );
+}
+
 /// The child-scoped summary row carries the same columns as the root one,
 /// but drift generates a distinct result class per query, so the mapping is
 /// repeated rather than shared.

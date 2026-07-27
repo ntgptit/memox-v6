@@ -487,6 +487,34 @@
   "@moveToLibraryRootLabel": {
     "description": "Picker row that un-nests the deck to the Library root (WBS 6.2)."
   },
+  "moveDeckBlockedSemantics": "{deck}, {reason}",
+  "@moveDeckBlockedSemantics": {
+    "description": "Accessible name of a disabled move destination: the deck followed by why it cannot receive the move.",
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "moveDeckSelfHelper": "This deck",
+  "@moveDeckSelfHelper": {
+    "description": "Move picker helper on the deck being moved (move-deck.md §4, §7)."
+  },
+  "moveDeckDescendantHelper": "Inside this deck",
+  "@moveDeckDescendantHelper": {
+    "description": "Move picker helper on a deck inside the moving deck's subtree (move-deck.md §7)."
+  },
+  "moveDeckHoldsCardsHelper": "Contains cards",
+  "@moveDeckHoldsCardsHelper": {
+    "description": "Move picker helper on a Leaf destination (move-deck.md §4, §7)."
+  },
+  "moveDeckAlreadyThereHelper": "Already here",
+  "@moveDeckAlreadyThereHelper": {
+    "description": "Move picker helper on the moving deck's current parent."
+  },
   "moveDeckNoDestinationsBody": "No other decks to move into — you can still move this to the Library root.",
   "@moveDeckNoDestinationsBody": {
     "description": "Shown when no nested deck is an eligible move destination (WBS 6.2)."

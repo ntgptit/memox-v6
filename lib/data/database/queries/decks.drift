@@ -326,6 +326,35 @@ ORDER BY depth DESC;
 -- descendant would cycle), holds no direct active cards (deck exclusivity 4.3
 -- forbids a deck owning both cards and child decks), and is not the deck's
 -- current parent (a no-op move). Ordered by name for the picker.
+-- Every deck in the pair as a move destination, with the reason an
+-- ineligible one cannot be chosen (`move-deck.md` §3 node E, §4, §11).
+--
+-- The picker used to show only the eligible rows, which left a learner unable
+-- to tell a deck that holds cards from one that is simply missing. §5's rules
+-- become a reason string here so the list can disable a row and say why; the
+-- store still has final say on the write.
+moveDestinationCandidates:
+WITH RECURSIVE subtree (id) AS (
+  SELECT :movingDeckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree s ON d.parent_id = s.id
+)
+SELECT d.*,
+  CASE
+    WHEN d.id = :movingDeckId THEN 'self'
+    WHEN d.id IN (SELECT id FROM subtree) THEN 'descendant'
+    WHEN EXISTS (
+      SELECT 1 FROM flashcards f
+      WHERE f.deck_id = d.id AND f.deleted_at IS NULL
+    ) THEN 'holdsCards'
+    WHEN d.id IS (SELECT parent_id FROM decks WHERE id = :movingDeckId)
+      THEN 'alreadyThere'
+    ELSE 'eligible'
+  END AS ineligibility
+FROM decks d
+WHERE d.language_pair_id = :languagePairId
+ORDER BY d.normalized_name, d.id;
+
 moveDestinationDecks:
 WITH RECURSIVE subtree (id) AS (
   SELECT :movingDeckId

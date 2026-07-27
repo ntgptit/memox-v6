@@ -1,4 +1,5 @@
 import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/deck/move_destination.dart';
 import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/domain/deck/deck_content_state.dart';
 
@@ -47,6 +48,13 @@ abstract interface class DeckRepository {
   /// moving deck's own subtree (a cycle), decks holding direct cards (4.3
   /// mixed content) and the current parent (a no-op). Library root is not a
   /// row here — the caller offers it separately.
+  /// Every deck in the pair as a move candidate, each carrying the reason it
+  /// cannot be chosen when it cannot (`move-deck.md` §3 node E, §4, §11).
+  Future<List<MoveDestination>> moveDestinationCandidates(
+    String languagePairId, {
+    required String movingDeckId,
+  });
+
   Future<List<Deck>> moveDestinations(
     String languagePairId, {
     required String movingDeckId,
