@@ -38,8 +38,10 @@ extension AppNavigation on BuildContext {
       GoRouter.of(this).go(RoutePaths.deckDetail(deckId));
 
   /// Pushes a nested deck onto the browse stack (browse-nested-decks:
-  /// Back walks up one level).
-  void pushDeckDetail(String deckId) =>
+  /// Back walks up one level). The future completes when that branch is
+  /// popped, so a caller can refresh what it handed off
+  /// (`open-search-result.md` §4).
+  Future<void> pushDeckDetail(String deckId) =>
       GoRouter.of(this).push(RoutePaths.deckDetail(deckId));
 
   /// Opens Library search (WBS 10.2).
@@ -50,7 +52,8 @@ extension AppNavigation on BuildContext {
       GoRouter.of(this).push(RoutePaths.newCard(deckId));
 
   /// Opens the Card Editor in edit mode for an existing card (WBS 6.3).
-  void pushEditCard(String deckId, String cardId) =>
+  /// Completes when the editor is popped, so the caller can refresh.
+  Future<void> pushEditCard(String deckId, String cardId) =>
       GoRouter.of(this).push(RoutePaths.editCard(deckId, cardId));
 
   /// Pops one level, falling back to the Library root.
