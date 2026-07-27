@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
 import 'package:memox_v6/domain/study_session/session_card_snapshot.dart';
@@ -94,5 +95,43 @@ void main() {
       findsOneWidget,
     );
     expect(find.widgetWithText(MxButton, 'Back to Today'), findsOneWidget);
+  });
+
+  // §4 and §8: the resume error owns the frame, says the answers are safe,
+  // and carries both ways out. It used to be a compact banner with a Retry —
+  // on a full-screen route with no tab bar and no back, a resume that kept
+  // failing had the learner cornered.
+  testWidgets('a failed resume offers Try again and a way back', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          studySessionRuntimeProvider.overrideWith(
+            (ref) => Future<StudyRuntimeState?>.error(
+              ValidationFailure(field: 'session', code: 'unreadable'),
+              StackTrace.empty,
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const StudySessionScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('We couldn’t resume your session'), findsOneWidget);
+    expect(find.text('Your saved answers are still here.'), findsOneWidget);
+    expect(find.widgetWithText(MxButton, 'Try again'), findsOneWidget);
+    expect(find.widgetWithText(MxButton, 'Back to Today'), findsOneWidget);
+    expect(
+      find.widgetWithText(MxButton, 'Start fresh'),
+      findsNothing,
+      reason: 'ending a running session is still undefined (int-15)',
+    );
   });
 }
