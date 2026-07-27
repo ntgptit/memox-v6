@@ -1,6 +1,7 @@
-import { spawn, spawnSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { createServer } from 'node:http';
+import { createReadStream, existsSync, mkdirSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // Playwright lives with the parity harness, which is where the repo installs
 // it; the smoke reuses that install rather than adding a second copy.
@@ -64,13 +65,76 @@ if (!process.argv.includes('--skip-build')) {
   ]);
 }
 
-process.stdout.write('\n==> Serving the release bundle\n');
-const server = spawn('node', [join(repoRoot, 'tool', 'parity', 'serve.mjs')], {
-  cwd: repoRoot,
-  shell: process.platform === 'win32',
-  stdio: 'inherit',
-  env: { ...process.env, PARITY_WEB_ROOT: bundle, PARITY_PORT: String(port) },
+/**
+ * Serves the bundle from *this* process.
+ *
+ * The first version spawned `tool/parity/serve.mjs` as a child. On Windows
+ * that child outlived every way this script tried to stop it — a shell wrapper
+ * swallowed `kill`, and a script killed mid-run never reached its cleanup at
+ * all — so the server kept holding the port and the run never terminated. One
+ * such orphan sat for three hours with its work long finished.
+ *
+ * An in-process server cannot be orphaned: when this process ends, for any
+ * reason, the listener ends with it. The headers match the parity server's,
+ * because the Drift wasm worker needs cross-origin isolation to start.
+ */
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.wasm': 'application/wasm',
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml',
+  '.ttf': 'font/ttf',
+  '.otf': 'font/otf',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.bin': 'application/octet-stream',
+  '.symbols': 'text/plain; charset=utf-8',
+};
+
+const bundleRoot = resolve(bundle);
+const bundlePrefix = `${bundleRoot}${sep}`.toLowerCase();
+
+const server = createServer((request, response) => {
+  const url = new URL(request.url ?? '/', 'http://localhost');
+  const relative = normalize(decodeURIComponent(url.pathname)).replace(
+    /^([/\\])+/,
+    '',
+  );
+
+  let filePath = resolve(bundleRoot, relative);
+  if (
+    filePath.toLowerCase() !== bundleRoot.toLowerCase() &&
+    !filePath.toLowerCase().startsWith(bundlePrefix)
+  ) {
+    response.writeHead(403).end('Forbidden');
+    return;
+  }
+  if (existsSync(filePath) && statSync(filePath).isDirectory()) {
+    filePath = join(bundleRoot, 'index.html');
+  }
+  if (!existsSync(filePath) && extname(relative) === '') {
+    filePath = join(bundleRoot, 'index.html');
+  }
+  if (!existsSync(filePath)) {
+    response.writeHead(404).end('Not found');
+    return;
+  }
+
+  response.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  response.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  response.setHeader('Cache-Control', 'no-store');
+  response.setHeader(
+    'Content-Type',
+    MIME[extname(filePath).toLowerCase()] ?? 'application/octet-stream',
+  );
+  createReadStream(filePath).pipe(response);
 });
+
+process.stdout.write('\n==> Serving the release bundle\n');
+await new Promise((ready) => server.listen(port, '127.0.0.1', ready));
 
 const consoleErrors = [];
 const pageErrors = [];
@@ -148,7 +212,11 @@ try {
         .catch(() => {});
   }
 } finally {
-  server.kill();
+  // `closeAllConnections` as well as `close`: a browser that kept a socket
+  // open would otherwise hold the listener, and the whole point of moving the
+  // server in-process was that this run always ends.
+  server.closeAllConnections();
+  await new Promise((closed) => server.close(closed));
 }
 
 writeFileSync(
