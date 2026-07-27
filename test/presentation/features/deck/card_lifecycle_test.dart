@@ -274,6 +274,27 @@ void main() {
     await disposeAndFlushStreams(tester);
   });
 
+  // §4 draws the confirm around the card itself: the term in quotes, then
+  // that its learning progress goes with it. The dialog said the same
+  // generic sentence for every card, so the one destructive step in this
+  // flow could not be checked against what the learner meant to delete
+  // (`int-102`).
+  testWidgets('the delete confirm names the card', (tester) async {
+    await tester.pumpWidget(app());
+    await pumpStreams(tester);
+
+    await tester.tap(find.text('hello'));
+    await pumpStreams(tester);
+    await tester.tap(find.text('Delete'));
+    await pumpStreams(tester);
+
+    expect(find.textContaining('\u201chello\u201d'), findsOneWidget);
+
+    await tester.tap(find.text('Keep card'));
+    await pumpStreams(tester);
+    await disposeAndFlushStreams(tester);
+  });
+
   testWidgets('Keep card cancels the delete', (tester) async {
     await tester.pumpWidget(app());
     await pumpStreams(tester);

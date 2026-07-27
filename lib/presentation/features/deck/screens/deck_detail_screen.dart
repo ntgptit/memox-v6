@@ -1,3 +1,5 @@
+import 'package:memox_v6/app/di/usecase_providers.dart';
+import 'package:memox_v6/domain/flashcard/delete_card_impact.dart';
 import 'package:flutter/material.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -369,6 +371,7 @@ Future<void> _openCardSettings(
   // Capture the notifier before the sheet await — the row's WidgetRef must
   // not be used across the async gap.
   final notifier = ref.read(cardLifecycleCommandViewmodelProvider.notifier);
+  final impactOf = ref.read(deleteFlashcardUseCaseProvider).impactOf;
   final action = await showCardSettingsSheet(context, isHidden: card.isHidden);
   if (!context.mounted || action == null) return;
   switch (action) {
@@ -392,12 +395,44 @@ Future<void> _openCardSettings(
       );
     case CardSettingsAction.delete:
       final l10n = AppLocalizations.of(context);
+      // §3's first node loads the content, session and progress impact, and
+      // §9 asks the confirm to state that impact exactly. One sentence
+      // covered both a card nobody was studying and a card sitting in the
+      // session the learner has open, which are not the same decision.
+      final DeleteCardImpact impact;
+      try {
+        impact = await impactOf(card.id);
+      } on Object {
+        // A delete whose safety cannot be established is not one to wave
+        // through — the same reasoning the use case applies when the runtime
+        // will not assemble.
+        if (!context.mounted) return;
+        showMxSnackbar(context, message: l10n.cardDeleteFailedMessage);
+        return;
+      }
+      if (!context.mounted) return;
+
+      // §5: "Current prompt hoặc pending answer | Block delete; user phải
+      // exit, commit answer hoặc explicit skip trước delete". The store
+      // refuses it either way, but arriving there through a destructive
+      // confirm and a generic failure told the learner nothing about what to
+      // do next.
+      if (impact == DeleteCardImpact.currentPrompt) {
+        // Told, not asked: there is no decision to offer here, only the thing
+        // that has to happen first.
+        showMxSnackbar(context, message: l10n.deleteCardBlockedMessage);
+        return;
+      }
+
       final confirmed = await showMxConfirmDialog(
         context,
         icon: Symbols.delete_rounded,
         tone: MxConfirmTone.error,
         title: l10n.deleteCardTitle,
-        text: l10n.deleteCardBody,
+        text: impact == DeleteCardImpact.inSession
+            ? '${l10n.deleteCardBody(card.term)}\n\n'
+                  '${l10n.deleteCardInSessionBody}'
+            : l10n.deleteCardBody(card.term),
         confirmLabel: l10n.deleteCardConfirmLabel,
         cancelLabel: l10n.keepCardLabel,
         danger: true,

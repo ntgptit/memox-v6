@@ -12,6 +12,7 @@ import 'package:memox_v6/domain/study_modes/study_mode_factory.dart';
 import 'package:memox_v6/domain/study_session/session_scope.dart';
 import 'package:memox_v6/domain/study_session/session_state.dart';
 import 'package:memox_v6/domain/study_session/session_type.dart';
+import 'package:memox_v6/domain/flashcard/delete_card_impact.dart';
 import 'package:memox_v6/domain/usecases/flashcard/delete_flashcard_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/answer_study_stage_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
@@ -127,6 +128,37 @@ void main() {
     await delete.deleteCard(other);
 
     expect(await isDeleted(other), isTrue);
+  });
+
+  // §3's first node is "Load content/session/progress impact" and §9 asks the
+  // confirm to state the exact impact. The same sentence was shown for a card
+  // nobody was studying and for one sitting in the open session, which are not
+  // the same decision (`int-102`).
+  group('impact (delete-flashcard.md 3, 5, 9)', () {
+    test('the current prompt reports the blocking impact', () async {
+      await startSession();
+      final current = (await loadRuntime())!.position.currentCardId!;
+
+      expect(await delete.impactOf(current), DeleteCardImpact.currentPrompt);
+    });
+
+    test('another card in the session reports the skip impact', () async {
+      await startSession();
+      final runtime = (await loadRuntime())!;
+      final other = runtime.position.roundCardIds.firstWhere(
+        (id) => id != runtime.position.currentCardId,
+      );
+
+      expect(await delete.impactOf(other), DeleteCardImpact.inSession);
+    });
+
+    test('with no session running the impact is none', () async {
+      final cards = await database.flashcardDao
+          .pageFlashcardsByDeck('d1', 50, 0)
+          .get();
+
+      expect(await delete.impactOf(cards.first.id), DeleteCardImpact.none);
+    });
   });
 
   test('the block lifts once the session moves on', () async {

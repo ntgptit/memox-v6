@@ -721,9 +721,22 @@
   "@deleteCardTitle": {
     "description": "Delete-card confirmation title (WBS 6.5; delete-flashcard.md)."
   },
-  "deleteCardBody": "The card, its translations, tags and progress are permanently deleted. Finished study history is kept.",
+  "deleteCardBody": "\u201c{term}\u201d and its learning progress will be permanently deleted. Finished study history is kept.",
   "@deleteCardBody": {
-    "description": "Delete-card confirmation body (WBS 6.5)."
+    "description": "Delete-card confirmation body (delete-flashcard.md §4). Names the card: a destructive confirm that does not say which one cannot be checked.",
+    "placeholders": {
+      "term": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteCardInSessionBody": "This card is in your current study session. It will be skipped when its turn comes.",
+  "@deleteCardInSessionBody": {
+    "description": "Extra line on the delete confirm when the card is in the active session but is not the prompt on screen (delete-flashcard.md §5)."
+  },
+  "deleteCardBlockedMessage": "You are answering this card right now. Answer it or leave the session, then delete it.",
+  "@deleteCardBlockedMessage": {
+    "description": "Explains what to do before the blocked delete can proceed (delete-flashcard.md §5)."
   },
   "deleteCardConfirmLabel": "Delete card",
   "@deleteCardConfirmLabel": {
