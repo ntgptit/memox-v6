@@ -648,6 +648,7 @@
   "appearanceSaveFailedMessage": "Không đổi được giao diện. Lựa chọn trước đó vẫn được giữ.",
   "relearnQueueFailedMessage": "Không lưu được hàng đợi học lại. Câu trả lời của bạn vẫn an toàn.",
   "studyAnswerSaveFailedTitle": "Không lưu được câu trả lời",
+  "studyRequiredInteractionMessage": "Hoàn tất bước này trước khi tiếp tục.",
   "studyAnswerSaveFailedBody": "Câu trả lời của bạn vẫn còn đây.",
   "studyStaleSessionTitle": "Phiên học này đã thay đổi ở nơi khác",
   "studyStaleSessionBody": "Hãy tải lại tiến độ đã lưu.",

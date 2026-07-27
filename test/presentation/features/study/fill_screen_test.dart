@@ -190,6 +190,31 @@ void main() {
     expect(find.textContaining('starts with'), findsNothing);
   });
 
+  // §3 node D: an incomplete interaction gets inline guidance, and §9 gives
+  // it copy. The Check button is disabled while the field is blank — which §6
+  // also asks for — but the keyboard can still submit, and a blank keyboard
+  // submit did nothing at all and said nothing about why.
+  testWidgets('submitting nothing says what is missing', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    // Focus the field so the keyboard has a connection to submit through.
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Complete this step before continuing.'), findsOneWidget);
+    // §5: "Empty/invalid answer không tạo Attempt" — still no feedback state.
+    expect(find.text('Continue'), findsNothing);
+    expect(find.text('Check'), findsOneWidget);
+
+    // Typing clears it: there is something to check now.
+    await tester.enterText(find.byType(TextField), 'a');
+    await tester.pumpAndSettle();
+    expect(find.text('Complete this step before continuing.'), findsNothing);
+  });
+
   // The kit requires deck-driven language labels — "Type the term (Korean)",
   // not "Type the term" — so a learner with two active pairs can tell which
   // script the prompt wants.
