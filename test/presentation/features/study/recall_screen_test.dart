@@ -6,6 +6,7 @@ import 'package:memox_v6/domain/study_modes/strategies/recall_study_mode_strateg
 import 'package:memox_v6/domain/study_modes/study_mode_input.dart';
 import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
 import 'package:memox_v6/domain/study_session/session_card_snapshot.dart';
+import 'package:memox_v6/domain/study_session/session_checkpoint.dart';
 import 'package:memox_v6/domain/study_session/session_round_order.dart';
 import 'package:memox_v6/domain/study_session/session_scope.dart';
 import 'package:memox_v6/domain/study_session/session_timer_state.dart';
@@ -75,6 +76,44 @@ void main() {
       roundIndex: 1,
       seed: 1,
       cardIds: const <String>['c0'],
+    ),
+  );
+
+  /// The same one card, re-opened at [roundIndex] — what its mastery retry
+  /// round looks like when it is the only card that failed.
+  StudyRuntimeState atRound(int roundIndex) => StudyRuntimeState.assemble(
+    session: runtime().session,
+    stages: const <StudyModeType>[StudyModeType.recall],
+    cardSnapshots: <SessionCardSnapshot>[
+      SessionCardSnapshot(
+        id: 'sc0',
+        sessionId: 's1',
+        cardId: 'c0',
+        displayOrder: 0,
+        term: 'friend-term',
+        meaning: 'friend',
+        contentVersion: 1,
+        progressBox: 0,
+        progressRevision: 0,
+      ),
+    ],
+    currentOrder: SessionRoundOrder(
+      id: 'ro1',
+      sessionId: 's1',
+      roundIndex: roundIndex,
+      seed: 1,
+      cardIds: const <String>['c0'],
+    ),
+    checkpoint: SessionCheckpoint(
+      id: 'cp1',
+      sessionId: 's1',
+      stageIndex: 0,
+      roundIndex: roundIndex,
+      cardPosition: 0,
+      failedCardIds: const <String>['c0'],
+      timerStateJson: '{}',
+      stateVersion: 1,
+      updatedAt: now,
     ),
   );
 
@@ -154,6 +193,55 @@ void main() {
     final input = recorded.single as RecallInput;
     expect(input.resolution, RecallResolution.timeout);
     expect(input.elapsedActiveMs, greaterThanOrEqualTo(20000));
+  });
+
+  // `int-78`: the countdown is per attempt, and a mastery retry round re-opens
+  // the same card. Keyed by card alone the widget element survives that
+  // boundary, so the notifier is never released and the retry inherits a clock
+  // that has already run out — the card times out again the moment it opens,
+  // and the round can never be passed.
+  testWidgets('a retry round on the same card counts from full again', (
+    tester,
+  ) async {
+    var round = 1;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          studySessionRuntimeProvider.overrideWith(
+            (ref) => Future.value(atRound(round)),
+          ),
+          studyAnswerViewmodelProvider.overrideWith(_SpyAnswer.new),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const RecallScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Spend the whole budget: the deadline commits a timeout.
+    await tester.pump(const Duration(seconds: 20));
+    await tester.pump();
+    expect(recorded, hasLength(1));
+
+    // The failed round closes and the retry round opens on the same card.
+    round = 2;
+    ProviderScope.containerOf(
+      tester.element(find.byType(RecallScreen)),
+    ).invalidate(studySessionRuntimeProvider);
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      find.text('Show · 20s'),
+      findsOneWidget,
+      reason: 'a fresh budget, not the one the last round spent',
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 
   // `exit-study-session.md` §5: a paused countdown resumes where it stopped.
