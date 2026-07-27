@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
+import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/domain/search/search_result.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
@@ -349,8 +350,14 @@ class _ResultRow extends HookConsumerWidget {
     final icon = result.type == SearchResultType.deck
         ? Symbols.folder
         : Symbols.style;
+    // `hide-flashcard.md` §1 keeps a hidden Card findable, and search is where
+    // a learner goes to find one back — so the hit carries its state rather
+    // than looking like any other row. §4 wants that state read, not just seen.
+    final l10n = AppLocalizations.of(context);
     return MxTappable(
-      semanticLabel: result.displayText,
+      semanticLabel: result.isHidden
+          ? l10n.cardHiddenSemantics(result.displayText)
+          : result.displayText,
       onTap: open,
       child: Row(
         children: [
@@ -358,6 +365,14 @@ class _ResultRow extends HookConsumerWidget {
           MxIcon(icon: icon),
           const MxGap.s4(),
           Expanded(child: MxText(result.displayText, role: MxTextRole.body)),
+          if (result.isHidden) ...[
+            const MxGap.s2(),
+            MxText(
+              l10n.cardHiddenBadge,
+              role: MxTextRole.caption,
+              color: context.colors.textSecondary,
+            ),
+          ],
           const MxGap.s3(),
         ],
       ),

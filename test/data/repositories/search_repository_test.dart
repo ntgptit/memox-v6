@@ -5,7 +5,10 @@ import 'package:memox_v6/data/repositories/drift_search_repository.dart';
 import 'package:memox_v6/domain/search/search_result.dart';
 
 /// WBS 10.1 — the Library search read-model ranks exact → prefix → contained,
-/// cards before decks, excluding hidden/deleted and other pairs (search-rank-v1).
+/// cards before decks, excluding deleted cards and other pairs (search-rank-v1).
+///
+/// A hidden card is *not* excluded: `hide-flashcard.md` §1 keeps it findable
+/// and manageable, and only fresh study queues drop it (`int-93`).
 void main() {
   late db.AppDatabase database;
   late DriftSearchRepository search;
@@ -142,7 +145,7 @@ void main() {
     expect(results.where((r) => r.id == 'apples'), hasLength(1));
   });
 
-  test('hidden and deleted cards are excluded', () async {
+  test('a hidden card is still found, and says so', () async {
     await database.flashcardDao.insertFlashcard(
       'c_hidden',
       'root',
@@ -168,9 +171,20 @@ void main() {
       "UPDATE flashcards SET deleted_at = 1 WHERE id = 'c_deleted'",
     );
 
-    final ids = (await run('app')).map((r) => r.id).toSet();
-    expect(ids, isNot(contains('c_hidden')));
+    final results = await run('app');
+    final ids = results.map((r) => r.id).toSet();
+    // §1: "Hidden Card vẫn tồn tại trong Leaf list và có thể tìm/filter/
+    // manage." Search is where a learner goes to find one back, so dropping it
+    // here left a hidden card reachable only by remembering its deck.
+    expect(ids, contains('c_hidden'));
+    expect(
+      results.firstWhere((r) => r.id == 'c_hidden').isHidden,
+      isTrue,
+      reason: 'the row has to be able to mark it',
+    );
+    // Deleted is the exclusion the read-model does own.
     expect(ids, isNot(contains('c_deleted')));
+    expect(results.firstWhere((r) => r.id == 'c_app').isHidden, isFalse);
   });
 
   test('results never cross the language pair', () async {

@@ -651,6 +651,8 @@
   "cardAddedMessage": "Đã thêm thẻ",
   "cardUpdatedMessage": "Đã cập nhật thẻ",
   "cardMovedMessage": "Đã di chuyển thẻ",
+  "cardHiddenBadge": "Đang ẩn",
+  "cardHiddenSemantics": "{card}, đang ẩn",
   "cardHiddenMessage": "Đã ẩn thẻ",
   "cardVisibleMessage": "Thẻ đã hiện lại",
   "cardDeletedMessage": "Đã xóa thẻ",

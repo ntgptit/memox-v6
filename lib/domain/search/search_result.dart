@@ -11,6 +11,7 @@ class SearchResult {
     required this.type,
     required this.displayText,
     required this.deckId,
+    this.isHidden = false,
   });
 
   final String id;
@@ -22,4 +23,10 @@ class SearchResult {
   /// The owning deck — the card's deck, or the deck itself — for path
   /// resolution when the caller opens the result.
   final String deckId;
+
+  /// Whether a card hit is hidden from study (`hide-flashcard.md` §1). Always
+  /// false for a deck, which has no visibility of its own. The row carries it
+  /// so a hidden card reads as hidden rather than looking like any other hit —
+  /// search is where a learner goes to find one back.
+  final bool isHidden;
 }
