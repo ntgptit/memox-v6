@@ -32,6 +32,7 @@ import 'package:memox_v6/domain/usecases/flashcard/move_flashcard_usecase.dart';
 import 'package:memox_v6/domain/usecases/flashcard/manage_card_audio_usecase.dart';
 import 'package:memox_v6/domain/usecases/flashcard/manage_card_tags_usecase.dart';
 import 'package:memox_v6/domain/usecases/flashcard/view_card_detail_usecase.dart';
+import 'package:memox_v6/domain/usecases/search/resolve_search_result_usecase.dart';
 import 'package:memox_v6/domain/usecases/flashcard/manage_card_translations_usecase.dart';
 import 'package:memox_v6/domain/usecases/language_pair/create_language_pair_usecase.dart';
 import 'package:memox_v6/domain/usecases/learning_progress/initialise_card_progress_usecase.dart';
@@ -233,6 +234,14 @@ LoadStudyQueueCountsUseCase loadStudyQueueCountsUseCase(Ref ref) {
 ManageCardTranslationsUseCase manageCardTranslationsUseCase(Ref ref) {
   return ManageCardTranslationsUseCase(
     cards: ref.watch(flashcardRepositoryProvider),
+  );
+}
+
+@riverpod
+ResolveSearchResultUseCase resolveSearchResultUseCase(Ref ref) {
+  return ResolveSearchResultUseCase(
+    cards: ref.watch(flashcardRepositoryProvider),
+    decks: ref.watch(deckRepositoryProvider),
   );
 }
 

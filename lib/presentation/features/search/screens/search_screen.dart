@@ -1,3 +1,6 @@
+import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
+import 'package:memox_v6/domain/search/search_target.dart';
+import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -352,7 +355,12 @@ class _Results extends ConsumerWidget {
         }
         return ListView(
           children: [
-            for (final hit in shown) _ResultRow(result: hit, query: query),
+            for (final hit in shown)
+              _ResultRow(
+                result: hit,
+                query: query,
+                includeHidden: includeHidden,
+              ),
           ],
         );
       },
@@ -361,13 +369,21 @@ class _Results extends ConsumerWidget {
 }
 
 class _ResultRow extends HookConsumerWidget {
-  const _ResultRow({required this.result, required this.query});
+  const _ResultRow({
+    required this.result,
+    required this.query,
+    required this.includeHidden,
+  });
 
   final SearchResult result;
 
   /// The query whose result list this row belongs to, so the return can
   /// refresh exactly that list.
   final String query;
+
+  /// The visibility filter this list was built with, which decides whether a
+  /// card hidden since the search still belongs to it.
+  final bool includeHidden;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -386,11 +402,47 @@ class _ResultRow extends HookConsumerWidget {
       // no detail screen existed, so selecting a search hit dropped the
       // learner into a form over content they had only asked to look at
       // (`int-100`).
+      // §1: "Object được revalidate ngay trước navigation." The list is a
+      // snapshot of the index when the query ran, and between then and this
+      // tap the object can be deleted, hidden or moved. Opening it on the
+      // strength of the cached row is what §6 forbids — "Không mở object chỉ
+      // dựa vào text/path cũ" — and §2 branches a stale one to "Remove stale
+      // result + guidance" rather than to a broken route (`int-101`).
+      final resolution = await ref
+          .read(resolveSearchResultUseCaseProvider)
+          .call(result, includeHidden: includeHidden);
+      if (!context.mounted) {
+        opening.value = false;
+        return;
+      }
+      final l10n = AppLocalizations.of(context);
+      if (resolution case SearchTargetGone(:final reason)) {
+        // Refreshing *is* the removal: the read-model no longer returns it,
+        // so the row leaves for the same reason it should never have been
+        // tapped. The message says which reason, because a row vanishing
+        // under your finger with no explanation is its own defect.
+        ref.invalidate(searchResultsProvider(query: query));
+        showMxSnackbar(
+          context,
+          message: switch (reason) {
+            SearchTargetGoneReason.deleted => l10n.searchResultDeletedMessage,
+            SearchTargetGoneReason.hidden => l10n.searchResultHiddenMessage,
+          },
+        );
+        opening.value = false;
+        return;
+      }
+      final ready = resolution as SearchTargetReady;
+      // §2: "Moved → Use current path + notify". The result carries the deck
+      // the index knew; the store carries the one it is in now.
+      if (ready.moved) {
+        showMxSnackbar(context, message: l10n.searchResultMovedMessage);
+      }
       switch (result.type) {
         case SearchResultType.deck:
-          await context.pushDeckDetail(result.deckId);
+          await context.pushDeckDetail(ready.deckId);
         case SearchResultType.card:
-          await context.pushCardDetail(result.deckId, result.id);
+          await context.pushCardDetail(ready.deckId, result.id);
       }
       opening.value = false;
       // §4: "Sau edit/delete, return refresh affected result/index". Search
