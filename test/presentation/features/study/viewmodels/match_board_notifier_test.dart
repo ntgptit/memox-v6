@@ -10,6 +10,7 @@ import 'package:memox_v6/domain/study_session/session_round_order.dart';
 import 'package:memox_v6/domain/study_session/session_scope.dart';
 import 'package:memox_v6/domain/study_session/session_state.dart';
 import 'package:memox_v6/domain/study_session/session_type.dart';
+import 'package:memox_v6/domain/study_session/session_advance_policy.dart';
 import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
 import 'package:memox_v6/domain/study_session/study_session.dart';
 import 'package:memox_v6/domain/usecases/study_session/answer_study_stage_usecase.dart';
@@ -146,7 +147,7 @@ void main() {
   });
 
   test('flush threads the answer use case over every card in order', () async {
-    final useCase = _RecordingAnswer(runtime());
+    final useCase = _RecordingAnswer();
     final container = await harness(useCase: useCase);
     final board = container.read(matchBoardProvider.notifier);
 
@@ -170,17 +171,33 @@ void main() {
 /// Records the inputs it is called with and returns the same runtime, so the
 /// flush loop threads without touching a repository.
 class _RecordingAnswer implements AnswerStudyStageUseCase {
-  _RecordingAnswer(this._runtime);
-  final StudyRuntimeState _runtime;
+  _RecordingAnswer();
   final List<StudyModeInput> received = <StudyModeInput>[];
 
+  /// Advances the cursor, as the real use case does.
+  ///
+  /// It used to hand the same runtime back every time, which made the flush's
+  /// walk look right while the position never moved. That mattered once the
+  /// flush started skipping inputs the cursor has already passed — a stalled
+  /// cursor means every input after the first is "already committed".
   @override
   Future<StudyRuntimeState> call(
     StudyRuntimeState current,
     StudyModeInput input,
   ) async {
     received.add(input);
-    return _runtime;
+    return StudyRuntimeState(
+      session: current.session,
+      stages: current.stages,
+      position: SessionPosition(
+        stageIndex: current.position.stageIndex,
+        roundIndex: current.position.roundIndex,
+        roundCardIds: current.position.roundCardIds,
+        cardPosition: current.position.cardPosition + 1,
+        failedCardIds: current.position.failedCardIds,
+      ),
+      cardsById: current.cardsById,
+    );
   }
 
   @override

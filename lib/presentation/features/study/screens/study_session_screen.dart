@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
+import 'package:memox_v6/presentation/features/study/viewmodels/match_flush_notifier.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_answer_viewmodel.dart';
 import 'package:memox_v6/presentation/shared/dialogs/mx_dialog.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
@@ -72,8 +73,32 @@ class _StudyStageDispatch extends ConsumerWidget {
     listenMxAction(
       ref,
       studyAnswerViewmodelProvider,
-      onFailure: (failure) =>
-          unawaited(_reportAnswerFailure(context, ref, failure)),
+      onFailure: (failure) => unawaited(
+        _reportAnswerFailure(
+          context,
+          ref,
+          failure,
+          onRetry: () =>
+              ref.read(studyAnswerViewmodelProvider.notifier).retry(),
+        ),
+      ),
+    );
+
+    // Match commits a whole board rather than a card, through its own
+    // command, so the listener above never sees its failures: tapping
+    // `Next round` on a save that could not land did nothing at all, and the
+    // board sat there looking finished.
+    listenMxAction(
+      ref,
+      matchFlushProvider,
+      onFailure: (failure) => unawaited(
+        _reportAnswerFailure(
+          context,
+          ref,
+          failure,
+          onRetry: () => ref.read(matchFlushProvider.notifier).retry(),
+        ),
+      ),
     );
 
     // The result outlives the active session (finalize clears it), so show it
@@ -137,8 +162,9 @@ class _StudyStageDispatch extends ConsumerWidget {
 Future<void> _reportAnswerFailure(
   BuildContext context,
   WidgetRef ref,
-  AppFailure failure,
-) async {
+  AppFailure failure, {
+  required Future<void> Function() onRetry,
+}) async {
   final l10n = AppLocalizations.of(context);
   final isStale = failure is ConflictFailure;
   final retried = await showMxDialog<bool>(
@@ -162,7 +188,7 @@ Future<void> _reportAnswerFailure(
     ref.invalidate(studySessionRuntimeProvider);
     return;
   }
-  await ref.read(studyAnswerViewmodelProvider.notifier).retry();
+  await onRetry();
 }
 
 /// Commits a skip past a card the learner deleted or hid since the session

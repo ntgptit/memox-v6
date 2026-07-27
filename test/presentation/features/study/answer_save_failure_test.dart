@@ -83,6 +83,44 @@ void main() {
     ),
   );
 
+  StudyRuntimeState matchRuntime() => StudyRuntimeState.assemble(
+    session: StudySession(
+      id: 's1',
+      type: SessionType.newLearning,
+      deckId: 'd1',
+      scope: SessionScope.subtree,
+      state: SessionState.active,
+      revision: 0,
+      snapshotVersion: 1,
+      scheduleSrs: true,
+      startedAt: now,
+      finalizedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    ),
+    stages: const <StudyModeType>[StudyModeType.match],
+    cardSnapshots: <SessionCardSnapshot>[
+      SessionCardSnapshot(
+        id: 'sc0',
+        sessionId: 's1',
+        cardId: 'c0',
+        displayOrder: 0,
+        term: 'friend-term',
+        meaning: 'friend',
+        contentVersion: 1,
+        progressBox: 3,
+        progressRevision: 0,
+      ),
+    ],
+    currentOrder: SessionRoundOrder(
+      id: 'ro1',
+      sessionId: 's1',
+      roundIndex: 1,
+      seed: 1,
+      cardIds: const <String>['c0'],
+    ),
+  );
+
   Widget wrap(_FailingAnswer answer) => ProviderScope(
     overrides: [
       studySessionRuntimeProvider.overrideWith(
@@ -131,6 +169,48 @@ void main() {
       reason: 'the retry carries the same answer, not a fresh one',
     );
     expect(find.text('Couldn’t save your answer'), findsNothing);
+  });
+
+  // Match commits a whole board through its own command, so the dispatcher's
+  // answer listener never saw its failures: `Next round` on a save that could
+  // not land did nothing, and the board sat there looking finished.
+  testWidgets('a Match board that cannot be committed says so', (tester) async {
+    final answer = _FailingAnswer();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          studySessionRuntimeProvider.overrideWith(
+            (ref) => Future.value(matchRuntime()),
+          ),
+          answerStudyStageUseCaseProvider.overrideWithValue(answer),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const StudySessionScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // One pair: tapping both halves completes the board.
+    await tester.tap(find.text('friend-term'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('friend'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Next round'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Couldn’t save your answer'), findsOneWidget);
+    expect(find.text('Try again'), findsOneWidget);
+
+    answer.failNext = false;
+    await tester.tap(find.text('Try again'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Couldn’t save your answer'), findsNothing);
+    expect(answer.submitted, hasLength(2), reason: 'the board was re-sent');
   });
 
   // §9 gives a stale write its own copy: the session moved elsewhere, so the
