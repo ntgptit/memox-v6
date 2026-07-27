@@ -836,7 +836,27 @@
   "@cardSaveFailedMessage": {
     "description": "Card Editor submit-error banner (WBS 5.3.2B)."
   },
-  "duplicateCardMessage": "A card \u201c{term}\u201d already exists in this deck.",
+  "duplicateCompareDraftLabel": "New card",
+  "@duplicateCompareDraftLabel": {
+    "description": "Column label for the card being created in the duplicate comparison."
+  },
+  "duplicateCompareEditedLabel": "Edited card",
+  "@duplicateCompareEditedLabel": {
+    "description": "Column label for the card being edited in the duplicate comparison."
+  },
+  "duplicateCompareExistingLabel": "Existing card",
+  "@duplicateCompareExistingLabel": {
+    "description": "Column label for the card already stored, in the duplicate comparison."
+  },
+  "duplicateReviewHint": "Review the differences before saving.",
+  "@duplicateReviewHint": {
+    "description": "Closing line of the duplicate comparison."
+  },
+  "duplicateCheckFailedMessage": "Couldn\u2019t check for duplicates. Try again.",
+  "@duplicateCheckFailedMessage": {
+    "description": "Shown when the duplicate lookup itself failed, which the spec separates from a failed save."
+  },
+  "duplicateCardMessage": "You already have a card for \u201c{term}\u201d.",
   "@duplicateCardMessage": {
     "description": "Card Editor duplicate banner (WBS 5.3.2B).",
     "placeholders": {"term": {"type": "String"}}

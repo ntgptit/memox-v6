@@ -1,3 +1,6 @@
+import 'package:memox_v6/presentation/features/flashcard/routes/flashcard_routes.dart';
+import 'package:memox_v6/app/router/route_paths.dart';
+import 'package:go_router/go_router.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,6 +52,27 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: const CardEditorScreen(deckId: 'd1'),
+      ),
+    );
+  }
+
+  /// The editor under a real router, for the review decisions that navigate.
+  ///
+  /// `View existing` pushes another editor, so a plain `MaterialApp` cannot
+  /// exercise it at all — and the thing under test is precisely what the push
+  /// leaves behind.
+  Widget routedApp() {
+    final router = GoRouter(
+      initialLocation: RoutePaths.newCard('d1'),
+      routes: flashcardRoutes(),
+    );
+    return ProviderScope(
+      overrides: [appDatabaseProvider.overrideWithValue(database)],
+      child: MaterialApp.router(
+        routerConfig: router,
+        theme: AppTheme.light(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
       ),
     );
   }
@@ -456,7 +480,7 @@ void main() {
     await pumpEditor(tester);
 
     // Review banner up, nothing committed yet.
-    expect(find.textContaining('already exists'), findsOneWidget);
+    expect(find.textContaining('You already have a card'), findsOneWidget);
     var cards = await database.flashcardDao
         .pageFlashcardsByDeck('d1', 50, 0)
         .get();
@@ -467,6 +491,93 @@ void main() {
 
     cards = await database.flashcardDao.pageFlashcardsByDeck('d1', 50, 0).get();
     expect(cards, hasLength(2));
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  // §4 draws the decision as a banner *plus* a detail block: the draft beside
+  // the stored card, term and meaning each. The banner alone named the term —
+  // the one thing the two cards are guaranteed to share — so `Add anyway` and
+  // `View existing` were both guesses (`int-96`).
+  testWidgets('the review shows both cards, not just the term', (tester) async {
+    await database.flashcardDao.insertFlashcard(
+      'c0',
+      'd1',
+      '안녕',
+      '안녕',
+      'hi',
+      0,
+      0,
+    );
+
+    await tester.pumpWidget(app());
+    await pumpEditor(tester);
+
+    await tester.enterText(find.byType(TextField).at(0), '안녕');
+    await tester.enterText(find.byType(TextField).at(1), 'hello there');
+    await tester.pump();
+    await tester.tap(find.text('Save'));
+    await pumpEditor(tester);
+
+    // Two of them: the screen's own title, and the draft column's label. §4
+    // words that column as the new or edited card, which reads right beside
+    // the existing one even where it echoes the title.
+    expect(find.text('New card'), findsNWidgets(2));
+    expect(find.text('Existing card'), findsOneWidget);
+    // The draft's meaning and the stored card's, side by side — the only
+    // thing that tells them apart.
+    expect(find.text('hello there'), findsWidgets);
+    expect(find.text('hi'), findsOneWidget);
+    expect(find.text('Review the differences before saving.'), findsOneWidget);
+
+    await disposeAndFlushStreams(tester);
+  });
+
+  // §5: "Open existing: draft retained until explicit discard/return", and §8
+  // repeats it. This used `go` to the existing card's *deck*, which replaces
+  // the route stack: the editor and everything typed into it were gone, and
+  // Back could not bring them back (`int-96`).
+  testWidgets('View existing keeps the draft and comes back to it', (
+    tester,
+  ) async {
+    await database.flashcardDao.insertFlashcard(
+      'c0',
+      'd1',
+      '안녕',
+      '안녕',
+      'hi',
+      0,
+      0,
+    );
+
+    await tester.pumpWidget(routedApp());
+    await pumpEditor(tester);
+
+    await tester.enterText(find.byType(TextField).at(0), '안녕');
+    await tester.enterText(find.byType(TextField).at(1), 'hello there');
+    await tester.pump();
+    await tester.tap(find.text('Save'));
+    await pumpEditor(tester);
+
+    await tester.tap(find.text('View existing'));
+    await pumpEditor(tester);
+
+    // The existing card is open, on its own content.
+    expect(find.text('hi'), findsWidgets);
+
+    final router = GoRouter.of(
+      tester.element(find.byType(CardEditorScreen).last),
+    );
+    router.pop();
+    await pumpEditor(tester);
+
+    // Back on the draft, with what was typed still in it.
+    expect(find.text('hello there'), findsWidgets);
+    expect(
+      (await database.flashcardDao.pageFlashcardsByDeck('d1', 50, 0).get()),
+      hasLength(1),
+      reason: 'inspecting the existing card commits nothing',
+    );
 
     await disposeAndFlushStreams(tester);
   });

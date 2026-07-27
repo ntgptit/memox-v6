@@ -2,6 +2,7 @@ import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
 import 'package:memox_v6/domain/flashcard/card_text.dart';
+import 'package:memox_v6/domain/flashcard/duplicate_lookup.dart';
 import 'package:memox_v6/domain/flashcard/edit_flashcard_result.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/domain/flashcard/flashcard_repository.dart';
@@ -58,7 +59,8 @@ class EditFlashcardUseCase {
       if (deck == null) {
         throw ValidationFailure(field: 'deckId', code: 'unknown');
       }
-      final candidates = await _cards.duplicateCandidates(
+      final candidates = await lookupDuplicateCandidates(
+        _cards,
         languagePairId: deck.languagePairId,
         normalizedTerm: normalizedTerm,
       );
