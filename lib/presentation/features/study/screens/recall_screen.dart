@@ -73,14 +73,15 @@ class _RecallStage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final timer = ref.watch(recallTimerProvider(card.cardId));
+    final round = runtime.position.roundIndex;
+    final timer = ref.watch(recallTimerProvider(card.cardId, round));
     final position = runtime.position;
     final total = position.roundCardIds.length;
     final currentIndex = position.cardPosition + 1;
 
     // The deadline commits exactly one canonical wrong(timeout): the transition
     // guard fires the answer once, when counting first crosses into timedOut.
-    ref.listen<RecallTimerState>(recallTimerProvider(card.cardId), (
+    ref.listen<RecallTimerState>(recallTimerProvider(card.cardId, round), (
       prev,
       next,
     ) {
@@ -160,8 +161,14 @@ class _RecallStage extends ConsumerWidget {
           icon: Symbols.visibility_rounded,
           label: l10n.recallShowLabel(timer.remainingSeconds),
           block: true,
-          onPressed: () =>
-              ref.read(recallTimerProvider(card.cardId).notifier).reveal(),
+          onPressed: () => ref
+              .read(
+                recallTimerProvider(
+                  card.cardId,
+                  runtime.position.roundIndex,
+                ).notifier,
+              )
+              .reveal(),
         );
       case RecallPhase.revealed:
         return Row(

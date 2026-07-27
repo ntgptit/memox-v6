@@ -7,15 +7,16 @@ part 'guess_selection_notifier.g.dart';
 /// the pre-commit selection so the feedback state can render before Continue
 /// writes the attempt.
 ///
-/// Keyed by `cardId`, like `FillFeedback` next door, so the next card starts
-/// unselected without anyone clearing it. The screen used to clear it the
-/// moment Continue was tapped, which meant a save that failed took the
-/// learner's choice off the screen while the dialog told them their answer
-/// was still there (`answer-study-stage.md` §6).
+/// Keyed by `cardId` and `roundIndex`, like `FillFeedback` next door, so the
+/// next card — and the same card in a mastery retry round — starts unselected
+/// without anyone clearing it. The screen used to clear it the moment Continue
+/// was tapped, which meant a save that failed took the learner's choice off
+/// the screen while the dialog told them their answer was still there
+/// (`answer-study-stage.md` §6).
 @riverpod
 class GuessSelection extends _$GuessSelection {
   @override
-  String? build(String cardId) => null;
+  String? build(String cardId, int roundIndex) => null;
 
   void select(String choiceId) => state = choiceId;
 }

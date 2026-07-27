@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
 import 'package:memox_v6/domain/study_session/session_card_snapshot.dart';
+import 'package:memox_v6/domain/study_session/session_checkpoint.dart';
 import 'package:memox_v6/domain/study_session/session_round_order.dart';
 import 'package:memox_v6/domain/study_session/session_scope.dart';
 import 'package:memox_v6/domain/study_session/session_state.dart';
@@ -75,6 +76,44 @@ void main() {
     ),
   );
 
+  /// The same one-card round, re-opened at [roundIndex] — what a mastery retry
+  /// round looks like when the only card in it failed.
+  StudyRuntimeState atRound(int roundIndex) => StudyRuntimeState.assemble(
+    session: runtime().session,
+    stages: const <StudyModeType>[StudyModeType.fill],
+    cardSnapshots: <SessionCardSnapshot>[
+      SessionCardSnapshot(
+        id: 'sc0',
+        sessionId: 's1',
+        cardId: 'c0',
+        displayOrder: 0,
+        term: 'apple',
+        meaning: 'fruit',
+        contentVersion: 1,
+        progressBox: 0,
+        progressRevision: 0,
+      ),
+    ],
+    currentOrder: SessionRoundOrder(
+      id: 'ro1',
+      sessionId: 's1',
+      roundIndex: roundIndex,
+      seed: 1,
+      cardIds: const <String>['c0'],
+    ),
+    checkpoint: SessionCheckpoint(
+      id: 'cp1',
+      sessionId: 's1',
+      stageIndex: 0,
+      roundIndex: roundIndex,
+      cardPosition: 0,
+      failedCardIds: const <String>['c0'],
+      timerStateJson: '{}',
+      stateVersion: 1,
+      updatedAt: now,
+    ),
+  );
+
   Widget wrap({StudyLanguageContext? languages}) => ProviderScope(
     overrides: [
       studySessionRuntimeProvider.overrideWith(
@@ -92,6 +131,64 @@ void main() {
       home: const FillScreen(),
     ),
   );
+
+  // §4: "Hint state thuộc từng attempt và reset khi Card bắt đầu attempt ở
+  // round mới", and a new round "mở input trống cho attempt mới".
+  //
+  // The feedback and hint were keyed by card alone. On a one-card retry round
+  // the stage re-opens on the same card, so the widget element survives the
+  // round boundary, the providers are never released, and the retry begins
+  // already graded — input locked, answer revealed, Continue showing. The
+  // learner cannot answer, so the round can never be passed and the session
+  // can never finish.
+  testWidgets('a retry round on the same card starts a fresh attempt', (
+    tester,
+  ) async {
+    var round = 1;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          studySessionRuntimeProvider.overrideWith(
+            (ref) => Future.value(atRound(round)),
+          ),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const FillScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Help'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('starts with'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'pear');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Check'));
+    await tester.pumpAndSettle();
+
+    // Graded wrong: the answer is revealed and the CTA becomes Continue.
+    expect(find.text('Continue'), findsOneWidget);
+    expect(find.textContaining('apple'), findsWidgets);
+
+    // The failed round closes and the retry round opens on the same card.
+    round = 2;
+    ProviderScope.containerOf(
+      tester.element(find.byType(FillScreen)),
+    ).invalidate(studySessionRuntimeProvider);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Check'), findsOneWidget, reason: 'a fresh attempt');
+    expect(find.text('Continue'), findsNothing);
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.enabled, isTrue);
+    // §4 again: the hint belongs to the attempt that asked for it.
+    expect(find.text('Help'), findsOneWidget);
+    expect(find.textContaining('starts with'), findsNothing);
+  });
 
   // The kit requires deck-driven language labels — "Type the term (Korean)",
   // not "Type the term" — so a learner with two active pairs can tell which
