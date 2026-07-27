@@ -9,6 +9,7 @@ class DeckDeletionImpact {
     required this.cardCount,
     required this.deckCount,
     this.studiedCardCount = 0,
+    this.endsRunningSession = false,
   });
 
   final DeckContentState state;
@@ -26,4 +27,17 @@ class DeckDeletionImpact {
   /// §5): the cards a reset would return to the unlearned state are exactly
   /// the cards that left it.
   final int studiedCardCount;
+
+  /// Whether a session running inside this deck's subtree would be destroyed.
+  ///
+  /// §1 requires an impact summary and §5 enumerates what goes with the deck.
+  /// A running session's committed attempts go too — the delete chain removes
+  /// its row, snapshots and attempts — and that was the one loss the summary
+  /// never named (`int-34`).
+  ///
+  /// The condition is the session's deck sitting inside the deleted subtree.
+  /// A subtree session rooted *above* this deck keeps its own row and can
+  /// finish from its snapshot, which is what ST-CHG-002 and ST-CHG-006
+  /// describe; only a session whose own deck is being removed is destroyed.
+  final bool endsRunningSession;
 }

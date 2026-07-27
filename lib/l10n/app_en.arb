@@ -580,6 +580,10 @@
   "@deleteDeckEmptyBody": {
     "description": "Delete impact for an Empty deck (delete-deck.md §4)."
   },
+  "deleteDeckEndsSessionSuffix": "A study session running here will end and its answers will be lost.",
+  "@deleteDeckEndsSessionSuffix": {
+    "description": "Impact line when a delete would destroy a running session (delete-deck.md §1, §5; int-34)."
+  },
   "deleteDeckStudiedSuffix": "{count, plural, =1{1 of them has study history you will lose.} other{{count} of them have study history you will lose.}}",
   "@deleteDeckStudiedSuffix": {
     "description": "Appended to the delete impact when some cards carry study history. delete-deck.md §1 asks the copy to name the *number* of learning progress removed, not just mention it; counting progress rows would restate the card count, since every card has one from creation, so this counts cards past Box 0.",

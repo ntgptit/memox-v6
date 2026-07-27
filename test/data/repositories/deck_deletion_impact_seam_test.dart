@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
+import 'package:memox_v6/data/repositories/drift_study_session_repository.dart';
 import 'package:memox_v6/data/repositories/drift_deck_repository.dart';
 import 'package:memox_v6/domain/usecases/deck/delete_deck_usecase.dart';
 import 'package:memox_v6/domain/usecases/deck/load_deck_deletion_impact_usecase.dart';
@@ -40,7 +41,10 @@ void main() {
   setUp(() async {
     database = db.AppDatabase.forTesting(NativeDatabase.memory());
     decks = DriftDeckRepository(database, _FixedClock(now));
-    impact = LoadDeckDeletionImpactUseCase(decks: decks);
+    impact = LoadDeckDeletionImpactUseCase(
+      decks: decks,
+      sessions: DriftStudySessionRepository(database),
+    );
     await database.languagePairDao.insertLanguagePair(
       'lp1',
       'en',

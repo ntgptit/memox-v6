@@ -58,7 +58,10 @@ void main() {
     database = db.AppDatabase.forTesting(NativeDatabase.memory());
     decks = DriftDeckRepository(database, _FixedClock(now));
     progress = DriftLearningProgressRepository(database);
-    impact = LoadDeckDeletionImpactUseCase(decks: decks);
+    impact = LoadDeckDeletionImpactUseCase(
+      decks: decks,
+      sessions: DriftStudySessionRepository(database),
+    );
     reset = ResetDeckProgressUseCase(
       progress: progress,
       availability: LoadResetProgressAvailabilityUseCase(
