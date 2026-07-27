@@ -14,33 +14,52 @@ import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
-/// The rename-deck dialog (WBS 6.1; `edit-deck.md`, kit `deck-settings--rename`).
-/// Metadata-only: it changes the deck's display name and nothing else. The form
-/// pre-fills the current name; Save is disabled until the field is submittable.
+/// The edit-deck dialog (WBS 6.1; `edit-deck.md`, kit `deck-settings--rename`).
+///
+/// Metadata-only: the display name and the optional description, saved
+/// together — §1 makes them one save so a failure cannot persist half the
+/// form. The form pre-fills both; Save is disabled until the name is
+/// submittable.
+///
+/// The kit draws this as a name-only `Rename deck` dialog while §4 draws a
+/// full-screen form with both fields and a read-only language pair. The
+/// dialog is the kit's, the fields are the spec's, and the disagreement is
+/// recorded as `int-57` rather than settled here.
 Future<void> showRenameDeckDialog(
   BuildContext context, {
   required String deckId,
   required String currentName,
+  String? currentDescription,
 }) {
   final l10n = AppLocalizations.of(context);
   return showMxDialog<void>(
     context,
     title: l10n.renameDeckTitle,
-    body: _RenameDeckForm(deckId: deckId, currentName: currentName),
+    body: _RenameDeckForm(
+      deckId: deckId,
+      currentName: currentName,
+      currentDescription: currentDescription,
+    ),
     actions: const [],
   );
 }
 
 class _RenameDeckForm extends HookConsumerWidget {
-  const _RenameDeckForm({required this.deckId, required this.currentName});
+  const _RenameDeckForm({
+    required this.deckId,
+    required this.currentName,
+    this.currentDescription,
+  });
 
   final String deckId;
   final String currentName;
+  final String? currentDescription;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final name = useMxTextSubmitState(initial: currentName);
+    final description = useMxTextValue(initial: currentDescription ?? '');
     final renameState = ref.watch(renameDeckDialogViewmodelProvider);
 
     listenMxAction(
@@ -72,6 +91,12 @@ class _RenameDeckForm extends HookConsumerWidget {
             errorText: nameError,
             enabled: !isSubmitting,
           ),
+          const MxGap.s4(),
+          MxTextField(
+            controller: description.controller,
+            label: l10n.deckDescriptionLabel,
+            enabled: !isSubmitting,
+          ),
           if (failure != null && nameError == null) ...[
             const MxGap.s3(),
             MxText(
@@ -97,7 +122,11 @@ class _RenameDeckForm extends HookConsumerWidget {
                 onPressed: name.canSubmit && !isSubmitting
                     ? () => ref
                           .read(renameDeckDialogViewmodelProvider.notifier)
-                          .rename(deckId: deckId, name: name.value)
+                          .rename(
+                            deckId: deckId,
+                            name: name.value,
+                            description: description.controller.text,
+                          )
                     : null,
               ),
             ],

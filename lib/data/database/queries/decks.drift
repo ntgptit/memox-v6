@@ -145,6 +145,14 @@ watchChildDecks:
 SELECT * FROM decks WHERE parent_id = :parentId
 ORDER BY normalized_name, id;
 
+-- The editable metadata of a deck, written together.
+-- `edit-deck.md` §1 makes the name and the description one save, so a
+-- failure cannot persist half of the form.
+editDeckMetadata:
+UPDATE decks SET name = :name, normalized_name = :normalizedName,
+  description = :description, updated_at = :updatedAt
+WHERE id = :deckId;
+
 renameDeck:
 UPDATE decks SET name = :name, normalized_name = :normalizedName,
   updated_at = :updatedAt

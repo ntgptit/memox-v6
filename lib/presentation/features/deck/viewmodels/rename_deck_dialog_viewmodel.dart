@@ -16,13 +16,17 @@ class RenameDeckDialogViewmodel extends _$RenameDeckDialogViewmodel {
   @override
   AsyncValue<void> build() => const AsyncData<void>(null);
 
-  Future<void> rename({required String deckId, required String name}) async {
+  Future<void> rename({
+    required String deckId,
+    required String name,
+    String? description,
+  }) async {
     if (state is AsyncLoading<void>) return;
     state = const AsyncLoading<void>();
     state = await runMxAction(() async {
       await ref
           .read(renameDeckUseCaseProvider)
-          .call(deckId: deckId, name: name);
+          .call(deckId: deckId, name: name, description: description);
     });
   }
 }
