@@ -643,5 +643,6 @@
   "reviewNoSessionActionLabel": "Về Today",
   "studyResumeFailedBody": "Các câu trả lời đã lưu của bạn vẫn còn đây.",
   "studyFinalizeLaterLabel": "Để sau",
+  "studyAnswerSaveBackLabel": "Quay lại",
   "todayErrorTitle": "Không tải được Hôm nay"
 }

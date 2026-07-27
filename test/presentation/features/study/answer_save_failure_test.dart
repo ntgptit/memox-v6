@@ -19,7 +19,8 @@ import 'package:memox_v6/presentation/features/study/screens/study_session_scree
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 
 /// WBS 5.6.3 — `answer-study-stage.md` §6: "Failure dialog: `Couldn't save
-/// your answer. Your answer is still here.` + `Try again`."
+/// your answer. Your answer is still here.` + `Try again`." The action carries
+/// the kit's own label (`Retry`), which `MX-VIS-078` measures.
 ///
 /// Nothing read the answer command's state, so a save that failed looked
 /// exactly like one still in flight: the card stayed put and said nothing. The
@@ -145,13 +146,17 @@ void main() {
 
     expect(find.text('Couldn’t save your answer'), findsOneWidget);
     expect(find.text('Your answer is still here.'), findsOneWidget);
-    expect(find.text('Try again'), findsOneWidget);
+    // The kit's `AnswerSaveErrorDialog` pairs Retry with Back; the copy stays
+    // §9's, which is a different claim from the kit's own wording rather than
+    // a different phrasing of it (`MX-VIS-078`).
+    expect(find.text('Retry'), findsOneWidget);
+    expect(find.text('Back'), findsOneWidget);
   });
 
   // §6: "Retry cùng attempt không tạo record hoặc progress update lần hai."
   // The same input is re-submitted, so the attempt's request id is the same
   // one the store already knows how to absorb.
-  testWidgets('Try again re-submits the answer that failed', (tester) async {
+  testWidgets('Retry re-submits the answer that failed', (tester) async {
     final answer = _FailingAnswer();
     await tester.pumpWidget(wrap(answer));
     await tester.pumpAndSettle();
@@ -159,7 +164,7 @@ void main() {
     await tester.tap(find.text('Remembered'));
     await tester.pumpAndSettle();
     answer.failNext = false;
-    await tester.tap(find.text('Try again'));
+    await tester.tap(find.text('Retry'));
     await tester.pumpAndSettle();
 
     expect(answer.submitted, hasLength(2));
@@ -203,10 +208,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Couldn’t save your answer'), findsOneWidget);
-    expect(find.text('Try again'), findsOneWidget);
+    expect(find.text('Retry'), findsOneWidget);
 
     answer.failNext = false;
-    await tester.tap(find.text('Try again'));
+    await tester.tap(find.text('Retry'));
     await tester.pumpAndSettle();
 
     expect(find.text('Couldn’t save your answer'), findsNothing);
@@ -228,7 +233,7 @@ void main() {
     expect(find.text('This session changed elsewhere'), findsOneWidget);
     expect(find.text('Reload your saved progress.'), findsOneWidget);
     expect(find.text('Reload'), findsOneWidget);
-    expect(find.text('Try again'), findsNothing);
+    expect(find.text('Retry'), findsNothing);
   });
 }
 

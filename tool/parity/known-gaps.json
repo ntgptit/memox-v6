@@ -13,6 +13,8 @@
     "MX-VIS-037--light": "Same kit self-contradiction, loading branch: the shot is a skeleton of chrome the JSX never renders. Permanent per the 2026-07-26 ruling.",
     "MX-VIS-037--dark": "Same as MX-VIS-037--light.",
     "MX-VIS-069--light": "Measured: 7.67% light / 9.45% dark (8.35 / 10.43 before the create FAB landed). Every section of the kit composition is built and correct; the residual is four things that cannot be built here. (1) The strip carries 2 of the kit's 4 stats — minutes-studied has no producer at all (`int-9`) and words-learned-today is recorded only when a daily goal exists (`int-12`); the two missing cells shorten the strip by one row and shift everything below it up, which is most of the diff. (2) The app bar's notification bell needs a notifications feature and (3) its avatar an account, both WBS 14.x. Recorded rather than parked: the number is real and the causes are enumerated, so the ratchet blocks any regression while the row stays honest about why it is not green.",
-    "MX-VIS-069--dark": "Same as MX-VIS-069--light."
+    "MX-VIS-069--dark": "Same as MX-VIS-069--light.",
+    "MX-VIS-078--light": "Measured: 21.49% light / 21.42% dark. The state is right and the composite under it is not: this app has one MxDialog doing the work of the kit's two dialog helpers. The kit's icon `Dialog` is a centred column — icon tile on top, then title and text, then an actions row at full width — while `MxDialog` is its `FormDialog` shape: left-aligned title, body, right-aligned wrapped actions. So the confirm renders title-above-icon, left-aligned, with stacked natural-width buttons. That composite is shared by six sites, so the fix belongs to the shared widget rather than to this state; recorded here with the number so the ratchet holds while it is made.",
+    "MX-VIS-078--dark": "Same as MX-VIS-078--light."
   }
 }

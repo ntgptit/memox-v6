@@ -1464,6 +1464,10 @@
   "@studyFinalizeLaterLabel": {
     "description": "Ghost action on the finalize-error state; leaves without finalizing (kit `study-result/finalize-later`)."
   },
+  "studyAnswerSaveBackLabel": "Back",
+  "@studyAnswerSaveBackLabel": {
+    "description": "Ghost action on the answer-save-error dialog; dismisses and leaves the answer on screen (kit `study-session/save-error-back`)."
+  },
   "todayErrorTitle": "Today couldn’t load",
   "@todayErrorTitle": {
     "description": "Today load-error title."
