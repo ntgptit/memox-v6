@@ -47,5 +47,27 @@ class RecentSearchesUseCase {
     );
   }
 
+  /// Drops one query from the history (`manage-recent-searches.md` §3: "Row
+  /// có query và remove action").
+  ///
+  /// Matched on the normalized query, the same key [record] dedupes by, so
+  /// removing works on what the learner sees rather than on exact bytes. §4
+  /// asks for idempotence: removing a query that is not there rewrites the
+  /// same list rather than failing.
+  Future<void> remove(String query) async {
+    final normalized = normalizeCardTerm(StringUtils.trimmed(query));
+    final existing = await current();
+    final next = existing
+        .where((entry) => normalizeCardTerm(entry) != normalized)
+        .toList();
+    if (next.length == existing.length) return;
+    await _preferences.save(
+      preferenceKey,
+      value: next,
+      schemaVersion: _schemaVersion,
+      updatedAt: _clock.nowUtc(),
+    );
+  }
+
   Future<void> clear() => _preferences.remove(preferenceKey);
 }

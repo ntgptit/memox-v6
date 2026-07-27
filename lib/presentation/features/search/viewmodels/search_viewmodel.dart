@@ -28,10 +28,22 @@ class RecentSearchesCommandViewmodel extends _$RecentSearchesCommandViewmodel {
   }
 
   Future<void> clearRecent() async {
-    final result = await runMxAction(() async {
+    state = await runMxAction(() async {
       await ref.read(recentSearchesUseCaseProvider).clear();
     });
-    if (result is! AsyncError) ref.invalidate(recentSearchesProvider);
+    if (state is! AsyncError) ref.invalidate(recentSearchesProvider);
+  }
+
+  /// Removes one query (`manage-recent-searches.md` §3).
+  ///
+  /// §4: "Failure không giả xóa" — a failed write leaves the list alone and
+  /// the state carries the failure, so the screen can say so instead of
+  /// showing a row that quietly came back.
+  Future<void> removeRecent(String query) async {
+    state = await runMxAction(() async {
+      await ref.read(recentSearchesUseCaseProvider).remove(query);
+    });
+    if (state is! AsyncError) ref.invalidate(recentSearchesProvider);
   }
 }
 
