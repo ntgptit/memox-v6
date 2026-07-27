@@ -90,7 +90,8 @@ class _GuessStage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final selected = ref.watch(guessSelectionProvider);
+    final cardId = runtime.currentCard?.cardId ?? '';
+    final selected = ref.watch(guessSelectionProvider(cardId));
     final position = runtime.position;
     final total = position.roundCardIds.length;
     final current = position.cardPosition + 1;
@@ -123,7 +124,7 @@ class _GuessStage extends ConsumerWidget {
               correctChoiceId: question.correctChoiceId,
               onTap: selected == null
                   ? () => ref
-                        .read(guessSelectionProvider.notifier)
+                        .read(guessSelectionProvider(cardId).notifier)
                         .select(option.choiceId)
                   : null,
             ),
@@ -156,7 +157,6 @@ class _GuessStage extends ConsumerWidget {
             selectedChoiceId: selectedChoiceId,
           ),
         );
-    ref.read(guessSelectionProvider.notifier).clear();
   }
 }
 

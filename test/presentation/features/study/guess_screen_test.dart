@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox_v6/app/di/usecase_providers.dart';
+import 'package:memox_v6/core/errors/app_failure.dart';
+import 'package:memox_v6/domain/study_modes/study_mode_input.dart';
+import 'package:memox_v6/domain/usecases/study_session/answer_study_stage_usecase.dart';
+import 'package:memox_v6/presentation/features/study/screens/study_session_screen.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
 import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
 import 'package:memox_v6/domain/study_session/session_card_snapshot.dart';
@@ -135,6 +140,46 @@ void main() {
     expect(find.widgetWithText(MxButton, 'Continue'), findsOneWidget);
   });
 
+  // §6: "Failure dialog: `Couldn't save your answer. Your answer is still
+  // here.`" The screen cleared the selection the moment Continue was tapped,
+  // so a save that failed took the learner's choice off the screen while the
+  // dialog told them it was still there.
+  testWidgets('a save that fails leaves the chosen option chosen', (
+    tester,
+  ) async {
+    final answer = _FailingAnswer();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          studySessionRuntimeProvider.overrideWith(
+            (ref) => Future.value(runtime(cardCount: 6)),
+          ),
+          answerStudyStageUseCaseProvider.overrideWithValue(answer),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          // The dispatcher, not the bare screen: it owns the failure dialog
+          // and its listener is what keeps the answer command alive while the
+          // save is in flight.
+          home: const StudySessionScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('school'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(MxButton, 'Continue'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Couldn’t save your answer'), findsOneWidget);
+    // The Continue action is still behind the dialog, and it appears only
+    // when an option is chosen — so the choice survived the failed save.
+    expect(find.widgetWithText(MxButton, 'Continue'), findsOneWidget);
+  });
+
   testWidgets(
     'a pool without five distinct meanings shows a recovery message',
     (tester) async {
@@ -146,4 +191,16 @@ void main() {
       );
     },
   );
+}
+
+/// An answer use case that always fails, so the screen is left holding the
+/// selection it just tried to commit.
+class _FailingAnswer implements AnswerStudyStageUseCase {
+  @override
+  Future<StudyRuntimeState> call(
+    StudyRuntimeState runtime,
+    StudyModeInput input,
+  ) async {
+    throw ValidationFailure(field: 'attempt', code: 'io');
+  }
 }
