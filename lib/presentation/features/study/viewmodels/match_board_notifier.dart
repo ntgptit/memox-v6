@@ -1,3 +1,6 @@
+import 'package:memox_v6/app/di/usecase_providers.dart';
+import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
+import 'dart:async';
 import 'package:memox_v6/core/random/deterministic_random.dart';
 import 'package:memox_v6/domain/study_modes/match_round.dart';
 import 'package:memox_v6/domain/study_modes/mode_outcome.dart';
@@ -276,8 +279,16 @@ class MatchBoard extends _$MatchBoard {
       );
       return;
     }
-    // wrong / almost: keep the first failing pick for the flush and let the
-    // learner retry (the tile stays unlocked).
+    // wrong / almost. §5 of `exit-study-session.md` puts the committed
+    // next-round failed set in the paused checkpoint, and the board writes no
+    // attempt until it is cleared — so without this the lapse lived only in
+    // memory and an exit forgot it (`int-83`). Best-effort by design: the
+    // board keeps its own copy for the round-end flush, which is the path that
+    // reports failures, so a store that refuses this write costs durability
+    // across an exit and nothing else.
+    unawaited(_commitLapse(termId));
+    // Keep the first failing pick for the flush and let the learner retry
+    // (the tile stays unlocked).
     final picks = state.lapsePicks.containsKey(termId)
         ? state.lapsePicks
         : <String, MatchLapsePick>{
@@ -292,6 +303,23 @@ class MatchBoard extends _$MatchBoard {
       flashMeaningId: meaningCardId,
       flashOutcome: outcome,
       lapsePicks: picks,
+    );
+  }
+
+  /// Writes the lapse to the checkpoint, through the shared action runner so a
+  /// store failure arrives as a mapped `AppFailure` rather than an unhandled
+  /// async error.
+  ///
+  /// The outcome is deliberately not surfaced: the board still holds this
+  /// lapse for the round-end flush, and that is the path that reports write
+  /// failures. Replacing the learner's pair feedback with an error banner
+  /// would report the same problem twice and interrupt the round to say
+  /// something the flush will say properly.
+  Future<void> _commitLapse(String cardId) async {
+    await runMxAction(
+      () => ref
+          .read(recordMatchLapseUseCaseProvider)
+          .call(sessionId: state.sessionId, cardId: cardId),
     );
   }
 

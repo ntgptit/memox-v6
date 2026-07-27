@@ -3,6 +3,7 @@ import 'package:memox_v6/domain/usecases/learning_progress/load_study_candidates
 import 'package:memox_v6/app/di/study_mode_providers.dart';
 import 'package:memox_v6/domain/usecases/study_session/answer_study_stage_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/finalize_study_session_usecase.dart';
+import 'package:memox_v6/domain/usecases/study_session/record_match_lapse_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/pause_study_session_usecase.dart';
 import 'package:memox_v6/domain/usecases/study_session/skip_unavailable_card_usecase.dart';
 import 'package:memox_v6/domain/usecases/today/load_today_projection_usecase.dart';
@@ -314,6 +315,11 @@ SkipUnavailableCardUseCase skipUnavailableCardUseCase(Ref ref) {
     cards: ref.watch(flashcardRepositoryProvider),
     clock: ref.watch(appClockProvider),
   );
+}
+
+@riverpod
+RecordMatchLapseUseCase recordMatchLapseUseCase(Ref ref) {
+  return RecordMatchLapseUseCase(ref.watch(studySessionRepositoryProvider));
 }
 
 @riverpod

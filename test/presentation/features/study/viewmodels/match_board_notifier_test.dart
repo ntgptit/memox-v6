@@ -1,3 +1,4 @@
+import 'package:memox_v6/domain/usecases/study_session/record_match_lapse_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
@@ -71,6 +72,12 @@ void main() {
         ),
         if (useCase != null)
           answerStudyStageUseCaseProvider.overrideWithValue(useCase),
+        // The board commits each lapse to the checkpoint as it happens
+        // (`int-83`). This harness has no store, and a unit test of the board
+        // is not the place to reach one.
+        recordMatchLapseUseCaseProvider.overrideWithValue(
+          const _NoopRecordMatchLapse(),
+        ),
       ],
     );
     addTearDown(container.dispose);
@@ -202,4 +209,17 @@ class _RecordingAnswer implements AnswerStudyStageUseCase {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// Absorbs the board's durable-lapse write; covered on its own in
+/// `record_match_lapse_usecase_test` and at the screen in
+/// `match_screen_test`.
+class _NoopRecordMatchLapse implements RecordMatchLapseUseCase {
+  const _NoopRecordMatchLapse();
+
+  @override
+  Future<void> call({
+    required String sessionId,
+    required String cardId,
+  }) async {}
 }
