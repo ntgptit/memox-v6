@@ -10,6 +10,7 @@ import 'package:memox_v6/presentation/features/today/viewmodels/today_projection
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_badge.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
@@ -105,6 +106,14 @@ class _ResultBody extends ConsumerWidget {
         ? 0
         : (summary.correctCount * 100 / summary.reviewedCount).round();
     final goalStatus = summary.goalStatus;
+    // `complete-daily-goal.md` §1: completion is reaching *or passing* the
+    // effective target, and "Goal vượt target vẫn giữ completed state". A null
+    // status is a session with no goal configured, which §1 says never
+    // completes anything ("Disabled Goal không phát completion").
+    final goalMet =
+        goalStatus != null &&
+        goalStatus.goalTargetCards > 0 &&
+        goalStatus.goalDoneCards >= goalStatus.goalTargetCards;
 
     // Kit `StudyResult.jsx`: an outer column with a uniform space-4 gap between
     // the hero, stats, review link, streak card and CTA. Gaps are interleaved
@@ -118,33 +127,51 @@ class _ResultBody extends ConsumerWidget {
           // ResultHero: centered icon tile + title + subtitle, paddingTop s4,
           // internal gap s3, subtitle nudged s1 below the title.
           const MxGap.s4(),
-          const Center(
+          Center(
             child: MxIconTile(
-              // The kit names the task-alt glyph here, but it does not render
-              // in the bundled Material Symbols Outlined or Rounded fonts.
-              // Both paint an ellipse with an identical 112x85 ink box at 4x,
-              // which is what a missing glyph falling back to a shared
-              // substitute looks like; the sharp family paints it square.
-              // Against the kit shot the hero came out 28x21 logical where
-              // the kit draws 27x27. The check-in-a-circle glyph used here
-              // carries the same meaning, stays in the Rounded family the
-              // icon contract requires, and renders undistorted. Pinned by
-              // mx_icon_aspect_test.dart, which fails once the named glyph
-              // renders square again.
-              icon: Symbols.check_circle_rounded,
-              tone: MxIconTileTone.accent,
+              // §3 node F, the goal-met result state — the kit's
+              // `study-result--goal-met` hero: the celebration glyph on the
+              // success tone in place of the standard accent tile. The screen
+              // had one hero for every outcome, so the surface where the goal
+              // is actually completed was the one surface that never said so.
+              icon: goalMet
+                  ? Symbols.celebration_rounded
+                  // The kit names the task-alt glyph here, but it does not render
+                  // in the bundled Material Symbols Outlined or Rounded fonts.
+                  // Both paint an ellipse with an identical 112x85 ink box at 4x,
+                  // which is what a missing glyph falling back to a shared
+                  // substitute looks like; the sharp family paints it square.
+                  // Against the kit shot the hero came out 28x21 logical where
+                  // the kit draws 27x27. The check-in-a-circle glyph used here
+                  // carries the same meaning, stays in the Rounded family the
+                  // icon contract requires, and renders undistorted. Pinned by
+                  // mx_icon_aspect_test.dart, which fails once the named glyph
+                  // renders square again.
+                  : Symbols.check_circle_rounded,
+              tone: goalMet ? MxIconTileTone.success : MxIconTileTone.accent,
               large: true,
             ),
           ),
           const MxGap.s3(),
           MxText(
-            l10n.studyResultCompleteTitle,
+            goalMet
+                ? l10n.studyResultGoalMetTitle
+                : l10n.studyResultCompleteTitle,
             role: MxTextRole.subtitle,
             textAlign: TextAlign.center,
           ),
           const MxGap.s1(),
           MxText(
-            l10n.studyResultReviewedText(summary.reviewedCount),
+            // The kit's subtitle here asserts "Streak +1", which this build
+            // cannot verify — nothing says whether this session is what
+            // extended the streak. §4's composition names the line that is
+            // both true and the one the spec asks for: current of target.
+            goalMet
+                ? l10n.studyResultGoalMetBody(
+                    goalStatus.goalDoneCards,
+                    goalStatus.goalTargetCards,
+                  )
+                : l10n.studyResultReviewedText(summary.reviewedCount),
             role: MxTextRole.body,
             color: context.colors.textSecondary,
             textAlign: TextAlign.center,
@@ -209,7 +236,7 @@ class _ResultBody extends ConsumerWidget {
           ],
           if (goalStatus != null) ...<Widget>[
             const MxGap.s4(),
-            _StreakCard(status: goalStatus),
+            _StreakCard(status: goalStatus, met: goalMet),
           ],
           const MxGap.s4(),
           MxButton(
@@ -271,9 +298,12 @@ class _Stat extends StatelessWidget {
 /// primary-soft card with an internal space-3 rhythm: the flame + streak row,
 /// then the goal label row (space-2 above the bar) and the progress bar.
 class _StreakCard extends StatelessWidget {
-  const _StreakCard({required this.status});
+  const _StreakCard({required this.status, required this.met});
 
   final StudyResultGoalStatus status;
+
+  /// Adds the kit's achievement badge (`study-result/goal-badge`).
+  final bool met;
 
   @override
   Widget build(BuildContext context) {
@@ -292,6 +322,28 @@ class _StreakCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          if (met) ...<Widget>[
+            // Kit: the card stays the neutral primary-soft streak card and the
+            // badge is the only success accent on it. The glyph is not
+            // decoration — §4 forbids resting the success meaning on colour.
+            // A Row rather than an Align: `MxBadge` centres inside its own
+            // box, so under the loose constraints an `Align` hands down it
+            // stretches to the full card width. A min-size Row gives its child
+            // an unbounded main axis, which is what makes the pill wrap its
+            // label — the kit draws it shrink-wrapped at the start.
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                MxBadge(
+                  label: l10n.studyResultGoalMetBadge,
+                  tone: MxBadgeTone.success,
+                  soft: true,
+                  leadingIcon: Symbols.celebration_rounded,
+                ),
+              ],
+            ),
+            const MxGap.s3(),
+          ],
           Row(
             children: <Widget>[
               MxIcon(

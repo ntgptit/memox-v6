@@ -73,3 +73,37 @@ test('MX-VIS-077 shows the finalize error with both ways on', async ({
     route: '/study',
   });
 });
+
+// MX-VIS-080 · Study Result · Goal met
+// Master flow: docs/business/study-goal/complete-daily-goal.md §3
+// Flow node: D["Persist completion event"] → F["Goal-met result state"]
+test('MX-VIS-080 shows the goal-met study result', async ({
+  page,
+}, testInfo) => {
+  // Same terminal-state argument as MX-VIS-054: the result renders a committed
+  // summary, and a finalized session is not an active row a resume could reach.
+  // What this seeds is the contribution that crossed the target.
+  await deepLinkEntry(page, {
+    masterFlow: 'docs/business/study-goal/complete-daily-goal.md',
+    fixture: 'MX-VIS-080',
+    route: '/study',
+    justification:
+      'complete-daily-goal §3 routes the crossed-target transition to the goal-met result state; the committed summary carrying that contribution is the seeded precondition, and the transition itself is unit-tested.',
+  });
+
+  await expectRoute(page, '/study');
+  await expect(page.getByText('Daily goal reached!')).toBeVisible();
+  await expect(page.getByText('Daily goal completed!')).toBeVisible();
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-080',
+    shot: 'study-result--goal-met',
+    screen: 'Study Result',
+    state: 'goal-met',
+    masterFlow: 'docs/business/study-goal/complete-daily-goal.md',
+    flowNode: 'D["Persist completion event"] → F["Goal-met result state"]',
+    fixture: 'MX-VIS-080',
+    route: '/study',
+  });
+});

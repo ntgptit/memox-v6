@@ -1105,6 +1105,26 @@
   "@studyResultStreakCaptionLabel": {
     "description": "Study Result streak-card caption under the day count."
   },
+  "studyResultGoalMetTitle": "Daily goal reached!",
+  "@studyResultGoalMetTitle": {
+    "description": "Study-result hero title when the session met today's goal (complete-daily-goal.md §3 node F; kit `study-result--goal-met`)."
+  },
+  "studyResultGoalMetBody": "{done} of {target} completed today",
+  "@studyResultGoalMetBody": {
+    "description": "Study-result hero body on a goal-met session; the second line of complete-daily-goal.md §4's composition.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "studyResultGoalMetBadge": "Daily goal completed!",
+  "@studyResultGoalMetBadge": {
+    "description": "Success badge on the study-result streak card when the goal is met (kit `study-result/goal-badge`)."
+  },
   "studyResultGoalTitleLabel": "Today's goal",
   "@studyResultGoalTitleLabel": {
     "description": "Study Result streak-card goal-progress row title."
