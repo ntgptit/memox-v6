@@ -496,6 +496,7 @@
   "reviewModeTitle": "Ôn tập",
   "studyExitTitle": "Rời phiên học này?",
   "studyExitBody": "Các câu trả lời đã lưu sẽ còn khi bạn quay lại. Câu đang làm dở có thể phải nhập lại.",
+  "matchExitUnsavedBody": "Các cặp bạn đã ghép trong vòng này chưa được lưu, nên vòng này sẽ bắt đầu lại khi bạn quay lại.",
   "studyExitKeepLabel": "Tiếp tục học",
   "studyExitConfirmLabel": "Lưu và thoát",
   "studyExitLabel": "Thoát",

@@ -266,6 +266,52 @@ void main() {
     );
   });
 
+  // `exit-study-session.md` §5: "Warn unfinished input not saved". A Match
+  // round commits nothing until the whole board is cleared, so leaving with
+  // pairs locked throws all of them away — and the shared exit copy calls that
+  // "the current unfinished answer", which is the wrong size by a board.
+  testWidgets('leaving mid-board says the round will start over', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap(runtime()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('love'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('사랑'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.bySemanticsLabel('Exit'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('this round starts over'),
+      findsOneWidget,
+      reason: 'the matched pair is not saved, and the confirm has to say so',
+    );
+
+    await tester.tap(find.text('Keep studying'));
+    await tester.pumpAndSettle();
+  });
+
+  // With nothing matched there is nothing extra to warn about, and the shared
+  // copy is exactly right.
+  testWidgets('leaving an untouched board adds no extra warning', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap(runtime()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.bySemanticsLabel('Exit'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('this round starts over'), findsNothing);
+    expect(find.text('Leave this session?'), findsOneWidget);
+
+    await tester.tap(find.text('Keep studying'));
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('meanings are the left column and terms the right', (
     tester,
   ) async {

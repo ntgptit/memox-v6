@@ -112,6 +112,11 @@ class _MatchStage extends ConsumerWidget {
       progressSemanticLabel: l10n.studyProgressLabel(done, total),
       onBack: () => Navigator.of(context).maybePop(),
       backLabel: l10n.studyExitLabel,
+      // §5: "Warn unfinished input not saved". A Match round commits nothing
+      // until the whole board is cleared, so leaving with pairs locked throws
+      // them all away — and the shared copy calls that "the current unfinished
+      // answer", which is the wrong size by an entire board.
+      exitNote: done > 0 ? l10n.matchExitUnsavedBody : null,
       body: SingleChildScrollView(
         // Meanings left, terms right — the kit's `MatchMode` fixes the sides
         // (`LEFT = ['time','love',…]`, `RIGHT = ['사랑','학교',…]`). The two
