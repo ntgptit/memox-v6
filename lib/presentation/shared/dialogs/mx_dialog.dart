@@ -145,13 +145,16 @@ class MxDialog extends StatelessWidget {
           child: body,
         ),
         const MxGap.s4(),
-        Row(
-          children: <Widget>[
-            for (final (index, action) in actions.indexed) ...<Widget>[
-              if (index > 0) const MxGap.s3(),
-              Expanded(child: action),
-            ],
-          ],
+        // The kit's actions row is `flex-wrap: wrap`: the pair shares the row
+        // when both fit and stacks when they do not. Expanded halves looked
+        // right for `Back`/`Retry` and truncated the exit confirm's longer
+        // pair to "Keep s…" / "Save a…" — natural widths wrap instead of
+        // clipping, which is the behaviour the kit's CSS actually has.
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: AppSpacing.space3,
+          runSpacing: AppSpacing.space3,
+          children: actions,
         ),
       ],
     );
