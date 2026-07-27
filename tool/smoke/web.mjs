@@ -136,11 +136,42 @@ const server = createServer((request, response) => {
 process.stdout.write('\n==> Serving the release bundle\n');
 await new Promise((ready) => server.listen(port, '127.0.0.1', ready));
 
+/**
+ * Turns on Flutter Web's semantics tree.
+ *
+ * The shipping entry does not force semantics on — and should not; only the
+ * parity entry does that, for the harness's benefit. Flutter therefore paints
+ * to canvas and exposes no copy to the DOM until one trusted gesture activates
+ * its accessibility placeholder. This is the same framework-owned activation
+ * the parity flows perform, and it is worth something on its own: a shipping
+ * build whose semantics never appear is unusable with a screen reader, and
+ * this smoke would catch that.
+ *
+ * Called again after a reload, because the new document starts without it.
+ */
+async function enableSemantics(page) {
+  const activator = page.getByRole('button', { name: 'Enable accessibility' });
+  await activator.waitFor({ state: 'visible', timeout: 60_000 });
+  // The engine parks this placeholder outside the painted viewport; move only
+  // this disposable framework node on-screen so a real pointer event reaches
+  // it. Flutter removes it immediately afterwards.
+  await activator.evaluate((node) => {
+    node.style.position = 'fixed';
+    node.style.inset = '0 auto auto 0';
+    node.style.width = '48px';
+    node.style.height = '48px';
+    node.style.zIndex = '2147483647';
+  });
+  await activator.click({ force: true });
+  await activator.waitFor({ state: 'detached', timeout: 15_000 });
+}
+
 const consoleErrors = [];
 const pageErrors = [];
 let outcome = 'PASS';
 let failedPage = null;
-let detail = 'The shipping entry booted and reached its first screen.';
+let detail =
+  'The shipping entry booted, skipped onboarding, and kept that across a reload.';
 
 try {
   // The server binds before it prints; a short poll is cheaper than parsing
@@ -159,24 +190,7 @@ try {
 
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'load' });
 
-  // The shipping entry does not force semantics on — and should not; only the
-  // parity entry does that, for the harness's benefit. Flutter Web therefore
-  // paints to canvas and exposes no copy to the DOM until one trusted gesture
-  // activates its accessibility placeholder. Doing that here is the same
-  // framework-owned activation the parity flows perform, and it is also worth
-  // something on its own: a shipping build whose semantics never appear is
-  // unusable with a screen reader, and this smoke would catch that.
-  const activator = page.getByRole('button', { name: 'Enable accessibility' });
-  await activator.waitFor({ state: 'visible', timeout: 60_000 });
-  await activator.evaluate((node) => {
-    node.style.position = 'fixed';
-    node.style.inset = '0 auto auto 0';
-    node.style.width = '48px';
-    node.style.height = '48px';
-    node.style.zIndex = '2147483647';
-  });
-  await activator.click({ force: true });
-  await activator.waitFor({ state: 'detached', timeout: 15_000 });
+  await enableSemantics(page);
 
   // A fresh install has no library, so the router's first-run gate redirects
   // `/` to the first-run landing. Waiting on its rendered title proves three
@@ -193,6 +207,38 @@ try {
 
   mkdirSync(evidenceDir, { recursive: true });
   await page.screenshot({ path: join(evidenceDir, 'first-run.png') });
+
+  // Past the first screen, into the one thing a Web build can get wrong that
+  // no unit test can see: whether a write survives a page load.
+  //
+  // `Not now` is the shortest journey that writes. `handle-empty-library-today.md`
+  // §4 makes the skipped marker persistent — "Onboarding skipped marker ngăn
+  // auto-open lặp" — so it has to go to the store, and the router's first-run
+  // gate has to read it back. Nothing else here needs typing, which keeps this
+  // smoke free of the CanvasKit text-entry machinery the parity flows carry.
+  await page.getByRole('button', { name: 'Not now' }).first().click();
+  await page.getByText('Today', { exact: false }).first().waitFor({
+    timeout: 30_000,
+  });
+
+  // The reload is the assertion. A fresh document, a fresh engine, a fresh
+  // Drift wasm worker — and if the marker did not reach durable storage the
+  // gate sends this straight back to the landing.
+  await page.reload({ waitUntil: 'load' });
+  await enableSemantics(page);
+  await page.getByText('Today', { exact: false }).first().waitFor({
+    timeout: 60_000,
+  });
+  const backAtLanding = await page
+    .getByText('Build your learning library', { exact: false })
+    .first()
+    .isVisible()
+    .catch(() => false);
+  if (backAtLanding) {
+    throw new Error('the skipped marker did not survive a reload');
+  }
+  await page.screenshot({ path: join(evidenceDir, 'after-reload.png') });
+
   await browser.close();
 
   if (consoleErrors.length > 0 || pageErrors.length > 0) {
@@ -228,7 +274,7 @@ writeFileSync(
       build: 'flutter build web --release',
       viewport: '390x780',
       route: '/',
-      expects: 'first-run landing',
+      expects: 'first-run landing, then Today surviving a reload',
       result: outcome,
       detail,
       consoleErrors,
