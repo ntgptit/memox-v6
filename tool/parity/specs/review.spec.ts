@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { deepLinkEntry, expectRoute } from '../flows';
+import { deepLinkEntry, expectRoute, tapControl } from '../flows';
 import { expectKitParity, expectStableCapture } from '../kit';
 
 // MX-VIS-050 · Review · Browsing
@@ -36,6 +36,41 @@ test('MX-VIS-050 resumes into the Review browsing stage', async ({
     flowNode:
       'A["Resume"] → B["Load snapshot + checkpoint + attempts"] → F["Validate checkpoint"] → G["Open committed stage/card"]',
     fixture: 'MX-VIS-050',
+    route: '/study',
+  });
+});
+
+// MX-VIS-079 · Study session · Exit confirm
+// Master flow: docs/business/study-session/exit-study-session.md §3
+// Flow node: A["Exit request"] → B["Resolve pending save"] → C["Exit confirm"]
+test('MX-VIS-079 asks before leaving a session', async ({
+  page,
+}, testInfo) => {
+  // §1: "X/Back trong active session luôn mở confirm". The journey is the
+  // learner's — resume into the stage, then ask to leave.
+  await deepLinkEntry(page, {
+    masterFlow: 'docs/business/study-session/exit-study-session.md',
+    fixture: 'MX-VIS-079',
+    route: '/study',
+    justification:
+      'exit-study-session §3 starts from an exit request inside a running session; the committed active session is the precondition and the confirm is the node under test.',
+  });
+
+  await expectRoute(page, '/study');
+  await tapControl(page, 'Exit');
+
+  await expect(page.getByText('Leave this session?')).toBeVisible();
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-079',
+    shot: 'study-session--exit',
+    screen: 'Study session',
+    state: 'exit confirm',
+    masterFlow: 'docs/business/study-session/exit-study-session.md',
+    flowNode:
+      'A["Exit request"] → B["Resolve pending save"] → C["Exit confirm"]',
+    fixture: 'MX-VIS-079',
     route: '/study',
   });
 });

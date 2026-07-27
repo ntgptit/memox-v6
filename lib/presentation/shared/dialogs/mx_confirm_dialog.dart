@@ -42,7 +42,6 @@ Future<bool> showMxConfirmDialog(
           onPressed: () => Navigator.of(dialogContext).pop(false),
           label: cancelLabel,
           variant: MxButtonVariant.ghost,
-          block: true,
         ),
       ),
       Builder(
@@ -53,7 +52,6 @@ Future<bool> showMxConfirmDialog(
           // dialogs still carry a primary confirm unless the action itself
           // destroys something, which is what `danger` says.
           danger: danger,
-          block: true,
         ),
       ),
     ],
