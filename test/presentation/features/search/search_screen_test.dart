@@ -60,6 +60,20 @@ void main() {
     await database.close();
   });
 
+  /// The screen under a real router, for the tests that navigate away and
+  /// come back.
+  Widget routedApp(GoRouter router) {
+    return ProviderScope(
+      overrides: [appDatabaseProvider.overrideWithValue(database)],
+      child: MaterialApp.router(
+        routerConfig: router,
+        theme: AppTheme.light(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+      ),
+    );
+  }
+
   Widget app() {
     return ProviderScope(
       overrides: [appDatabaseProvider.overrideWithValue(database)],
@@ -93,14 +107,60 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('a query with no hits shows guidance', (tester) async {
+  // KIT-26-02: no-results must not look like the empty dataset. Both were the
+  // same centred caption, so "you haven't searched yet" and "your search found
+  // nothing" were indistinguishable; the kit's `search/no-results` is a
+  // warning-toned empty state that names the query back.
+  testWidgets('a query with no hits names the query it failed on', (
+    tester,
+  ) async {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField), 'zzz');
     await tester.pumpAndSettle();
 
-    expect(find.text('No decks or cards match your search.'), findsOneWidget);
+    expect(find.text('No matches'), findsOneWidget);
+    expect(
+      find.text(
+        'Nothing matched \u201czzz\u201d. Try another term or check the spelling.',
+      ),
+      findsOneWidget,
+    );
+    // The blank-query prompt is a different picture, not the same one.
+    expect(find.text('Search your decks and cards by name.'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  // `filter-search-results.md` §4: "No-results-with-filters nêu Clear/adjust
+  // filters", §6: "Clear phục hồi query không filter". A filter that hid every
+  // hit claimed the query matched nothing and offered no way back.
+  testWidgets('a filter that hides every hit says so and clears', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    // 'hel' matches the card `hello` and no deck.
+    await tester.enterText(find.byType(TextField), 'hel');
+    await tester.pumpAndSettle();
+    expect(find.text('hello'), findsOneWidget);
+
+    await tester.tap(find.text('Decks'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('No results of this type'), findsOneWidget);
+    expect(
+      find.text('No matches'),
+      findsNothing,
+      reason: 'the query did match — the chip is what hid it',
+    );
+
+    await tester.tap(find.text('Clear filter'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('hello'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -205,17 +265,7 @@ void main() {
       initialLocation: RoutePaths.search,
       routes: [...searchRoutes(), ...deckDetailRoutes(), ...flashcardRoutes()],
     );
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [appDatabaseProvider.overrideWithValue(database)],
-        child: MaterialApp.router(
-          routerConfig: router,
-          theme: AppTheme.light(),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-        ),
-      ),
-    );
+    await tester.pumpWidget(routedApp(router));
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField), 'hel');
@@ -265,6 +315,69 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Try again'), findsNothing);
+  });
+  // `open-search-result.md` §4: "Sau edit/delete, return refresh affected
+  // result/index". Search stays mounted under the pushed route and its list is
+  // a future cached per query, so a card deleted in the editor came back to a
+  // row that opened an object no longer in the store.
+  testWidgets('returning from a result refreshes what it listed', (
+    tester,
+  ) async {
+    final router = GoRouter(
+      initialLocation: RoutePaths.search,
+      routes: [...searchRoutes(), ...deckDetailRoutes(), ...flashcardRoutes()],
+    );
+    await tester.pumpWidget(routedApp(router));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'hel');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('hello'));
+    await tester.pumpAndSettle();
+    expect(find.text('Edit card'), findsOneWidget);
+
+    // What the editor's delete action does to the store.
+    await database.flashcardDao.softDeleteFlashcard(1, 1, 'c1');
+
+    router.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('hello'), findsNothing);
+    expect(find.text('No matches'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  // §4: "Double tap chỉ tạo một navigation". The pushed route takes a frame to
+  // cover the row, and a second tap inside that frame stacked a second copy of
+  // the destination that Back then had to be pressed twice to leave.
+  testWidgets('a double tap on a result opens one destination', (tester) async {
+    final router = GoRouter(
+      initialLocation: RoutePaths.search,
+      routes: [...searchRoutes(), ...deckDetailRoutes(), ...flashcardRoutes()],
+    );
+    await tester.pumpWidget(routedApp(router));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'hel');
+    await tester.pumpAndSettle();
+
+    // Both taps land before the route transition rebuilds anything.
+    await tester.tap(find.text('hello'));
+    await tester.tap(find.text('hello'));
+    await tester.pumpAndSettle();
+    expect(find.text('Edit card'), findsOneWidget);
+
+    router.pop();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Edit card'),
+      findsNothing,
+      reason: 'one pop leaves the editor, so only one was pushed',
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 }
 

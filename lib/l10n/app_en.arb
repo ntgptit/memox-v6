@@ -232,9 +232,30 @@
   "@searchPromptMessage": {
     "description": "Neutral prompt shown before any search query (WBS 10.2)."
   },
-  "searchNoResultsMessage": "No decks or cards match your search.",
+  "searchNoResultsTitle": "No matches",
+  "@searchNoResultsTitle": {
+    "description": "Title of the search no-results state (kit `search/no-results`; KIT-26-02)."
+  },
+  "searchNoResultsMessage": "Nothing matched \u201c{query}\u201d. Try another term or check the spelling.",
   "@searchNoResultsMessage": {
-    "description": "Shown when a search returns no hits (WBS 10.2)."
+    "description": "Body of the search no-results state, naming the query that found nothing (kit `search/no-results`).",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchFilteredEmptyTitle": "No results of this type",
+  "@searchFilteredEmptyTitle": {
+    "description": "Title shown when a type filter hides every hit (filter-search-results.md \u00a74)."
+  },
+  "searchFilteredEmptyMessage": "Your search found other results. Clear the filter to see them.",
+  "@searchFilteredEmptyMessage": {
+    "description": "Body shown when a type filter hides every hit (filter-search-results.md \u00a74)."
+  },
+  "clearSearchFilterLabel": "Clear filter",
+  "@clearSearchFilterLabel": {
+    "description": "Restores the unfiltered result list (filter-search-results.md \u00a76)."
   },
   "searchFilterAll": "All",
   "@searchFilterAll": {

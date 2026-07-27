@@ -12,6 +12,9 @@ import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_chip.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
@@ -93,7 +96,11 @@ class _SearchBody extends HookConsumerWidget {
         Expanded(
           child: query.isEmpty
               ? _Recent(onSelect: (value) => input.controller.text = value)
-              : _Results(query: query, filter: filter.value),
+              : _Results(
+                  query: query,
+                  filter: filter.value,
+                  onClearFilter: () => filter.value = SearchResultFilter.all,
+                ),
         ),
       ],
     );
@@ -219,10 +226,18 @@ class _Prompt extends StatelessWidget {
 }
 
 class _Results extends ConsumerWidget {
-  const _Results({required this.query, required this.filter});
+  const _Results({
+    required this.query,
+    required this.filter,
+    required this.onClearFilter,
+  });
 
   final String query;
   final SearchResultFilter filter;
+
+  /// Drops back to the unfiltered list (`filter-search-results.md` §6:
+  /// "Clear phục hồi query không filter").
+  final VoidCallback onClearFilter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -249,41 +264,94 @@ class _Results extends ConsumerWidget {
       retryLabel: l10n.tryAgainLabel,
       data: (context, hits) {
         final shown = hits.where((hit) => _matchesFilter(filter, hit)).toList();
+        // `filter-search-results.md` §4: "No-results-with-filters nêu
+        // Clear/adjust filters". Results the chip hid are not a no-match, but
+        // both rendered the same "nothing matched" line — so a learner whose
+        // query found only cards while `Decks` was selected was told their
+        // query found nothing, with no clear offered and no hint that `All`
+        // was the way back.
+        if (shown.isEmpty && hits.isNotEmpty) {
+          return MxEmptyState(
+            icon: Symbols.filter_alt_off,
+            tone: MxIconTileTone.warning,
+            title: l10n.searchFilteredEmptyTitle,
+            body: l10n.searchFilteredEmptyMessage,
+            reserveNavZone: false,
+            action: MxButton(
+              onPressed: onClearFilter,
+              label: l10n.clearSearchFilterLabel,
+              variant: MxButtonVariant.secondary,
+              block: true,
+            ),
+          );
+        }
+        // The kit's `search/no-results`: a warning-toned empty state that
+        // names the query back. This was the same centred caption the
+        // blank-query prompt uses, so "you haven't searched yet" and "your
+        // search found nothing" were the same picture (KIT-26-02).
         if (shown.isEmpty) {
-          return _Prompt(message: l10n.searchNoResultsMessage);
+          return MxEmptyState(
+            icon: Symbols.search_off,
+            tone: MxIconTileTone.warning,
+            title: l10n.searchNoResultsTitle,
+            body: l10n.searchNoResultsMessage(query),
+            reserveNavZone: false,
+          );
         }
         return ListView(
-          children: [for (final hit in shown) _ResultRow(result: hit)],
+          children: [
+            for (final hit in shown) _ResultRow(result: hit, query: query),
+          ],
         );
       },
     );
   }
 }
 
-class _ResultRow extends StatelessWidget {
-  const _ResultRow({required this.result});
+class _ResultRow extends HookConsumerWidget {
+  const _ResultRow({required this.result, required this.query});
 
   final SearchResult result;
 
-  void _open(BuildContext context) {
-    // Hand off to the owning object's contract (open-search-result.md §2): a
-    // deck opens its detail, a card opens the card editor in its deck.
-    switch (result.type) {
-      case SearchResultType.deck:
-        context.pushDeckDetail(result.deckId);
-      case SearchResultType.card:
-        context.pushEditCard(result.deckId, result.id);
-    }
-  }
+  /// The query whose result list this row belongs to, so the return can
+  /// refresh exactly that list.
+  final String query;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // §4: "Double tap chỉ tạo một navigation". The pushed route takes a
+    // frame to cover the row, and a second tap inside that frame stacked a
+    // second copy of the destination that Back then had to be pressed twice
+    // to leave.
+    final opening = useRef(false);
+
+    Future<void> open() async {
+      if (opening.value) return;
+      opening.value = true;
+      // Hand off to the owning object's contract (open-search-result.md §2): a
+      // deck opens its detail, a card opens the card editor in its deck.
+      switch (result.type) {
+        case SearchResultType.deck:
+          await context.pushDeckDetail(result.deckId);
+        case SearchResultType.card:
+          await context.pushEditCard(result.deckId, result.id);
+      }
+      opening.value = false;
+      // §4: "Sau edit/delete, return refresh affected result/index". Search
+      // stays mounted under the pushed route and the list is a future cached
+      // per query, so a card renamed in the editor came back to a row still
+      // carrying its old term — and a card deleted there came back to a row
+      // that opened an object no longer in the store.
+      if (!context.mounted) return;
+      ref.invalidate(searchResultsProvider(query: query));
+    }
+
     final icon = result.type == SearchResultType.deck
         ? Symbols.folder
         : Symbols.style;
     return MxTappable(
       semanticLabel: result.displayText,
-      onTap: () => _open(context),
+      onTap: open,
       child: Row(
         children: [
           const MxGap.s3(),
