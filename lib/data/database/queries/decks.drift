@@ -150,7 +150,8 @@ ORDER BY normalized_name, id;
 -- failure cannot persist half of the form.
 editDeckMetadata:
 UPDATE decks SET name = :name, normalized_name = :normalizedName,
-  description = :description, updated_at = :updatedAt
+  description = :description, normalized_description = :normalizedDescription,
+  updated_at = :updatedAt
 WHERE id = :deckId;
 
 renameDeck:
@@ -306,16 +307,19 @@ WHERE parent_id IN (SELECT id FROM subtree);
 -- depth DESC yields the root first and the deck itself last.
 deckAncestors:
 WITH RECURSIVE chain (id, language_pair_id, parent_id, name, normalized_name,
-  description, created_at, updated_at, depth) AS (
+  description, normalized_description, created_at, updated_at, depth) AS (
   SELECT id, language_pair_id, parent_id, name, normalized_name, description,
-    created_at, updated_at, 0 FROM decks WHERE id = :deckId
+    normalized_description, created_at, updated_at, 0 FROM decks
+  WHERE id = :deckId
   UNION ALL
   SELECT d.id, d.language_pair_id, d.parent_id, d.name, d.normalized_name,
-    d.description, d.created_at, d.updated_at, chain.depth + 1
+    d.description, d.normalized_description, d.created_at, d.updated_at,
+    chain.depth + 1
   FROM decks d INNER JOIN chain ON d.id = chain.parent_id
 )
 SELECT id, language_pair_id, parent_id, name, normalized_name, description,
-  created_at, updated_at FROM chain ORDER BY depth DESC;
+  normalized_description, created_at, updated_at FROM chain
+ORDER BY depth DESC;
 
 -- Valid move destinations for :movingDeckId (WBS 6.2 reparent). Every deck in
 -- the pair that is NOT inside the moving deck's own subtree (moving into a
@@ -372,6 +376,20 @@ SELECT d.id AS id, 'deck' AS result_type, d.name AS display_text,
 FROM decks d
 WHERE d.language_pair_id = :languagePairId
   AND d.normalized_name LIKE '%' || :deckQuery || '%'
+UNION ALL
+-- §5: "Match trên Deck name; description là supporting match" and
+-- "Exact/prefix name đứng trước partial description match". Tier 3 puts every
+-- description hit behind every name hit, and a deck matching on both is
+-- carried by its name row rather than listed twice.
+SELECT d.id AS id, 'deck' AS result_type, d.name AS display_text,
+  d.id AS deck_id,
+  3 AS tier,
+  2 AS field_priority, d.normalized_name AS sort_key
+FROM decks d
+WHERE d.language_pair_id = :languagePairId
+  AND d.normalized_description IS NOT NULL
+  AND d.normalized_description LIKE '%' || :deckQuery || '%'
+  AND d.normalized_name NOT LIKE '%' || :deckQuery || '%'
 ORDER BY tier, field_priority, sort_key, id;
 
 -- Valid move targets for a card (WBS 6.5 move-flashcard). Every deck in the

@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
+import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/data/database/app_database.dart';
 
 /// Guided migration structure for the shared database (WBS 4.7;
@@ -40,6 +41,9 @@ Future<void> _upgrade(
   if (from < 2) {
     await _upgradeToV2(database, migrator);
   }
+  if (from < 3) {
+    await _upgradeToV3(database, migrator);
+  }
 }
 
 /// v2 (WBS 5.4.4): give `SrsSchedule`'s two timestamps a column.
@@ -65,6 +69,37 @@ Future<void> _upgradeToV2(AppDatabase database, Migrator migrator) async {
     database.learningProgress,
     database.learningProgress.lastReviewedAt,
   );
+}
+
+/// v3 (WBS 6.1 / 10.2): give the deck description a comparison key.
+///
+/// `search-decks.md` §5 makes the description a supporting match, and SQLite
+/// cannot compute the NFC + case-folded form the name already stores a column
+/// for. The column is added nullable and **is** backfilled, which the v2 note
+/// below explains is not always allowed: the difference is that this value is
+/// a pure function of data the row already holds. Deriving it is not inferring
+/// a business fact, so policy rule 6 does not bite — and without the backfill
+/// every deck written before v3 would be unsearchable by its description
+/// until someone happened to edit it.
+Future<void> _upgradeToV3(AppDatabase database, Migrator migrator) async {
+  await migrator.addColumn(
+    database.decks,
+    database.decks.normalizedDescription,
+  );
+  final rows = await database
+      .customSelect(
+        'SELECT id, description FROM decks WHERE description IS NOT NULL',
+      )
+      .get();
+  for (final row in rows) {
+    await database.customStatement(
+      'UPDATE decks SET normalized_description = ? WHERE id = ?',
+      <Object?>[
+        StringUtils.comparisonKey(row.read<String>('description')),
+        row.read<String>('id'),
+      ],
+    );
+  }
 }
 
 Future<void> _verifyIntegrity(AppDatabase database) async {

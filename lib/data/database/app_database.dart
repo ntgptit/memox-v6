@@ -54,7 +54,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// Cheap connectivity probe for startup warm-up (WBS 4.8): forces the
   /// lazy executor open so open/migration failures surface immediately.

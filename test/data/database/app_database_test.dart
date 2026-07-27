@@ -17,7 +17,7 @@ void main() {
     });
 
     test('opens at the current schema version and executes queries', () async {
-      expect(database.schemaVersion, 2);
+      expect(database.schemaVersion, 3);
 
       final row = await database.customSelect('SELECT 1 AS probe').getSingle();
       expect(row.read<int>('probe'), 1);
@@ -25,7 +25,7 @@ void main() {
       final version = await database
           .customSelect('PRAGMA user_version')
           .getSingle();
-      expect(version.read<int>('user_version'), 2);
+      expect(version.read<int>('user_version'), 3);
     });
 
     test('close is idempotent and ends the connection', () async {

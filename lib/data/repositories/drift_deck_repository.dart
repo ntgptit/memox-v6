@@ -1,3 +1,4 @@
+import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/data/database/app_database.dart' as db;
 import 'package:memox_v6/data/database/sqlite_error_mapper.dart';
@@ -140,6 +141,7 @@ class DriftDeckRepository implements DeckRepository {
         name,
         normalizedName,
         description,
+        description == null ? null : StringUtils.comparisonKey(description),
         updatedAt.millisecondsSinceEpoch,
         deckId,
       );
