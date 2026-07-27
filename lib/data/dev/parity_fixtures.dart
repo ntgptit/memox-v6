@@ -58,6 +58,7 @@ class ParityFixtures {
     'MX-VIS-014',
     'MX-VIS-015',
     'MX-VIS-018',
+    'MX-VIS-084',
     'MX-VIS-034',
     'MX-VIS-036',
     'MX-VIS-037',
@@ -131,6 +132,9 @@ class ParityFixtures {
         return;
       case 'MX-VIS-043':
       case 'MX-VIS-044':
+      // Search over the same leaf: five cards and a deck whose name shares
+      // their prefix, which is what makes the results list worth a picture.
+      case 'MX-VIS-084':
         await _seedLeafDeck();
         return;
       case 'MX-VIS-062':
