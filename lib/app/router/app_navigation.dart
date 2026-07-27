@@ -49,8 +49,10 @@ extension AppNavigation on BuildContext {
   /// (`refresh-today-projections.md` §3, "Deck/Card mutation").
   Future<void> pushSearch() => GoRouter.of(this).push(RoutePaths.search);
 
-  /// Pushes the Card Editor for creating a card in [deckId].
-  void pushNewCard(String deckId) =>
+  /// Pushes the Card Editor for creating a card in [deckId]. Completes when
+  /// the editor is popped, so the caller can refresh what it handed off
+  /// (`manage-today-create-actions.md` §6).
+  Future<void> pushNewCard(String deckId) =>
       GoRouter.of(this).push(RoutePaths.newCard(deckId));
 
   /// Opens the Card Editor in edit mode for an existing card (WBS 6.3).

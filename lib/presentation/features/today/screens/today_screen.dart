@@ -50,11 +50,11 @@ import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 /// gaps).
 ///
 /// Template-only shell: the consumer child does the watch.
-class TodayScreen extends ConsumerWidget {
+class TodayScreen extends StatelessWidget {
   const TodayScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     // The state bodies own their scrolling (lists) or fill the frame (empty
     // states), so the scaffold provides no outer scroll view.
@@ -71,16 +71,7 @@ class TodayScreen extends ConsumerWidget {
           MxIconButton.toolbar(
             icon: Symbols.search_rounded,
             semanticLabel: l10n.searchLabel,
-            // §3's "Deck/Card mutation" trigger, on the one path this screen
-            // owns: search is pushed over Today, so Today stays mounted and
-            // its snapshot survives whatever the learner did in there — and
-            // search opens the card editor, where a card can be renamed or
-            // deleted out of the very counts behind this bar.
-            onPressed: () async {
-              await context.pushSearch();
-              if (!context.mounted) return;
-              ref.invalidate(todayProjectionProvider);
-            },
+            onPressed: () => context.pushSearch(),
           ),
         ],
       ),
@@ -111,6 +102,27 @@ class _TodayBody extends HookConsumerWidget {
     // §1 needs no request token of its own — the provider element keeps only
     // its latest future, so a superseded refresh is dropped before it can
     // reach the screen.
+    // `handle-caught-up-today.md` §4: "Browse return giữ Today context và
+    // refresh". Library is a sibling tab rather than a route over Today, so
+    // the shell keeps this branch mounted in its IndexedStack — a learner who
+    // browsed away, added or studied something and came back read the numbers
+    // from before they left. go_router mutes an inactive branch's tickers, so
+    // this is the branch's own visibility rather than a hook into the shell,
+    // and it reads as `true` wherever there is no shell at all.
+    final visible = TickerMode.valuesOf(context).enabled;
+    final wasVisible = useRef(visible);
+    useEffect(() {
+      final returned = visible && !wasVisible.value;
+      wasVisible.value = visible;
+      if (!returned) return null;
+      // After the frame: a hook effect still runs inside the build phase, and
+      // invalidating a watched provider there is a rebuild during a build.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) ref.invalidate(todayProjectionProvider);
+      });
+      return null;
+    }, <Object?>[visible]);
+
     final resumes = useState(0);
     useEffect(() {
       final listener = AppLifecycleListener(
