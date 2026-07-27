@@ -107,6 +107,25 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  // §4 draws the row as a title over a supporting path. It showed the name
+  // alone, so two decks called Grammar under different parents were the same
+  // row twice — which §10 lists as a state this screen has to handle.
+  testWidgets('a result shows the context that distinguishes it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'hel');
+    await tester.pumpAndSettle();
+
+    // The card's row names the deck it lives in.
+    expect(find.text('hello'), findsOneWidget);
+    expect(find.text('Korean'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   // `search-rank-v1` says "Hidden/deleted content bị loại trước ranking", and
   // the sentence after it — "Filters chạy trước ranking" — is what that clause
   // is: the default visibility filter. `int-93` made hidden cards findable,

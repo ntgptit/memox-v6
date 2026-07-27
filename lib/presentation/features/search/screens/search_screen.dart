@@ -471,7 +471,27 @@ class _ResultRow extends HookConsumerWidget {
           const MxGap.s3(),
           MxIcon(icon: icon),
           const MxGap.s4(),
-          Expanded(child: MxText(result.displayText, role: MxTextRole.body)),
+          // §4 draws the row as a title over a supporting path, and §11 makes
+          // it an acceptance criterion: "Result có đủ path/context để phân
+          // biệt". The row showed the name alone, so two decks called Grammar
+          // in different parents — or two cards with the same term in
+          // different decks — were the same row twice, and §10 lists exactly
+          // that as a state this screen has to handle (`int-104`).
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MxText(result.displayText, role: MxTextRole.body),
+                MxText(
+                  result.contextName ?? l10n.libraryTitle,
+                  role: MxTextRole.caption,
+                  color: context.colors.textSecondary,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
           if (result.isHidden) ...[
             const MxGap.s2(),
             MxText(
