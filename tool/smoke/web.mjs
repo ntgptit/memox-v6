@@ -169,11 +169,13 @@ async function enableSemantics(page) {
 }
 
 const consoleErrors = [];
+const failedRequests = [];
 const pageErrors = [];
 let outcome = 'PASS';
 let failedPage = null;
 let detail =
-  'The shipping entry booted, skipped onboarding, and kept that across a reload.';
+  'The shipping entry booted, skipped onboarding, kept that across a reload, ' +
+  'and read its store again with the network down.';
 
 try {
   // The server binds before it prints; a short poll is cheaper than parsing
@@ -210,6 +212,12 @@ try {
   page.on('pageerror', (error) =>
     pageErrors.push(`${error}
 ${error.stack ?? ''}`));
+  // A console error says a resource failed; only this says *which*, which is
+  // the whole diagnosis when the failure is a shell that was not cached.
+  page.on('requestfailed', (request) =>
+    failedRequests.push(
+      `${request.url()} — ${request.failure()?.errorText ?? 'failed'}`,
+    ));
 
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'load' });
 
@@ -262,6 +270,73 @@ ${error.stack ?? ''}`));
   }
   await page.screenshot({ path: join(evidenceDir, 'after-reload.png') });
 
+  // ---- offline (WBS 5.7.4: "force-close/resume and offline Web/Android
+  // variants"; view-card-detail.md's Offline row: "render committed local
+  // data").
+  //
+  // This is the claim the whole architecture rests on. MemoX is local-first:
+  // the store is a Drift wasm database in the browser, so losing the network
+  // should be a non-event. Nothing had ever checked it, and on Web it is not
+  // free — the bundle itself comes over that network, so surviving offline
+  // depends on Flutter's service worker having cached the app shell.
+  //
+  // The offline shell has to be active before the network goes: registration
+  // is asynchronous and a reload raced against it would fail for a reason that
+  // has nothing to do with the app.
+  //
+  // The wait is raced against a deadline on purpose: `serviceWorker.ready`
+  // never settles when nothing registers, so an un-raced await would hang the
+  // run instead of failing it — which is exactly the shape of the orphan this
+  // harness already learned about once. A worker that never activates is the
+  // finding (`int-95`), not a flake.
+  await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator)) {
+      throw new Error('this browser exposes no service worker API');
+    }
+    const registered = navigator.serviceWorker.ready.then(() => true);
+    const timedOut = new Promise((resolve) =>
+      setTimeout(() => resolve(false), 30_000),
+    );
+    if (!(await Promise.race([registered, timedOut]))) {
+      throw new Error('no service worker activated, so the shell is not cached');
+    }
+  });
+  // Exactly one worker owns the scope, and it is ours.
+  //
+  // Flutter's loader registers its own deprecated worker whenever *any*
+  // registration already exists, so simply adding a second one made the two
+  // trade the scope between loads and neither cached the shell. `int-95` is as
+  // much that collision as the missing cache, and this is what would catch it
+  // coming back — a regenerated `flutter_bootstrap.js` would put the settings
+  // straight back.
+  const workers = await page.evaluate(async () =>
+    (await navigator.serviceWorker.getRegistrations()).map(
+      (registration) =>
+        registration.active?.scriptURL ?? registration.installing?.scriptURL ?? '',
+    ),
+  );
+  const foreign = workers.filter((url) => !url.endsWith('/offline_shell.js'));
+  if (foreign.length > 0) {
+    throw new Error(`a second service worker took the scope: ${foreign.join(', ')}`);
+  }
+
+  await page.context().setOffline(true);
+  await page.reload({ waitUntil: 'load' });
+  await enableSemantics(page);
+  await page.getByText('Today', { exact: false }).first().waitFor({
+    timeout: 60_000,
+  });
+  const offlineAtLanding = await page
+    .getByText('Build your learning library', { exact: false })
+    .first()
+    .isVisible()
+    .catch(() => false);
+  if (offlineAtLanding) {
+    throw new Error('the store did not answer with the network down');
+  }
+  await page.screenshot({ path: join(evidenceDir, 'offline.png') });
+  await page.context().setOffline(false);
+
   await browser.close();
 
   if (consoleErrors.length > 0 || pageErrors.length > 0) {
@@ -297,11 +372,13 @@ writeFileSync(
       build: 'flutter build web --release',
       viewport: '390x780',
       route: '/',
-      expects: 'first-run landing, then Today surviving a reload',
+      expects:
+        'first-run landing, then Today surviving a reload and an offline reload',
       result: outcome,
       detail,
       consoleErrors,
       pageErrors,
+      failedRequests,
     },
     null,
     2,
