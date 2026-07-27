@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:memox_v6/presentation/shared/dialogs/mx_confirm_dialog.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/match_flush_notifier.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_answer_viewmodel.dart';
-import 'package:memox_v6/presentation/shared/dialogs/mx_dialog.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_action_runner.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
 import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
@@ -167,23 +167,23 @@ Future<void> _reportAnswerFailure(
 }) async {
   final l10n = AppLocalizations.of(context);
   final isStale = failure is ConflictFailure;
-  final retried = await showMxDialog<bool>(
+  // Composition from the kit's `AnswerSaveErrorDialog`: the shared confirm
+  // composite, tone error, a `sync_problem` glyph, and Back beside Retry.
+  // The copy stays §9's — the spec is explicit about both sentences, and the
+  // kit's own wording ("Retry so your review schedule stays correct") is a
+  // different claim rather than a different phrasing of the same one.
+  final retried = await showMxConfirmDialog(
     context,
+    icon: isStale ? Symbols.sync_rounded : Symbols.sync_problem_rounded,
+    tone: MxConfirmTone.error,
     title: isStale
         ? l10n.studyStaleSessionTitle
         : l10n.studyAnswerSaveFailedTitle,
-    body: MxText(
-      isStale ? l10n.studyStaleSessionBody : l10n.studyAnswerSaveFailedBody,
-      role: MxTextRole.body,
-    ),
-    actions: <Widget>[
-      MxButton(
-        label: isStale ? l10n.studyReloadLabel : l10n.studyTryAgainLabel,
-        onPressed: () => Navigator.of(context).pop(true),
-      ),
-    ],
+    text: isStale ? l10n.studyStaleSessionBody : l10n.studyAnswerSaveFailedBody,
+    confirmLabel: isStale ? l10n.studyReloadLabel : l10n.studyRetryLabel,
+    cancelLabel: l10n.studyAnswerSaveBackLabel,
   );
-  if (retried != true || !context.mounted) return;
+  if (!retried || !context.mounted) return;
   if (isStale) {
     ref.invalidate(studySessionRuntimeProvider);
     return;

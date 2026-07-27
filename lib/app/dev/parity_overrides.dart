@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
+import 'package:memox_v6/domain/usecases/study_session/answer_study_stage_usecase.dart';
+import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
+import 'package:memox_v6/domain/study_modes/study_mode_input.dart';
 import 'package:memox_v6/app/di/core_providers.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
@@ -132,6 +135,13 @@ List<Override> parityOverridesFor(String fixtureId) {
     'MX-VIS-077' => <Override>[
       studyResultProvider.overrideWith(_FailedStudyResult.new),
     ],
+    // The answer-save error: the write the dialog reports is the one broken
+    // here. Everything else on screen is the real Fill stage.
+    'MX-VIS-078' => <Override>[
+      answerStudyStageUseCaseProvider.overrideWith(
+        (ref) => const _FailingAnswerStudyStageUseCase(),
+      ),
+    ],
     _ => const <Override>[],
   };
 }
@@ -154,6 +164,21 @@ class _SeededStudyResult extends StudyResult {
           ),
         ),
       );
+}
+
+/// An answer write that always fails, for `study-session--answer-save-error`.
+class _FailingAnswerStudyStageUseCase implements AnswerStudyStageUseCase {
+  const _FailingAnswerStudyStageUseCase();
+
+  @override
+  Future<StudyRuntimeState> call(
+    StudyRuntimeState runtime,
+    StudyModeInput input,
+  ) async {
+    throw const UnexpectedFailure(
+      cause: 'parity fixture: the answer write fails for MX-VIS-078',
+    );
+  }
 }
 
 /// The Study Result after a finalize that could not be committed
