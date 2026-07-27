@@ -265,6 +265,18 @@
   "@searchFilterDecks": {
     "description": "Search filter chip limiting results to decks (WBS 10.2)."
   },
+  "searchResultDeletedMessage": "That was deleted. The list has been refreshed.",
+  "@searchResultDeletedMessage": {
+    "description": "Guidance when a search result is opened after its object was deleted (open-search-result.md 2)."
+  },
+  "searchResultHiddenMessage": "That card is now hidden. The list has been refreshed.",
+  "@searchResultHiddenMessage": {
+    "description": "Guidance when a search result is opened after its card was hidden and the visibility filter excludes hidden cards."
+  },
+  "searchResultMovedMessage": "That card has moved; opening it where it is now.",
+  "@searchResultMovedMessage": {
+    "description": "Notification when a card search result resolves to a different deck than the one it was indexed under."
+  },
   "searchFilterHidden": "Hidden",
   "@searchFilterHidden": {
     "description": "Search filter chip that includes hidden cards in the results (filter-search-results.md visibility dimension). Off by default, which is the default search-rank-v1 states."

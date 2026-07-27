@@ -435,6 +435,111 @@ void main() {
   // §4: "Double tap chỉ tạo một navigation". The pushed route takes a frame to
   // cover the row, and a second tap inside that frame stacked a second copy of
   // the destination that Back then had to be pressed twice to leave.
+  // §1: "Object được revalidate ngay trước navigation", and §2 branches a
+  // deleted one to "Remove stale result + guidance". The row opened whatever
+  // the cached list said, which is what §6 forbids — the destination then had
+  // to apologise for a route that should never have been taken (`int-101`).
+  testWidgets('a result deleted since the search says so and leaves', (
+    tester,
+  ) async {
+    final router = GoRouter(
+      initialLocation: RoutePaths.search,
+      routes: [...searchRoutes(), ...deckDetailRoutes(), ...flashcardRoutes()],
+    );
+    await tester.pumpWidget(routedApp(router));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'hel');
+    await tester.pumpAndSettle();
+    expect(find.text('hello'), findsOneWidget);
+
+    // What another screen's delete does to the store while search is open.
+    await database.flashcardDao.softDeleteFlashcard(1, 1, 'c1');
+
+    await tester.tap(find.text('hello'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('That was deleted. The list has been refreshed.'),
+      findsOneWidget,
+    );
+    expect(find.text('Card'), findsNothing, reason: 'no route was opened');
+    expect(find.text('hello'), findsNothing, reason: 'the stale row is gone');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  // The hidden branch is filter-relative: a learner who asked for hidden cards
+  // is not surprised to open one, so only a list built without them treats a
+  // newly hidden card as stale (`int-98` set that default).
+  testWidgets('a card hidden since the search is treated as stale', (
+    tester,
+  ) async {
+    final router = GoRouter(
+      initialLocation: RoutePaths.search,
+      routes: [...searchRoutes(), ...deckDetailRoutes(), ...flashcardRoutes()],
+    );
+    await tester.pumpWidget(routedApp(router));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'hel');
+    await tester.pumpAndSettle();
+
+    await database.customStatement(
+      "UPDATE flashcards SET is_hidden = 1 WHERE id = 'c1'",
+    );
+
+    await tester.tap(find.text('hello'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('That card is now hidden. The list has been refreshed.'),
+      findsOneWidget,
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  // §2: "Moved → Use current path + notify". The result carries the deck the
+  // index knew; opening it there would have been a route to the wrong place.
+  testWidgets('a card moved since the search opens where it is now', (
+    tester,
+  ) async {
+    await database.deckDao.insertDeck(
+      'other',
+      'lp1',
+      null,
+      'Archive',
+      'archive',
+      0,
+      0,
+    );
+    final router = GoRouter(
+      initialLocation: RoutePaths.search,
+      routes: [...searchRoutes(), ...deckDetailRoutes(), ...flashcardRoutes()],
+    );
+    await tester.pumpWidget(routedApp(router));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'hel');
+    await tester.pumpAndSettle();
+
+    await database.customStatement(
+      "UPDATE flashcards SET deck_id = 'other' WHERE id = 'c1'",
+    );
+
+    await tester.tap(find.text('hello'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('That card has moved; opening it where it is now.'),
+      findsOneWidget,
+    );
+    expect(find.text('Card'), findsWidgets, reason: 'it still opened');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('a double tap on a result opens one destination', (tester) async {
     final router = GoRouter(
       initialLocation: RoutePaths.search,
