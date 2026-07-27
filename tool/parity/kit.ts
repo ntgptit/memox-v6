@@ -149,6 +149,20 @@ export async function expectStableCapture(page: Page): Promise<void> {
     await page.mouse.move(2, Math.floor(viewport.height / 2));
   }
 
+  // Let any transient confirmation leave first. The app raises a snackbar on
+  // every successful command now, and a journey that creates its own
+  // preconditions (create the card, then reopen it) can still be showing one
+  // when the capture happens — MX-VIS-059 went from 0.97% to 5.83% on exactly
+  // that. The three-identical-captures check below does not catch it: a
+  // stationary bar is perfectly stable.
+  await page
+    .getByText(
+      /^(Card|Deck) (added|updated|moved|deleted|hidden|visible)$|^Deck progress reset$|^Daily goal updated$/,
+    )
+    .first()
+    .waitFor({ state: 'detached', timeout: 8000 })
+    .catch(() => undefined);
+
   const captures: string[] = [];
   for (let attempt = 0; attempt < 3; attempt++) {
     await settle(page);
