@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
 import 'package:memox_v6/domain/today/today_projection.dart';
@@ -49,11 +50,11 @@ import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
 /// gaps).
 ///
 /// Template-only shell: the consumer child does the watch.
-class TodayScreen extends StatelessWidget {
+class TodayScreen extends ConsumerWidget {
   const TodayScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     // The state bodies own their scrolling (lists) or fill the frame (empty
     // states), so the scaffold provides no outer scroll view.
@@ -70,7 +71,16 @@ class TodayScreen extends StatelessWidget {
           MxIconButton.toolbar(
             icon: Symbols.search_rounded,
             semanticLabel: l10n.searchLabel,
-            onPressed: () => context.pushSearch(),
+            // §3's "Deck/Card mutation" trigger, on the one path this screen
+            // owns: search is pushed over Today, so Today stays mounted and
+            // its snapshot survives whatever the learner did in there — and
+            // search opens the card editor, where a card can be renamed or
+            // deleted out of the very counts behind this bar.
+            onPressed: () async {
+              await context.pushSearch();
+              if (!context.mounted) return;
+              ref.invalidate(todayProjectionProvider);
+            },
           ),
         ],
       ),
@@ -82,11 +92,36 @@ class TodayScreen extends StatelessWidget {
   }
 }
 
-class _TodayBody extends ConsumerWidget {
+class _TodayBody extends HookConsumerWidget {
   const _TodayBody();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // `refresh-today-projections.md` §3 names app foreground first among the
+    // triggers. Nothing wired it, and Today is the screen a learner leaves
+    // open: come back the next morning and the greeting still said good
+    // evening, the due count was yesterday's, and a dashboard that had gone
+    // caught-up overnight still offered the review it had already finished.
+    // Every number here is derived from "now", so none of them aged.
+    //
+    // The bump is the rebuild: the greeting reads the clock directly rather
+    // than through the projection, so invalidating the projection alone would
+    // refresh the counts and leave the greeting in yesterday evening.
+    //
+    // §1 needs no request token of its own — the provider element keeps only
+    // its latest future, so a superseded refresh is dropped before it can
+    // reach the screen.
+    final resumes = useState(0);
+    useEffect(() {
+      final listener = AppLifecycleListener(
+        onResume: () {
+          resumes.value++;
+          ref.invalidate(todayProjectionProvider);
+        },
+      );
+      return listener.dispose;
+    }, const <Object?>[]);
+
     final l10n = AppLocalizations.of(context);
     // The greeting needs no data, so it sits outside the async builder and
     // renders in every state including loading and error — which is what the
@@ -107,9 +142,12 @@ class _TodayBody extends ConsumerWidget {
         // Kit `.app__body` gap: `space-6`. It was `space-5` (20) here, four
         // logical short of every other section break in the app.
         const MxGap.s6(),
-        // §3's manual trigger. The other triggers it lists — foreground, day
-        // boundary, deck/card mutation — are not wired yet; this is the one
-        // the learner can reach.
+        // §3's manual trigger, beside the foreground one this state installs
+        // and the deck/card-mutation one the search action carries. The day
+        // boundary is still unwired: it only bites while the app stays in the
+        // foreground across midnight, since foreground covers every other way
+        // back — recorded rather than built, because it needs a scheduled
+        // tick this screen has no other reason to own.
         //
         // No request token of its own (§1): the provider element keeps only
         // its latest future, so a response from a superseded refresh is

@@ -44,8 +44,10 @@ extension AppNavigation on BuildContext {
   Future<void> pushDeckDetail(String deckId) =>
       GoRouter.of(this).push(RoutePaths.deckDetail(deckId));
 
-  /// Opens Library search (WBS 10.2).
-  void pushSearch() => GoRouter.of(this).push(RoutePaths.search);
+  /// Opens Library search (WBS 10.2). Completes when search is popped, so
+  /// the caller can refresh what search may have mutated on the way back
+  /// (`refresh-today-projections.md` §3, "Deck/Card mutation").
+  Future<void> pushSearch() => GoRouter.of(this).push(RoutePaths.search);
 
   /// Pushes the Card Editor for creating a card in [deckId].
   void pushNewCard(String deckId) =>
