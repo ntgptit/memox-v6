@@ -1475,6 +1475,26 @@
   "@deckUpdatedMessage": {
     "description": "Success confirmation after renaming or editing a deck (edit-deck.md)."
   },
+  "moveDeckFailedMessage": "Couldn't move the deck. Nothing has changed. Try again.",
+  "@moveDeckFailedMessage": {
+    "description": "Move failure copy (move-deck.md §8). Names the atomicity §1 promises: the deck is where it was."
+  },
+  "moveDeckDuplicateMessage": "A deck with this name already exists there.",
+  "@moveDeckDuplicateMessage": {
+    "description": "Move failure on a destination sibling-name collision (move-deck.md §7)."
+  },
+  "moveDeckStaleTargetMessage": "That destination is no longer available. Choose another one.",
+  "@moveDeckStaleTargetMessage": {
+    "description": "Move failure when the destination disappeared before submit (move-deck.md §7)."
+  },
+  "moveDeckLeafTargetMessage": "This deck contains cards and can't receive a nested deck.",
+  "@moveDeckLeafTargetMessage": {
+    "description": "Move failure on a Leaf destination (move-deck.md §7)."
+  },
+  "moveDeckDescendantMessage": "Choose a destination outside this deck.",
+  "@moveDeckDescendantMessage": {
+    "description": "Move failure on a self/descendant destination (move-deck.md §7)."
+  },
   "deckMovedMessage": "Deck moved",
   "@deckMovedMessage": {
     "description": "Success confirmation after moving a deck (move-deck.md)."
