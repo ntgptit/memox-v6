@@ -502,15 +502,11 @@ class _LeafBranch extends ConsumerWidget {
               ],
             ),
           ),
-        const MxGap.s6(),
-        // The same entry point the empty deck offers. It was left disabled
-        // pending the 5.3 flashcard flow, which landed with 5.3.2 child A —
-        // so until now a deck accepted its first card and no others.
-        MxButton(
-          label: l10n.addCardLabel,
-          block: true,
-          onPressed: () => context.pushNewCard(deckId),
-        ),
+        // No trailing `Add card` button: the kit's populated leaf carries the
+        // FAB and nothing else (`FlashcardList.jsx`), which is what
+        // `MX-VIS-042` records. The button existed because the FAB created a
+        // deck here — the branch it belongs to (`int-52`) — so with the FAB
+        // adding cards it is a second copy of the same action.
       ],
     );
   }

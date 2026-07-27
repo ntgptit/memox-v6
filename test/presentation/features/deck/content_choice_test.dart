@@ -3,7 +3,6 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_fab.dart';
 import 'package:go_router/go_router.dart';
 import 'package:memox_v6/app/di/data_providers.dart';
@@ -106,17 +105,19 @@ void main() {
     await tester.pumpWidget(app());
     await pumpStreams(tester);
 
-    expect(find.text('Add card'), findsOneWidget);
+    // The affordance is the FAB, which is the only one the kit's populated
+    // leaf draws (`FlashcardList.jsx`, `MX-VIS-042`). It used to be a
+    // full-width button below the list *and* a FAB that created a deck —
+    // the branch the leaf may not have at all (`int-52`).
     expect(find.text('Create nested deck'), findsNothing);
     expect(find.text('Import cards'), findsNothing);
 
-    // Present is not the same as usable. This control shipped disabled —
+    // Present is not the same as usable. The old button shipped disabled —
     // `onPressed: null` behind a stale "lands with the 5.3 flashcard flow"
-    // comment — so a deck accepted its first card and no others, and the
-    // assertion above passed the whole time.
-    final addCard = tester.widget<MxButton>(
-      find.widgetWithText(MxButton, 'Add card'),
-    );
+    // comment — so a deck accepted its first card and no others, and a
+    // presence-only assertion passed the whole time.
+    final addCard = tester.widget<MxFab>(find.byType(MxFab));
+    expect(addCard.semanticLabel, 'Add card');
     expect(addCard.onPressed, isNotNull, reason: 'Add card must be actionable');
 
     await disposeAndFlushStreams(tester);
