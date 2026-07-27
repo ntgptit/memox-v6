@@ -387,6 +387,11 @@ ORDER BY d.normalized_name, d.id;
 -- to carry "path/language pair đủ để phân biệt tên giống nhau ở context khác"
 -- and `search-library-content.md` §3 says a result shows "matched field, type
 -- và path; không chỉ tên".
+--
+-- `subtitle` is the matched object's own second line — a card's primary
+-- meaning, a deck's description — which the kit's `StatusCardRow` draws under
+-- the term. It is content the index already holds; §3 of
+-- `update-search-index.md` forbids reaching past that into Progress.
 -- Meaning/translation matching needs normalized storage those columns lack —
 -- a recorded follow-up.
 searchLibraryContent:
@@ -398,7 +403,7 @@ SELECT f.id AS id, 'card' AS result_type, f.term AS display_text,
     ELSE 2
   END AS tier,
   0 AS field_priority, f.normalized_term AS sort_key, f.is_hidden AS is_hidden,
-  fd.name AS context_name
+  fd.name AS context_name, f.primary_meaning AS subtitle
 FROM flashcards f
 INNER JOIN decks fd ON fd.id = f.deck_id
 WHERE fd.language_pair_id = :languagePairId
@@ -413,7 +418,7 @@ SELECT d.id AS id, 'deck' AS result_type, d.name AS display_text,
     ELSE 2
   END AS tier,
   1 AS field_priority, d.normalized_name AS sort_key, 0 AS is_hidden,
-  parent.name AS context_name
+  parent.name AS context_name, d.description AS subtitle
 FROM decks d
 LEFT JOIN decks parent ON parent.id = d.parent_id
 WHERE d.language_pair_id = :languagePairId
@@ -427,7 +432,7 @@ SELECT d.id AS id, 'deck' AS result_type, d.name AS display_text,
   d.id AS deck_id,
   3 AS tier,
   2 AS field_priority, d.normalized_name AS sort_key, 0 AS is_hidden,
-  parent.name AS context_name
+  parent.name AS context_name, d.description AS subtitle
 FROM decks d
 LEFT JOIN decks parent ON parent.id = d.parent_id
 WHERE d.language_pair_id = :languagePairId

@@ -132,10 +132,10 @@ class ParityFixtures {
         return;
       case 'MX-VIS-043':
       case 'MX-VIS-044':
-      // Search over the same leaf: five cards and a deck whose name shares
-      // their prefix, which is what makes the results list worth a picture.
-      case 'MX-VIS-084':
         await _seedLeafDeck();
+        return;
+      case 'MX-VIS-084':
+        await _seedSearchCorpus();
         return;
       case 'MX-VIS-062':
       case 'MX-VIS-063':
@@ -488,6 +488,55 @@ class ParityFixtures {
       fixedInstantMs,
       fixedInstantMs,
     );
+  }
+
+  /// The kit's own search sample (`Search.jsx` RESULTS), seeded as real data.
+  ///
+  /// Matching the shot's scenario rather than inventing one is what the
+  /// harness does elsewhere — `MX-VIS-078` records the same move — because a
+  /// ratio measured over different content measures the content, not the
+  /// composition. Three cards across two decks, one of them hidden, all
+  /// matching the query `하`.
+  Future<void> _seedSearchCorpus() async {
+    await _seedActivePair();
+    const decks = <(String, String, String)>[
+      ('fx-topik', 'TOPIK I — Vocabulary', 'topik i — vocabulary'),
+      ('fx-verbs', 'Common Verbs', 'common verbs'),
+    ];
+    for (final (id, name, normalized) in decks) {
+      await _database.deckDao.insertDeck(
+        id,
+        'fx-lp-1',
+        null,
+        name,
+        normalized,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+    }
+
+    const cards = <(String, String, String, String, bool)>[
+      ('fx-s-0', 'fx-topik', '공부하다', 'to study', false),
+      ('fx-s-1', 'fx-verbs', '좋아하다', 'to like', false),
+      ('fx-s-2', 'fx-topik', '하다', 'to do (auxiliary)', true),
+    ];
+    for (final (id, deckId, term, meaning, hidden) in cards) {
+      await _database.flashcardDao.insertFlashcard(
+        id,
+        deckId,
+        term,
+        term,
+        meaning,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+      if (hidden) {
+        await _database.customStatement(
+          'UPDATE flashcards SET is_hidden = 1 WHERE id = ?',
+          <Object?>[id],
+        );
+      }
+    }
   }
 
   Future<void> _seedLeafDeck() async {

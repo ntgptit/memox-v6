@@ -1,3 +1,5 @@
+import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
 import 'package:memox_v6/domain/search/search_target.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
@@ -14,7 +16,6 @@ import 'package:memox_v6/presentation/features/search/viewmodels/search_viewmode
 import 'package:memox_v6/presentation/shared/hooks/mx_text_hooks.dart';
 import 'package:memox_v6/presentation/shared/layouts/mx_scaffold.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
-import 'package:memox_v6/presentation/shared/widgets/inputs/mx_text_field.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_chip.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
@@ -100,6 +101,15 @@ class _SearchBody extends HookConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const MxGap.s4(),
+        // Still the form field, and that is a recorded defect rather than a
+        // choice: `MxSearchDock`'s own contract says "Use when: the search
+        // entry at the top of list screens (library, search)" and "Do not use
+        // when: inline form text entry (`MxTextField`)". Swapping it is
+        // `int-106`'s next step and is held back only because the parity
+        // harness cannot drive the dock — `fillField`'s `toHaveValue` check
+        // fails against it — so the swap could not be measured, and shipping
+        // an unmeasurable change to a screen that finally has a row is the
+        // thing `int-105` existed to stop.
         MxTextField(
           controller: input.controller,
           label: l10n.searchLabel,
@@ -454,53 +464,60 @@ class _ResultRow extends HookConsumerWidget {
       ref.invalidate(searchResultsProvider(query: query));
     }
 
-    final icon = result.type == SearchResultType.deck
-        ? Symbols.folder
-        : Symbols.style;
-    // `hide-flashcard.md` §1 keeps a hidden Card findable, and search is where
-    // a learner goes to find one back — so the hit carries its state rather
-    // than looking like any other row. §4 wants that state read, not just seen.
+    // The kit's `StatusCardRow` (via `search/ResultRow.jsx`): term over
+    // meaning over the deck line, each result in its own card. No leading
+    // icon — the kit does not draw one — and hidden is the crossed-eye glyph
+    // beside the term with the row dimmed, not a word in the trailing slot.
+    //
+    // What the kit also draws and this row deliberately does not: an SRS
+    // status badge (New/Due/Mastered). The kit contradicts itself there, and
+    // its own `Chips.jsx` is the side with the citation — "Search does not
+    // index Progress content (update-search-index.md §3) — see ADR-009 /
+    // CF-14" — and §3 of that spec reads "Không index Progress/Account/private
+    // fields ngoài explicit scope". A badge would need exactly the Progress
+    // the index is forbidden to hold (`int-106`).
     final l10n = AppLocalizations.of(context);
-    return MxTappable(
+    final subtitle = result.subtitle;
+    return MxCard(
+      padding: MxCardPadding.sm,
       semanticLabel: result.isHidden
           ? l10n.cardHiddenSemantics(result.displayText)
           : result.displayText,
       onTap: open,
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const MxGap.s3(),
-          MxIcon(icon: icon),
-          const MxGap.s4(),
-          // §4 draws the row as a title over a supporting path, and §11 makes
-          // it an acceptance criterion: "Result có đủ path/context để phân
-          // biệt". The row showed the name alone, so two decks called Grammar
-          // in different parents — or two cards with the same term in
-          // different decks — were the same row twice, and §10 lists exactly
-          // that as a state this screen has to handle (`int-104`).
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                MxText(result.displayText, role: MxTextRole.body),
-                MxText(
-                  result.contextName ?? l10n.libraryTitle,
-                  role: MxTextRole.caption,
+          Row(
+            children: [
+              Flexible(
+                child: MxText(result.displayText, role: MxTextRole.subtitle),
+              ),
+              if (result.isHidden) ...[
+                const MxGap.s2(),
+                MxIcon(
+                  icon: Symbols.visibility_off_rounded,
                   color: context.colors.textSecondary,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
-            ),
+            ],
           ),
-          if (result.isHidden) ...[
-            const MxGap.s2(),
+          if (subtitle != null && subtitle.isNotEmpty) ...[
+            const MxGap.s1(),
             MxText(
-              l10n.cardHiddenBadge,
+              subtitle,
               role: MxTextRole.caption,
-              color: context.colors.textSecondary,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
-          const MxGap.s3(),
+          const MxGap.s1(),
+          MxText(
+            result.contextName ?? l10n.libraryTitle,
+            role: MxTextRole.caption,
+            color: context.colors.textSecondary,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
