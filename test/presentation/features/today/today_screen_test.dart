@@ -5,6 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/core/theme/app_theme.dart';
+import 'package:memox_v6/presentation/features/search/routes/search_routes.dart';
+import 'package:memox_v6/presentation/features/today/routes/today_routes.dart';
+import 'package:memox_v6/app/router/route_paths.dart';
+import 'package:go_router/go_router.dart';
 import 'package:memox_v6/domain/today/today_projection.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/today/screens/today_screen.dart';
@@ -45,6 +49,28 @@ void main() {
 
   Override data(TodayProjection projection) =>
       todayProjectionProvider.overrideWith((ref) => Future.value(projection));
+
+  /// Today under a real router beside search, for the return-refresh test.
+  Widget routed(GoRouter router, Override override) => ProviderScope(
+    overrides: [override],
+    child: MaterialApp.router(
+      routerConfig: router,
+      theme: AppTheme.light(),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+    ),
+  );
+
+  /// Hands out the snapshots in order, so a re-read is visible on screen
+  /// rather than inferred from a call count.
+  Override snapshots(List<TodayProjection> takes) {
+    var read = 0;
+    return todayProjectionProvider.overrideWith((ref) {
+      final projection = takes[read.clamp(0, takes.length - 1)];
+      read++;
+      return Future.value(projection);
+    });
+  }
 
   testWidgets('a paused session offers Resume', (tester) async {
     await tester.pumpWidget(
@@ -1009,6 +1035,81 @@ void main() {
       expect(find.text('Grammar · 4 cards'), findsOneWidget);
       expect(find.text('Vocabulary · 6 cards'), findsOneWidget);
     });
+  });
+
+  // `refresh-today-projections.md` §3 names app foreground first among the
+  // refresh triggers. Nothing wired it: a dashboard left open overnight kept
+  // yesterday's due count, and every number here is derived from "now".
+  testWidgets('coming back to the foreground re-reads the dashboard', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      wrap(
+        snapshots(const <TodayProjection>[
+          TodayProjection(
+            primaryAction: TodayPrimaryAction.startReview,
+            dueCount: 7,
+          ),
+          TodayProjection(
+            primaryAction: TodayPrimaryAction.caughtUp,
+            dueCount: 0,
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('7 cards due'), findsOneWidget);
+
+    // Away and back: the sequence a real backgrounding walks through.
+    for (final state in const <AppLifecycleState>[
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ]) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
+    await tester.pumpAndSettle();
+
+    expect(find.text('7 cards due'), findsNothing);
+    expect(find.text('You’re all caught up'), findsOneWidget);
+  });
+
+  // §3's "Deck/Card mutation" trigger, on the path this screen owns: search is
+  // pushed over Today, so Today stays mounted underneath and kept its snapshot
+  // across a visit that can rename or delete the very cards it counted.
+  testWidgets('returning from search re-reads the dashboard', (tester) async {
+    final router = GoRouter(
+      initialLocation: RoutePaths.home,
+      routes: [...todayBranchRoutes(), ...searchRoutes()],
+    );
+    await tester.pumpWidget(
+      routed(
+        router,
+        snapshots(const <TodayProjection>[
+          TodayProjection(
+            primaryAction: TodayPrimaryAction.startReview,
+            dueCount: 7,
+          ),
+          TodayProjection(
+            primaryAction: TodayPrimaryAction.caughtUp,
+            dueCount: 0,
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('7 cards due'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Search'));
+    await tester.pumpAndSettle();
+    router.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('7 cards due'), findsNothing);
+    expect(find.text('You’re all caught up'), findsOneWidget);
   });
 }
 
