@@ -338,7 +338,11 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('tapping a card result opens the card editor', (tester) async {
+  // `open-search-result.md` §3: "Valid Card → Open Card/detail contract". It
+  // opened the *editor*, because no detail screen existed — so looking
+  // something up dropped the learner into a form over content they had only
+  // asked to look at (`int-100`).
+  testWidgets('tapping a card result opens its detail', (tester) async {
     final router = GoRouter(
       initialLocation: RoutePaths.search,
       routes: [...searchRoutes(), ...deckDetailRoutes(), ...flashcardRoutes()],
@@ -351,8 +355,10 @@ void main() {
     await tester.tap(find.text('hello'));
     await tester.pumpAndSettle();
 
-    // The card opens its editor in edit mode.
-    expect(find.text('Edit card'), findsOneWidget);
+    // The card opens its detail, which is a read surface: the term is shown,
+    // not loaded into a field.
+    expect(find.text('Card'), findsWidgets);
+    expect(find.text('Edit card'), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -412,9 +418,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('hello'));
     await tester.pumpAndSettle();
-    expect(find.text('Edit card'), findsOneWidget);
+    expect(find.text('Card'), findsWidgets);
 
-    // What the editor's delete action does to the store.
+    // What the card's delete action does to the store.
     await database.flashcardDao.softDeleteFlashcard(1, 1, 'c1');
 
     router.pop();
@@ -444,15 +450,15 @@ void main() {
     await tester.tap(find.text('hello'));
     await tester.tap(find.text('hello'));
     await tester.pumpAndSettle();
-    expect(find.text('Edit card'), findsOneWidget);
+    expect(find.text('Card'), findsWidgets);
 
     router.pop();
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Edit card'),
-      findsNothing,
-      reason: 'one pop leaves the editor, so only one was pushed',
+      find.text('hello'),
+      findsOneWidget,
+      reason: 'one pop is back on the result list, so only one was pushed',
     );
 
     await tester.pumpWidget(const SizedBox.shrink());

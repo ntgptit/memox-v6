@@ -57,6 +57,12 @@ extension AppNavigation on BuildContext {
 
   /// Opens the Card Editor in edit mode for an existing card (WBS 6.3).
   /// Completes when the editor is popped, so the caller can refresh.
+  /// Opens the Card Detail read projection (`view-card-detail.md`). Pushed:
+  /// the return preserves whatever list sent the learner here, which is what
+  /// `open-search-result.md` §3's "Return preserves Search" asks for.
+  Future<void> pushCardDetail(String deckId, String cardId) =>
+      GoRouter.of(this).push(RoutePaths.cardDetail(deckId, cardId));
+
   Future<void> pushEditCard(String deckId, String cardId) =>
       GoRouter.of(this).push(RoutePaths.editCard(deckId, cardId));
 

@@ -20,6 +20,13 @@ abstract final class RoutePaths {
 
   static String newCard(String deckId) => '/deck/$deckId/new-card';
 
+  /// Card Detail path template (WBS 6.x; `view-card-detail.md`).
+  static const String cardDetailPattern =
+      '/deck/:${RouteParams.deckId}/card/:${RouteParams.cardId}';
+
+  static String cardDetail(String deckId, String cardId) =>
+      '/deck/$deckId/card/$cardId';
+
   /// Card Editor path template for editing an existing card (WBS 6.3).
   static const String editCardPattern =
       '/deck/:${RouteParams.deckId}/card/:${RouteParams.cardId}/edit';

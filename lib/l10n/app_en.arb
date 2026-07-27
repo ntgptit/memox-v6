@@ -1564,6 +1564,55 @@
   "@cardMovedMessage": {
     "description": "Success confirmation after moving a card (move-flashcard.md)."
   },
+  "cardDetailTitle": "Card",
+  "@cardDetailTitle": {
+    "description": "App-bar title of the Card Detail read projection (view-card-detail.md)."
+  },
+  "cardSettingsLabel": "Card options",
+  "@cardSettingsLabel": {
+    "description": "Opens the card action sheet from Card Detail."
+  },
+  "cardNotFoundTitle": "This card is unavailable",
+  "@cardNotFoundTitle": {
+    "description": "Card Detail not-found/deleted state."
+  },
+  "backToDeckLabel": "Back to deck",
+  "@backToDeckLabel": {
+    "description": "Safe return from the Card Detail not-found state to the owning deck."
+  },
+  "tagsLabel": "Tags",
+  "@tagsLabel": {
+    "description": "Section header for a card’s tags on Card Detail."
+  },
+  "progressLabel": "Progress",
+  "@progressLabel": {
+    "description": "Section header for the read-only scheduling summary on Card Detail."
+  },
+  "cardProgressNoneMessage": "Not scheduled yet.",
+  "@cardProgressNoneMessage": {
+    "description": "Card Detail progress summary before the card has any progress row."
+  },
+  "cardProgressBoxMessage": "Box {box}",
+  "@cardProgressBoxMessage": {
+    "description": "Card Detail progress summary with no due date yet.",
+    "placeholders": {
+      "box": {
+        "type": "int"
+      }
+    }
+  },
+  "cardProgressBoxDueMessage": "Box {box} · due {due}",
+  "@cardProgressBoxDueMessage": {
+    "description": "Card Detail progress summary: SRS box and the next due date.",
+    "placeholders": {
+      "box": {
+        "type": "int"
+      },
+      "due": {
+        "type": "String"
+      }
+    }
+  },
   "cardHiddenBadge": "Hidden",
   "@cardHiddenBadge": {
     "description": "The hidden marker on a card row (`hide-flashcard.md` §4) — also the accessible name's state, so it is not icon-only."
