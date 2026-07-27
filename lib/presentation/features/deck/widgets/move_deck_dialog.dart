@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
+import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/domain/deck/move_destination.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/deck/viewmodels/deck_detail_viewmodel.dart';
@@ -92,14 +93,34 @@ class _MoveDeckPicker extends ConsumerWidget {
         ),
         if (failure != null) ...[
           const MxGap.s3(),
-          MxText(
-            MxActionErrors.messageOf(failure, l10n),
-            role: MxTextRole.caption,
-          ),
+          MxText(_moveFailureMessage(failure, l10n), role: MxTextRole.caption),
         ],
       ],
     );
   }
+}
+
+/// What a failed move says (`move-deck.md` §7, §8).
+///
+/// §8's copy is "Couldn't move the deck. Nothing has changed. Try again." and
+/// the middle sentence is the one that matters: §1 promises the move is atomic
+/// — never in both places, never lost from both — and this is where a learner
+/// is told so. The shared error surface said only that something went wrong,
+/// which leaves them wondering whether the deck half-moved.
+///
+/// §7 gives the structural rejections their own lines. They arrive as typed
+/// conflicts from the store, which is deliberate: the picker filters these
+/// destinations out, so reaching one means the tree changed under the sheet
+/// and the reason is worth naming rather than flattening into "try again".
+String _moveFailureMessage(AppFailure failure, AppLocalizations l10n) {
+  if (failure is ValidationFailure) return l10n.moveDeckStaleTargetMessage;
+  if (failure is! ConflictFailure) return l10n.moveDeckFailedMessage;
+  return switch (failure.code) {
+    'duplicate' => l10n.moveDeckDuplicateMessage,
+    'deck-mixed-content' => l10n.moveDeckLeafTargetMessage,
+    'deck-cycle' => l10n.moveDeckDescendantMessage,
+    _ => l10n.moveDeckFailedMessage,
+  };
 }
 
 class _DestinationList extends StatelessWidget {
