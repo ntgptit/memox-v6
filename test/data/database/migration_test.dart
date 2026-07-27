@@ -18,21 +18,21 @@ void main() {
     // Only the current version can be checked against a fresh `createAll`;
     // an older snapshot is reached by upgrading into it, which is what the
     // v1 -> v2 group below does.
-    test('a freshly created database matches the v2 snapshot', () async {
+    test('a freshly created database matches the v3 snapshot', () async {
       final database = AppDatabase.forTesting(NativeDatabase.memory());
       addTearDown(database.close);
 
-      await verifier.migrateAndValidate(database, 2);
+      await verifier.migrateAndValidate(database, 3);
     });
   });
 
-  group('v1 -> v2 upgrade (WBS 5.4.4)', () {
-    test('adds the two SRS timestamp columns', () async {
+  group('v1 -> v3 upgrade (WBS 5.4.4, 6.1)', () {
+    test('adds the SRS timestamps and the description key', () async {
       final connection = await verifier.startAt(1);
       final database = AppDatabase.forTesting(connection.executor);
       addTearDown(database.close);
 
-      await verifier.migrateAndValidate(database, 2);
+      await verifier.migrateAndValidate(database, 3);
     });
 
     test('a v1 row survives the upgrade with NULL timestamps', () async {
@@ -63,7 +63,7 @@ void main() {
         "VALUES ('p1', 'c1', 3, 100, 4, 1, 0, 0)",
       );
 
-      await verifier.migrateAndValidate(database, 2);
+      await verifier.migrateAndValidate(database, 3);
 
       final row = await database
           .customSelect(

@@ -99,6 +99,49 @@ void main() {
     expect(results.last.id, 'c_snap');
   });
 
+  // `search-decks.md` §5: "Match trên Deck name; description là supporting
+  // match" and "Exact/prefix name đứng trước partial description match". The
+  // description was write-only until now — it had no editing path (`int-57`)
+  // and no reader at all, so a deck whose description named the query was
+  // simply not findable.
+  test('a description match ranks behind every name match', () async {
+    await database.deckDao.editDeckMetadata(
+      'Grammar',
+      'grammar',
+      'Appendix of particles',
+      'appendix of particles',
+      0,
+      'root',
+    );
+
+    final results = await run('app');
+
+    // 'apples' matches by name and outranks the description hit, which comes
+    // last however early the word sits in the description.
+    expect(results.map((r) => r.id).toList(), [
+      'c_app',
+      'c_apple',
+      'apples',
+      'root',
+    ]);
+    expect(results.last.type, SearchResultType.deck);
+  });
+
+  test('a deck matching both name and description is listed once', () async {
+    await database.deckDao.editDeckMetadata(
+      'Apples',
+      'apples',
+      'apple varieties',
+      'apple varieties',
+      0,
+      'apples',
+    );
+
+    final results = await run('app');
+
+    expect(results.where((r) => r.id == 'apples'), hasLength(1));
+  });
+
   test('hidden and deleted cards are excluded', () async {
     await database.flashcardDao.insertFlashcard(
       'c_hidden',

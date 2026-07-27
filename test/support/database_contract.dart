@@ -29,7 +29,7 @@ void runDatabaseLifecycleContract(
       // Deliberately a literal, not `database.schemaVersion`: comparing the
       // store to itself would pass no matter what shipped. Bumping this is
       // part of releasing a schema version.
-      expect(version.read<int>('user_version'), 2);
+      expect(version.read<int>('user_version'), 3);
     });
 
     test('enforces foreign keys on the connection', () async {
