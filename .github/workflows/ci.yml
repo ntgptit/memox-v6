@@ -213,6 +213,15 @@ jobs:
         working-directory: tool/parity
         run: npx playwright install --with-deps chromium
 
+      # `*.g.dart` is gitignored, so a fresh checkout has none of it and the
+      # Web build fails on every `part` directive. The verifier does this for
+      # the jobs that call it; these two build Flutter directly and have to
+      # ask for it themselves.
+      - name: Generate sources
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
       - name: Run kit visual parity
         run: node tool/parity/run.mjs
 
@@ -264,6 +273,15 @@ jobs:
       - name: Install Chromium
         working-directory: tool/parity
         run: npx playwright install --with-deps chromium
+
+      # `*.g.dart` is gitignored, so a fresh checkout has none of it and the
+      # Web build fails on every `part` directive. The verifier does this for
+      # the jobs that call it; these two build Flutter directly and have to
+      # ask for it themselves.
+      - name: Generate sources
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
 
       - name: Run the Tier-1 Web smoke
         run: node tool/smoke/web.mjs
