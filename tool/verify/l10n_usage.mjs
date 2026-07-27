@@ -43,7 +43,6 @@ const RETAINED = {
   moveDeckConfirmLabel: 'as moveDeckTitle',
   addTagLabel: 'tag-management surface of WBS 6.4, not yet built',
   removeTagLabel: 'as addTagLabel',
-  studyFinalizeErrorMessage: 'finalize-error body; the screen currently shows the title alone',
 };
 
 const arb = JSON.parse(readFileSync(arbPath, 'utf8'));
