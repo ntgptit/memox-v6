@@ -245,15 +245,15 @@
       }
     }
   },
-  "searchFilteredEmptyTitle": "No results of this type",
+  "searchFilteredEmptyTitle": "No results match these filters",
   "@searchFilteredEmptyTitle": {
     "description": "Title shown when a type filter hides every hit (filter-search-results.md \u00a74)."
   },
-  "searchFilteredEmptyMessage": "Your search found other results. Clear the filter to see them.",
+  "searchFilteredEmptyMessage": "Your search found other results. Clear the filters to see them.",
   "@searchFilteredEmptyMessage": {
     "description": "Body shown when a type filter hides every hit (filter-search-results.md \u00a74)."
   },
-  "clearSearchFilterLabel": "Clear filter",
+  "clearSearchFilterLabel": "Clear filters",
   "@clearSearchFilterLabel": {
     "description": "Restores the unfiltered result list (filter-search-results.md \u00a76)."
   },
@@ -264,6 +264,10 @@
   "searchFilterDecks": "Decks",
   "@searchFilterDecks": {
     "description": "Search filter chip limiting results to decks (WBS 10.2)."
+  },
+  "searchFilterHidden": "Hidden",
+  "@searchFilterHidden": {
+    "description": "Search filter chip that includes hidden cards in the results (filter-search-results.md visibility dimension). Off by default, which is the default search-rank-v1 states."
   },
   "searchFilterCards": "Cards",
   "@searchFilterCards": {
