@@ -477,7 +477,7 @@ test('MX-VIS-055 a second card with an existing term raises the duplicate review
   // anyway (ghost override). The 4-way compare/merge surface is authored at
   // implementation time per specs/flashcard-editor.md, so it is not part of
   // this state.
-  await expect(page.getByText(/already exists/i)).toBeVisible();
+  await expect(page.getByText(/You already have a card/i)).toBeVisible();
   await expectRoute(page, editorRoute);
 
   await expectStableCapture(page);

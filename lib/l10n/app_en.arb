@@ -836,7 +836,11 @@
   "@cardSaveFailedMessage": {
     "description": "Card Editor submit-error banner (WBS 5.3.2B)."
   },
-  "duplicateCardMessage": "A card \u201c{term}\u201d already exists in this deck.",
+  "duplicateCheckFailedMessage": "Couldn\u2019t check for duplicates. Try again.",
+  "@duplicateCheckFailedMessage": {
+    "description": "Shown when the duplicate lookup itself failed, which the spec separates from a failed save."
+  },
+  "duplicateCardMessage": "You already have a card for \u201c{term}\u201d.",
   "@duplicateCardMessage": {
     "description": "Card Editor duplicate banner (WBS 5.3.2B).",
     "placeholders": {"term": {"type": "String"}}

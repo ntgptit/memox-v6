@@ -1,9 +1,10 @@
+import 'package:memox_v6/domain/flashcard/flashcard.dart';
+import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
-import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_editor_chrome.dart';
 import 'package:memox_v6/presentation/features/flashcard/widgets/card_tags_section.dart';
@@ -297,8 +298,19 @@ class _CardEditorForm extends HookConsumerWidget {
                             label: l10n.viewExistingLabel,
                             variant: MxButtonVariant.secondary,
                             size: MxButtonSize.sm,
-                            onPressed: () =>
-                                context.goDeckDetail(duplicates.first.deckId),
+                            // Pushed, and onto the card itself.
+                            //
+                            // §5: "Open existing: draft retained until
+                            // explicit discard/return", and §8 repeats it.
+                            // This used `go` to the *deck*, which replaces the
+                            // route stack — the editor and everything typed
+                            // into it were gone, and Back could not bring them
+                            // back. Inspecting the card you are warned about
+                            // is not a decision to abandon your draft.
+                            onPressed: () => context.pushEditCard(
+                              duplicates.first.deckId,
+                              duplicates.first.id,
+                            ),
                           ),
                           const MxGap.s2(),
                           MxButton(
@@ -324,7 +336,7 @@ class _CardEditorForm extends HookConsumerWidget {
                         // it as a title made it a bold heading with the action
                         // stacked underneath, which is the decision layout,
                         // not the recoverable-failure one.
-                        body: l10n.cardSaveFailedMessage,
+                        body: _saveFailureMessage(failure, l10n),
                         action: MxButton(
                           label: l10n.tryAgainLabel,
                           variant: MxButtonVariant.secondary,
@@ -526,4 +538,18 @@ class _CardEditorForm extends HookConsumerWidget {
         .where((token) => token.isNotEmpty)
         .toList();
   }
+}
+
+/// What a failed save says.
+///
+/// §6 gives the duplicate lookup its own line — "Couldn't check for
+/// duplicates. Try again." — and the distinction is not cosmetic: a save that
+/// was rejected and a check that could not run leave the learner in different
+/// places, one holding content the store refused and one holding content it
+/// was never offered. Both read as "couldn't save this card".
+String _saveFailureMessage(AppFailure failure, AppLocalizations l10n) {
+  if (failure is ConflictFailure && failure.code == 'duplicate-check-failed') {
+    return l10n.duplicateCheckFailedMessage;
+  }
+  return l10n.cardSaveFailedMessage;
 }

@@ -4,6 +4,7 @@ import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
 import 'package:memox_v6/domain/flashcard/card_audio_ref.dart';
 import 'package:memox_v6/domain/flashcard/card_text.dart';
+import 'package:memox_v6/domain/flashcard/duplicate_lookup.dart';
 import 'package:memox_v6/domain/flashcard/card_translation.dart';
 import 'package:memox_v6/domain/flashcard/create_flashcard_result.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
@@ -63,7 +64,8 @@ class CreateFlashcardUseCase {
     }
 
     if (!allowDuplicate) {
-      final candidates = await _cards.duplicateCandidates(
+      final candidates = await lookupDuplicateCandidates(
+        _cards,
         languagePairId: deck.languagePairId,
         normalizedTerm: normalizeCardTerm(displayTerm),
       );
