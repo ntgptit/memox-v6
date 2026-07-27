@@ -61,9 +61,15 @@ class _FillView extends ConsumerWidget {
             title: l10n.reviewNoSessionMessage,
           );
         }
-        // Key by card so the input controller + feedback reset each card.
+        // Key by card *and* round: the input controller lives in this
+        // element's hooks, and a mastery retry round re-opens the same card.
+        // Keyed by card alone the element survives that boundary, so the new
+        // attempt opened with the failed answer still typed in it — §4 asks a
+        // new round to "mở input trống cho attempt mới".
         return _FillStage(
-          key: ValueKey<String>(current.cardId),
+          key: ValueKey<String>(
+            '${runtime.position.roundIndex}:${current.cardId}',
+          ),
           runtime: runtime,
           card: current,
         );
