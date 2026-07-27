@@ -13,6 +13,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_card.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_contextual_app_bar.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_link.dart';
@@ -57,9 +58,15 @@ class _StudyResultBody extends ConsumerWidget {
       value: ref.watch(studyResultProvider),
       loadingLabel: l10n.studyFinalizingLabel,
       loading: (context) => _Finalizing(label: l10n.studyFinalizingLabel),
+      // §6's own composition. The shared compact banner carried the title and
+      // a small Retry, and this screen is terminal by design — "no back; exit
+      // only via the explicit actions" — so a finalize that kept failing left
+      // the learner with one button and no way off the screen at all. The
+      // body explaining what happened was written and never rendered.
+      error: (context, failure) => _FinalizeFailed(
+        onRetry: () => ref.read(studyResultProvider.notifier).retry(),
+      ),
       errorTitle: l10n.studyFinalizeErrorTitle,
-      retryLabel: l10n.studyRetryLabel,
-      onRetry: () => ref.read(studyResultProvider.notifier).retry(),
       data: (context, summary) => summary == null
           ? _Finalizing(label: l10n.studyFinalizingLabel)
           : SingleChildScrollView(child: _ResultBody(summary: summary)),
@@ -336,6 +343,48 @@ class _StreakCard extends StatelessWidget {
             value: progress.toDouble(),
             semanticLabel: progressLabel,
             prominent: true,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The finalize-error state (`finalize-study-session.md` §6).
+///
+/// Leaving is safe here, which is why it is offered: the session stays
+/// active, Today offers it back as one to continue, and opening it finalizes
+/// again — §6's "Retry: same finalize request identity" is what makes the
+/// deferred attempt count once rather than twice. Nothing is lost by walking
+/// away; only the schedule update waits.
+class _FinalizeFailed extends StatelessWidget {
+  const _FinalizeFailed({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return MxEmptyState(
+      icon: Symbols.cloud_off_rounded,
+      tone: MxIconTileTone.warning,
+      title: l10n.studyFinalizeErrorTitle,
+      body: l10n.studyFinalizeErrorMessage,
+      action: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          MxButton(
+            label: l10n.studyTryAgainLabel,
+            block: true,
+            onPressed: onRetry,
+          ),
+          const MxGap.s2(),
+          MxButton(
+            label: l10n.reviewNoSessionActionLabel,
+            variant: MxButtonVariant.ghost,
+            block: true,
+            onPressed: () => context.goHome(),
           ),
         ],
       ),

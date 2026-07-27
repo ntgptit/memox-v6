@@ -151,13 +151,28 @@ void main() {
     expect(find.text('Finalizing…'), findsWidgets);
   });
 
-  testWidgets('the finalize-error state offers Retry', (tester) async {
+  // §6. This screen is terminal by design — no back, exit only through its
+  // own actions — so a finalize that kept failing had the learner holding one
+  // button with nowhere to go. Leaving is safe: the session stays active,
+  // Today offers it back, and opening it finalizes again under the same
+  // request identity, so the deferred attempt counts once.
+  testWidgets('the finalize-error state explains itself and offers both '
+      'ways on', (tester) async {
     await tester.pumpWidget(
       wrap(AsyncError<StudySessionSummary?>('boom', StackTrace.empty)),
     );
     await tester.pumpAndSettle();
+
     expect(find.text('Couldn’t save your results'), findsOneWidget);
-    expect(find.widgetWithText(MxButton, 'Retry'), findsOneWidget);
+    expect(
+      find.text(
+        'Your session finished, but we couldn’t update your schedule. Retry '
+        'so this session counts.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.widgetWithText(MxButton, 'Try again'), findsOneWidget);
+    expect(find.widgetWithText(MxButton, 'Back to Today'), findsOneWidget);
   });
 }
 
