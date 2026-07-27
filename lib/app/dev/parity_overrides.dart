@@ -125,6 +125,13 @@ List<Override> parityOverridesFor(String fixtureId) {
     'MX-VIS-054' => <Override>[
       studyResultProvider.overrideWith(_SeededStudyResult.new),
     ],
+    // The finalize error is a state the journey cannot be driven into: the
+    // write that fails is the one the fixture would have to break, and
+    // breaking it is what this pins. Same contract as the failure overrides
+    // above — a real failure state, not invented content.
+    'MX-VIS-077' => <Override>[
+      studyResultProvider.overrideWith(_FailedStudyResult.new),
+    ],
     _ => const <Override>[],
   };
 }
@@ -147,6 +154,23 @@ class _SeededStudyResult extends StudyResult {
           ),
         ),
       );
+}
+
+/// The Study Result after a finalize that could not be committed
+/// (`study-result--finalize-error`).
+class _FailedStudyResult extends StudyResult {
+  @override
+  AsyncValue<StudySessionSummary?> build() =>
+      const AsyncError<StudySessionSummary?>(
+        UnexpectedFailure(cause: 'parity fixture: finalize fails'),
+        StackTrace.empty,
+      );
+
+  @override
+  Future<void> finalize() async {}
+
+  @override
+  Future<void> retry() async {}
 }
 
 /// A deck read whose card stream never emits, for the two loading states.

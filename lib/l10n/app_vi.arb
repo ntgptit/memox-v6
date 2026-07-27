@@ -642,5 +642,6 @@
   "reviewNoSessionBody": "Có thể phiên đã kết thúc ở màn hình khác. Các câu trả lời đã lưu vẫn nguyên vẹn.",
   "reviewNoSessionActionLabel": "Về Today",
   "studyResumeFailedBody": "Các câu trả lời đã lưu của bạn vẫn còn đây.",
+  "studyFinalizeLaterLabel": "Để sau",
   "todayErrorTitle": "Không tải được Hôm nay"
 }

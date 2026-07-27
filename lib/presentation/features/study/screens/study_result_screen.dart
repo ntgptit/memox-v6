@@ -365,23 +365,33 @@ class _FinalizeFailed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // Composition from `StudyResult.jsx`'s `finalize-error` branch: an error
+    // -toned `cloud_off` EmptyState over two stacked block buttons, `Retry`
+    // primary with the refresh glyph and `Not now` ghost. The labels are the
+    // kit's rather than §6's `Try again`, because the title and body already
+    // came from the kit and a state should not speak in two voices.
     return MxEmptyState(
       icon: Symbols.cloud_off_rounded,
-      tone: MxIconTileTone.warning,
+      tone: MxIconTileTone.error,
       title: l10n.studyFinalizeErrorTitle,
       body: l10n.studyFinalizeErrorMessage,
+      // The kit's action column is `var(--memox-size-3xl)`, which is what
+      // `standard` is; `wide` overshot it and painted past the kit's buttons
+      // on both sides. Measured, not guessed.
+      actionWidth: MxEmptyStateActionWidth.standard,
       action: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           MxButton(
-            label: l10n.studyTryAgainLabel,
+            icon: Symbols.refresh_rounded,
+            label: l10n.studyRetryLabel,
             block: true,
             onPressed: onRetry,
           ),
-          const MxGap.s2(),
+          const MxGap.s3(),
           MxButton(
-            label: l10n.reviewNoSessionActionLabel,
+            label: l10n.studyFinalizeLaterLabel,
             variant: MxButtonVariant.ghost,
             block: true,
             onPressed: () => context.goHome(),
