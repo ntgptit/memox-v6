@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/app/router/app_navigation.dart';
@@ -24,17 +25,26 @@ enum _CreateAction { addCard, createDeck }
 /// The sheet owns no mutation (§6: "Sheet không trực tiếp persist
 /// Deck/Card/Import"). It resolves which flow applies and hands off; the
 /// owning flow keeps its own failures (§4).
-class TodayCreateFab extends ConsumerWidget {
+class TodayCreateFab extends HookConsumerWidget {
   const TodayCreateFab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    // §4: "Double selection chỉ handoff một flow". The sheet takes a frame to
+    // cover the FAB, and a second tap inside that frame opened a second sheet
+    // over the first — dismissing one left the other still there.
+    final busy = useRef(false);
 
     return MxFab(
       icon: Symbols.add_rounded,
       semanticLabel: l10n.todayCreateLabel,
-      onPressed: () => _open(context, ref, l10n),
+      onPressed: () async {
+        if (busy.value) return;
+        busy.value = true;
+        await _open(context, ref, l10n);
+        busy.value = false;
+      },
     );
   }
 
@@ -84,7 +94,11 @@ class TodayCreateFab extends ConsumerWidget {
 
     switch (target) {
       case SingleAddCardTarget(:final deckId):
-        context.pushNewCard(deckId);
+        // Awaited so the sheet stays claimed for the whole handoff (§4).
+        // The refresh §1 and §6 ask for on return is Today's own: the editor
+        // covers it, and `_TodayBody` re-reads whenever it becomes visible
+        // again rather than each caller remembering to say so.
+        await context.pushNewCard(deckId);
       case ChooseAddCardTarget():
         // Node F. The kit picks the target on its own `add-card-target`
         // screen, which this build does not have; the Library is where a deck

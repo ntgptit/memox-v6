@@ -1111,6 +1111,91 @@ void main() {
     expect(find.text('7 cards due'), findsNothing);
     expect(find.text('You’re all caught up'), findsOneWidget);
   });
+
+  // `manage-today-create-actions.md` §4: "Double selection chỉ handoff một
+  // flow". The sheet takes a frame to cover the FAB, and a second tap inside
+  // that frame opened a second sheet over the first — dismissing one left the
+  // other still standing.
+  testWidgets('a double tap on the create FAB opens one sheet', (tester) async {
+    await tester.pumpWidget(
+      wrap(
+        data(
+          const TodayProjection(
+            primaryAction: TodayPrimaryAction.startReview,
+            dueCount: 7,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Driven through the callback rather than two hit-tested taps: after the
+    // first tap the sheet's barrier owns the FAB's position, so a second
+    // pointer never reaches it and the race this guards would not be
+    // reproduced. Two synchronous invocations are exactly that race.
+    final fab = tester.widget<MxFab>(find.byType(MxFab));
+    fab.onPressed!();
+    fab.onPressed!();
+    await tester.pumpAndSettle();
+
+    expect(find.text('CREATE'), findsOneWidget);
+  });
+
+  // `handle-caught-up-today.md` §4: "Browse return giữ Today context và
+  // refresh". Library is a sibling tab, not a route over Today, so the shell
+  // keeps this branch mounted — a learner who browsed away, added something
+  // and came back read the numbers from before they left.
+  testWidgets('coming back to the Today tab re-reads the dashboard', (
+    tester,
+  ) async {
+    final router = GoRouter(
+      initialLocation: RoutePaths.home,
+      routes: <RouteBase>[
+        StatefulShellRoute.indexedStack(
+          builder: (context, state, shell) => shell,
+          branches: <StatefulShellBranch>[
+            StatefulShellBranch(routes: todayBranchRoutes()),
+            StatefulShellBranch(
+              routes: <RouteBase>[
+                GoRoute(
+                  path: RoutePaths.library,
+                  builder: (context, state) =>
+                      const Scaffold(body: Text('Library stands in here')),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      routed(
+        router,
+        snapshots(const <TodayProjection>[
+          TodayProjection(
+            primaryAction: TodayPrimaryAction.startReview,
+            dueCount: 7,
+          ),
+          TodayProjection(
+            primaryAction: TodayPrimaryAction.caughtUp,
+            dueCount: 0,
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('7 cards due'), findsOneWidget);
+
+    router.go(RoutePaths.library);
+    await tester.pumpAndSettle();
+    expect(find.text('Library stands in here'), findsOneWidget);
+
+    router.go(RoutePaths.home);
+    await tester.pumpAndSettle();
+
+    expect(find.text('7 cards due'), findsNothing);
+    expect(find.text('You’re all caught up'), findsOneWidget);
+  });
 }
 
 class _RecordingStartReview extends StartReview {
