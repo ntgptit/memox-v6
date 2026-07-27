@@ -12,6 +12,7 @@ class SearchResult {
     required this.displayText,
     required this.deckId,
     this.isHidden = false,
+    this.contextName,
   });
 
   final String id;
@@ -23,6 +24,12 @@ class SearchResult {
   /// The owning deck — the card's deck, or the deck itself — for path
   /// resolution when the caller opens the result.
   final String deckId;
+
+  /// What tells this result apart from a same-named one elsewhere: the owning
+  /// deck for a card, the parent deck for a nested deck, and null for a root
+  /// deck — which the row reads as the Library. `search-decks.md` §1 and §11
+  /// both require enough path to distinguish duplicates.
+  final String? contextName;
 
   /// Whether a card hit is hidden from study (`hide-flashcard.md` §1). Always
   /// false for a deck, which has no visibility of its own. The row carries it

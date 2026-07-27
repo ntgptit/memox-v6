@@ -187,6 +187,36 @@ void main() {
     expect(results.firstWhere((r) => r.id == 'c_app').isHidden, isFalse);
   });
 
+  // §1 and §11 of `search-decks.md`: a result carries enough path to tell it
+  // apart from a same-named one elsewhere, and §3 of `search-library-content.md`
+  // says a row shows "matched field, type và path; không chỉ tên" (`int-104`).
+  test('every hit carries the context that distinguishes it', () async {
+    // Nested under `apples`, not `root`: root holds cards, and deck
+    // exclusivity forbids a deck that owns cards from owning child decks.
+    await database.deckDao.insertDeck(
+      'nested',
+      'lp1',
+      'apples',
+      'Apples',
+      'apples',
+      0,
+      0,
+    );
+
+    final results = await run('app');
+    final context = <String, String?>{
+      for (final row in results) row.id: row.contextName,
+    };
+
+    // A card names the deck it lives in.
+    expect(context['c_app'], 'Deck');
+    // A nested deck names its parent; the two decks called Apples are now
+    // distinguishable.
+    expect(context['nested'], 'Apples');
+    // A root deck has no parent, and the row reads that as the Library.
+    expect(context['apples'], isNull);
+  });
+
   test('results never cross the language pair', () async {
     await database.deckDao.insertDeck(
       'other',

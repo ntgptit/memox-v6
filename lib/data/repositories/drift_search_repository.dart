@@ -27,6 +27,7 @@ class DriftSearchRepository implements SearchRepository {
         displayText: row.displayText,
         deckId: row.deckId,
         isHidden: row.isHidden == 1,
+        contextName: row.contextName,
       );
     }).toList();
   }
