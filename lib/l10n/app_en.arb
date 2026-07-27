@@ -1456,6 +1456,10 @@
   "@reviewNoSessionActionLabel": {
     "description": "Action out of the no-session study route (resume-study-session.md §7: return to the Dashboard)."
   },
+  "studyResumeFailedBody": "Your saved answers are still here.",
+  "@studyResumeFailedBody": {
+    "description": "Reassurance under the resume-failure title (resume-study-session.md §4)."
+  },
   "todayErrorTitle": "Today couldn’t load",
   "@todayErrorTitle": {
     "description": "Today load-error title."

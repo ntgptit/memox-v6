@@ -23,6 +23,8 @@ import 'package:memox_v6/presentation/features/study/viewmodels/study_result_not
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_empty_state.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_icon_tile.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_gap.dart';
 
 /// The active study route (WBS 5.6). It dispatches to the current stage's
 /// mode screen from the runtime; an empty session shows a placeholder.
@@ -84,13 +86,16 @@ class _StudyStageDispatch extends ConsumerWidget {
     return MxAsyncBuilder<StudyRuntimeState?>(
       value: ref.watch(studySessionRuntimeProvider),
       loadingLabel: l10n.loadingLabel,
+      // §4's own composition rather than the compact banner: this is a
+      // full-screen route with no tab bar and no back, so the error owns the
+      // frame and has to carry its own exits. §8 names one of them —
+      // "Back từ resume error về Dashboard, giữ session paused" — and it was
+      // not there, so a resume that kept failing left the learner with a
+      // Retry button and nothing else.
+      error: (context, failure) => _ResumeFailed(
+        onRetry: () => ref.invalidate(studySessionRuntimeProvider),
+      ),
       errorTitle: l10n.studyResumeFailedTitle,
-      // §3 node H: "Recoverable error" offers Retry. The spec pairs it with
-      // `Start fresh`, which is not offered — ending the running session is
-      // the same undefined act `int-15` records, and here it would discard
-      // answers the learner can still see the count of.
-      retryLabel: l10n.studyRetryLabel,
-      onRetry: () => ref.invalidate(studySessionRuntimeProvider),
       data: (context, runtime) {
         if (runtime == null) {
           // §3 node E / §7: "Session unavailable: về Dashboard/Deck với copy
@@ -176,4 +181,46 @@ Future<void> _skipUnavailableCard(
       .call(runtime);
   if (skipped == null) return;
   ref.invalidate(studySessionRuntimeProvider);
+}
+
+/// The resume-error state (`resume-study-session.md` §4, §8).
+///
+/// §4 pairs `Try again` with `Start fresh`, and `Start fresh` is still not
+/// offered: ending a running session is the undefined act `int-15` records,
+/// and here it would discard answers whose count the learner can see. Leaving
+/// for the dashboard is not that act — §8 is explicit that Back keeps the
+/// session paused — so that is the second way out.
+class _ResumeFailed extends StatelessWidget {
+  const _ResumeFailed({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return MxEmptyState(
+      icon: Icons.refresh_rounded,
+      tone: MxIconTileTone.warning,
+      title: l10n.studyResumeFailedTitle,
+      body: l10n.studyResumeFailedBody,
+      action: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          MxButton(
+            label: l10n.studyTryAgainLabel,
+            block: true,
+            onPressed: onRetry,
+          ),
+          const MxGap.s2(),
+          MxButton(
+            label: l10n.reviewNoSessionActionLabel,
+            variant: MxButtonVariant.ghost,
+            block: true,
+            onPressed: () => context.goHome(),
+          ),
+        ],
+      ),
+    );
+  }
 }
