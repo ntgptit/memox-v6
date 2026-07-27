@@ -1,5 +1,6 @@
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
+import 'package:memox_v6/domain/flashcard/delete_card_impact.dart';
 import 'package:memox_v6/domain/flashcard/flashcard_repository.dart';
 import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
 
@@ -20,6 +21,24 @@ class DeleteFlashcardUseCase {
   final FlashcardRepository _cards;
   final LoadStudyRuntimeUseCase _runtime;
   final AppClock _clock;
+
+  /// What a delete would disturb, for the confirm to state (§3's "Load
+  /// content/session/progress impact", §9's "Confirm states exact impact").
+  ///
+  /// It raises for the same reason [deleteCard] does when the runtime cannot
+  /// be assembled: that is precisely the case where nobody can say whether
+  /// this card is the one on screen.
+  Future<DeleteCardImpact> impactOf(String cardId) async {
+    final runtime = await _runtime();
+    if (runtime == null) return DeleteCardImpact.none;
+    if (runtime.position.currentCardId == cardId) {
+      return DeleteCardImpact.currentPrompt;
+    }
+    if (runtime.cardsById.containsKey(cardId)) {
+      return DeleteCardImpact.inSession;
+    }
+    return DeleteCardImpact.none;
+  }
 
   Future<void> deleteCard(String cardId) async {
     final card = await _cards.findById(cardId);
