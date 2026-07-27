@@ -1269,6 +1269,15 @@
   "@studyActiveSessionTitle": {
     "description": "Prompt shown when a study session is already running and another start is attempted. The kit also offers Start over; that is not built, because no document defines what abandoning a session does to its committed contributions."
   },
+  "studyActiveSessionInDeckBody": "Your session in {deck} is still in progress. Resume it to keep going.",
+  "@studyActiveSessionInDeckBody": {
+    "description": "Body of the already-running-session prompt when the running session's deck could be named (start-study-session.md \u00a75, \"Different active session\").",
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      }
+    }
+  },
   "studyActiveSessionBody": "A session is already in progress. Resume it to keep going.",
   "@studyActiveSessionBody": {
     "description": "Body of the already-running-session prompt."
