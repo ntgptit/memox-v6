@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:memox_v6/core/theme/extensions/app_theme_context.dart';
@@ -95,6 +96,12 @@ class _FillStage extends HookConsumerWidget {
         .value;
     final l10n = AppLocalizations.of(context);
     final answer = useMxTextSubmitState();
+    // §3 node D: an incomplete interaction gets inline guidance. The Check
+    // button is disabled while the field is blank, which §6 also asks for —
+    // but the keyboard can still submit, and a blank keyboard submit did
+    // nothing at all and said nothing about why. Set by that submit and
+    // cleared as soon as there is something to check.
+    final needsAnswer = useState(false);
     final position = runtime.position;
     // The round is part of the key: a retry round re-opens this same card, and
     // state keyed on the card alone would carry the last round's grade in.
@@ -159,10 +166,17 @@ class _FillStage extends HookConsumerWidget {
             enabled: !graded,
             readOnly: graded,
             textInputAction: TextInputAction.done,
+            errorText: needsAnswer.value
+                ? l10n.studyRequiredInteractionMessage
+                : null,
+            onChanged: (_) => needsAnswer.value = false,
             onSubmitted: (_) {
-              if (!graded && answer.canSubmit) {
-                _check(ref, answer.value, hintShown);
+              if (graded) return;
+              if (!answer.canSubmit) {
+                needsAnswer.value = true;
+                return;
               }
+              _check(ref, answer.value, hintShown);
             },
           ),
           if (hintShown && !graded) ...<Widget>[

@@ -1507,6 +1507,10 @@
   "@studyAnswerSaveFailedTitle": {
     "description": "Answer-save failure dialog title (answer-study-stage.md §6, §9)."
   },
+  "studyRequiredInteractionMessage": "Complete this step before continuing.",
+  "@studyRequiredInteractionMessage": {
+    "description": "Inline guidance when a stage is submitted before its required interaction is complete (answer-study-stage.md \u00a73 node D, \u00a79 row 1)."
+  },
   "studyAnswerSaveFailedBody": "Your answer is still here.",
   "@studyAnswerSaveFailedBody": {
     "description": "Answer-save failure dialog body; Try again re-submits the same attempt (answer-study-stage.md §6)."
