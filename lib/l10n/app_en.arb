@@ -899,6 +899,23 @@
   "@studyExitLabel": {
     "description": "Back/exit action in the study shell."
   },
+  "relearnModeTitle": "Relearn",
+  "@relearnModeTitle": {
+    "description": "Stage title while a relearn session runs (relearn-cards.md \u00a74)."
+  },
+  "relearnNoteBody": "Relearning missed cards \u2014 {count} left to revisit.",
+  "@relearnNoteBody": {
+    "description": "Note above the prompt in a relearn session (relearn-cards.md \u00a71 \"User \u0111\u01b0\u1ee3c bi\u1ebft c\u00f2n bao nhi\u00eau Cards c\u1ea7n relearn\"; kit `study-session--relearn`).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dueReviewNoteBody": "Reviewing due cards \u2014 your answers set when each one comes back.",
+  "@dueReviewNoteBody": {
+    "description": "Note above the prompt in a due-review session (srs-binary-review.md \u00a72; kit `study-session--due-review`)."
+  },
   "srsBinaryReviewTitle": "Review",
   "@srsBinaryReviewTitle": {
     "description": "Stage title for SRS Binary Review, the mode every due-review session runs."

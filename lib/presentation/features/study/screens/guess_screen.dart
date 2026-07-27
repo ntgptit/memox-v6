@@ -12,6 +12,7 @@ import 'package:memox_v6/presentation/features/study/viewmodels/guess_selection_
 import 'package:memox_v6/presentation/features/study/viewmodels/study_answer_viewmodel.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_session_runtime_provider.dart';
 import 'package:memox_v6/presentation/features/study/widgets/study_shell.dart';
+import 'package:memox_v6/presentation/features/study/widgets/study_session_note.dart';
 import 'package:memox_v6/presentation/shared/viewmodels/mx_async_builder.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_card.dart';
@@ -97,7 +98,7 @@ class _GuessStage extends ConsumerWidget {
     final current = position.cardPosition + 1;
 
     return StudyShell(
-      title: l10n.guessModeTitle,
+      title: studyStageTitle(l10n, runtime, l10n.guessModeTitle),
       progress: total == 0 ? 0 : current / total,
       progressCounter: '$current/$total',
       progressSemanticLabel: l10n.studyProgressLabel(current, total),
@@ -105,6 +106,9 @@ class _GuessStage extends ConsumerWidget {
       backLabel: l10n.studyExitLabel,
       body: ListView(
         children: <Widget>[
+          // Which session this is, when it is one the learner should be told
+          // about (`relearn-cards.md` §1).
+          StudySessionNote(runtime: runtime),
           MxCard(
             child: SizedBox(
               height: 96,
