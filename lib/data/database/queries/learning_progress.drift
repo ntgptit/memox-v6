@@ -55,6 +55,26 @@ WHERE f.deleted_at IS NULL AND f.is_hidden = 0
   )
 ORDER BY learning_progress.due_at, f.id;
 
+-- Every studiable card in a deck scope (ST-TYPE-003: "Practice scope hợp lệ").
+--
+-- Practice is the one session type whose queue is the scope itself rather than
+-- a schedule: it sets `scheduleSrs = false` and contributes no Goal or Streak,
+-- so a card's box does not decide whether it can be practised. Hidden and
+-- soft-deleted cards are excluded, which is the same "studiable" set the deck
+-- summaries count.
+studiableCardIdsInScope:
+WITH RECURSIVE subtree(id) AS (
+  SELECT id FROM decks WHERE id = :scopeDeckId
+  UNION ALL
+  SELECT d.id FROM decks d INNER JOIN subtree ON d.parent_id = subtree.id
+)
+SELECT f.id AS card_id
+FROM flashcards f
+INNER JOIN subtree ON subtree.id = f.deck_id
+INNER JOIN learning_progress ON learning_progress.card_id = f.id
+WHERE f.deleted_at IS NULL AND f.is_hidden = 0
+ORDER BY f.id;
+
 findProgressByCard:
 SELECT * FROM learning_progress WHERE card_id = :cardId;
 

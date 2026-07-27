@@ -68,11 +68,17 @@ class StartStudySessionUseCase {
       nowUtc: now,
     );
 
+    // ST-TYPE-003 draws Practice from the scope rather than from a schedule,
+    // so its list is read only when it is the one being asked for.
+    final scopeCardIds = type == SessionType.practice
+        ? await _progress.studiableCardIdsInScope(scopeDeckId: deckId)
+        : const <String>[];
     final cardIds = _cardIdsFor(
       type,
       candidates.newCardIds,
       candidates.dueCardIds,
       relearnCardIds,
+      scopeCardIds,
     );
     final eligibleCards = await _resolveEligibleCards(cardIds);
     final distinctMeanings = eligibleCards
@@ -119,9 +125,17 @@ class StartStudySessionUseCase {
     List<String> newCardIds,
     List<String> dueCardIds,
     List<String> relearnCardIds,
+    List<String> scopeCardIds,
   ) {
     if (type == SessionType.newLearning) return newCardIds;
     if (type == SessionType.dueReview) return dueCardIds;
+    // ST-TYPE-003: "Practice scope hợp lệ và một mode được chọn". The queue is
+    // the scope, not a schedule — Practice sets `scheduleSrs = false` and
+    // contributes no Goal or Streak, so a card's box does not decide whether
+    // it can be practised. This arm was missing entirely, so the eligibility
+    // policy and the plan resolver both handled Practice while no caller could
+    // ever create one (`int-79`).
+    if (type == SessionType.practice) return scopeCardIds;
     // Relearn does not select from the scope's queues: its queue is the
     // committed terminal-wrong set of a finalized session, handed in by the
     // caller (`relearn-cards.md` §1 — "Relearn queue được tạo từ terminal
