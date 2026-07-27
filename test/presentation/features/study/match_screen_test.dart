@@ -10,6 +10,8 @@ import 'package:memox_v6/domain/study_session/session_state.dart';
 import 'package:memox_v6/domain/study_session/session_type.dart';
 import 'package:memox_v6/domain/study_session/study_runtime_state.dart';
 import 'package:memox_v6/domain/study_session/study_session.dart';
+import 'package:memox_v6/app/di/usecase_providers.dart';
+import 'package:memox_v6/domain/usecases/study_session/record_match_lapse_usecase.dart';
 import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/study/screens/match_screen.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_card.dart';
@@ -91,6 +93,9 @@ void main() {
   Widget wrap(StudyRuntimeState state) => ProviderScope(
     overrides: [
       studySessionRuntimeProvider.overrideWith((ref) => Future.value(state)),
+      recordMatchLapseUseCaseProvider.overrideWithValue(
+        _SpyRecordMatchLapse(lapsed),
+      ),
     ],
     child: MaterialApp(
       theme: AppTheme.light(),
@@ -99,6 +104,8 @@ void main() {
       home: const MatchScreen(),
     ),
   );
+
+  setUp(lapsed.clear);
 
   testWidgets('renders both sides of the board', (tester) async {
     await tester.pumpWidget(wrap(runtime()));
@@ -312,6 +319,29 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  // `exit-study-session.md` §5 puts the committed next-round failed set in the
+  // paused checkpoint, and a Match round writes no attempt until the board is
+  // cleared — so a lapse used to live only in memory, and leaving forgot it
+  // (`int-83`). It is written as it happens now.
+  //
+  // §4 also fixes *whose* lapse it is: "Attempt thuộc Card/pair của term được
+  // chọn. Meaning bị chọn nhầm không tự đánh dấu Card sở hữu meaning đó là
+  // failed." The card that owns the wrongly-picked meaning is not at fault.
+  testWidgets('a wrong pair commits the term card as lapsed, and only it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap(runtime()));
+    await tester.pumpAndSettle();
+
+    // 'love' is c0's meaning; pairing it with c1's term is wrong.
+    await tester.tap(find.text('love'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('학교'));
+    await tester.pumpAndSettle();
+
+    expect(lapsed, <String>['c1'], reason: 'the term picked, not the meaning');
+  });
+
   testWidgets('meanings are the left column and terms the right', (
     tester,
   ) async {
@@ -331,4 +361,18 @@ void main() {
       reason: 'meanings must sit left of terms',
     );
   });
+}
+
+/// Card ids the board committed as lapsed this test.
+final lapsed = <String>[];
+
+class _SpyRecordMatchLapse implements RecordMatchLapseUseCase {
+  const _SpyRecordMatchLapse(this._sink);
+
+  final List<String> _sink;
+
+  @override
+  Future<void> call({required String sessionId, required String cardId}) async {
+    _sink.add(cardId);
+  }
 }
