@@ -177,9 +177,7 @@ class _Body extends StatelessWidget {
           Wrap(
             spacing: MxGap.s2Value,
             runSpacing: MxGap.s2Value,
-            children: [
-              for (final tag in detail.tags) MxChip(label: tag.name),
-            ],
+            children: [for (final tag in detail.tags) MxChip(label: tag.name)],
           ),
         ],
         const MxGap.s6(),

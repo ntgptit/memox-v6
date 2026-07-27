@@ -68,9 +68,8 @@ void main() {
         // every teardown here, and the deck suite already owns those.
         GoRoute(
           path: RoutePaths.deckDetailPattern,
-          builder: (context, state) => const Scaffold(
-            body: Center(child: Text('deck route')),
-          ),
+          builder: (context, state) =>
+              const Scaffold(body: Center(child: Text('deck route'))),
         ),
       ],
     );
