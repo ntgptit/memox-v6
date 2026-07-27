@@ -27,7 +27,9 @@ import { chromium } from '../parity/node_modules/playwright/index.mjs';
 
 const smokeRoot = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(smokeRoot, '..', '..');
-const bundle = join(repoRoot, 'build', 'smoke-web');
+const bundle = process.env.MEMOX_SMOKE_BUNDLE
+  ? join(repoRoot, process.env.MEMOX_SMOKE_BUNDLE)
+  : join(repoRoot, 'build', 'smoke-web');
 const evidenceDir = join(repoRoot, 'evidence', 'smoke', 'web');
 const port = Number(process.env.MEMOX_SMOKE_PORT ?? 4601);
 
@@ -177,7 +179,26 @@ try {
   // The server binds before it prints; a short poll is cheaper than parsing
   // its output and does not depend on the message staying the same.
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 390, height: 780 } });
+  // The locale is set explicitly, and that is not incidental.
+  //
+  // A CI runner with no `LANG` makes Chromium report `C` in
+  // `navigator.languages`. `C` is a POSIX locale name, not a BCP-47 tag, and
+  // Flutter's engine builds a JS `Intl.Locale` from every entry during
+  // renderer init — `EnginePlatformDispatcher.parseBrowserLanguages`. That
+  // throws `RangeError: Incorrect locale information provided` before any app
+  // code runs, and the app never paints (`int-88`).
+  //
+  // So the harness pins a real tag rather than inheriting the runner's. A
+  // browser reporting `C` is a property of a bare shell, not of a user: every
+  // real browser normalises `navigator.languages` to BCP-47. Leaving it
+  // unpinned made the smoke report an engine limitation as a product failure.
+  //
+  // `MEMOX_SMOKE_LOCALE` still overrides it, which is how the reproduction
+  // above was found and how it can be re-checked.
+  const page = await browser.newPage({
+    viewport: { width: 390, height: 780 },
+    locale: process.env.MEMOX_SMOKE_LOCALE ?? 'en-US',
+  });
   failedPage = page;
 
   page.on('console', (message) => {
@@ -186,7 +207,9 @@ try {
     if (IGNORED_CONSOLE.some((pattern) => pattern.test(text))) return;
     consoleErrors.push(text);
   });
-  page.on('pageerror', (error) => pageErrors.push(String(error)));
+  page.on('pageerror', (error) =>
+    pageErrors.push(`${error}
+${error.stack ?? ''}`));
 
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'load' });
 
