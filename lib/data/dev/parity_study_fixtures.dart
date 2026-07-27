@@ -411,6 +411,103 @@ class ParityStudyFixtures {
   /// free of the CJK-term cap. Seeded as data (session, five card snapshots, the
   /// round order and the fill-stage checkpoint) so navigating to the study route
   /// resumes into Fill without a start flow.
+  /// The Fill stage as `study-session--answer-save-error` stages it: the kit
+  /// shot is a 25-card session on its 21st card, prompting `school`.
+  ///
+  /// `seedFillSession` is a five-card session on its first card, which is
+  /// right for `fill-mode--waiting` and wrong here — the counter and the
+  /// prompt are most of what a capture compares outside the dialog.
+  Future<void> seedFillSessionAtShotPosition() async {
+    await _database.deckDao.insertDeck(
+      'fx-fl-deck',
+      'fx-lp-1',
+      null,
+      'Words',
+      'words',
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+
+    const shotCardIndex = 20;
+    const shotPrompt = 'school';
+    const shotTerm = 'hakgyo';
+    const totalCards = 25;
+    // Only the card the shot prompts carries the kit's content; the rest
+    // exist to make the counter read 21/25, and are never rendered.
+    (String, String, String) cardAt(int index) => index == shotCardIndex
+        ? ('fx-fl-c$index', shotTerm, shotPrompt)
+        : ('fx-fl-c$index', 'term$index', 'meaning$index');
+    final cards = <(String, String, String)>[
+      for (var i = 0; i < totalCards; i++) cardAt(i),
+    ];
+    for (final (id, term, meaning) in cards) {
+      await _database.flashcardDao.insertFlashcard(
+        id,
+        'fx-fl-deck',
+        term,
+        term,
+        meaning,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+      await _database.learningProgressDao.insertProgress(
+        'p-$id',
+        id,
+        0,
+        null,
+        fixedInstantMs,
+        fixedInstantMs,
+      );
+    }
+
+    await _database.studySessionDao.insertSession(
+      'fx-fl-session',
+      'newLearning',
+      'fx-fl-deck',
+      'subtree',
+      'active',
+      1,
+      fixedInstantMs,
+      fixedInstantMs,
+      fixedInstantMs,
+    );
+    for (var i = 0; i < cards.length; i++) {
+      final (id, term, meaning) = cards[i];
+      await _database.sessionSnapshotDao.insertSessionCard(
+        'sc-$id',
+        'fx-fl-session',
+        id,
+        i,
+        term,
+        meaning,
+        1,
+        0,
+        0,
+        fixedInstantMs,
+      );
+    }
+    const fillRoundIndex = 5;
+    await _database.sessionSnapshotDao.insertRoundOrder(
+      'fx-fl-order',
+      'fx-fl-session',
+      fillRoundIndex,
+      1,
+      jsonEncode(cards.map((card) => card.$1).toList()),
+      fixedInstantMs,
+    );
+    await _database.sessionCheckpointDao.upsertCheckpoint(
+      'fx-fl-checkpoint',
+      'fx-fl-session',
+      4,
+      fillRoundIndex,
+      shotCardIndex,
+      '[]',
+      '{}',
+      1,
+      fixedInstantMs,
+    );
+  }
+
   Future<void> seedFillSession() async {
     await _database.deckDao.insertDeck(
       'fx-fl-deck',

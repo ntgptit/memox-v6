@@ -157,6 +157,9 @@ class ParityFixtures {
         await _study.seedRecallSession();
         return;
       case 'MX-VIS-078':
+        await _seedActivePair();
+        await _study.seedFillSessionAtShotPosition();
+        return;
       case 'MX-VIS-053':
         await _seedActivePair();
         await _study.seedFillSession();
