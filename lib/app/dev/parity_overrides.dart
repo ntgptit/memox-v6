@@ -141,6 +141,15 @@ List<Override> parityOverridesFor(String fixtureId) {
     'MX-VIS-080' => <Override>[
       studyResultProvider.overrideWith(_GoalMetStudyResult.new),
     ],
+    // The two finalizing views. A commit that never completes is the state
+    // itself, so the pinned dependency *is* the precondition — the same
+    // contract as the hanging-write states above.
+    'MX-VIS-081' => <Override>[
+      studyResultProvider.overrideWith(_FinalizingStudyResult.new),
+    ],
+    'MX-VIS-082' => <Override>[
+      studyResultProvider.overrideWith(_RetryingStudyResult.new),
+    ],
     // The answer-save error: the write the dialog reports is the one broken
     // here. Everything else on screen is the real Fill stage.
     'MX-VIS-078' => <Override>[
@@ -190,6 +199,24 @@ class _GoalMetStudyResult extends StudyResult {
           ),
         ),
       );
+}
+
+/// A finalize that never resolves (`study-result--finalizing`).
+class _FinalizingStudyResult extends StudyResult {
+  @override
+  AsyncValue<StudySessionSummary?> build() =>
+      const AsyncLoading<StudySessionSummary?>();
+}
+
+/// The same view after a failed finalize was retried
+/// (`study-result--retry-finalize`).
+class _RetryingStudyResult extends StudyResult {
+  @override
+  AsyncValue<StudySessionSummary?> build() =>
+      const AsyncLoading<StudySessionSummary?>();
+
+  @override
+  bool get isRetrying => true;
 }
 
 /// An answer write that always fails, for `study-session--answer-save-error`.

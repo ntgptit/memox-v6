@@ -107,3 +107,66 @@ test('MX-VIS-080 shows the goal-met study result', async ({
     route: '/study',
   });
 });
+
+// MX-VIS-081 · Study Result · Finalizing
+// Master flow: docs/business/study-session/finalize-study-session.md §3
+// Flow node: A["Required queue complete"] --> B["Finalizing…"]
+test('MX-VIS-081 shows the finalizing view', async ({ page }, testInfo) => {
+  // §3 node B is the state while the commit is in flight, so the commit that
+  // never resolves is the precondition rather than a staged screen — the same
+  // contract as the other in-flight states.
+  await deepLinkEntry(page, {
+    masterFlow: 'docs/business/study-session/finalize-study-session.md',
+    fixture: 'MX-VIS-081',
+    route: '/study',
+    justification:
+      'finalize-study-session §3 holds at Finalizing while the commit runs; a commit pinned in flight is that state, and the finalize orchestration itself is unit-tested.',
+  });
+
+  await expectRoute(page, '/study');
+  await expect(page.getByText('Saving your results…')).toBeVisible();
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-081',
+    shot: 'study-result--finalizing',
+    screen: 'Study Result',
+    state: 'finalizing',
+    masterFlow: 'docs/business/study-session/finalize-study-session.md',
+    flowNode: 'A["Required queue complete"] --> B["Finalizing…"]',
+    fixture: 'MX-VIS-081',
+    route: '/study',
+  });
+});
+
+// MX-VIS-082 · Study Result · Retry finalize
+// Master flow: docs/business/study-session/finalize-study-session.md §3
+// Flow node: F["Finalize error · Retry"] --> B["Finalizing…"]
+test('MX-VIS-082 shows the retrying finalize view', async ({
+  page,
+}, testInfo) => {
+  // §9 lists `retry` as its own state beside `finalizing`: the same view,
+  // reframed for a learner who has already watched one save fail.
+  await deepLinkEntry(page, {
+    masterFlow: 'docs/business/study-session/finalize-study-session.md',
+    fixture: 'MX-VIS-082',
+    route: '/study',
+    justification:
+      'finalize-study-session §6 sends Retry back through the same finalize request; the re-attempt held in flight is that state, and the retry identity itself is unit-tested.',
+  });
+
+  await expectRoute(page, '/study');
+  await expect(page.getByText('Retrying…')).toBeVisible();
+
+  await expectStableCapture(page);
+  await expectKitParity(page, testInfo, {
+    id: 'MX-VIS-082',
+    shot: 'study-result--retry-finalize',
+    screen: 'Study Result',
+    state: 'retry-finalize',
+    masterFlow: 'docs/business/study-session/finalize-study-session.md',
+    flowNode: 'F["Finalize error · Retry"] --> B["Finalizing…"]',
+    fixture: 'MX-VIS-082',
+    route: '/study',
+  });
+});

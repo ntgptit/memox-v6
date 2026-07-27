@@ -1059,6 +1059,18 @@
       }
     }
   },
+  "studyFinalizingBody": "Updating your review schedule and streak.",
+  "@studyFinalizingBody": {
+    "description": "Supporting copy under the finalizing hero (kit `study-result--finalizing`)."
+  },
+  "studyFinalizeRetryingLabel": "Retrying\u2026",
+  "@studyFinalizeRetryingLabel": {
+    "description": "Finalizing hero title on a re-attempt (finalize-study-session.md \u00a79 `retry`; kit `study-result--retry-finalize`)."
+  },
+  "studyFinalizeRetryingBody": "Trying again to update your review schedule and streak.",
+  "@studyFinalizeRetryingBody": {
+    "description": "Supporting copy under the retrying hero (kit `study-result--retry-finalize`)."
+  },
   "studyResultTitle": "Results",
   "@studyResultTitle": {
     "description": "Study Result screen title (WBS 5.6.13)."
@@ -1149,9 +1161,9 @@
   "@studyResultDoneLabel": {
     "description": "Study Result secondary action returning to the library."
   },
-  "studyFinalizingLabel": "Finalizing…",
+  "studyFinalizingLabel": "Saving your results…",
   "@studyFinalizingLabel": {
-    "description": "Shown while a completed session's results are being committed."
+    "description": "Finalizing hero title, and the spinner's announcement, while a completed session is committed (kit `study-result--finalizing`)."
   },
   "studyFinalizeErrorTitle": "Couldn’t save your results",
   "@studyFinalizeErrorTitle": {

@@ -8,6 +8,7 @@ import 'package:memox_v6/l10n/generated/app_localizations.dart';
 import 'package:memox_v6/presentation/features/study/screens/study_result_screen.dart';
 import 'package:memox_v6/presentation/features/study/viewmodels/study_result_notifier.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_button.dart';
+import 'package:memox_v6/presentation/shared/widgets/mx_skeleton.dart';
 
 /// WBS 5.6.13 — the Study Result screen renders the committed summary and the
 /// finalizing / finalize-error states (`finalize-study-session.md` §§4,6,7).
@@ -243,7 +244,7 @@ void main() {
   testWidgets('the finalizing state shows a progress label', (tester) async {
     await tester.pumpWidget(wrap(const AsyncLoading<StudySessionSummary?>()));
     await tester.pump();
-    expect(find.text('Finalizing…'), findsWidgets);
+    expect(find.text('Saving your results…'), findsWidgets);
     expect(find.text('Session complete'), findsNothing);
   });
 
@@ -252,7 +253,7 @@ void main() {
   ) async {
     await tester.pumpWidget(wrap(const AsyncData<StudySessionSummary?>(null)));
     await tester.pump();
-    expect(find.text('Finalizing…'), findsWidgets);
+    expect(find.text('Saving your results…'), findsWidgets);
   });
 
   // §6. This screen is terminal by design — no back, exit only through its
@@ -260,6 +261,50 @@ void main() {
   // button with nowhere to go. Leaving is safe: the session stays active,
   // Today offers it back, and opening it finalizes again under the same
   // request identity, so the deferred attempt counts once.
+  // §6 asks the finalizing state for a "stable progress/status", and the kit
+  // spends the whole screen on it. This was one centred sentence, so the
+  // screen went from a line of text to a full page the moment the commit
+  // landed.
+  testWidgets('finalizing holds the shape of the result it is loading', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap(const AsyncLoading<StudySessionSummary?>()));
+    await tester.pump();
+
+    expect(find.text('Saving your results…'), findsOneWidget);
+    expect(
+      find.text('Updating your review schedule and streak.'),
+      findsOneWidget,
+    );
+    // Three stat placeholders and the streak card's.
+    expect(find.byType(MxSkeleton), findsNWidgets(7));
+    // §4: "không có CTA khi đang xử lý".
+    expect(find.byType(MxButton), findsNothing);
+  });
+
+  // §9 lists `retry` as its own state beside `finalizing`, and the kit
+  // reframes the view for it. A learner who had just watched a save fail was
+  // shown the same first-attempt copy when they pressed Retry.
+  testWidgets('a re-attempt says it is retrying', (tester) async {
+    await tester.pumpWidget(
+      wrap(
+        const AsyncLoading<StudySessionSummary?>(),
+        notifier: _FakeResult(
+          const AsyncLoading<StudySessionSummary?>(),
+          retrying: true,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Retrying…'), findsOneWidget);
+    expect(
+      find.text('Trying again to update your review schedule and streak.'),
+      findsOneWidget,
+    );
+    expect(find.text('Saving your results…'), findsNothing);
+  });
+
   testWidgets('the finalize-error state explains itself and offers both '
       'ways on', (tester) async {
     await tester.pumpWidget(
@@ -285,8 +330,14 @@ void main() {
 /// Overrides the result notifier to a fixed state; retry is a no-op so the error
 /// test never reaches the real finalize dependencies.
 class _FakeResult extends StudyResult {
-  _FakeResult(this._state, {this.relearn});
+  _FakeResult(this._state, {this.relearn, this.retrying = false});
   final AsyncValue<StudySessionSummary?> _state;
+
+  /// Stands in for a finalize that is a re-attempt.
+  final bool retrying;
+
+  @override
+  bool get isRetrying => retrying;
 
   /// What a `Review mistakes` tap returns: null when there was nothing to
   /// start, otherwise the start's own outcome.
