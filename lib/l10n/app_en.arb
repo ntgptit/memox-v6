@@ -1523,6 +1523,35 @@
   "@cardUpdatedMessage": {
     "description": "Success confirmation after editing a card (edit-flashcard.md)."
   },
+  "moveCardFailedMessage": "Couldn't move the card. Nothing has changed. Try again.",
+  "@moveCardFailedMessage": {
+    "description": "Inline failure for a move that did not commit (`move-flashcard.md` §6). The middle sentence is the point: §7 rolls back membership and both counts together."
+  },
+  "moveCardCrossPairMessage": "That deck belongs to a different language pair.",
+  "@moveCardCrossPairMessage": {
+    "description": "Move rejected because the target is in another language pair, which `move-flashcard.md` §5 routes through an explicit compatibility review that does not exist yet."
+  },
+  "moveCardStaleTargetMessage": "That destination is no longer available. Choose another one.",
+  "@moveCardStaleTargetMessage": {
+    "description": "Move rejected because the chosen deck changed under the picker (`move-flashcard.md` §5 \"Deleted/stale: reload picker\")."
+  },
+  "moveCardDuplicateMessage": "\"{term}\" is already in that deck.",
+  "@moveCardDuplicateMessage": {
+    "description": "Duplicate review before a move commits (`move-flashcard.md` §1, §5): a card with the same term already sits in the target deck.",
+    "placeholders": {
+      "term": {
+        "type": "String"
+      }
+    }
+  },
+  "moveAnywayLabel": "Move anyway",
+  "@moveAnywayLabel": {
+    "description": "Keep-both override on the duplicate review banner in the move picker."
+  },
+  "moveCardParentTargetMessage": "That deck has nested decks inside it, so it can't hold cards.",
+  "@moveCardParentTargetMessage": {
+    "description": "Move rejected by deck exclusivity: the target became a Parent under the picker (`move-flashcard.md` §9 \"Move không được tạo mixed content\")."
+  },
   "cardMovedMessage": "Card moved",
   "@cardMovedMessage": {
     "description": "Success confirmation after moving a card (move-flashcard.md)."

@@ -22,6 +22,15 @@ abstract interface class FlashcardRepository {
     required String normalizedTerm,
   });
 
+  /// Active cards already in [deckId] carrying [normalizedTerm], excluding
+  /// [excludeCardId] — the duplicate set a move has to clear (`move-
+  /// flashcard.md` §1: "Duplicate check chạy trong target context").
+  Future<List<Flashcard>> duplicatesInDeck({
+    required String deckId,
+    required String normalizedTerm,
+    required String excludeCardId,
+  });
+
   Future<Flashcard?> findById(String id);
 
   Future<List<Flashcard>> pageByDeck(

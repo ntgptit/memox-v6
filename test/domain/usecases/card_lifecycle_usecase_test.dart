@@ -15,6 +15,7 @@ import 'package:memox_v6/domain/usecases/flashcard/edit_flashcard_usecase.dart';
 import 'package:memox_v6/domain/usecases/flashcard/hide_flashcard_usecase.dart';
 import 'package:memox_v6/domain/usecases/flashcard/manage_card_tags_usecase.dart';
 import 'package:memox_v6/domain/usecases/flashcard/manage_card_translations_usecase.dart';
+import 'package:memox_v6/domain/flashcard/move_flashcard_result.dart';
 import 'package:memox_v6/domain/usecases/flashcard/move_flashcard_usecase.dart';
 
 import '../../support/fake_clock.dart';
@@ -37,15 +38,24 @@ void main() {
     String deckId = 'd1',
     String term = 'hello',
     String meaning = 'xin chào',
+    bool allowDuplicate = false,
+    // The generator is seeded per call, so two cards sharing a term would
+    // otherwise share an id — and create is idempotent on the id.
+    String? idPrefix,
   }) async {
     final create = CreateFlashcardUseCase(
       cards: cards,
       decks: decks,
-      idGenerator: SequentialIdGenerator(prefix: term),
+      idGenerator: SequentialIdGenerator(prefix: idPrefix ?? term),
       clock: clock,
     );
     final result =
-        await create(deckId: deckId, term: term, primaryMeaning: meaning)
+        await create(
+              deckId: deckId,
+              term: term,
+              primaryMeaning: meaning,
+              allowDuplicate: allowDuplicate,
+            )
             as FlashcardCreated;
     return result.card.id;
   }
@@ -383,6 +393,68 @@ void main() {
             'cross-pair-move',
           ),
         ),
+      );
+    });
+
+    // §1: "Duplicate check chạy trong target context"; §5: "Duplicate
+    // candidate → Duplicate resolution before commit". A move ran straight
+    // through, so a term the create flow refuses to add twice could still be
+    // moved in beside its twin (`int-94`).
+    test('a duplicate term in the target pauses before committing', () async {
+      final cardId = await createCard();
+      await createCard(deckId: 'd2', allowDuplicate: true, idPrefix: 'twin');
+
+      final result = await move(cardId: cardId, targetDeckId: 'd2');
+
+      expect(result, isA<MoveDuplicatesFound>());
+      expect(
+        (result as MoveDuplicatesFound).candidates.single.deckId,
+        'd2',
+        reason: 'the candidate is the card already sitting in the target',
+      );
+      final card = await cards.findById(cardId);
+      expect(card?.deckId, 'd1', reason: 'nothing is written on a pause');
+    });
+
+    test('an explicit keep-both retry moves it anyway', () async {
+      final cardId = await createCard();
+      await createCard(deckId: 'd2', allowDuplicate: true, idPrefix: 'twin');
+
+      final result = await move(
+        cardId: cardId,
+        targetDeckId: 'd2',
+        allowDuplicate: true,
+      );
+
+      expect(result, isA<FlashcardMoved>());
+      expect((await cards.findById(cardId))?.deckId, 'd2');
+    });
+
+    // The pair-wide check the create flow runs would block every move whose
+    // term exists anywhere in the pair — including the card's own source deck.
+    test('a same-term card in another deck does not block the move', () async {
+      final cardId = await createCard();
+      await createCard(deckId: 'child', allowDuplicate: true, idPrefix: 'twin');
+
+      expect(
+        await move(cardId: cardId, targetDeckId: 'd2'),
+        isA<FlashcardMoved>(),
+      );
+    });
+
+    // Hiding is not deleting: the term is still taken in that deck.
+    test('a hidden card in the target still counts as a duplicate', () async {
+      final cardId = await createCard();
+      final twin = await createCard(
+        deckId: 'd2',
+        allowDuplicate: true,
+        idPrefix: 'twin',
+      );
+      await hide.setHidden(twin, hidden: true);
+
+      expect(
+        await move(cardId: cardId, targetDeckId: 'd2'),
+        isA<MoveDuplicatesFound>(),
       );
     });
 

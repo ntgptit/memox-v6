@@ -105,6 +105,18 @@ class DriftFlashcardRepository implements FlashcardRepository {
   }
 
   @override
+  Future<List<domain.Flashcard>> duplicatesInDeck({
+    required String deckId,
+    required String normalizedTerm,
+    required String excludeCardId,
+  }) async {
+    final rows = await _database.flashcardDao
+        .duplicatesInDeck(deckId, normalizedTerm, excludeCardId)
+        .get();
+    return rows.map((row) => row.toDomain()).toList();
+  }
+
+  @override
   Future<domain.Flashcard?> findById(String id) async {
     final row = await _database.flashcardDao
         .findFlashcardById(id)
