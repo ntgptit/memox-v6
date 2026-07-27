@@ -225,6 +225,16 @@ class DriftDeckRepository implements DeckRepository {
       // The session history of a deleted deck goes with it. The learner's
       // streak and daily goals do not: those are keyed by local date in their
       // own tables and never referenced the deck.
+      //
+      // This contradicts ST-CHG-002, which says a session whose snapshot is
+      // sufficient should be allowed to *finish* after its deck is deleted.
+      // The schema is what prevents it: sessions, their card snapshots and
+      // their relearn items are anchored to decks and cards by foreign key,
+      // so honouring the table means dropping three of them and accepting
+      // rows that reference deleted content. That trade-off is recorded as
+      // `int-34` and is the owner's to make; until then the confirm names
+      // the session it will destroy rather than the delete pretending
+      // otherwise.
       await _database.transaction(() async {
         await _database.deckDao.clearTerminalAttemptRefsInDecks(deckId);
         await _database.deckDao.deleteAttemptsInDecks(deckId);
