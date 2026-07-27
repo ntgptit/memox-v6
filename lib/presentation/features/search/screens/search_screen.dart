@@ -48,6 +48,24 @@ class SearchScreen extends StatelessWidget {
 /// Result-type filter for the search list (WBS 10.2; `filter-search-results.md`).
 enum SearchResultFilter { all, decks, cards }
 
+/// Whether [result] survives the visibility filter
+/// (`filter-search-results.md` §1: filter theo "object type, language pair,
+/// Deck scope và visibility").
+///
+/// `search-rank-v1` reads "Hidden/deleted content bị loại trước ranking", and
+/// the sentence after it — "Filters chạy trước ranking" — is what that clause
+/// is: the *default* visibility filter, not a rule that hidden content is
+/// unsearchable. It cannot be the latter, because a visibility filter over a
+/// set that never contains hidden cards would filter nothing.
+///
+/// So `int-93` was half right. Hidden cards belong in the searchable set —
+/// `hide-flashcard.md` §1 keeps them findable and §8 sanctions only the study
+/// queues — but showing them unconditionally dropped the default the ranking
+/// policy states. This restores it, with the chip that makes it a decision.
+bool _matchesVisibility(bool includeHidden, SearchResult result) {
+  return includeHidden || !result.isHidden;
+}
+
 bool _matchesFilter(SearchResultFilter filter, SearchResult result) {
   return switch (filter) {
     SearchResultFilter.all => true,
@@ -65,6 +83,7 @@ class _SearchBody extends HookConsumerWidget {
     final input = useMxTextValue();
     final query = StringUtils.trimmed(input.value);
     final filter = useState(SearchResultFilter.all);
+    final includeHidden = useState(false);
 
     void recordSubmitted(String value) {
       final committed = StringUtils.trimmed(value);
@@ -91,6 +110,8 @@ class _SearchBody extends HookConsumerWidget {
           _FilterChips(
             selected: filter.value,
             onSelect: (value) => filter.value = value,
+            includeHidden: includeHidden.value,
+            onToggleHidden: () => includeHidden.value = !includeHidden.value,
           ),
           const MxGap.s3(),
         ],
@@ -100,7 +121,11 @@ class _SearchBody extends HookConsumerWidget {
               : _Results(
                   query: query,
                   filter: filter.value,
-                  onClearFilter: () => filter.value = SearchResultFilter.all,
+                  includeHidden: includeHidden.value,
+                  onClearFilter: () {
+                    filter.value = SearchResultFilter.all;
+                    includeHidden.value = true;
+                  },
                 ),
         ),
       ],
@@ -183,10 +208,20 @@ class _Recent extends ConsumerWidget {
 }
 
 class _FilterChips extends StatelessWidget {
-  const _FilterChips({required this.selected, required this.onSelect});
+  const _FilterChips({
+    required this.selected,
+    required this.onSelect,
+    required this.includeHidden,
+    required this.onToggleHidden,
+  });
 
   final SearchResultFilter selected;
   final ValueChanged<SearchResultFilter> onSelect;
+
+  /// Whether hidden cards are being shown. §3: "Chips tóm tắt active
+  /// filters", and visibility is one of §1's four filter dimensions.
+  final bool includeHidden;
+  final VoidCallback onToggleHidden;
 
   @override
   Widget build(BuildContext context) {
@@ -210,6 +245,14 @@ class _FilterChips extends StatelessWidget {
           selected: selected == SearchResultFilter.cards,
           onTap: () => onSelect(SearchResultFilter.cards),
         ),
+        // Visibility is its own dimension, not a fourth type: a learner can
+        // want cards *and* want the hidden ones, so it toggles rather than
+        // joining the single-select row above it.
+        MxChip(
+          label: l10n.searchFilterHidden,
+          selected: includeHidden,
+          onTap: onToggleHidden,
+        ),
       ],
     );
   }
@@ -230,11 +273,16 @@ class _Results extends ConsumerWidget {
   const _Results({
     required this.query,
     required this.filter,
+    required this.includeHidden,
     required this.onClearFilter,
   });
 
   final String query;
   final SearchResultFilter filter;
+
+  /// Whether hidden cards are shown; off by default, which is the default
+  /// `search-rank-v1` states.
+  final bool includeHidden;
 
   /// Drops back to the unfiltered list (`filter-search-results.md` §6:
   /// "Clear phục hồi query không filter").
@@ -264,7 +312,10 @@ class _Results extends ConsumerWidget {
       onRetry: () => ref.invalidate(searchResultsProvider(query: query)),
       retryLabel: l10n.tryAgainLabel,
       data: (context, hits) {
-        final shown = hits.where((hit) => _matchesFilter(filter, hit)).toList();
+        final shown = hits
+            .where((hit) => _matchesFilter(filter, hit))
+            .where((hit) => _matchesVisibility(includeHidden, hit))
+            .toList();
         // `filter-search-results.md` §4: "No-results-with-filters nêu
         // Clear/adjust filters". Results the chip hid are not a no-match, but
         // both rendered the same "nothing matched" line — so a learner whose

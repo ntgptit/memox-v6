@@ -107,10 +107,38 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  // `hide-flashcard.md` §1: a hidden Card stays findable, and search is where a
-  // learner goes to find one back. §4: its state is a semantic label, "không
-  // chỉ opacity/color" — the row must say hidden, not merely look it (int-93).
-  testWidgets('a hidden card is listed and reads as hidden', (tester) async {
+  // `search-rank-v1` says "Hidden/deleted content bị loại trước ranking", and
+  // the sentence after it — "Filters chạy trước ranking" — is what that clause
+  // is: the default visibility filter. `int-93` made hidden cards findable,
+  // which `hide-flashcard.md` §1 requires, but showed them unconditionally and
+  // so dropped that default (`int-98`).
+  testWidgets('a hidden card stays out of the results by default', (
+    tester,
+  ) async {
+    await database.customStatement(
+      "UPDATE flashcards SET is_hidden = 1 WHERE id = 'c1'",
+    );
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'hel');
+    await tester.pumpAndSettle();
+
+    expect(find.text('hello'), findsNothing);
+    // Not a no-match: the query found something the filter is holding back,
+    // and `filter-search-results.md` §4 wants that said with a way out.
+    expect(find.text('Clear filters'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  // §1 of `filter-search-results.md` lists visibility as one of the four
+  // filter dimensions, and `hide-flashcard.md` §1 keeps a hidden Card
+  // findable — search is where a learner goes to find one back. §4 of that
+  // spec: its state is a semantic label, "không chỉ opacity/color".
+  testWidgets('the Hidden chip brings it back, reading as hidden', (
+    tester,
+  ) async {
     await database.customStatement(
       "UPDATE flashcards SET is_hidden = 1 WHERE id = 'c1'",
     );
@@ -120,9 +148,10 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'hel');
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Hidden'));
+    await tester.pumpAndSettle();
 
     expect(find.text('hello'), findsOneWidget);
-    expect(find.text('Hidden'), findsOneWidget);
     // The row's own label leads; MxTappable merges its descendants after it,
     // so the state is heard before the term's own text repeats it.
     expect(
@@ -131,6 +160,28 @@ void main() {
     );
 
     semantics.dispose();
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  // The clear on that empty state has to actually clear: resetting only the
+  // type chip would leave a query whose only matches are hidden showing the
+  // same empty state with the same dead button.
+  testWidgets('clearing the filters reveals what they held back', (
+    tester,
+  ) async {
+    await database.customStatement(
+      "UPDATE flashcards SET is_hidden = 1 WHERE id = 'c1'",
+    );
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'hel');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Clear filters'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('hello'), findsOneWidget);
+
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
@@ -177,14 +228,14 @@ void main() {
     await tester.tap(find.text('Decks'));
     await tester.pumpAndSettle();
 
-    expect(find.text('No results of this type'), findsOneWidget);
+    expect(find.text('No results match these filters'), findsOneWidget);
     expect(
       find.text('No matches'),
       findsNothing,
       reason: 'the query did match — the chip is what hid it',
     );
 
-    await tester.tap(find.text('Clear filter'));
+    await tester.tap(find.text('Clear filters'));
     await tester.pumpAndSettle();
 
     expect(find.text('hello'), findsOneWidget);
