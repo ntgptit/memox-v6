@@ -1,3 +1,6 @@
+import 'package:memox_v6/domain/flashcard/card_translation_draft.dart';
+import 'package:memox_v6/domain/flashcard/card_translation.dart';
+import 'package:memox_v6/core/ids/id_generator.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:memox_v6/core/time/app_clock.dart';
 import 'package:memox_v6/domain/deck/deck_repository.dart';
@@ -18,13 +21,16 @@ class EditFlashcardUseCase {
     required FlashcardRepository cards,
     required DeckRepository decks,
     required AppClock clock,
+    required IdGenerator idGenerator,
   }) : _cards = cards,
        _decks = decks,
-       _clock = clock;
+       _clock = clock,
+       _idGenerator = idGenerator;
 
   final FlashcardRepository _cards;
   final DeckRepository _decks;
   final AppClock _clock;
+  final IdGenerator _idGenerator;
 
   /// Loads the card to edit with its current content version
   /// (edit-flashcard.md §3 "Load content version"); null when the card is
@@ -41,6 +47,7 @@ class EditFlashcardUseCase {
     required String primaryMeaning,
     required int expectedContentVersion,
     bool allowDuplicate = false,
+    List<CardTranslationDraft>? translations,
   }) async {
     final displayTerm = validateCardText(term, field: 'term');
     final displayMeaning = validateCardText(
@@ -77,7 +84,48 @@ class EditFlashcardUseCase {
       primaryMeaning: displayMeaning,
       expectedContentVersion: expectedContentVersion,
       now: _clock.nowUtc(),
+      translations: translations == null
+          ? null
+          : _resolveTranslations(cardId, displayMeaning, translations),
     );
     return FlashcardEdited(updated);
+  }
+
+  /// Validates a translation draft and gives its new rows ids
+  /// (`manage-card-translations.md` §1, §5).
+  ///
+  /// Every entry is nonblank and unique by normalized text against the primary
+  /// meaning *being saved* — not the stored one, because both change in the
+  /// same commit and validating against the old value would let an edit that
+  /// renames the primary meaning onto an existing translation through.
+  /// Position is the draft's own order, which §5 requires to be contiguous
+  /// after Save.
+  List<CardTranslation> _resolveTranslations(
+    String cardId,
+    String primaryMeaning,
+    List<CardTranslationDraft> drafts,
+  ) {
+    final seen = <String>{normalizeCardTerm(primaryMeaning)};
+    final resolved = <CardTranslation>[];
+    for (var i = 0; i < drafts.length; i++) {
+      final draft = drafts[i];
+      final text = validateCardText(draft.text, field: 'translation');
+      if (!seen.add(normalizeCardTerm(text))) {
+        throw ConflictFailure(
+          entity: 'flashcard_translations',
+          code: 'duplicate-translation',
+        );
+      }
+      resolved.add(
+        CardTranslation(
+          id: draft.id ?? _idGenerator.newId(),
+          cardId: cardId,
+          languageCode: draft.languageCode,
+          text: text,
+          displayOrder: i,
+        ),
+      );
+    }
+    return resolved;
   }
 }

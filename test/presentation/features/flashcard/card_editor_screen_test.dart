@@ -723,33 +723,90 @@ void main() {
       );
       await pumpEditor(tester);
 
-      expect(await translationTexts(), ['goodbye']);
+      // §6: the row is in the draft, not the store, until Save.
       expect(find.text('goodbye'), findsOneWidget);
+      expect(await translationTexts(), isEmpty);
+
+      await tester.tap(find.text('Save'));
+      await pumpEditor(tester);
+
+      expect(await translationTexts(), ['goodbye']);
 
       await disposeAndFlushStreams(tester);
     });
 
-    testWidgets('removes an additional translation', (tester) async {
+    testWidgets('removing a translation waits for Save', (tester) async {
       await seedCard();
+      await database.flashcardDao.insertTranslation(
+        't1',
+        'c1',
+        'vi',
+        'tạm biệt',
+        0,
+        0,
+        0,
+      );
       await tester.pumpWidget(editApp('c1'));
       await pumpEditor(tester);
       await discloseTranslations(tester);
 
-      await tester.enterText(find.byType(TextField).at(2), 'goodbye');
-      await tester.pump();
       await tester.tap(
         find.descendant(
           of: find.byType(CardTranslationsSection),
-          matching: find.byIcon(Symbols.add_rounded),
+          matching: find.byIcon(Symbols.close_rounded),
         ),
       );
       await pumpEditor(tester);
-      expect(await translationTexts(), ['goodbye']);
 
-      await tester.tap(find.bySemanticsLabel('Remove translation'));
+      // §6: "Removing existing translation can be undone by discard parent
+      // draft" — so the row is gone from the draft and still in the store.
+      expect(find.text('tạm biệt'), findsNothing);
+      expect(await translationTexts(), ['tạm biệt']);
+
+      await tester.tap(find.text('Save'));
       await pumpEditor(tester);
 
       expect(await translationTexts(), isEmpty);
+
+      await disposeAndFlushStreams(tester);
+    });
+
+    // The removal used to commit on the spot, so nothing marked the editor
+    // dirty and Cancel closed without asking — the guard that exists to stop
+    // work being thrown away could not see the work being thrown away
+    // (`int-99`).
+    testWidgets('a removed translation makes the editor dirty', (tester) async {
+      await seedCard();
+      await database.flashcardDao.insertTranslation(
+        't1',
+        'c1',
+        'vi',
+        'tạm biệt',
+        0,
+        0,
+        0,
+      );
+      await tester.pumpWidget(editApp('c1'));
+      await pumpEditor(tester);
+      await discloseTranslations(tester);
+
+      await tester.tap(
+        find.descendant(
+          of: find.byType(CardTranslationsSection),
+          matching: find.byIcon(Symbols.close_rounded),
+        ),
+      );
+      await pumpEditor(tester);
+
+      await tester.tap(find.bySemanticsLabel('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Discard'), findsWidgets);
+      expect(
+        await translationTexts(),
+        ['tạm biệt'],
+        reason: 'nothing was written while the confirm is open',
+      );
 
       await disposeAndFlushStreams(tester);
     });

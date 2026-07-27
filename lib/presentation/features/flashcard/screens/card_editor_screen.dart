@@ -1,3 +1,4 @@
+import 'package:memox_v6/domain/flashcard/card_translation_draft.dart';
 import 'package:memox_v6/domain/flashcard/flashcard.dart';
 import 'package:memox_v6/core/errors/app_failure.dart';
 import 'package:flutter/material.dart';
@@ -161,10 +162,53 @@ class _CardEditorForm extends HookConsumerWidget {
 
     // Edit is dirty only when the content diverges from the loaded card
     // (edit-flashcard.md §6 — a clean edit keeps Save disabled).
+    // §6: "Child edits live in parent Card draft until Save". The stored rows
+    // seed the draft once; every add and remove after that is local, and
+    // Discard throws the whole draft away — which is what §6 means by "can be
+    // undone by discard parent draft".
+    final storedTranslations = isEdit
+        ? ref.watch(cardTranslationsProvider(cardId: editingCard.id)).value
+        : null;
+    final translationDrafts = useState<List<CardTranslationDraft>?>(null);
+    useEffect(() {
+      if (storedTranslations == null) return null;
+      if (translationDrafts.value != null) return null;
+      translationDrafts.value = [
+        for (final row in storedTranslations)
+          CardTranslationDraft(
+            id: row.id,
+            text: row.text,
+            languageCode: row.languageCode,
+          ),
+      ];
+      return null;
+    }, [storedTranslations]);
+    final translationRows =
+        translationDrafts.value ?? const <CardTranslationDraft>[];
+
+    // A card that already carries translations shows them without being
+    // asked — disclosure hides an empty slot, never existing content.
+    final hasTranslations = isEdit && translationRows.isNotEmpty;
+
+    /// Whether the draft diverged from what is stored (§6, and the editor's
+    /// own dirty-cancel guard). A removed row used to commit on the spot, so
+    /// nothing here had to notice it; now Cancel has to ask.
+    bool translationsDirty() {
+      final stored = storedTranslations;
+      if (stored == null) return false;
+      if (stored.length != translationRows.length) return true;
+      for (var i = 0; i < stored.length; i++) {
+        if (stored[i].id != translationRows[i].id) return true;
+        if (stored[i].text != translationRows[i].text) return true;
+      }
+      return false;
+    }
+
     bool computeDirty() {
       if (isEdit) {
         return term.controller.text != editingCard.term ||
-            meaning.controller.text != editingCard.primaryMeaning;
+            meaning.controller.text != editingCard.primaryMeaning ||
+            translationsDirty();
       }
       return term.controller.text.isNotEmpty ||
           meaning.controller.text.isNotEmpty ||
@@ -179,6 +223,17 @@ class _CardEditorForm extends HookConsumerWidget {
           .set(dirty: computeDirty());
       ref.read(cardEditorDuplicatesViewmodelProvider.notifier).clear();
     }
+
+    // A draft translation change has to reach the dirty guard the same way a
+    // typed character does. Nothing else observes the list, so without this
+    // Cancel closed silently over a removal — the guard that exists to stop
+    // work being thrown away could not see the work being thrown away.
+    useEffect(() {
+      // Deferred: hooks run their effects inside the build phase, and Riverpod
+      // refuses a provider write there.
+      WidgetsBinding.instance.addPostFrameCallback((_) => syncDraftState());
+      return null;
+    }, [translationRows]);
 
     final saveState = ref.watch(cardEditorSaveViewmodelProvider);
 
@@ -209,16 +264,6 @@ class _CardEditorForm extends HookConsumerWidget {
       Navigator.of(context).pop();
     });
 
-    // A card that already carries translations shows them without being
-    // asked — disclosure hides an empty slot, never existing content.
-    final hasTranslations =
-        isEdit &&
-        (ref
-                .watch(cardTranslationsProvider(cardId: editingCard.id))
-                .value
-                ?.isNotEmpty ??
-            false);
-
     final duplicates = ref.watch(cardEditorDuplicatesViewmodelProvider);
     final isSubmitting = saveState is AsyncLoading<void>;
     final failure = MxActionErrors.failureOf(saveState);
@@ -233,6 +278,7 @@ class _CardEditorForm extends HookConsumerWidget {
               primaryMeaning: meaning.controller.text,
               expectedContentVersion: editingCard.contentVersion,
               allowDuplicate: allowDuplicate,
+              translations: translationDrafts.value,
             );
         return;
       }
@@ -448,8 +494,9 @@ class _CardEditorForm extends HookConsumerWidget {
                       // keeps the resting form Term -> Meaning -> Tags.
                       if (translationsOpen.value || hasTranslations) ...[
                         CardTranslationsSection(
-                          cardId: editingCard.id,
+                          rows: translationRows,
                           languageCode: editor.meaningLanguageCode,
+                          onChanged: (rows) => translationDrafts.value = rows,
                         ),
                         const MxGap.s6(),
                       ],

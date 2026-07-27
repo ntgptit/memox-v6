@@ -453,6 +453,7 @@ class DriftFlashcardRepository implements FlashcardRepository {
     required String primaryMeaning,
     required int expectedContentVersion,
     required DateTime now,
+    List<CardTranslation>? translations,
   }) {
     final epoch = now.millisecondsSinceEpoch;
     return mapSqliteConflicts(entity: 'flashcards', () async {
@@ -473,12 +474,78 @@ class DriftFlashcardRepository implements FlashcardRepository {
           epoch,
           cardId,
         );
+        if (translations != null) {
+          await _applyTranslations(cardId, translations, epoch);
+        }
         final updated = await _database.flashcardDao
             .findFlashcardById(cardId)
             .getSingle();
         return updated.toDomain();
       });
     });
+  }
+
+  /// Brings the card's translations to exactly [desired], inside the caller's
+  /// transaction (`manage-card-translations.md` §3 "Save Card atomically").
+  ///
+  /// Rows the draft still carries keep their ids — §1 asks for stable
+  /// identity, so an edited row is updated rather than deleted and recreated.
+  /// Order comes from the list's own sequence, through the same park-then-set
+  /// two phases the standalone reorder uses: the
+  /// `(card_id, language_code, display_order)` uniqueness would otherwise
+  /// collide mid-permutation.
+  Future<void> _applyTranslations(
+    String cardId,
+    List<CardTranslation> desired,
+    int epoch,
+  ) async {
+    final stored = await _database.flashcardDao
+        .listTranslationsForCard(cardId)
+        .get();
+    final storedIds = stored.map((row) => row.id).toSet();
+    final keptIds = desired.map((row) => row.id).toSet();
+
+    for (final row in stored) {
+      if (keptIds.contains(row.id)) continue;
+      await _database.flashcardDao.deleteTranslation(row.id);
+    }
+
+    // Park every survivor first, then assign: a row moving into a slot another
+    // row has not left yet is the collision the two phases exist for.
+    for (var i = 0; i < desired.length; i++) {
+      if (!storedIds.contains(desired[i].id)) continue;
+      await _database.flashcardDao.parkCardTranslationOrder(
+        (i + 1).toDouble(),
+        epoch,
+        desired[i].id,
+      );
+    }
+
+    for (var i = 0; i < desired.length; i++) {
+      final translation = desired[i];
+      if (!storedIds.contains(translation.id)) {
+        await _database.flashcardDao.insertTranslation(
+          translation.id,
+          cardId,
+          translation.languageCode,
+          translation.text,
+          i,
+          epoch,
+          epoch,
+        );
+        continue;
+      }
+      await _database.flashcardDao.updateCardTranslationText(
+        translation.text,
+        epoch,
+        translation.id,
+      );
+      await _database.flashcardDao.setCardTranslationOrder(
+        i,
+        epoch,
+        translation.id,
+      );
+    }
   }
 
   @override

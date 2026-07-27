@@ -60,6 +60,13 @@ abstract interface class FlashcardRepository {
   /// Rewrites the card's own content, guarded by the expected content
   /// version so a concurrent edit never last-write-wins silently
   /// (edit-flashcard.md); the stored version increments on success.
+  /// Rewrites the card's own fields, and — when [translations] is given — its
+  /// additional translations, in one transaction.
+  ///
+  /// `manage-card-translations.md` §6 keeps child edits in the parent draft
+  /// until Save, and the flow's §3 ends at "Save Card atomically". Passing
+  /// `null` leaves the child rows alone, for callers that only touch the
+  /// parent's own content.
   Future<Flashcard> editCardContent(
     String cardId, {
     required String term,
@@ -67,6 +74,7 @@ abstract interface class FlashcardRepository {
     required String primaryMeaning,
     required int expectedContentVersion,
     required DateTime now,
+    List<CardTranslation>? translations,
   });
 
   /// Deletes child content and current scheduling state and tombstones
