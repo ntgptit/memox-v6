@@ -37,8 +37,31 @@ abstract interface class AppTimeZone {
 final class SystemTimeZone implements AppTimeZone {
   const SystemTimeZone();
 
+  /// What the host calls its zone, or [unknownZoneId] when it will not say.
+  ///
+  /// `DateTime.timeZoneName` is not safe to read unguarded on Web: the
+  /// implementation asks the browser's `Intl` for the zone, and a host whose
+  /// locale it cannot use throws `RangeError: Incorrect locale information
+  /// provided` instead of returning anything. A CI runner with no `LANG` set
+  /// is exactly such a host, and the shipping app died on a white screen there
+  /// before the first frame — found by the Tier-1 Web smoke (`int-88`).
+  ///
+  /// The identifier is bookkeeping: it travels with a day record so a later
+  /// reconciliation can tell which zone produced it. Not knowing it is a
+  /// smaller problem than not starting, and recording that it was unknown is
+  /// honest where inventing `UTC` would not be — the day boundaries still come
+  /// from [localTimeOf], which needs no locale at all.
   @override
-  String get id => DateTime.now().timeZoneName;
+  String get id {
+    try {
+      return DateTime.now().timeZoneName;
+    } on Object {
+      return unknownZoneId;
+    }
+  }
+
+  /// Recorded when the host will not report a zone name.
+  static const String unknownZoneId = 'unknown';
 
   @override
   DateTime localTimeOf(DateTime utcInstant) => utcInstant.toLocal();
