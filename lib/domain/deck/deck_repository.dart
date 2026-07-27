@@ -1,4 +1,5 @@
 import 'package:memox_v6/domain/deck/deck.dart';
+import 'package:memox_v6/domain/deck/card_target.dart';
 import 'package:memox_v6/domain/deck/move_destination.dart';
 import 'package:memox_v6/domain/deck/deck_summary.dart';
 import 'package:memox_v6/domain/deck/deck_content_state.dart';
@@ -63,6 +64,13 @@ abstract interface class DeckRepository {
   /// Decks in [languagePairId] that can hold a card — Empty or Leaf (no child
   /// decks) — excluding [excludeDeckId] (the card's current deck). The
   /// card-move-destination picker's eligible list (WBS 6.5).
+  /// Every deck in the pair as a card target, each carrying the reason it
+  /// cannot receive the card (`add-content-to-deck.md` §3 node F, §4).
+  Future<List<CardTarget>> cardTargetCandidates(
+    String languagePairId, {
+    required String sourceDeckId,
+  });
+
   Future<List<Deck>> cardMoveTargets(
     String languagePairId, {
     required String excludeDeckId,

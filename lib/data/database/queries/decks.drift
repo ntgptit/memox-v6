@@ -425,6 +425,24 @@ ORDER BY tier, field_priority, sort_key, id;
 -- pair that can hold cards — Empty or Leaf, i.e. it has no child decks (a deck
 -- with children is a Parent and 4.3 exclusivity forbids it owning cards) —
 -- excluding the card's current deck. Ordered by name for the picker.
+-- Every deck in the pair as a card target, with the reason an ineligible one
+-- cannot receive the card (`add-content-to-deck.md` §3 node F, §4).
+--
+-- §4 draws a Parent row disabled and labelled rather than absent, and §3's
+-- ineligible branch is "Disabled · choose child". The picker showed only the
+-- eligible rows, so a Parent a learner was looking for simply was not there.
+cardTargetCandidates:
+SELECT d.*,
+  CASE
+    WHEN d.id = :sourceDeckId THEN 'sourceDeck'
+    WHEN EXISTS (SELECT 1 FROM decks child WHERE child.parent_id = d.id)
+      THEN 'isParent'
+    ELSE 'eligible'
+  END AS ineligibility
+FROM decks d
+WHERE d.language_pair_id = :languagePairId
+ORDER BY d.normalized_name, d.id;
+
 cardMoveDestinationDecks:
 SELECT d.* FROM decks d
 WHERE d.language_pair_id = :languagePairId
