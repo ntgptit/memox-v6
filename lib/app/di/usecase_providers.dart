@@ -255,6 +255,7 @@ EditFlashcardUseCase editFlashcardUseCase(Ref ref) {
     cards: ref.watch(flashcardRepositoryProvider),
     decks: ref.watch(deckRepositoryProvider),
     clock: ref.watch(appClockProvider),
+    idGenerator: ref.watch(idGeneratorProvider),
   );
 }
 

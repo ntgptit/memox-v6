@@ -1,3 +1,4 @@
+import 'package:memox_v6/domain/flashcard/card_translation_draft.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/core/utils/string_utils.dart';
 import 'package:memox_v6/domain/deck/deck.dart';
@@ -137,6 +138,7 @@ class CardEditorSaveViewmodel extends _$CardEditorSaveViewmodel {
     required String primaryMeaning,
     required int expectedContentVersion,
     bool allowDuplicate = false,
+    List<CardTranslationDraft>? translations,
   }) async {
     state = const AsyncLoading<void>();
     state = await AsyncValue.guard(() async {
@@ -148,6 +150,7 @@ class CardEditorSaveViewmodel extends _$CardEditorSaveViewmodel {
             primaryMeaning: primaryMeaning,
             expectedContentVersion: expectedContentVersion,
             allowDuplicate: allowDuplicate,
+            translations: translations,
           );
       if (result is EditDuplicateCandidatesFound) {
         ref

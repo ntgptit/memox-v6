@@ -1,3 +1,4 @@
+import 'package:memox_v6/domain/flashcard/card_translation_draft.dart';
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,6 +79,7 @@ List<Override> parityOverridesFor(String fixtureId) {
           cards: ref.watch(flashcardRepositoryProvider),
           decks: ref.watch(deckRepositoryProvider),
           clock: ref.watch(appClockProvider),
+          idGenerator: ref.watch(idGeneratorProvider),
         ),
       ),
     ],
@@ -340,6 +342,7 @@ class _FailingEditFlashcardUseCase extends EditFlashcardUseCase {
     required super.cards,
     required super.decks,
     required super.clock,
+    required super.idGenerator,
   });
 
   @override
@@ -349,6 +352,7 @@ class _FailingEditFlashcardUseCase extends EditFlashcardUseCase {
     required String primaryMeaning,
     required int expectedContentVersion,
     bool allowDuplicate = false,
+    List<CardTranslationDraft>? translations,
   }) async {
     throw const UnexpectedFailure(
       cause: 'parity fixture: the card edit path fails for MX-VIS-057',

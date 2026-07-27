@@ -64,7 +64,12 @@ void main() {
     database = db.AppDatabase.forTesting(NativeDatabase.memory());
     cards = DriftFlashcardRepository(database);
     decks = DriftDeckRepository(database, const SystemClock());
-    edit = EditFlashcardUseCase(cards: cards, decks: decks, clock: clock);
+    edit = EditFlashcardUseCase(
+      cards: cards,
+      decks: decks,
+      clock: clock,
+      idGenerator: SequentialIdGenerator(prefix: 'tr'),
+    );
     hide = HideFlashcardUseCase(cards: cards, clock: clock);
     delete = DeleteFlashcardUseCase(
       cards: cards,

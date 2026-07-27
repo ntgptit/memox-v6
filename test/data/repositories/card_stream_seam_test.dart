@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../../support/sequential_ids.dart';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox_v6/domain/usecases/study_session/load_study_runtime_usecase.dart';
@@ -96,6 +98,7 @@ void main() {
       cards: cards,
       decks: decks,
       clock: _FixedClock(now),
+      idGenerator: SequentialIdGenerator(prefix: 'tr'),
     ).call(
       cardId: created.id,
       term: 'hello',
