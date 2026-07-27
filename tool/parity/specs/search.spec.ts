@@ -18,8 +18,10 @@ import { expectKitParity } from '../kit';
 test('MX-VIS-084 lists ranked results for a typed query', async ({
   page,
 }, testInfo) => {
-  // The fixture seeds one leaf deck of five cards, reached the way a learner
-  // reaches search: Library's app-bar action, not a deep link.
+  // The fixture seeds the kit's own sample — three cards across two decks,
+  // one hidden — because a ratio measured over different content measures the
+  // content. Reached the way a learner reaches search: Library's app-bar
+  // action, not a deep link.
   await enterFlow(page, {
     masterFlow: 'docs/business/search/search-library-content.md',
     fixture: 'MX-VIS-084',
@@ -29,10 +31,16 @@ test('MX-VIS-084 lists ranked results for a typed query', async ({
   await tapControl(page, 'Search');
   await expectRoute(page, '/search');
 
-  // A query that matches a card term and nothing else, so the list is the
-  // ranked-results state rather than the mixed one.
-  await fillField(page, /Search/i, 'on', { blur: false });
-  await expect(page.getByText('one').first()).toBeVisible();
+  // The kit's own query: `하` matches all three seeded terms.
+  await fillField(page, /Search/i, '하', { blur: false });
+  await expect(page.getByText('to study').first()).toBeVisible();
+
+  // The kit's list includes a hidden card, drawn dimmed rather than dropped.
+  // `int-98` made that a filter the learner turns on — `search-rank-v1`'s
+  // "Hidden/deleted content bị loại trước ranking" is the default — so the
+  // state the shot photographs is reached with the chip on.
+  await tapControl(page, 'Hidden');
+  await expect(page.getByText('to do (auxiliary)').first()).toBeVisible();
 
   await expectKitParity(page, testInfo, {
     id: 'MX-VIS-084',

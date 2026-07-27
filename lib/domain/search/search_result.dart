@@ -13,6 +13,7 @@ class SearchResult {
     required this.deckId,
     this.isHidden = false,
     this.contextName,
+    this.subtitle,
   });
 
   final String id;
@@ -24,6 +25,10 @@ class SearchResult {
   /// The owning deck — the card's deck, or the deck itself — for path
   /// resolution when the caller opens the result.
   final String deckId;
+
+  /// The object's own second line — a card's primary meaning, a deck's
+  /// description — which the kit's result row draws under the term.
+  final String? subtitle;
 
   /// What tells this result apart from a same-named one elsewhere: the owning
   /// deck for a card, the parent deck for a nested deck, and null for a root
