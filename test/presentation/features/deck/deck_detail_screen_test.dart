@@ -160,6 +160,37 @@ void main() {
     await disposeAndFlushStreams(tester);
   });
 
+  // `study-deck.md` §7 writes a line for every blocked start — no cards, not
+  // enough, no Guess pool, nothing due. The deck row's study action left all of
+  // them "to the shared error surface", and a deck row has none: the tap did
+  // nothing and said nothing (`int-108`).
+  testWidgets('studying a deck with no cards says why', (tester) async {
+    // A child deck with no cards at all: the row still offers the study
+    // action, so the block has to be said rather than swallowed.
+    await database.deckDao.insertDeck(
+      'asia',
+      'lp1',
+      'root',
+      'Asia',
+      'asia',
+      0,
+      0,
+    );
+
+    await tester.pumpWidget(app('root'));
+    await pumpDeck(tester);
+
+    await tester.tap(find.bySemanticsLabel('Study').first);
+    await pumpDeck(tester);
+
+    expect(
+      find.text('This deck doesn\u2019t have any cards to study yet.'),
+      findsOneWidget,
+    );
+
+    await disposeAndFlushStreams(tester);
+  });
+
   testWidgets('a parent deck lists children and browses deeper', (
     tester,
   ) async {
