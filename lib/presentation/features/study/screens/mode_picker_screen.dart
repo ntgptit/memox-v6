@@ -63,28 +63,22 @@ class ModePickerScreen extends HookConsumerWidget {
         onBack: () => Navigator.of(context).maybePop(),
         backLabel: l10n.backLabel,
       ),
-      // `MxScaffold` scrolls the body; a second viewport inside it has no
-      // bounded height to expand into.
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      // One rhythm for the whole body, which is what the kit's scaffold gives
+      // its children. Hand-placed gaps between the sections drifted every row
+      // a little lower than the shot, and the error accumulated downward: by
+      // the last mode the offset was most of a row, and the note and CTA below
+      // it were displaced entirely (`int-110`).
+      body: MxList(
         children: [
-          const MxGap.s4(),
           _ScopeCard(deckName: deck.value?.name ?? ''),
-          const MxGap.s4(),
-          MxList(
-            children: [
-              for (final mode in _practiceModes)
-                _ModeOption(
-                  mode: mode,
-                  selected: selected.value == mode,
-                  onSelect: isStarting ? null : () => selected.value = mode,
-                ),
-            ],
-          ),
-          const MxGap.s4(),
-          // The kit prints this under the list, and §6 is the reason it is
-          // true: "Practice outcome vẫn có thể ghi history nhưng không mutate
-          // SRS/Goal/Streak trong v1."
+          for (final mode in _practiceModes)
+            _ModeOption(
+              mode: mode,
+              selected: selected.value == mode,
+              onSelect: isStarting ? null : () => selected.value = mode,
+            ),
+          // §6 is why this line is true: "Practice outcome vẫn có thể ghi
+          // history nhưng không mutate SRS/Goal/Streak trong v1."
           Center(
             child: MxText(
               l10n.practiceNoSrsNote,
@@ -92,7 +86,6 @@ class ModePickerScreen extends HookConsumerWidget {
               color: context.colors.textTertiary,
             ),
           ),
-          const MxGap.s4(),
           MxButton(
             label: isStarting
                 ? l10n.studyStartingLabel
@@ -109,7 +102,6 @@ class ModePickerScreen extends HookConsumerWidget {
                         selectedMode: selected.value,
                       ),
           ),
-          const MxGap.s8(),
         ],
       ),
     );
