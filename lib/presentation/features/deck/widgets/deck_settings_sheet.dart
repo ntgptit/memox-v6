@@ -9,7 +9,7 @@ import 'package:memox_v6/presentation/shared/widgets/mx_tappable.dart';
 import 'package:memox_v6/presentation/shared/widgets/mx_text.dart';
 
 /// A deck lifecycle action chosen from the settings sheet (WBS 6.1).
-enum DeckSettingsAction { rename, move, resetProgress, delete }
+enum DeckSettingsAction { practice, rename, move, resetProgress, delete }
 
 /// The deck-settings action sheet (WBS 6.1; kit `deck-settings--action-sheet`).
 /// Groups the deck lifecycle actions under one overflow so the app bar stays
@@ -40,6 +40,15 @@ class _DeckSettingsBody extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        // §2 of `study-deck.md` lists Study among a deck's entry points, and §6
+        // requires the choice to happen on a selection surface rather than on
+        // one tap. The deck row's bolt still starts `newLearning` directly
+        // (`int-108`); this row is how a Practice session is chosen.
+        _ActionRow(
+          icon: Symbols.fitness_center_rounded,
+          label: l10n.practiceLabel,
+          action: DeckSettingsAction.practice,
+        ),
         _ActionRow(
           icon: Symbols.edit_rounded,
           label: l10n.renameDeckLabel,

@@ -60,6 +60,12 @@ extension AppNavigation on BuildContext {
   /// Opens the Card Detail read projection (`view-card-detail.md`). Pushed:
   /// the return preserves whatever list sent the learner here, which is what
   /// `open-search-result.md` §3's "Return preserves Search" asks for.
+  /// Opens the Practice mode picker for a deck (`study-deck.md` §4). Pushed:
+  /// §6 makes it a selection surface, so Back returns to the deck rather than
+  /// leaving a session behind.
+  Future<void> pushPractice(String deckId) =>
+      GoRouter.of(this).push(RoutePaths.practice(deckId));
+
   Future<void> pushCardDetail(String deckId, String cardId) =>
       GoRouter.of(this).push(RoutePaths.cardDetail(deckId, cardId));
 

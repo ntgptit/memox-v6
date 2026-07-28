@@ -1299,6 +1299,79 @@
   "@studyStartFailedMessage": {
     "description": "Generic start failure (study-deck.md \u00a77). The second sentence is the one that matters: a failed start leaves no orphan session."
   },
+  "practiceModeTitle": "Practice mode",
+  "@practiceModeTitle": {
+    "description": "App-bar title of the Practice mode picker (kit `mode-picker/appbar`)."
+  },
+  "practiceLabel": "Practice",
+  "@practiceLabel": {
+    "description": "Deck-settings row that opens the Practice mode picker (study-deck.md \u00a72)."
+  },
+  "startSessionLabel": "Start session",
+  "@startSessionLabel": {
+    "description": "The picker\u2019s primary CTA; \u00a76 requires selecting a tile not to start on its own."
+  },
+  "studyStartingLabel": "Starting\u2026",
+  "@studyStartingLabel": {
+    "description": "The picker\u2019s CTA while a start is in flight (study-deck.md \u00a77)."
+  },
+  "cardSourceLabel": "Card source",
+  "@cardSourceLabel": {
+    "description": "Heading of the picker\u2019s scope card (kit `mode-picker/scope`)."
+  },
+  "practiceNoSrsNote": "Practice does not activate new cards or schedule SRS.",
+  "@practiceNoSrsNote": {
+    "description": "Note under the mode list; \u00a76 confirms Practice writes no SRS, goal or streak in v1."
+  },
+  "modeReviewName": "Review",
+  "@modeReviewName": {
+    "description": "Study mode name."
+  },
+  "modeReviewDescription": "Browse and flip cards",
+  "@modeReviewDescription": {
+    "description": "Study mode description (kit MODES)."
+  },
+  "modeMatchName": "Match",
+  "@modeMatchName": {
+    "description": "Study mode name."
+  },
+  "modeMatchDescription": "Match terms to meanings",
+  "@modeMatchDescription": {
+    "description": "Study mode description (kit MODES)."
+  },
+  "modeGuessName": "Guess",
+  "@modeGuessName": {
+    "description": "Study mode name."
+  },
+  "modeGuessDescription": "Pick the right meaning",
+  "@modeGuessDescription": {
+    "description": "Study mode description (kit MODES)."
+  },
+  "modeRecallName": "Recall",
+  "@modeRecallName": {
+    "description": "Study mode name."
+  },
+  "modeRecallDescription": "Recall, then self-grade",
+  "@modeRecallDescription": {
+    "description": "Study mode description (kit MODES)."
+  },
+  "modeFillName": "Fill",
+  "@modeFillName": {
+    "description": "Study mode name."
+  },
+  "modeFillDescription": "Type the term from its meaning",
+  "@modeFillDescription": {
+    "description": "Study mode description (kit MODES)."
+  },
+  "selectModeSemantics": "Select {mode}",
+  "@selectModeSemantics": {
+    "description": "Accessible name of a mode option row (kit ariaLabel `Select <name>`).",
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
   "deckStudyLabel": "Study",
   "@deckStudyLabel": {
     "description": "Starts a study session for the open deck (WBS 5.6.1/2)."
