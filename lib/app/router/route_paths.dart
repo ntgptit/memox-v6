@@ -20,6 +20,11 @@ abstract final class RoutePaths {
 
   static String newCard(String deckId) => '/deck/$deckId/new-card';
 
+  /// The Practice mode picker for a deck (WBS 5.6.1; `study-deck.md` §4).
+  static const String practicePattern = '/deck/:${RouteParams.deckId}/practice';
+
+  static String practice(String deckId) => '/deck/$deckId/practice';
+
   /// Card Detail path template (WBS 6.x; `view-card-detail.md`).
   static const String cardDetailPattern =
       '/deck/:${RouteParams.deckId}/card/:${RouteParams.cardId}';

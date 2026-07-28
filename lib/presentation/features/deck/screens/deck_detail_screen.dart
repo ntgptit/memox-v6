@@ -104,6 +104,8 @@ Future<void> _openDeckSettings(BuildContext context, Deck deck) async {
   );
   if (!context.mounted || action == null) return;
   switch (action) {
+    case DeckSettingsAction.practice:
+      await context.pushPractice(deck.id);
     case DeckSettingsAction.rename:
       await showRenameDeckDialog(
         context,

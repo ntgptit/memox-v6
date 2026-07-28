@@ -1,3 +1,4 @@
+import 'package:memox_v6/domain/study_modes/study_mode_type.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'package:memox_v6/domain/study_session/session_scope.dart';
 import 'package:memox_v6/domain/study_session/session_type.dart';
@@ -18,16 +19,25 @@ class StudyStart extends _$StudyStart {
   @override
   AsyncValue<void> build() => const AsyncData<void>(null);
 
+  /// [selectedMode] is Practice's alone: §6 of `study-deck.md` gives the other
+  /// three session types fixed plans, so a mode passed with them would be
+  /// ignored by the policy and misleading here.
   Future<void> start({
     required String deckId,
     SessionType type = SessionType.newLearning,
+    StudyModeType? selectedMode,
   }) async {
     if (state is AsyncLoading<void>) return;
     state = const AsyncLoading<void>();
     state = await runMxAction(() async {
       await ref
           .read(startStudySessionUseCaseProvider)
-          .call(deckId: deckId, scope: SessionScope.subtree, type: type);
+          .call(
+            deckId: deckId,
+            scope: SessionScope.subtree,
+            type: type,
+            selectedMode: selectedMode,
+          );
     });
   }
 }
