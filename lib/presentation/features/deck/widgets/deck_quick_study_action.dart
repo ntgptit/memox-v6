@@ -1,3 +1,4 @@
+import 'package:memox_v6/presentation/shared/widgets/mx_snackbar.dart';
 import 'package:memox_v6/app/di/usecase_providers.dart';
 import 'dart:async';
 
@@ -60,13 +61,40 @@ void listenForQuickStudyStart(WidgetRef ref, BuildContext context) {
     onFailure: (failure) {
       // `start-study-session.md` §3 node D. A session is already running, and
       // the schema allows exactly one — so this is not a thing that went
-      // wrong, it is a fork the learner has to take. Every other failure
-      // stays a failure and is left to the shared error surface.
-      if (failure is! ConflictFailure) return;
-      if (failure.code != 'active-session') return;
-      unawaited(_confirmResumeActiveSession(context, ref));
+      // wrong, it is a fork the learner has to take.
+      if (failure is ConflictFailure && failure.code == 'active-session') {
+        unawaited(_confirmResumeActiveSession(context, ref));
+        return;
+      }
+      // Everything else used to be "left to the shared error surface", and on
+      // a deck row there is no such surface: the tap did nothing and said
+      // nothing. `study-deck.md` §7 writes a line for each blocked start, and
+      // the block reasons arrive typed — `ValidationFailure(field: 'start')`
+      // carrying the `StartBlockReason` name (`int-108`).
+      showMxSnackbar(
+        context,
+        message: _startFailureMessage(failure, AppLocalizations.of(context)),
+      );
     },
   );
+}
+
+/// What a blocked or failed start says (`study-deck.md` §7).
+///
+/// The reasons are the `StartBlockReason` names the start policy decides on,
+/// and each has its own line because they need different things from the
+/// learner: add cards, widen the scope, or nothing at all because there is
+/// simply nothing due. Collapsing them into one sentence — or into silence,
+/// which is what this surface did — leaves a tap that appears to do nothing.
+String _startFailureMessage(AppFailure failure, AppLocalizations l10n) {
+  if (failure is! ValidationFailure) return l10n.studyStartFailedMessage;
+  return switch (failure.code) {
+    'scopeEmpty' => l10n.studyNoCardsMessage,
+    'dueCaughtUp' => l10n.studyCaughtUpMessage,
+    'guessPoolInsufficient' => l10n.studyGuessPoolMessage,
+    'practiceModeNotSelected' => l10n.studyNotEnoughMessage,
+    _ => l10n.studyStartFailedMessage,
+  };
 }
 
 /// The kit's `Continue your session?` prompt (`start-study-session.md` §4).

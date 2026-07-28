@@ -1279,6 +1279,26 @@
   "@studyRetryLabel": {
     "description": "Retries a failed finalize on the Study Result."
   },
+  "studyNoCardsMessage": "This deck doesn\u2019t have any cards to study yet.",
+  "@studyNoCardsMessage": {
+    "description": "Start blocked because the scope holds no eligible card (study-deck.md \u00a77)."
+  },
+  "studyNotEnoughMessage": "Add more cards or choose a larger scope for this mode.",
+  "@studyNotEnoughMessage": {
+    "description": "Start blocked because the scope is under the mode\u2019s minimum (study-deck.md \u00a77)."
+  },
+  "studyGuessPoolMessage": "Guess needs at least 5 cards with different meanings.",
+  "@studyGuessPoolMessage": {
+    "description": "Start blocked because the Guess pool lacks five distinct normalized meanings (study-deck.md \u00a77)."
+  },
+  "studyCaughtUpMessage": "Nothing is due in this deck right now.",
+  "@studyCaughtUpMessage": {
+    "description": "Start blocked because the due queue is empty; ST-TYPE-006 calls this caught up rather than an empty scope."
+  },
+  "studyStartFailedMessage": "Couldn\u2019t start the session. Nothing has changed.",
+  "@studyStartFailedMessage": {
+    "description": "Generic start failure (study-deck.md \u00a77). The second sentence is the one that matters: a failed start leaves no orphan session."
+  },
   "deckStudyLabel": "Study",
   "@deckStudyLabel": {
     "description": "Starts a study session for the open deck (WBS 5.6.1/2)."
