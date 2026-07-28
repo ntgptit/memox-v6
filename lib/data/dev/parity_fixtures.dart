@@ -63,6 +63,7 @@ class ParityFixtures {
     'MX-VIS-036',
     'MX-VIS-037',
     'MX-VIS-043',
+    'MX-VIS-090',
     'MX-VIS-049',
     'MX-VIS-055',
     'MX-VIS-056',
@@ -132,6 +133,9 @@ class ParityFixtures {
         return;
       case 'MX-VIS-043':
       case 'MX-VIS-044':
+      // The Mode Picker over the same leaf: five cards is what a Practice
+      // session needs to offer every mode, Guess included.
+      case 'MX-VIS-090':
         await _seedLeafDeck();
         return;
       case 'MX-VIS-084':
